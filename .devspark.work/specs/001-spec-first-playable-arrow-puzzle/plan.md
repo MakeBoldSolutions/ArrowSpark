@@ -8,7 +8,7 @@ Deliver the complete session-only puzzle loop using project-level scenes and ind
 
 ## Summary
 
-Use a RefCounted puzzle state, a fixed board definition, a Control-based board and arrow views, and a results panel. Route both project main menus to the puzzle scene. Preserve opening, SceneLoader, AppConfig, audio/video/input options, pause/restart/main-menu behavior and recovery. Do not attach LevelListStateManager or invoke level-won/lost progression for this puzzle.
+Use a RefCounted puzzle state, a fixed board definition, a Control-based board and arrow views, and a results panel. Route both project main menus to the puzzle scene, hiding Continue and Level Select and keeping legacy level assets in source (spec Tradeoffs, FR-013). Preserve opening, SceneLoader, AppConfig, audio/video/input options, pause/restart/main-menu behavior and recovery. Do not attach LevelListStateManager or invoke level-won/lost progression for this puzzle.
 
 ## Technical Context
 
@@ -42,16 +42,16 @@ No waivers or unresolved violations. Passing the design gate does not assert run
 ```yaml
 context_resolved:
   - id: arrowgame-constitution
-    path: C:/GitHub/MakeBoldSolutions/ArrowGame/.knowledge/governance/constitution.md
-    via: direct scope match for scripts and scenes
+    path: .knowledge/governance/constitution.md
+    via: "appliesTo match: scripts/**, scenes/**"
     hop: 1
   - id: save-progression
-    path: C:/GitHub/MakeBoldSolutions/ArrowGame/.knowledge/architecture/save-progression.md
-    via: main menu -> GameState/GlobalState and input settings appliesTo
+    path: .knowledge/architecture/save-progression.md
+    via: "source-call: scenes/menus/main_menu/main_menu_with_animations.gd -> GameState.start_game / GlobalState.reset (scripts/game_state.gd, addons/.../global_state.gd are in its appliesTo)"
     hop: 2
 ```
 
-Inspected .knowledge/index.json and ontology/coverage.json: two current nodes, no edges or entities. Traversal stops after the related save/input node; no additional relevant decisions exist. Source inspection confirms animated New Game calls GlobalState.reset(), load_game_scene calls GameState.start_game(), and existing gameplay uses LevelListStateManager. These paths must be bypassed for the puzzle. Create a current architecture node for puzzle behavior, and update save-progression to distinguish preserved legacy storage from session-only puzzle entry. Rebuild the knowledge index using repository tooling after those updates.
+Inspected .knowledge/index.json and ontology/coverage.json: two current nodes, no edges or entities. `via` values therefore describe appliesTo or source-call traversal, not ontology relations. Traversal stops after the related save/input node; no additional relevant decisions exist. Source inspection confirms animated New Game calls GlobalState.reset(), load_game_scene calls GameState.start_game(), and existing gameplay uses LevelListStateManager. These paths must be bypassed for the puzzle. Create a current architecture node for puzzle behavior, and update save-progression to distinguish preserved legacy storage from session-only puzzle entry. Rebuild the knowledge index using repository tooling after those updates.
 
 ## Project Structure
 
@@ -76,7 +76,7 @@ Retain existing game_ui.tscn, sample levels and progression scripts; they are no
 
 The board receives primary mouse presses through GUI input and converts local coordinates to a grid cell; empty or inactive cells return ignored. A held mouse button does not repeat. The controller calls select_arrow(cell) once and immediately updates counters from state. Visual children ignore mouse events so a departing graphic cannot intercept another active cell. Core state alone decides blocking.
 
-Render simple directional arrows with drawing primitives, avoiding font-glyph dependencies. Use a centered board that scales to available Control area, with margins for HUD. Convert clicks in board-local coordinates and verify resized windows. Exit tweens move beyond the board edge along direction; blocked feedback pulses scale/outline without changing logical coordinates. Initial durations: 0.25 seconds exit, 0.15 seconds blocked cue, adjustable after smoke testing. New feedback replaces existing feedback on the same view; no input lock.
+Render simple directional arrows with drawing primitives, avoiding font-glyph dependencies. Use a centered board that scales to available Control area, with margins for HUD. Convert clicks in board-local coordinates and verify resized windows. Exit tweens move beyond the board edge along direction; blocked feedback pulses scale/outline without changing logical coordinates. Initial durations: 0.25 seconds exit, 0.15 seconds blocked cue; the blocked cue may be tuned after smoke testing but must stay at or below 0.3 seconds (FR-005). New feedback replaces existing feedback on the same view; no input lock.
 
 Track all active exit tweens. After the state completes, show results only after all departures finish (not just the most recently selected arrow). Pause suspends board input and animations through inherited process mode; the existing pause menu remains usable. Results take focus and consume background input; prevent duplicate pause overlays while results are open. Replay kills old tweens, clears views/results, creates fresh state and increments a generation token so stale callbacks cannot affect the next attempt. Main Menu uses SceneLoader. Pause Restart reloads the current puzzle scene through the existing confirmation action.
 

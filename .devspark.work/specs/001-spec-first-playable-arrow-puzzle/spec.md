@@ -3,7 +3,7 @@ classification: full-spec
 risk_level: medium
 target_workflow: specify-full
 required_artifacts: spec, plan, tasks
-recommended_next_step: plan
+recommended_next_step: implement
 required_gates: checklist, analyze, critic
 route_intent: full-spec
 status: Draft
@@ -49,6 +49,7 @@ Use one fixed, solvable rectangular board and four cardinal arrow directions. Ke
 - Procedural boards and progression would expand content and verification scope; both are explicitly excluded.
 - Replacing starter structure would risk unrelated regressions; extend the existing game instead.
 - Unlimited mistakes retain an informational score without interrupting the puzzle.
+- The main menu's Play/New Game entry now opens the arrow puzzle instead of the sample levels. The starter's Continue and Level Select buttons are hidden because they imply saved level progression that this session-only puzzle does not have. The sample levels, level-select scene and progression scripts stay in source, unreachable from the menu, so they can be restored later. Starting the puzzle no longer resets saved progress.
 
 ### Architectural Impact and Constraints
 
@@ -91,7 +92,7 @@ As a player, I can try blocked arrows repeatedly and continue playing so that mi
 
 **Acceptance Scenarios**:
 
-1. **Given** an active arrow anywhere ahead on the selected arrow's travel line, including across empty cells, **When** the selected arrow is tapped, **Then** it remains in its grid position, brief visible feedback occurs, mistakes increases by one, and remaining is unchanged.
+1. **Given** an active arrow anywhere ahead on the selected arrow's travel line, including across empty cells, **When** the selected arrow is selected, **Then** it remains in its grid position, brief visible feedback occurs, mistakes increases by one, and remaining is unchanged.
 2. **Given** a blocked arrow, **When** it is selected 100 consecutive times, including during blocked feedback, **Then** all 100 selections count once each, the board is unchanged, and the player can immediately continue. This is a verification sample, not a limit.
 3. **Given** the blocker has been successfully selected and is departing, **When** the previously blocked arrow is selected, **Then** the departing blocker no longer obstructs it.
 4. **Given** any mistake count, **When** the player keeps playing, **Then** no lives, failure screen, retry cap, timer, advertisement, or interrupting penalty appears.
@@ -107,7 +108,7 @@ As a player, I can see how I performed and replay the same board so that the fir
 **Acceptance Scenarios**:
 
 1. **Given** one active arrow remains with a clear path, **When** it is selected, **Then** remaining reaches zero, its exit animation is allowed to finish, and exactly one completion view shows total arrows, mistakes, score, accuracy, and Replay.
-2. **Given** a board with N starting arrows and M mistakes, **When** all N arrows have been removed, **Then** total arrows is N, mistakes is M, score is `max(N - M, 0)`, and accuracy is `N / (N + M)`, displayed as a percentage.
+2. **Given** a board with N starting arrows and M mistakes, **When** all N arrows have been removed, **Then** total arrows is N, mistakes is M, and score and accuracy follow FR-010 (at completion, accuracy equals `N / (N + M)`).
 3. **Given** a completed puzzle, **When** Replay is activated, **Then** the same positions and directions return, remaining resets to N, mistakes and taps reset to zero, and no previous animation or result affects the new run.
 4. **Given** more mistakes than starting arrows, **When** the puzzle is completed, **Then** score is zero and results and replay remain available.
 
@@ -144,15 +145,15 @@ As an existing player, I retain usable menus and my configured controls and sett
 - **FR-002**: The player MUST be able to select an active arrow with a primary mouse click. One discrete click MUST produce at most one selection. Core selection behavior MUST be independent of input device so adding touch later does not change puzzle rules.
 - **FR-003**: An arrow MUST be blocked if and only if another active arrow lies strictly ahead on the same row for left/right or the same column for up/down, anywhere between it and the board boundary. Empty cells do not interrupt this check, and blocker direction is irrelevant.
 - **FR-004**: A clear selection MUST increment successful removals once, remove the arrow from active blocking and selection immediately, and animate it leaving the board along its direction. Remaining MUST decrease once; mistakes MUST remain unchanged.
-- **FR-005**: A blocked selection MUST preserve arrow position, direction, and active status, increment mistakes once, and provide a brief visible cue that is not solely a color change. Feedback MUST return the arrow to its normal appearance without blocking further selections.
+- **FR-005**: A blocked selection MUST preserve arrow position, direction, and active status, increment mistakes once, and provide a visible cue that is not solely a color change and lasts no longer than 0.3 seconds. Feedback MUST return the arrow to its normal appearance and MUST NOT block further selections at any time, including while it plays.
 - **FR-006**: The puzzle MUST permit unlimited blocked selections and continued play. It MUST have no lives, failure state, retry limit, timer, advertisement, or penalty that interrupts play.
-- **FR-007**: During play, readable counters MUST show active arrows remaining and mistakes, starting at total arrows and zero respectively and updating after every accepted selection.
+- **FR-007**: During play, counters MUST remain fully visible, uncropped and not overlapping the board at every window size from the 1280x720 default down to 960x540, and MUST show active arrows remaining and mistakes, starting at total arrows and zero respectively and updating after every accepted selection.
 - **FR-008**: Total taps MUST count only accepted selections of active arrows, whether clear or blocked. At every state, `total taps = successful removals + mistakes`; inactive-arrow clicks, empty-space clicks, and UI actions MUST leave these counts unchanged.
 - **FR-009**: Completion MUST occur exactly once per attempt when no active arrows remain. The final exit animation MUST finish before results obscure the board. Subsequent board clicks MUST leave the completed result unchanged.
-- **FR-010**: Completion MUST display starting total arrows, mistakes, `score = max(total arrows - mistakes, 0)`, `accuracy = successful arrow removals / total taps`, and Replay. Accuracy MUST be shown as a percentage rounded to one decimal place; zero taps MUST yield zero accuracy.
-- **FR-011**: Replay MUST start the identical board as a fresh attempt, resetting mistakes, successful removals, taps, completion state, and visual effects while retaining the original total arrow count and unrelated player settings.
+- **FR-010**: Completion MUST display starting total arrows, mistakes, `score = max(total arrows - mistakes, 0)`, `accuracy = successful arrow removals / total taps`, Replay, and Main Menu. Accuracy MUST be shown as a percentage rounded to one decimal place, with exact ties rounded half away from zero (for example, 6.25% displays as 6.3%); zero taps MUST yield zero accuracy.
+- **FR-011**: Replay MUST start the identical board as a fresh attempt, resetting mistakes, successful removals, taps, completion state, and visual effects while retaining the original total arrow count and unrelated player settings. The existing pause-menu Restart, once confirmed, MUST likewise start a fresh attempt; cancelling Restart MUST leave the current attempt unchanged.
 - **FR-012**: Puzzle rules and state MUST be independent of rendering, animation, and input event handling, allowing blocking, selection outcomes, counters, completion, score, accuracy, and reset behavior to be verified without a displayed game or mouse input.
-- **FR-013**: Integration MUST preserve useful starter functionality, existing keyboard/gamepad navigation and remapping, and compatibility with saved progress/settings and recovery behavior. Affected new menu controls, including Replay, MUST support the existing navigation conventions. No new puzzle-result persistence or progression MUST be introduced.
+- **FR-013**: Integration MUST preserve the starter's opening/intro, main menu, options (audio, video, input remapping), credits, pause menu, scene loading, and existing keyboard/gamepad navigation and remapping, and compatibility with saved progress/settings and recovery behavior. Affected new menu controls, including Replay, MUST support the existing navigation conventions. Play/New Game MUST open the puzzle without resetting or saving progress. Continue and Level Select MUST be hidden, with their scenes and scripts left in source as described under Tradeoffs Considered. No new puzzle-result persistence or progression MUST be introduced.
 
 ### Key Entities
 
@@ -166,7 +167,7 @@ As an existing player, I retain usable menus and my configured controls and sett
 - A tap means a selection of an active arrow, not every physical click anywhere in the application.
 - A successfully selected arrow becomes inactive immediately; animation depicts the accepted removal and does not govern blocking.
 - The exact dimensions and authored layout are implementation choices, provided all four directions, blocked/clear cases, and full solvability are demonstrated.
-- Accuracy uses one decimal place for readable, deterministic presentation.
+- Accuracy uses one decimal place, rounding exact ties half away from zero, so the display is readable and deterministic.
 - New puzzle arrow selection needs mouse support for this slice; existing keyboard/gamepad navigation is preserved, but new keyboard/gamepad board-selection mechanics are not required.
 - No context sources were skipped. No relevant prior puzzle specification was found.
 

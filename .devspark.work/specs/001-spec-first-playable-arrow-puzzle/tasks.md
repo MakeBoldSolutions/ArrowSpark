@@ -15,7 +15,7 @@ Every task starts unchecked. On completion replace linkage placeholders with all
 Establish a safe baseline and isolated validation environment.
 
 - [ ] T001 Record engine version and baseline import/save-input regression results in .devspark.work/specs/001-spec-first-playable-arrow-puzzle/gates/verification.md using tests/run_regressions.py; preserve existing user data. (code_ref: pending | knowledge_ref: pending)
-- [ ] T002 Create tests/run_puzzle_regressions.py using a temporary project, unique application name, copied core scripts and redirected user-data roots; require exit zero and PUZZLE_FAILURES=0. (code_ref: pending | knowledge_ref: pending)
+- [ ] T002 Create tests/run_puzzle_regressions.py using a temporary project, unique application name, copied core scripts and redirected user-data roots; require exit zero and PUZZLE_FAILURES=0. The launcher can only be validated end to end once T003-T005 exist; confirm it then. (code_ref: pending | knowledge_ref: pending)
 
 ## Phase 2: Foundational
 
@@ -28,11 +28,11 @@ Provide the shared definition/state boundary before UI work.
 
 Independent test: start from opening and remove A,B,D,C,E,F,G,H; verify eight-to-zero remaining and one removal per arrow.
 
-- [ ] T005 [US1] Add blocking matrix, definition validation, witness solution, inactive selection and counter-invariant tests in tests/puzzle_regression.gd; establish failing assertions before completing rules. (Implements: FR-001, FR-003, FR-004, FR-012) (code_ref: pending | knowledge_ref: pending)
+- [ ] T005 [US1] Add blocking matrix, definition validation, witness solution, inactive selection and counter-invariant tests (invariants over clear and ignored selections only; blocked-selection accounting is tested in T011) in tests/puzzle_regression.gd; establish failing assertions before completing rules. (Implements: FR-001, FR-003, FR-004, FR-012) (code_ref: pending | knowledge_ref: pending)
 - [ ] T006 [US1] Implement all-direction is_blocked and accepted clear selection in scripts/puzzle/puzzle_state.gd; erase immediately and account exactly once, ignoring absent/completed selections. (Implements: FR-003, FR-004, FR-008) (code_ref: pending | knowledge_ref: pending)
 - [ ] T007 [US1] Build scenes/puzzle/arrow_view.gd and scenes/puzzle/puzzle_board.gd with primitive arrow drawing, scaled grid layout, primary-press click-to-cell mapping, empty-click ignoring and scene-bound exit tweens; visual children must not intercept clicks. (Implements: FR-002, FR-004) (code_ref: pending | knowledge_ref: pending)
 - [ ] T008 [US1] Compose scenes/puzzle/arrow_puzzle.tscn and arrow_puzzle.gd with state ownership, live HUD, existing music and pause controller; update counters before visuals and track concurrent departures. (Implements: FR-004, FR-007, FR-012) (code_ref: pending | knowledge_ref: pending)
-- [ ] T009 [US1] Route scenes/menus/main_menu/main_menu.tscn and main_menu_with_animations.tscn to the puzzle; update main_menu_with_animations.gd to omit GlobalState.reset/GameState.start_game and hide Continue/Level Select while preserving intro, options and credits. (Implements: FR-001, FR-013) (code_ref: pending | knowledge_ref: pending)
+- [ ] T009 [US1] Route scenes/menus/main_menu/main_menu.tscn and main_menu_with_animations.tscn to the puzzle; update main_menu_with_animations.gd to omit GlobalState.reset/GameState.start_game and hide Continue/Level Select while preserving intro, options and credits; leave game_ui.tscn, sample levels and level-select scenes in source. (Implements: FR-001, FR-013) (code_ref: pending | knowledge_ref: pending)
 - [ ] T010 [US1] Create typed current behavior documentation in .knowledge/architecture/arrow-puzzle.md with appliesTo/source_of_truth for core and scene paths, rule semantics and input boundaries; cite only durable source/tests. (Implements: FR-001, FR-002, FR-003, FR-004, FR-007, FR-012) (code_ref: pending | knowledge_ref: pending)
 
 ## Phase 4: US2 Unlimited Mistakes
@@ -47,8 +47,8 @@ Independent test: select B 100 times while A remains, then remove A and B; no re
 
 Independent test: finish perfect and mistake-heavy runs, verify results, Replay and complete a fresh second run.
 
-- [ ] T014 [US3] Extend tests/puzzle_regression.gd with score floor, zero-tap accuracy, perfect/mixed results, completed-state ignoring and fresh-state reset assertions. (Implements: FR-009, FR-010, FR-011) (code_ref: pending | knowledge_ref: pending)
-- [ ] T015 [US3] Implement copied completion results in scripts/puzzle/puzzle_state.gd and scenes/puzzle/puzzle_results.tscn/puzzle_results.gd with all result fields, one-decimal percentage, Replay/Main Menu and explicit focus. (Implements: FR-009, FR-010) (code_ref: pending | knowledge_ref: pending)
+- [ ] T014 [US3] Extend tests/puzzle_regression.gd with score floor, zero-tap accuracy, perfect/mixed results, one-decimal display rounding including the exact tie at 120 mistakes (8/128 = 6.25% displays 6.3%), completed-state ignoring and fresh-state reset assertions. (Implements: FR-009, FR-010, FR-011) (code_ref: pending | knowledge_ref: pending)
+- [ ] T015 [US3] Implement copied completion results in scripts/puzzle/puzzle_state.gd and scenes/puzzle/puzzle_results.tscn/puzzle_results.gd with all result fields, one-decimal percentage rounding ties half away from zero, Replay/Main Menu and explicit focus. (Implements: FR-009, FR-010) (code_ref: pending | knowledge_ref: pending)
 - [ ] T016 [US3] Add playing/draining/results lifecycle to scenes/puzzle/arrow_puzzle.gd: wait for all departures, show results once, absorb background clicks, suppress extra pause overlays, kill tweens/invalidate callbacks and create fresh state on Replay. (Implements: FR-009, FR-011) (code_ref: pending | knowledge_ref: pending)
 - [ ] T017 [US3] Update .knowledge/architecture/arrow-puzzle.md for completion arithmetic, all-departures barrier, replay and pause lifecycle. (Implements: FR-009, FR-010, FR-011) (code_ref: pending | knowledge_ref: pending)
 
@@ -56,7 +56,7 @@ Independent test: finish perfect and mistake-heavy runs, verify results, Replay 
 
 Independent test: navigate affected menus using supported mouse/keyboard/gamepad remaps, pause/restart and compare preserved saved data.
 
-- [ ] T018 [US4] Verify and adjust project-level focus/process-mode configuration in scenes/puzzle/arrow_puzzle.tscn and puzzle_results.tscn for pause/resume/options, restart confirmation and results navigation; reuse scenes/overlaid_menus/pause_menu.tscn without changing addon code. (Implements: FR-013) (code_ref: pending | knowledge_ref: pending)
+- [ ] T018 [US4] Verify and adjust project-level focus/process-mode configuration in scenes/puzzle/arrow_puzzle.tscn and puzzle_results.tscn for pause/resume/options, restart confirmation (confirmed restart gives a fresh attempt, cancelled restart keeps it) and results navigation; reuse scenes/overlaid_menus/pause_menu.tscn without changing addon code. (Implements: FR-011, FR-013) (code_ref: pending | knowledge_ref: pending)
 - [ ] T019 [US4] Run existing tests/run_regressions.py and isolated desktop menu/save recovery checks from quickstart.md; record settings/progress preservation, remapping, focus, pause mid-animation and restart outcomes in .devspark.work/specs/001-spec-first-playable-arrow-puzzle/gates/verification.md; leave unavailable hardware checks outstanding. (Implements: FR-013) (code_ref: pending | knowledge_ref: pending)
 - [ ] T020 [US4] Update .knowledge/architecture/save-progression.md to document session-only puzzle entry versus preserved legacy storage/recovery, and .knowledge/architecture/arrow-puzzle.md for affected menu paths. (Implements: FR-013) (code_ref: pending | knowledge_ref: pending)
 
