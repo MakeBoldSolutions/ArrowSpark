@@ -3,14 +3,14 @@ gate: critic
 status: pass
 blocking: false
 severity: info
-summary: "FULL review after remediation: 0 showstoppers, 0 critical, 0 high open. All 6 findings from the first run were fixed directly in spec.md, plan.md, tasks.md and quickstart.md (frontmatter metadata, an automated FR-013 no-reset regression test, automated FR-005/FR-007 duration/layout assertions, a preserved-progress menu note, and an appliesTo extension for save-progression.md)."
+summary: "FULL review after remediation: 0 showstoppers, 0 critical, 0 high open. All 6 findings from the first run were fixed directly in spec.md, plan.md, tasks.md and quickstart.md (frontmatter metadata, an automated FR-013 no-reset regression test, automated FR-005/FR-007 duration/layout assertions, a preserved-progress menu note, and an appliesTo extension for save-progression.md). Hashes below reflect one further wording-only edit (FR-013's note requirement made measurable) made while closing a companion /devspark.analyze finding; no critic finding is affected."
 reviewed_artifacts:
   - path: spec.md
-    hash: "65fbbeed9a25908bff201fb7ac8e9cae6963c0e5"
+    hash: "96eab2611cb6e4accadf50a80ae00846f37e2e03"
   - path: plan.md
     hash: "c587b5bdaff06a96d1366f2fd18c97972a22b734"
   - path: tasks.md
-    hash: "7c17709acb04a023790a6be4dec6a9c92647ec33"
+    hash: "60b56a2d775b719c279118021d45e8ca77e06cff"
 ```
 
 ## Technical Risk Assessment
@@ -146,7 +146,7 @@ None outstanding from this gate.
 
 **Recommended Risk Mitigations:**
 
-- None outstanding. The `analyze` gate's recorded artifact hashes (spec.md `b30e6c25...`, plan.md `c19bdd44...`, tasks.md `69684231...`) now predate this remediation's edits — re-run `/devspark.analyze` before `/devspark.implement` so its gate reflects the current spec/plan/tasks text (it was not touched by this critic remediation and its own findings are unaffected in substance, but its stored hashes are stale).
+None outstanding. `/devspark.analyze` has since been re-run against this text (see `gates/analyze.md`); it found and closed one companion wording ambiguity in FR-013's note requirement (now reflected in the hashes above) and left one LOW, non-blocking task-ordering item open as an accepted style choice.
 
-Where you are: critic gate re-run after remediation — PASS, 0 open findings, verdict PROCEED.
-Next: re-run `/devspark.analyze` to refresh its stale artifact hashes, then `/devspark.implement`.
+Where you are: critic gate re-run after remediation — PASS, 0 open findings, verdict PROCEED. Companion `/devspark.analyze` gate also PASS.
+Next: run `/devspark.implement`.
