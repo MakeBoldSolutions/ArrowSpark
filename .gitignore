@@ -18,6 +18,10 @@ mono_crash.*.json
 exports/
 Exports/
 
+# Python (test launchers)
+__pycache__/
+*.pyc
+
 # IDE and OS specific
 .vscode/
 .idea/

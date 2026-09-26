@@ -1,0 +1,53 @@
+name: Godot Regression Tests
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'scripts/**'
+      - 'scenes/**'
+      - 'addons/maaacks_game_template/base/scripts/**'
+      - 'tests/**'
+      - 'project.godot'
+      - '.github/workflows/godot-regression-tests.yml'
+  pull_request:
+    paths:
+      - 'scripts/**'
+      - 'scenes/**'
+      - 'addons/maaacks_game_template/base/scripts/**'
+      - 'tests/**'
+      - 'project.godot'
+      - '.github/workflows/godot-regression-tests.yml'
+
+jobs:
+  regressions:
+    runs-on: ubuntu-latest
+    env:
+      GODOT_VERSION: "4.4-stable"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Download and verify headless-capable Godot ${{ env.GODOT_VERSION }} (Linux)
+        run: |
+          ASSET="Godot_v${GODOT_VERSION}_linux.x86_64.zip"
+          curl -fsSL -o "$ASSET" \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}/${ASSET}"
+          curl -fsSL -o SHA512-SUMS.txt \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}/SHA512-SUMS.txt"
+          grep -F " ${ASSET}" SHA512-SUMS.txt | sha512sum --check --strict -
+          unzip -q "$ASSET"
+          chmod +x "Godot_v${GODOT_VERSION}_linux.x86_64"
+          echo "GODOT_BIN=$PWD/Godot_v${GODOT_VERSION}_linux.x86_64" >> "$GITHUB_ENV"
+
+      - name: Run puzzle rule, layout, and solvability regressions
+        run: python tests/run_puzzle_regressions.py --godot "$GODOT_BIN"
+
+      - name: Run save/settings and input regressions
+        run: python tests/run_regressions.py --godot "$GODOT_BIN"

@@ -13,6 +13,8 @@ appliesTo:
   - addons/maaacks_game_template/base/scenes/autoloads/app_config.gd
   - tests/save_input_regression.gd
   - tests/run_regressions.py
+  - scenes/menus/main_menu/main_menu.tscn
+  - scenes/menus/main_menu/main_menu_with_animations.gd
 ---
 
 # Save Progression and Input Settings
@@ -69,6 +71,25 @@ the complete configured event list. Duplicate detection uses the rebuilt InputMa
 not the previous defaults. Changing a keyboard key therefore retains an unchanged
 gamepad binding. Reset-to-default input restores the captured startup defaults and
 removes the stored input configuration.
+
+## Session-Only Puzzle Entry vs. Preserved Legacy Storage
+
+`scenes/menus/main_menu/main_menu_with_animations.gd`'s Play/New Game path
+(`main_menu.tscn` and `main_menu_with_animations.tscn`, both routed to
+`res://scenes/puzzle/arrow_puzzle.tscn`) no longer overrides `new_game()` or
+`load_game_scene()`, so it never calls `GlobalState.reset()` or
+`GameState.start_game()`. The puzzle attempt itself
+(`scripts/puzzle/puzzle_state.gd`) is in-memory only and is never read from
+or written to `GlobalState`/`GameState`; see
+.knowledge/architecture/arrow-puzzle.md for its rules. Existing saved level
+progress, settings and recovery behavior described above are therefore
+unaffected by starting, playing, or replaying the puzzle. Continue and
+Level Select stay hidden on the main menu (their scenes/scripts remain in
+source, unreachable from this menu); the `NewGameButton` tooltip states that
+existing level progress is preserved. Puzzle entry also never touches the
+input-remap system: a keyboard/gamepad remap seeded before `new_game()`/
+`load_game_scene()` is unaffected by either call. Source of truth:
+tests/save_input_regression.gd's `_test_no_reset_on_puzzle_entry()`.
 
 ## Validation and Limits
 

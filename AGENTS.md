@@ -11,3 +11,9 @@
   3. `.devspark/defaults/commands/devspark.{name}.md`
 - Preserve user work in `.devspark.work/` and `.knowledge/`; upgrades refresh `.devspark/` only.
 - Project principles and technology are defined in `.knowledge/governance/constitution.md`.
+
+## Active Technologies
+
+- Godot 4.4 and GDScript with Maaack's Game Template; Python 3.11+ regression launchers.
+- Puzzle rules use RefCounted classes independently of scenes and input. Preserve this boundary when extending the rule core.
+- Run `python tests/run_puzzle_regressions.py --godot <executable>` and `python tests/run_regressions.py --godot <executable>` for isolated regression checks; gameplay changes also require Godot validation and desktop smoke testing.

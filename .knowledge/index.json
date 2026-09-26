@@ -1,7 +1,7 @@
 {
   "generated": {
     "by": "build-knowledge-index",
-    "at": "2026-09-26T16:58:07Z"
+    "at": "2026-09-26T21:44:55Z"
   },
   "roots": [
     {
@@ -27,6 +27,32 @@
   ],
   "nodes": [
     {
+      "id": "arrow-puzzle",
+      "type": "architecture",
+      "path": ".knowledge/architecture/arrow-puzzle.md",
+      "title": "Arrow Puzzle Rules, Presentation and Menu Integration",
+      "appliesTo": [
+        "scripts/puzzle/puzzle_definition.gd",
+        "scripts/puzzle/puzzle_state.gd",
+        "scripts/puzzle/puzzle_solver.gd",
+        "scripts/puzzle/puzzle_feedback.gd",
+        "scripts/puzzle/puzzle_results_format.gd",
+        "scenes/puzzle/arrow_puzzle.tscn",
+        "scenes/puzzle/arrow_puzzle.gd",
+        "scenes/puzzle/puzzle_board.gd",
+        "scenes/puzzle/arrow_view.gd",
+        "scenes/puzzle/puzzle_results.tscn",
+        "scenes/puzzle/puzzle_results.gd",
+        "scenes/menus/main_menu/main_menu.tscn",
+        "scenes/menus/main_menu/main_menu_with_animations.tscn",
+        "scenes/menus/main_menu/main_menu_with_animations.gd",
+        "tests/puzzle_regression.gd",
+        "tests/run_puzzle_regressions.py",
+        "tests/puzzle_layout_check.gd",
+        "tests/scene_loader_stub.gd"
+      ]
+    },
+    {
       "id": "save-progression",
       "type": "architecture",
       "path": ".knowledge/architecture/save-progression.md",
@@ -41,7 +67,9 @@
         "addons/maaacks_game_template/base/scripts/config.gd",
         "addons/maaacks_game_template/base/scenes/autoloads/app_config.gd",
         "tests/save_input_regression.gd",
-        "tests/run_regressions.py"
+        "tests/run_regressions.py",
+        "scenes/menus/main_menu/main_menu.tscn",
+        "scenes/menus/main_menu/main_menu_with_animations.gd"
       ]
     },
     {
