@@ -1,0 +1,48 @@
+{
+  "generated": {
+    "by": "build-knowledge-index",
+    "at": "2026-09-26T16:32:24Z"
+  },
+  "roots": [
+    {
+      "path": ".devspark/",
+      "owner": "framework",
+      "purpose": "framework payload"
+    },
+    {
+      "path": ".devspark.work/",
+      "owner": "repo",
+      "purpose": "work products"
+    },
+    {
+      "path": ".knowledge/",
+      "owner": "repo",
+      "purpose": "current authoritative knowledge and published user-facing guidance"
+    },
+    {
+      "path": ".archive/",
+      "owner": "repo",
+      "purpose": "landing place for old work products, grouped by release"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "arrowgame-constitution",
+      "type": "governance",
+      "path": ".knowledge/governance/constitution.md",
+      "title": "ArrowGame Constitution",
+      "appliesTo": [
+        "project.godot",
+        "scripts/**",
+        "scenes/**",
+        "resources/**",
+        "assets/**",
+        "addons/**"
+      ]
+    }
+  ],
+  "edges": [],
+  "dangling_references": [],
+  "entities": [],
+  "stale_entities": []
+}
