@@ -1,6 +1,6 @@
 extends Control
 ## Completion results panel: total arrows, mistakes, score, accuracy, Replay
-## and Main Menu (FR-010). Absorbs background input while shown so a second
+## and Main Menu. Absorbs background input while shown so a second
 ## completion or pause overlay cannot occur underneath it.
 
 signal replay_requested

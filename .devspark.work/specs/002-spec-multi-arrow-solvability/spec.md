@@ -15,14 +15,14 @@ participants:
   reviewer: human
   critic: ai
   scribe: ai
-status: Draft
+status: In Progress
 ---
 
 # Feature Specification: Rich Arrow Model and Solvability Foundation
 
 **Feature Branch**: `002-spec-multi-arrow-solvability`
 **Created**: 2026-09-26
-**Status**: Draft
+**Status**: In Progress
 **Input**: User description: "Rich Arrow Model and Solvability Foundation — extend the existing First Playable Arrow Puzzle to support multi-cell arrows (arrowhead plus a straight or right-angle-turning tail occupying one or more cells) and establish solvability as a formal, presentation-independent domain property with witness-solution generation, retaining basic structural counts as a foundation for future difficulty analysis, while preserving current scoring, HUD, Replay, Main Menu integration, and rule/presentation separation."
 
 ## Product Owner TLDR
@@ -74,7 +74,7 @@ Focus on: whether blocking correctly treats every tail cell the same as a head c
 
 ## User Scenarios & Testing
 
-### User Story 1 - Play Multi-Cell Arrows With Straight and Bent Tails (Priority: P1)
+### User Story 1 - Play Multi-Cell Arrows With Straight and Bent Tails (Priority: P1) ✅ Complete
 
 As a player, I can see and select arrows that occupy more than one cell — some with a straight tail, some with a tail that bends once or more at right angles — and have them leave the board in the direction their head points.
 
@@ -89,7 +89,7 @@ As a player, I can see and select arrows that occupy more than one cell — some
 3. **Given** a puzzle containing arrows pointing up, down, left, and right, **When** each is selected with a clear forward path, **Then** each correctly exits toward the edge matching its own arrowhead direction.
 4. **Given** an arrow occupying a single cell (no tail), **When** its path ahead is clear, **Then** it behaves exactly as in the prior single-cell puzzle.
 
-### User Story 2 - Tails Block and Unblock Other Arrows (Priority: P1)
+### User Story 2 - Tails Block and Unblock Other Arrows (Priority: P1) ✅ Complete
 
 As a player, I can see that an arrow's tail — not only its head — stops another arrow from moving, and that removing the blocking arrow opens up the path for the one it was blocking.
 
@@ -104,7 +104,7 @@ As a player, I can see that an arrow's tail — not only its head — stops anot
 3. **Given** an arrow blocked by another arrow's head, **When** that blocking arrow is removed, **Then** the previously blocked arrow becomes selectable under the same rule as a tail-caused block.
 4. **Given** two arrows whose shapes do not intersect the same forward path, **When** either is selected, **Then** the other's presence never affects the outcome, matching the existing off-axis/behind non-blocking guarantee.
 
-### User Story 3 - Prove the Puzzle Is Solvable Before It Ships (Priority: P2)
+### User Story 3 - Prove the Puzzle Is Solvable Before It Ships (Priority: P2) ✅ Complete
 
 As the person responsible for the puzzle definition, I can run an automated, presentation-independent analysis that either produces one complete valid removal order clearing the whole board, or reports that no such order exists, so a broken puzzle can never reach players undetected.
 
@@ -119,7 +119,7 @@ As the person responsible for the puzzle definition, I can run an automated, pre
 3. **Given** an unsolvable puzzle definition, **When** the analysis runs, **Then** it reports that no complete solution exists, without returning a partial or invalid sequence as if it were a witness.
 4. **Given** the puzzle definition shipped for gameplay, **When** automated verification runs, **Then** it confirms that definition is solvable and that the produced witness sequence, executed against the rule layer, actually clears the board.
 
-### User Story 4 - Retain Structural Counts for Future Difficulty Work (Priority: P3)
+### User Story 4 - Retain Structural Counts for Future Difficulty Work (Priority: P3) ✅ Complete
 
 As the person planning future puzzle-difficulty work, I want the solvability analysis to keep a record of basic structural facts it already encounters — how many legal choices came up, and which states were forced versus branching — so a later feature can build on this data without redesigning the analysis result.
 

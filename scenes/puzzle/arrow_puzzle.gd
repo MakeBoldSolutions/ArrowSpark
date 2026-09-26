@@ -1,8 +1,7 @@
 extends Control
 ## Session controller: owns PuzzleState, the live HUD, and the
-## playing -> draining -> results lifecycle (data-model.md). Reuses the
-## starter's pause menu and background music; does not touch saved
-## progress or settings (FR-013).
+## playing -> draining -> results lifecycle. Reuses the starter's pause menu
+## and background music; does not touch saved progress or settings.
 
 @export_file("*.tscn") var main_menu_scene_path: String = "res://scenes/menus/main_menu/main_menu_with_animations.tscn"
 
@@ -37,20 +36,26 @@ func _update_hud() -> void:
 	_remaining_label.text = "Remaining: %d" % _state.remaining()
 	_mistakes_label.text = "Mistakes: %d" % _state.mistakes
 
+## Any cell of a multi-cell shape (head or tail) resolves to the same
+## canonical head before mutation, so the board's per-arrow views (keyed by
+## head) always receive the right owner regardless of which cell was clicked.
 func _on_cell_clicked(cell: Vector2i) -> void:
-	var outcome: PuzzleState.SelectOutcome = _state.select_arrow(cell)
+	var head = _state.get_arrow_head(cell)
+	if head == null:
+		return
+	var outcome: PuzzleState.SelectOutcome = _state.select_arrow(head)
 	match outcome:
 		PuzzleState.SelectOutcome.IGNORED:
 			pass
 		PuzzleState.SelectOutcome.BLOCKED:
 			_update_hud()
-			_board.play_blocked(cell)
+			_board.play_blocked(head)
 		PuzzleState.SelectOutcome.REMOVED:
 			_update_hud()
 			_pending_departures += 1
 			if _state.completed:
 				_awaiting_completion = true
-			_board.play_removed(cell)
+			_board.play_removed(head)
 
 func _on_departure_finished() -> void:
 	_pending_departures -= 1
@@ -63,7 +68,7 @@ func _show_results() -> void:
 
 ## Replay reloads this scene so the identical board starts as a fully fresh
 ## attempt: a new PuzzleState, cleared views/tweens and no stale callbacks
-## from the finished attempt (data-model.md Presentation lifecycle).
+## from the finished attempt.
 func _on_results_replay_requested() -> void:
 	SceneLoader.reload_current_scene()
 

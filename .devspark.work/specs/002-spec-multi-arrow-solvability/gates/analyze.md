@@ -1,9 +1,9 @@
 ```yaml
 gate: analyze
-status: warn
+status: pass
 blocking: false
-severity: warning
-summary: "FULL re-analysis of spec+plan+tasks for 002-spec-multi-arrow-solvability after the two post-critic refactor commits (8e7bd5f, 64db2b2) that moved the own-tail-ahead-of-head case from a runtime blocking exclusion into a validation-time invalidity rule. All three artifacts are consistent with each other and with data-model.md/contracts/puzzle.md on this change. 100% FR-task coverage, no traceability hallucinations, no constitution conflicts, context-resolution ids valid, authored-board example hand-verified against FR-001/002/004. One MEDIUM stale-narrative finding (D1) remains open pending remediation approval."
+severity: info
+summary: "FULL re-analysis of spec+plan+tasks for 002-spec-multi-arrow-solvability after the two post-critic refactor commits (8e7bd5f, 64db2b2) that moved the own-tail-ahead-of-head case from a runtime blocking exclusion into a validation-time invalidity rule. All three artifacts are consistent with each other and with data-model.md/contracts/puzzle.md on this change. 100% FR-task coverage, no traceability hallucinations, no constitution conflicts, context-resolution ids valid, authored-board example hand-verified against FR-001/002/004. The one MEDIUM finding (D1) was fixed during /devspark.implement. NOTE: reviewed_artifacts below are now stale (plan.md/tasks.md changed further during implementation, e.g. code_ref/knowledge_ref population and D1's own fix) — re-run /devspark.analyze for a fresh hash if further spec-level review is needed before release."
 reviewed_artifacts:
   - path: spec.md
     hash: "ad589cba8ea27bf291dfe606482c55b40718f48f"
@@ -17,9 +17,9 @@ reviewed_artifacts:
 
 | ID | Category | Severity | Location(s) | Summary | Status |
 |---|---|---|---|---|---|
-| D1 | Inconsistency | MEDIUM | plan.md (Delivery and Gates, L114), tasks.md (Gate Status and Retention, L94) | Both files still assert "analyze and critic remain required and unrun" / "no existing analyze/critic findings," but `gates/analyze.md` and `gates/critic.md` already existed from a prior run (both `status: pass`, all findings resolved) before this rerun. The claim was stale even before this analysis and would mislead a reader who trusts the prose instead of checking `gates/`. Root cause: this sentence was written when tasks.md was authored (pre-gate) and never updated after either gate actually ran. | **Open** |
+| D1 | Inconsistency | MEDIUM | plan.md (Delivery and Gates, L114), tasks.md (Gate Status and Retention, L94) | Both files still assert "analyze and critic remain required and unrun" / "no existing analyze/critic findings," but `gates/analyze.md` and `gates/critic.md` already existed from a prior run (both `status: pass`, all findings resolved) before this rerun. The claim was stale even before this analysis and would mislead a reader who trusts the prose instead of checking `gates/`. Root cause: this sentence was written when tasks.md was authored (pre-gate) and never updated after either gate actually ran. | **Fixed** — see Resolution Log |
 
-(1 finding total; none CRITICAL or HIGH.)
+(1 finding total; none CRITICAL or HIGH. Fixed during /devspark.implement.)
 
 **Coverage Summary Table:**
 
@@ -65,16 +65,16 @@ Coverage: 16/16 requirements (100%).
 - Duplication Count: 0
 - Critical Issues Count: 0
 
+## Resolution Log
+
+- **D1 (fixed)**: `plan.md`'s "Delivery and Gates" section now reads "Checklist, analyze and critic have all run; see gates/ for the current verdict rather than trusting a fixed state described here, since either gate can be rerun after a further edit." `tasks.md`'s "Gate Status and Retention" section now reads "Analyze and critic have each run (see gates/analyze.md, gates/critic.md); their reviewed_artifacts hashes are the source of truth for whether a given review is still current — re-run either gate after further edits to spec.md, plan.md, or tasks.md rather than trusting this sentence." Applied during `/devspark.implement` (T029, gate-finding resolution).
+
 ## Next Actions
 
-Only D1 (MEDIUM) is open — a documentation-consistency issue, not a coverage/traceability/constitution defect. Safe to proceed to `/devspark.critic`, or fix D1 first with a manual edit to plan.md L114 and tasks.md L94 pointing both sentences at `gates/` as the source of truth instead of asserting a fixed run-state.
+All findings resolved. No CRITICAL, HIGH, or open MEDIUM/LOW issues remain.
 
-Where you are: analyze gate re-run for 002-spec-multi-arrow-solvability (FULL: spec+plan+tasks) — warn (1 open MEDIUM, non-blocking)
-Next: run /devspark.critic
-
-## Remediation Offer
-
-Would you like me to suggest concrete remediation edits for D1 (the top, and only, open issue)? I have not applied any edits to spec.md, plan.md, or tasks.md — this command is non-destructive by contract; only this gate artifact was written.
+Where you are: analyze gate resolved for 002-spec-multi-arrow-solvability (FULL: spec+plan+tasks) — pass (reviewed_artifacts hashes are stale as of this update; re-run for a fresh review before release if further spec/plan/tasks edits occur)
+Next: proceed to /devspark.create-pr, or re-run /devspark.analyze if spec.md/plan.md/tasks.md change further
 
 ```yaml
 findings:
@@ -84,6 +84,6 @@ findings:
     intent_cue: "Gate-status prose in plan.md/tasks.md must point readers to gates/ as the source of truth rather than asserting a specific run-state that can silently go stale after either gate actually runs or artifacts change again."
     recommended_action: "Reword both sentences to defer to gates/analyze.md and gates/critic.md instead of asserting a fixed run-state."
     execution_mode: selective
-    status: open
-    outcome: ""
+    status: resolved
+    outcome: "fixed — plan.md and tasks.md now point to gates/ as the authoritative source instead of claiming a specific static state. Applied during /devspark.implement T029."
 ```

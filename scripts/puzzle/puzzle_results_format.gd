@@ -3,7 +3,7 @@ extends RefCounted
 ## Pure display formatting shared by puzzle_results.gd and headless tests.
 
 ## Formats a 0..1 accuracy ratio as a one-decimal percentage string, rounding
-## an exact tie half away from zero (FR-010; e.g. 6.25% displays as "6.3%").
+## an exact tie half away from zero (e.g. 6.25% displays as "6.3%").
 static func format_accuracy_percent(accuracy: float) -> String:
 	var percent: float = accuracy * 100.0
 	var scaled: float = percent * 10.0

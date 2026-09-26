@@ -111,7 +111,7 @@ tests/                           # existing test directory (repository root)
 **Structure Decision**: Extend existing boundaries and suites without new runtime services or test frameworks.
 
 ## Delivery and Gates
-US1 supplies shapes/presentation; US2 integrates blockers/content; US3 proves solvability; US4 supplies metrics. Shared occupancy must be correct before either player story. US1 is a preview; complete delivery requires all four stories. Checklist is complete; analyze and critic remain required and unrun.
+US1 supplies shapes/presentation; US2 integrates blockers/content; US3 proves solvability; US4 supplies metrics. Shared occupancy must be correct before either player story. US1 is a preview; complete delivery requires all four stories. Checklist, analyze and critic have all run; see gates/ for the current verdict rather than trusting a fixed state described here, since either gate can be rerun after a further edit.
 
 Keep the completed planning bundle live for release under the shared preamble's explicit retention rule. The older tasks outline's deletion instruction conflicts with that rule and destroys required traceability; do not schedule deletion during implementation.
 

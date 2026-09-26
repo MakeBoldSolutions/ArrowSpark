@@ -4,7 +4,7 @@ Two independent checks run:
 1. Pure rule regressions (tests/puzzle_regression.gd) against an isolated,
    unique temporary project containing only the puzzle core scripts. No
    scenes, addons or autoloads are needed since PuzzleState/PuzzleDefinition
-   have no Node, mouse, tween or persistence dependency (FR-012).
+   have no Node, mouse, tween or persistence dependency.
 2. A scene-based HUD/board layout and feedback-duration check
    (tests/puzzle_layout_check.gd) against the real project (so the full
    scene tree and addon autoloads are available), with the platform
@@ -36,7 +36,7 @@ def run_rule_regressions(godot: str, repo: Path) -> None:
         (root / "project.godot").write_text(
             f'config_version=5\n[application]\nconfig/name="{name}"\n', encoding="utf-8"
         )
-        for script in ("puzzle_definition", "puzzle_state", "puzzle_feedback", "puzzle_results_format"):
+        for script in ("puzzle_definition", "puzzle_state", "puzzle_solver", "puzzle_feedback", "puzzle_results_format"):
             shutil.copyfile(
                 repo / "scripts/puzzle" / f"{script}.gd",
                 root / f"{script}.gd",

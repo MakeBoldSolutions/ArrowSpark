@@ -1,9 +1,9 @@
 ```yaml
 gate: critic
-status: warn
+status: pass
 blocking: false
-severity: warning
-summary: "FULL adversarial re-review of 002-spec-multi-arrow-solvability after two post-critic spec refactor commits (8e7bd5f, 64db2b2) that moved the own-tail-ahead-of-head case from a runtime blocking exclusion into a validation-time invalidity rule. Re-verified the four previously fixed findings remain fixed. No showstoppers, no constitution violations. Two new MEDIUM findings surfaced on this pass: an unverified binary download in the CI workflow that backs the feature's solvability guarantee, and a traceability gap where that same CI workflow has no task recording its code_ref."
+severity: info
+summary: "FULL adversarial re-review of 002-spec-multi-arrow-solvability after two post-critic spec refactor commits (8e7bd5f, 64db2b2) that moved the own-tail-ahead-of-head case from a runtime blocking exclusion into a validation-time invalidity rule. Re-verified the four previously fixed findings remain fixed. No showstoppers, no constitution violations. Two MEDIUM findings (critic-005, critic-006) were fixed during /devspark.implement. NOTE: reviewed_artifacts below are now stale (tasks.md changed further during implementation) — re-run /devspark.critic for a fresh hash if further risk review is needed before release."
 reviewed_artifacts:
   - path: spec.md
     hash: "ad589cba8ea27bf291dfe606482c55b40718f48f"
@@ -27,7 +27,7 @@ reviewed_artifacts:
 
 ### Executive Summary
 
-Re-verified critic-001 through critic-004 from the prior run remain fixed after the two subsequent spec refactor commits (own-tail-ahead-of-head moved from a runtime exclusion into a validation-time invalidity rule — spec.md, plan.md, data-model.md, contracts/puzzle.md, and tasks.md all agree on this). No stack/archetype risk checklists exist under `.devspark/risk-checklists/` or `.devspark.work/risk-checklists/`, so this review derives risks from first principles using the universal failure-mode lens; consider seeding checklists from this and future runs. Two new MEDIUM findings surfaced on this full re-pass, both outside `/devspark.analyze`'s scope (they're about production-CI trust and task-linkage completeness, not internal artifact consistency). Neither blocks proceeding to `/devspark.implement`.
+Re-verified critic-001 through critic-004 from the prior run remain fixed after the two subsequent spec refactor commits (own-tail-ahead-of-head moved from a runtime exclusion into a validation-time invalidity rule — spec.md, plan.md, data-model.md, contracts/puzzle.md, and tasks.md all agree on this). No stack/archetype risk checklists exist under `.devspark/risk-checklists/` or `.devspark.work/risk-checklists/`, so this review derives risks from first principles using the universal failure-mode lens; consider seeding checklists from this and future runs. Two MEDIUM findings surfaced on the full re-pass (critic-005, critic-006), both outside `/devspark.analyze`'s scope; both were fixed during `/devspark.implement` — see Resolution Log.
 
 ### Findings (source of truth)
 
@@ -43,8 +43,8 @@ findings:
     effective_severity: medium
     recommended_action: "Download godotengine/godot's SHA512-SUMS.txt for the same release tag and verify the downloaded zip's checksum against it before chmod +x/execution; fail the job on mismatch."
     execution_mode: manual
-    status: open
-    outcome: ""
+    status: resolved
+    outcome: "fixed — .github/workflows/godot-regression-tests.yml now downloads SHA512-SUMS.txt for the same release tag and verifies the downloaded zip's checksum via `sha512sum --check --strict -` before chmod +x/execution, failing the job on mismatch. Verified locally against the real godotengine/godot 4.4-stable release assets (checksum matched). Applied during /devspark.implement T029."
   - finding_id: critic-006
     category: documentation
     archetype_applicable: true
@@ -55,50 +55,35 @@ findings:
     effective_severity: medium
     recommended_action: "Add the CI workflow path to T024's or T028's file scope (or add a short dedicated task) so its code_ref gets recorded before this bundle is retained for release."
     execution_mode: selective
-    status: open
-    outcome: ""
+    status: resolved
+    outcome: "fixed — .github/workflows/godot-regression-tests.yml added to T028's code_ref scope in tasks.md, recording its ownership before this bundle is retained for release. Applied during /devspark.implement T029."
 ```
 
 ### High
 
 _(None open — see Executive Summary for the four previously-fixed findings, still fixed.)_
 
-### Missing Critical Tasks
-
-- **Documentation:** No task currently owns recording `code_ref` for `.github/workflows/godot-regression-tests.yml` (critic-006).
-
-### Questionable Assumptions
-
-1. **The downloaded Godot release asset is trustworthy because it comes from `github.com/godotengine/godot/releases`** → Failure mode: a compromised or mirrored release asset would be executed as the verification engine with no integrity check, silently invalidating the "provably solvable" guarantee this whole feature is built to deliver (critic-005).
-
 ### Dependency Risk Assessment
 
 | Dependency | Concern | Alternative |
 | ---------- | ------- | ----------- |
-| Godot 4.4-stable Linux release zip (CI) | Downloaded and executed with no checksum verification | Verify against Godot's published `SHA512-SUMS.txt` for the same tag before execution |
-
-### Estimated Technical Debt at Launch
-
-- **Operational Debt:** One CI hardening item (checksum verification) and one traceability item (CI file's code_ref) — both small, non-blocking, addressable in a follow-up task or T024/T028 scope expansion.
+| Godot 4.4-stable Linux release zip (CI) | Downloaded and executed; now verified against `SHA512-SUMS.txt` before use (fixed) | — |
 
 ### Metrics
 
-- Showstopper: 0 / Critical: 0 / High: 0 (4 previously fixed, re-confirmed fixed) / Medium: 2 (new)
-- Findings by category: dependency_supply_chain (1, open), documentation (1, open)
-- Missing operational tasks (FULL scope): 1 (CI workflow code_ref ownership)
+- Showstopper: 0 / Critical: 0 / High: 0 (4 previously fixed, re-confirmed fixed) / Medium: 2 (both fixed)
+- Findings by category: dependency_supply_chain (1, resolved), documentation (1, resolved)
 
 **VERDICT:** PROCEED
 
-**Required Actions Before Implementation:** None — both open findings are MEDIUM, non-blocking, and independent of the four core user stories.
+**Required Actions Before Implementation:** None — all findings resolved.
 
-**Recommended Risk Mitigations:**
+## Resolution Log
 
-- Add SHA512 checksum verification to the Godot download step in `.github/workflows/godot-regression-tests.yml` before implementation work relies on that CI signal (critic-005).
-- Expand T024 or T028's scan scope to include `.github/workflows/` so the CI workflow's `code_ref` gets recorded before `/devspark.release` archives this bundle (critic-006).
+- **critic-005 (fixed)**: `.github/workflows/godot-regression-tests.yml` now downloads `SHA512-SUMS.txt` for the same release tag and runs `grep -F " ${ASSET}" SHA512-SUMS.txt | sha512sum --check --strict -` before `chmod +x`/execution, failing the job on any mismatch. Verified locally end-to-end against the real `godotengine/godot` 4.4-stable release assets (the checksum matched; also confirmed the asset must be saved under its real filename, not a renamed `godot.zip`, for `sha512sum -c` to find it — an earlier draft had this bug, caught by running the sequence locally before committing).
+- **critic-006 (fixed)**: `tasks.md`'s T028 now lists `.github/workflows/godot-regression-tests.yml` in its `code_ref`, so the file's ownership is recorded in this bundle before `/devspark.release` archives it.
 
-## Remediation Offer
+Applied during `/devspark.implement` T029 (gate-finding resolution).
 
-Would you like me to suggest concrete remediation edits for critic-005 and critic-006? I have not applied any edits to `.github/workflows/godot-regression-tests.yml`, `spec.md`, `plan.md`, or `tasks.md` — this command is non-destructive by contract; only this gate artifact was written.
-
-Where you are: critic gate re-run for 002-spec-multi-arrow-solvability (FULL) — warn (2 open MEDIUM, non-blocking)
-Next: run /devspark.implement, or address critic-005/critic-006 and analyze-D1 first
+Where you are: critic gate resolved for 002-spec-multi-arrow-solvability (FULL) — pass (reviewed_artifacts hashes are stale as of this update; re-run for a fresh review before release if further spec/plan/tasks edits occur)
+Next: proceed to /devspark.create-pr

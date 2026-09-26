@@ -34,11 +34,15 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Download headless-capable Godot ${{ env.GODOT_VERSION }} (Linux)
+      - name: Download and verify headless-capable Godot ${{ env.GODOT_VERSION }} (Linux)
         run: |
-          curl -fsSL -o godot.zip \
-            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_linux.x86_64.zip"
-          unzip -q godot.zip
+          ASSET="Godot_v${GODOT_VERSION}_linux.x86_64.zip"
+          curl -fsSL -o "$ASSET" \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}/${ASSET}"
+          curl -fsSL -o SHA512-SUMS.txt \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}/SHA512-SUMS.txt"
+          grep -F " ${ASSET}" SHA512-SUMS.txt | sha512sum --check --strict -
+          unzip -q "$ASSET"
           chmod +x "Godot_v${GODOT_VERSION}_linux.x86_64"
           echo "GODOT_BIN=$PWD/Godot_v${GODOT_VERSION}_linux.x86_64" >> "$GITHUB_ENV"
 

@@ -86,7 +86,9 @@ progress, settings and recovery behavior described above are therefore
 unaffected by starting, playing, or replaying the puzzle. Continue and
 Level Select stay hidden on the main menu (their scenes/scripts remain in
 source, unreachable from this menu); the `NewGameButton` tooltip states that
-existing level progress is preserved. Source of truth:
+existing level progress is preserved. Puzzle entry also never touches the
+input-remap system: a keyboard/gamepad remap seeded before `new_game()`/
+`load_game_scene()` is unaffected by either call. Source of truth:
 tests/save_input_regression.gd's `_test_no_reset_on_puzzle_entry()`.
 
 ## Validation and Limits
