@@ -1,7 +1,7 @@
 # Data Model
 
 ## PuzzleDefinition
-Positive integer width/height; copied arrows dictionary maps head Vector2i to cardinal direction. Optional copied tails dictionary maps head to ordered Array[Vector2i]; omitted tails are empty. A shape is [head] + tail. Validate typed cells, board bounds, distinct cells, unit orthogonal adjacency, existing tail-owner head, and exclusive ownership across shapes. Repeated-cell reversals are invalid; multiple right-angle turns are supported.
+Positive integer width/height; copied arrows dictionary maps head Vector2i to cardinal direction. Optional copied tails dictionary maps head to ordered Array[Vector2i]; omitted tails are empty. A shape is [head] + tail. Validate typed cells, board bounds, distinct cells, unit orthogonal adjacency, existing tail-owner head, and exclusive ownership across shapes. Repeated-cell reversals are invalid; multiple right-angle turns are supported. The first tail cell, when present, MUST equal head minus its direction vector (immediately behind the head, opposite its direction of travel); a tail whose first cell is anywhere else is invalid. No tail cell of an arrow MAY lie on that same arrow's own forward escape ray (the cells strictly between its head and the board edge along its direction); such geometry is an invalid definition, never a runtime exception. Different arrows' cells may be orthogonally adjacent without restriction — only overlap is invalid.
 
 get_arrow_cells(head) and get_cell_owners() return independent copies. Preserve the three-argument constructor and duplicate_arrows() direction-map semantics. Input and snapshot mutation cannot affect active attempts.
 

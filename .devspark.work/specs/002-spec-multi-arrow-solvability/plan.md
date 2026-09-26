@@ -28,7 +28,7 @@ The authoritative spec, constitution v2.0.0, current arrow-puzzle and save-progr
 Head-coordinate identities avoid new IDs. An ownership dictionary avoids shape scans per click. Monotone elimination replaces unnecessary backtracking. Copied dictionaries/arrays avoid new dependencies and shared mutable shape resources.
 
 ### Architectural Impact
-Preserve the three-argument definition constructor and direction map, adding optional tails. Add occupancy accessors and one pure solver script. Update existing board/view/controller boundaries without addon, menu-routing or persistence changes.
+Preserve the three-argument definition constructor and direction map, adding optional tails. Add occupancy accessors and one pure solver script. Update existing board/view/controller boundaries without addon, menu-routing or persistence changes. Validation now also enforces tail origin (first tail cell immediately behind the head, opposite direction of travel) and the head-as-leading-edge invariant (no own tail cell on the arrow's own forward escape ray); both are rejected at definition validation, not special-cased in the blocking check, keeping the own-cell exclusion in `is_blocked` a pure self-ownership rule rather than a conflict resolver.
 
 ### Reviewer Guidance
 Check monotonicity proof, ownership validation, tail-click identity resolution before removal, one departure callback per arrow, and metric scope along one traversal.

@@ -1,7 +1,7 @@
 # Puzzle Interfaces
 
 ## Definition and core
-PuzzleDefinition.new(width: int, height: int, arrows: Dictionary, tails: Dictionary = {}) preserves old constructors. is_valid() checks ownership/path constraints; get_validation_errors() -> Array[String] provides diagnostics. get_arrow_cells(head: Vector2i) -> Array[Vector2i] and get_cell_owners() -> Dictionary return copies.
+PuzzleDefinition.new(width: int, height: int, arrows: Dictionary, tails: Dictionary = {}) preserves old constructors. is_valid() checks ownership/path constraints, including: every cell in bounds; the first tail cell (when present) immediately behind its head, opposite direction of travel; full path connectivity via unit orthogonal adjacency with no diagonals/gaps/branches; no arrow's own tail cell on its own forward escape ray; and no cell shared between two arrows (adjacency between different arrows' cells is always permitted). get_validation_errors() -> Array[String] provides diagnostics. get_arrow_cells(head: Vector2i) -> Array[Vector2i] and get_cell_owners() -> Dictionary return copies.
 
 PuzzleState.get_arrow_head(cell: Vector2i) -> Variant returns Vector2i or null. is_blocked/select_arrow accept head or tail cells. Preserve outcome enums, counters, results and head-direction snapshot meanings. Whole-shape occupancy removal is synchronous and atomic. Rule scripts extend RefCounted without Node/input/animation/persistence dependencies.
 
