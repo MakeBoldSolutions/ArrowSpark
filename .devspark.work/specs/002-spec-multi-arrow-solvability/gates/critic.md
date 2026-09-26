@@ -1,18 +1,18 @@
 ```yaml
 gate: critic
-status: pass
+status: warn
 blocking: false
-severity: info
-summary: "FULL adversarial review of 002-spec-multi-arrow-solvability (game archetype, brownfield, internal risk profile). No showstoppers or constitution violations. Original findings (one CRITICAL correctness risk, three HIGH process/metadata gaps) were reviewed, confirmed genuine, and fixed — see Resolution Log."
+severity: warning
+summary: "FULL adversarial re-review of 002-spec-multi-arrow-solvability after two post-critic spec refactor commits (8e7bd5f, 64db2b2) that moved the own-tail-ahead-of-head case from a runtime blocking exclusion into a validation-time invalidity rule. Re-verified the four previously fixed findings remain fixed. No showstoppers, no constitution violations. Two new MEDIUM findings surfaced on this pass: an unverified binary download in the CI workflow that backs the feature's solvability guarantee, and a traceability gap where that same CI workflow has no task recording its code_ref."
 reviewed_artifacts:
   - path: spec.md
-    hash: "95613a7503ce2e0d3b3e2b866fd9d10c180bbf6b"
+    hash: "ad589cba8ea27bf291dfe606482c55b40718f48f"
   - path: plan.md
-    hash: "84e3665cce92bd03e185a420ab8ea7a7d3e8779b"
+    hash: "8c1d2d7bf1e77d478fd3e8929b40fbe7d1210958"
   - path: tasks.md
-    hash: "eaa774b801bde44895df63191e61406c0fc17329"
+    hash: "430e26626e1e186a0d279c8e1a127549c5f4518f"
   - path: data-model.md
-    hash: "324cf175946b9433eecefbcacb9470afd2e2b001"
+    hash: "a11c067d5eba1b4abb411f6e91f1833ccfb7c6f5"
 ```
 
 ## Technical Risk Assessment
@@ -21,81 +21,84 @@ reviewed_artifacts:
 **Scope:** FULL
 **Detected Archetype:** game (Godot project files)
 **Detected Stack:** GDScript + Godot 4.4 + no persistent storage
-**Context Mode:** brownfield (now explicit in spec.md frontmatter)
-**Risk Profile:** internal (now explicit in spec.md frontmatter)
-**Risk Posture:** GREEN
+**Context Mode:** brownfield (spec.md frontmatter)
+**Risk Profile:** internal (spec.md frontmatter)
+**Risk Posture:** YELLOW
 
 ### Executive Summary
 
-All four findings from the prior critic run were reviewed against source text, confirmed genuine (not gamed against the checker), and fixed. The one CRITICAL correctness risk — FR-004's own-cell exclusion wording narrowing to "behind its own head" when FR-001's tail geometry legally permits a tail cell ahead of the head — is now worded unconditionally on ownership, with an explicit fixture requirement added to T011. No further findings remain open.
+Re-verified critic-001 through critic-004 from the prior run remain fixed after the two subsequent spec refactor commits (own-tail-ahead-of-head moved from a runtime exclusion into a validation-time invalidity rule — spec.md, plan.md, data-model.md, contracts/puzzle.md, and tasks.md all agree on this). No stack/archetype risk checklists exist under `.devspark/risk-checklists/` or `.devspark.work/risk-checklists/`, so this review derives risks from first principles using the universal failure-mode lens; consider seeding checklists from this and future runs. Two new MEDIUM findings surfaced on this full re-pass, both outside `/devspark.analyze`'s scope (they're about production-CI trust and task-linkage completeness, not internal artifact consistency). Neither blocks proceeding to `/devspark.implement`.
 
 ### Findings (source of truth)
 
 ```yaml
 findings:
-  - finding_id: critic-001
-    category: error_handling_resilience
+  - finding_id: critic-005
+    category: dependency_supply_chain
     archetype_applicable: true
-    location: spec.md#FR-004, spec.md#Edge-Cases, tasks.md#T011
-    description: "FR-004 excluded 'an arrow's own tail cells (behind its own head)' from blocking itself, but FR-001's tail geometry permits a tail cell to end up ahead of the head after right-angle turns (verified with a concrete example: head at (2,2) facing UP with tail [(3,2),(3,1),(2,1)] places tail cell (2,1) directly in the arrow's own forward path). Following FR-004's literal wording instead of data-model.md's unconditional own-cell exclusion would make such an arrow permanently unremovable."
-    intent_cue: "The own-cell exclusion in is_blocked/select_arrow must be unconditional on ownership, not on relative position, because a legal tail shape can place a tail cell anywhere reachable by straight/right-angle segments — including ahead of its own head."
-    base_severity: critical
-    effective_severity: critical
-    recommended_action: "Reword FR-004 and the Edge Cases bullet to state the exclusion is unconditional on ownership; add an explicit T011 fixture with a tail cell positioned ahead of its own head."
-    execution_mode: selective
-    status: resolved
-    outcome: "fixed — spec.md FR-004 now reads 'every cell the arrow itself owns ... MUST NOT count against itself, regardless of that cell's position relative to the head'; the Edge Cases bullet was reworded to match; T011 in tasks.md now explicitly names the ahead-of-head fixture."
-  - finding_id: critic-002
-    category: testing_strategy
-    archetype_applicable: true
-    location: .github/workflows/, tasks.md#T024-T026
-    description: "No CI workflow executed tests/run_puzzle_regressions.py or tests/run_regressions.py; the feature's solvability guarantee depended entirely on a developer remembering to run them by hand before merging."
-    intent_cue: "The feature's stated goal is to make solvability verification automatic and non-bypassable rather than dependent on manual discipline."
-    base_severity: high
-    effective_severity: high
-    recommended_action: "Add a CI workflow running both regression launchers against a headless Godot executable on every push/PR touching the affected paths."
+    location: .github/workflows/godot-regression-tests.yml#L27-L33
+    description: "The CI workflow that runs this feature's solvability regressions (FR-011's automated verification) downloads the Godot engine binary from a GitHub release URL via plain curl and chmod +x's it with no checksum verification against Godot's published SHA512-SUMS.txt. This binary is the trust anchor for every claim this feature makes about the shipped puzzle being provably solvable — if the release asset were ever corrupted or tampered with (compromised release pipeline, cache poisoning, etc.), the CI run could report a false 'solvable' pass with no signal that the verification engine itself was compromised."
+    intent_cue: "The CI step should establish that the binary it is about to execute as the verification engine is the one Godot actually published, not merely that some bytes arrived over HTTPS."
+    base_severity: medium
+    effective_severity: medium
+    recommended_action: "Download godotengine/godot's SHA512-SUMS.txt for the same release tag and verify the downloaded zip's checksum against it before chmod +x/execution; fail the job on mismatch."
     execution_mode: manual
-    status: resolved
-    outcome: "fixed — added .github/workflows/godot-regression-tests.yml, which downloads Godot 4.4-stable (Linux, verified download URL returns HTTP 200) and runs tests/run_puzzle_regressions.py and tests/run_regressions.py on push/PR to scripts/**, scenes/**, addons/maaacks_game_template/base/scripts/**, tests/**, and project.godot."
-  - finding_id: critic-003
+    status: open
+    outcome: ""
+  - finding_id: critic-006
     category: documentation
     archetype_applicable: true
-    location: spec.md frontmatter
-    description: "spec.md's frontmatter had no risk_profile field, leaving severity scaling as an unreviewed silent default."
-    intent_cue: ""
-    base_severity: high
-    effective_severity: high
-    recommended_action: "Add risk_profile to spec.md's frontmatter."
-    execution_mode: auto
-    status: resolved
-    outcome: "fixed — spec.md frontmatter now declares risk_profile: internal."
-  - finding_id: critic-004
-    category: documentation
-    archetype_applicable: true
-    location: spec.md frontmatter
-    description: "spec.md's frontmatter had no change_type field, leaving the brownfield regression-risk lens as a reviewer's inference rather than a recorded decision."
-    intent_cue: ""
-    base_severity: high
-    effective_severity: high
-    recommended_action: "Add change_type to spec.md's frontmatter."
-    execution_mode: auto
-    status: resolved
-    outcome: "fixed — spec.md frontmatter now declares change_type: brownfield."
+    location: .github/workflows/godot-regression-tests.yml, tasks.md (no task references this path)
+    description: "godot-regression-tests.yml was added as a direct remediation to a prior critic finding (critic-002) rather than through a tasks.md item, so it has no code_ref entry anywhere in this bundle. T024's verification scope and T028's cleanup/linkage scan both enumerate scripts/puzzle/, scenes/puzzle/, tests/, and .knowledge/architecture/arrow-puzzle.md but never mention .github/workflows/. Per the shared preamble's retention rule, /devspark.release will later confirm every item's code_ref/knowledge_ref linkage before archiving this bundle — a changed production file with no owning task item is exactly the gap that check exists to catch, and right now this file would pass release with no traceability record."
+    intent_cue: "Every durable file this planning bundle caused to exist or change should be traceable from some task's code_ref, not just from a gate's Resolution Log prose, so release-time linkage verification actually covers it."
+    base_severity: medium
+    effective_severity: medium
+    recommended_action: "Add the CI workflow path to T024's or T028's file scope (or add a short dedicated task) so its code_ref gets recorded before this bundle is retained for release."
+    execution_mode: selective
+    status: open
+    outcome: ""
 ```
 
-### Resolution Log
+### High
 
-- **critic-001 (fixed)**: `spec.md` FR-004 and the Edge Cases bullet now state the arrow's own-cell exclusion is unconditional on ownership, not position — matching `data-model.md`'s already-correct implementation description. `tasks.md`'s T011 now explicitly requires a fixture with a tail cell positioned ahead of its own head, closing the gap between what the requirement promises and what will actually be tested.
-- **critic-002 (fixed)**: Added `.github/workflows/godot-regression-tests.yml`. Verified the Godot 4.4-stable Linux release asset URL resolves (HTTP 200) before committing, and validated the workflow YAML parses correctly.
-- **critic-003 / critic-004 (fixed)**: `spec.md` frontmatter now declares `risk_profile: internal` and `change_type: brownfield` explicitly.
+_(None open — see Executive Summary for the four previously-fixed findings, still fixed.)_
 
-No plan.md changes were required — plan.md's design (data-model.md's unconditional own-cell exclusion, the monotone-elimination solver) was already correct; only spec.md's requirement wording and repository CI tooling needed to catch up.
+### Missing Critical Tasks
+
+- **Documentation:** No task currently owns recording `code_ref` for `.github/workflows/godot-regression-tests.yml` (critic-006).
+
+### Questionable Assumptions
+
+1. **The downloaded Godot release asset is trustworthy because it comes from `github.com/godotengine/godot/releases`** → Failure mode: a compromised or mirrored release asset would be executed as the verification engine with no integrity check, silently invalidating the "provably solvable" guarantee this whole feature is built to deliver (critic-005).
+
+### Dependency Risk Assessment
+
+| Dependency | Concern | Alternative |
+| ---------- | ------- | ----------- |
+| Godot 4.4-stable Linux release zip (CI) | Downloaded and executed with no checksum verification | Verify against Godot's published `SHA512-SUMS.txt` for the same tag before execution |
+
+### Estimated Technical Debt at Launch
+
+- **Operational Debt:** One CI hardening item (checksum verification) and one traceability item (CI file's code_ref) — both small, non-blocking, addressable in a follow-up task or T024/T028 scope expansion.
 
 ### Metrics
 
-- Showstopper: 0 / Critical: 0 (1 fixed) / High: 0 (3 fixed)
-- Findings by category: error_handling_resilience (1, resolved), testing_strategy (1, resolved), documentation (2, resolved)
+- Showstopper: 0 / Critical: 0 / High: 0 (4 previously fixed, re-confirmed fixed) / Medium: 2 (new)
+- Findings by category: dependency_supply_chain (1, open), documentation (1, open)
+- Missing operational tasks (FULL scope): 1 (CI workflow code_ref ownership)
 
 **VERDICT:** PROCEED
 
-**Required Actions Before Implementation:** None — all findings resolved.
+**Required Actions Before Implementation:** None — both open findings are MEDIUM, non-blocking, and independent of the four core user stories.
+
+**Recommended Risk Mitigations:**
+
+- Add SHA512 checksum verification to the Godot download step in `.github/workflows/godot-regression-tests.yml` before implementation work relies on that CI signal (critic-005).
+- Expand T024 or T028's scan scope to include `.github/workflows/` so the CI workflow's `code_ref` gets recorded before `/devspark.release` archives this bundle (critic-006).
+
+## Remediation Offer
+
+Would you like me to suggest concrete remediation edits for critic-005 and critic-006? I have not applied any edits to `.github/workflows/godot-regression-tests.yml`, `spec.md`, `plan.md`, or `tasks.md` — this command is non-destructive by contract; only this gate artifact was written.
+
+Where you are: critic gate re-run for 002-spec-multi-arrow-solvability (FULL) — warn (2 open MEDIUM, non-blocking)
+Next: run /devspark.implement, or address critic-005/critic-006 and analyze-D1 first

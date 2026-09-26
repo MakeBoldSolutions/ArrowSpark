@@ -1,27 +1,25 @@
 ```yaml
 gate: analyze
-status: pass
+status: warn
 blocking: false
-severity: info
-summary: "FULL analysis of spec+plan+tasks for 002-spec-multi-arrow-solvability. No CRITICAL/HIGH issues. 100% FR-task coverage, no traceability hallucinations, no constitution conflicts, context-resolution ids valid. Original findings B1/C1/C2 (one MEDIUM, two LOW) were reviewed, confirmed genuine, and fixed directly in the wording — see Resolution Log."
+severity: warning
+summary: "FULL re-analysis of spec+plan+tasks for 002-spec-multi-arrow-solvability after the two post-critic refactor commits (8e7bd5f, 64db2b2) that moved the own-tail-ahead-of-head case from a runtime blocking exclusion into a validation-time invalidity rule. All three artifacts are consistent with each other and with data-model.md/contracts/puzzle.md on this change. 100% FR-task coverage, no traceability hallucinations, no constitution conflicts, context-resolution ids valid, authored-board example hand-verified against FR-001/002/004. One MEDIUM stale-narrative finding (D1) remains open pending remediation approval."
 reviewed_artifacts:
   - path: spec.md
-    hash: "e15ec2173b6144023983512b85d6f07a345c5427"
+    hash: "ad589cba8ea27bf291dfe606482c55b40718f48f"
   - path: plan.md
-    hash: "84e3665cce92bd03e185a420ab8ea7a7d3e8779b"
+    hash: "8c1d2d7bf1e77d478fd3e8929b40fbe7d1210958"
   - path: tasks.md
-    hash: "4f46b74d36b452c649a3c2fc6d5161975e5fdc09"
+    hash: "430e26626e1e186a0d279c8e1a127549c5f4518f"
 ```
 
 ## Specification Analysis Report
 
 | ID | Category | Severity | Location(s) | Summary | Status |
 |---|---|---|---|---|---|
-| B1 | Ambiguity | MEDIUM | spec.md (FR-013, US4 AC1, Independent Test, Key Entities, SC-006) | Spec used three inconsistent phrasings for the same metric across five locations — "legal/active choices encountered" (AC1), "active/legal choices encountered" (FR-013), and "legal choices encountered" alone (Independent Test, Key Entities, SC-006) — while `data-model.md` already commits to two distinct fields (`active_choices_encountered`, `legal_choices_encountered`). Confirmed as genuine spec-internal terminology drift, not just a spec-vs-plan gap. | **Fixed** — see Resolution Log |
-| C1 | Underspecification | LOW | spec.md (FR-013) | FR-013's "Where inexpensive and naturally produced" clause added implementer discretion to a MUST requirement, while US4's acceptance scenarios required the metrics unconditionally. Confirmed as a genuine wording inconsistency (FR text softer than its own AC). | **Fixed** — see Resolution Log |
-| C2 | Underspecification | LOW | contracts/puzzle.md | `PuzzleSolver.analyze()` bounded by "at most N accepted removals" with `N` never defined anywhere in the bundle. Confirmed as a genuine undefined placeholder. | **Fixed** — see Resolution Log |
+| D1 | Inconsistency | MEDIUM | plan.md (Delivery and Gates, L114), tasks.md (Gate Status and Retention, L94) | Both files still assert "analyze and critic remain required and unrun" / "no existing analyze/critic findings," but `gates/analyze.md` and `gates/critic.md` already existed from a prior run (both `status: pass`, all findings resolved) before this rerun. The claim was stale even before this analysis and would mislead a reader who trusts the prose instead of checking `gates/`. Root cause: this sentence was written when tasks.md was authored (pre-gate) and never updated after either gate actually ran. | **Open** |
 
-(3 findings total; none CRITICAL or HIGH. All 3 reviewed, validated as genuine, and resolved.)
+(1 finding total; none CRITICAL or HIGH.)
 
 **Coverage Summary Table:**
 
@@ -39,7 +37,7 @@ reviewed_artifacts:
 | unsolvable-puzzle-reports-no-complete-solution (FR-010) | Yes | T016, T018, T019 | |
 | shipped-puzzle-has-automated-solvability-verification (FR-011) | Yes | T017, T018, T019 | |
 | analysis-result-structured-for-future-extension (FR-012) | Yes | T016, T020, T021, T022 | |
-| analysis-retains-structural-counts-no-difficulty-score (FR-013) | Yes | T020, T021, T022 | Wording fixed (B1/C1) |
+| analysis-retains-structural-counts-no-difficulty-score (FR-013) | Yes | T020, T021, T022 | |
 | analysis-not-required-to-enumerate-every-solution (FR-014) | Yes | T016, T018, T019 | |
 | shipped-puzzle-demonstrates-required-content (FR-015) | Yes | T012, T014, T015, T018 | |
 | existing-scoring-hud-replay-menu-unchanged (FR-016) | Yes | T004, T008, T009, T014, T023 | |
@@ -50,7 +48,11 @@ Coverage: 16/16 requirements (100%).
 
 **Cross-Repo Dependencies:** None declared (`depends_on`/`supersedes` absent from spec.md frontmatter) — §H not applicable.
 
-**Context Resolution Validity:** All three `context_resolved` entries in plan.md (`arrow-puzzle`, `save-progression`, `arrowgame-constitution`) resolve to existing `.knowledge/` documents with `appliesTo` entries consistent with the stated `via` traversal. No stale or hallucinated references.
+**Context Resolution Validity:** All three `context_resolved` entries in plan.md (`arrow-puzzle`, `save-progression`, `arrowgame-constitution`) resolve to existing `.knowledge/` documents; the `via` relations (direct `appliesTo` match on `scripts/puzzle`/`scenes/puzzle`; shared `main_menu.tscn`/`main_menu_with_animations.gd` entries linking arrow-puzzle to save-progression) are actually present on those entities. No stale or hallucinated references.
+
+**Spec/Plan/Data-Model/Contract Consistency (re-verified post-refactor):** The two commits since the last gate run (`8e7bd5f`, `64db2b2`) moved "own tail cell ahead of its own head" from a runtime blocking-exclusion special case into a validation-time invalidity rule. Verified this change is now stated identically in intent across all four documents: spec.md FR-001/FR-004/Edge Cases, plan.md's Architectural Impact paragraph, data-model.md's `PuzzleDefinition`/`is_blocked` description, and contracts/puzzle.md's `is_valid()` description — all agree the exclusion is unconditional on ownership and the ahead-of-head geometry is rejected at validation, not runtime. tasks.md's T003/T005 (validation-rejection fixtures) and T011 (explicitly scopes the ahead-of-head case out of the runtime blocking-matrix task, pointing to T005) are consistent with this design. No drift found.
+
+**Authored-board spot check:** Hand-traced all 8 arrows in data-model.md's 5x4 candidate board against FR-001 (tail-origin rule), FR-002 (no cell overlap, in-bounds), and FR-004 (forward-escape-ray blocking) — no overlapping cells, both tailed arrows (A tail bending twice, B, D straight) have a correct first-tail-cell position, no arrow's own tail occupies its own forward escape ray, and the four documented blocking relationships (A blocks B and E, D blocks C, B blocks G) all match a manual trace of each arrow's forward ray. Consistent with the spec's edge cases and FR text.
 
 **Unmapped Tasks:** None. Setup/polish tasks without `Implements:` tags (T001, T002, T024–T029) are process/verification tasks by design, consistent with the tasks template convention.
 
@@ -59,52 +61,29 @@ Coverage: 16/16 requirements (100%).
 - Total Requirements: 16
 - Total Tasks: 29
 - Coverage % (requirements with ≥1 task): 100%
-- Ambiguity Count: 0 (2 fixed: B1, C1)
+- Ambiguity Count: 0
 - Duplication Count: 0
 - Critical Issues Count: 0
 
-## Resolution Log
-
-All three findings were reviewed against source text, confirmed as genuine defects (not gamed against the checker), and fixed directly in the artifacts — no plan/tasks/data-model change was needed since `data-model.md`'s two-metric design was already correct; the spec's own wording was the actual drift source.
-
-- **B1 (fixed)**: `spec.md` now consistently names two distinct metrics — "active choices encountered" and "legal choices encountered" — at every occurrence: FR-013, US4 AC1, the User Story 4 Independent Test line, Key Entities, and SC-006. This aligns the spec with `data-model.md`'s existing `active_choices_encountered`/`legal_choices_encountered` fields rather than changing the design to match ambiguous wording.
-- **C1 (fixed)**: FR-013's conditional clause ("Where inexpensive and naturally produced...") was removed; the requirement now states the four counts as an unconditional MUST, matching US4's acceptance scenarios. The "inexpensive/naturally-available" framing remains in spec.md's Tradeoffs Considered section, where it correctly lives as design rationale rather than a requirement qualifier.
-- **C2 (fixed)**: `contracts/puzzle.md`'s undefined `N` was replaced with the concrete bound: "at most one accepted removal per arrow in the definition."
-- The temporary knowledge mirror `.devspark.work/specs/002-spec-multi-arrow-solvability/knowledge/fr-013.md` (title = verbatim FR-013 text) was updated to match, so it doesn't silently retain the pre-fix wording.
-
-No plan.md or tasks.md changes were required — their content already presumed the corrected (two-metric, unconditional) interpretation; only spec.md's and contracts/puzzle.md's wording needed to catch up.
-
 ## Next Actions
 
-All findings resolved. No CRITICAL, HIGH, or open MEDIUM/LOW issues remain.
+Only D1 (MEDIUM) is open — a documentation-consistency issue, not a coverage/traceability/constitution defect. Safe to proceed to `/devspark.critic`, or fix D1 first with a manual edit to plan.md L114 and tasks.md L94 pointing both sentences at `gates/` as the source of truth instead of asserting a fixed run-state.
 
-Where you are: analyze gate resolved for 002-spec-multi-arrow-solvability (FULL: spec+plan+tasks) — pass
+Where you are: analyze gate re-run for 002-spec-multi-arrow-solvability (FULL: spec+plan+tasks) — warn (1 open MEDIUM, non-blocking)
 Next: run /devspark.critic
+
+## Remediation Offer
+
+Would you like me to suggest concrete remediation edits for D1 (the top, and only, open issue)? I have not applied any edits to spec.md, plan.md, or tasks.md — this command is non-destructive by contract; only this gate artifact was written.
 
 ```yaml
 findings:
-  - finding_id: analyze-B1
+  - finding_id: analyze-D1
     severity: medium
-    description: "spec.md used three inconsistent phrasings for the same metric pair across five locations (AC1, FR-013, Independent Test, Key Entities, SC-006), leaving it unclear whether one or two fields were required, while data-model.md already committed to two distinct fields."
-    intent_cue: "FR-013 and every other mention in spec.md must name both 'active choices encountered' and 'legal choices encountered' as distinct fields, matching data-model.md."
-    recommended_action: "Reword all five spec.md locations to consistently name both metrics."
-    execution_mode: auto
-    status: resolved
-    outcome: "fixed — spec.md now consistently names 'active choices encountered' and 'legal choices encountered' at FR-013, US4 AC1, the Independent Test line, Key Entities, and SC-006; knowledge/fr-013.md mirror updated to match."
-  - finding_id: analyze-C1
-    severity: low
-    description: "FR-013's conditional clause 'Where inexpensive and naturally produced' qualified a MUST requirement with implementer discretion, even though US4's acceptance scenarios required the metrics unconditionally."
-    intent_cue: "FR-013 must state the metrics as an unconditional requirement, since plan.md's chosen algorithm always produces them cheaply during a single traversal."
-    recommended_action: "Remove the conditional clause from FR-013; keep the 'inexpensive' framing only in Tradeoffs Considered."
-    execution_mode: auto
-    status: resolved
-    outcome: "fixed — FR-013 now states the four counts unconditionally; Tradeoffs Considered retains the design-rationale framing."
-  - finding_id: analyze-C2
-    severity: low
-    description: "contracts/puzzle.md describes PuzzleSolver.analyze() as bounded by 'at most N accepted removals' without defining N anywhere in the design bundle."
-    intent_cue: "The solver's termination bound must be named concretely (arrow count in the definition) so the stopping condition is traceable, not a placeholder symbol."
-    recommended_action: "Replace 'N' in contracts/puzzle.md with the concrete bound (one removal per arrow in the definition)."
-    execution_mode: auto
-    status: resolved
-    outcome: "fixed — contracts/puzzle.md now reads 'at most one accepted removal per arrow in the definition ... followed by a stuck scan'."
+    description: "plan.md (Delivery and Gates) and tasks.md (Gate Status and Retention) both stated analyze/critic were 'required and unrun' / had 'no existing findings,' but gates/analyze.md and gates/critic.md already existed from a prior completed run (status: pass) before this analysis started."
+    intent_cue: "Gate-status prose in plan.md/tasks.md must point readers to gates/ as the source of truth rather than asserting a specific run-state that can silently go stale after either gate actually runs or artifacts change again."
+    recommended_action: "Reword both sentences to defer to gates/analyze.md and gates/critic.md instead of asserting a fixed run-state."
+    execution_mode: selective
+    status: open
+    outcome: ""
 ```
