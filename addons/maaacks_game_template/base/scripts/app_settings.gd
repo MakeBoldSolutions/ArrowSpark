@@ -45,7 +45,7 @@ static func set_input_from_config(action_name : String):
 		return
 	InputMap.action_erase_events(action_name)
 	for config_event in config_events:
-		if config_event not in action_events:
+		if not InputMap.action_has_event(action_name, config_event):
 			InputMap.action_add_event(action_name, config_event)
 
 static func _get_action_names() -> Array[StringName]:

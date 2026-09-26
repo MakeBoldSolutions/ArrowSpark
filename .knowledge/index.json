@@ -1,7 +1,7 @@
 {
   "generated": {
     "by": "build-knowledge-index",
-    "at": "2026-09-26T16:32:24Z"
+    "at": "2026-09-26T16:58:07Z"
   },
   "roots": [
     {
@@ -26,6 +26,24 @@
     }
   ],
   "nodes": [
+    {
+      "id": "save-progression",
+      "type": "architecture",
+      "path": ".knowledge/architecture/save-progression.md",
+      "title": "Save Progression and Input Settings",
+      "appliesTo": [
+        "scripts/game_state.gd",
+        "scripts/level_state.gd",
+        "scripts/level_list_state_manager.gd",
+        "addons/maaacks_game_template/base/scripts/global_state.gd",
+        "addons/maaacks_game_template/base/scripts/global_state_data.gd",
+        "addons/maaacks_game_template/base/scripts/app_settings.gd",
+        "addons/maaacks_game_template/base/scripts/config.gd",
+        "addons/maaacks_game_template/base/scenes/autoloads/app_config.gd",
+        "tests/save_input_regression.gd",
+        "tests/run_regressions.py"
+      ]
+    },
     {
       "id": "arrowgame-constitution",
       "type": "governance",

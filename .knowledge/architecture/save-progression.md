@@ -1,0 +1,76 @@
+---
+id: save-progression
+type: architecture
+title: Save Progression and Input Settings
+appliesTo:
+  - scripts/game_state.gd
+  - scripts/level_state.gd
+  - scripts/level_list_state_manager.gd
+  - addons/maaacks_game_template/base/scripts/global_state.gd
+  - addons/maaacks_game_template/base/scripts/global_state_data.gd
+  - addons/maaacks_game_template/base/scripts/app_settings.gd
+  - addons/maaacks_game_template/base/scripts/config.gd
+  - addons/maaacks_game_template/base/scenes/autoloads/app_config.gd
+  - tests/save_input_regression.gd
+  - tests/run_regressions.py
+---
+
+# Save Progression and Input Settings
+
+## Ownership and Startup
+
+The AppConfig autoload opens GlobalState, then applies configured input, audio,
+and window settings. GlobalState stores a GlobalStateData resource at
+`user://global_state.tres`. GameState holds level states, the highest level reached,
+the selected level, and the play count. LevelListStateManager connects level
+selection and advancement to GameState updates. LevelState stores each level's color.
+
+Config stores player settings separately at `user://config.cfg`. Progress resets
+clear the GlobalState states dictionary; they do not reset input/audio/video settings.
+
+## Save Recovery
+
+A missing save initializes fresh state. An existing resource is accepted only if
+it is GlobalStateData. If loading fails or the resource has the wrong type, the
+original bytes remain untouched, fresh in-memory state is available for the session,
+and `save_blocked` prevents ordinary writes. This protects recoverable data while
+allowing play without persistence.
+
+At startup, a confirmation dialog offers continuing without saving or backing up
+and resetting progress. Explicit reset first copies the failed save to
+`global_state.tres.recovery`, with a numeric suffix when a backup already exists.
+Only a successful backup permits reset and re-enables saving. A failed backup
+cancels the reset and retains write protection. Save/reset return Godot Error
+values, and write failures are logged; the startup recovery action also displays
+a failure notice. Existing callers may ignore the returned error.
+
+These narrow addon changes keep persistence protection in the shared save entry
+point, covering all callers. Input restoration likewise belongs in the shared
+settings implementation. Keep these local fixes when updating the bundled addon.
+
+## Input Restoration
+
+AppSettings reads saved events for each action, clears the action, and restores
+the complete configured event list. Duplicate detection uses the rebuilt InputMap,
+not the previous defaults. Changing a keyboard key therefore retains an unchanged
+gamepad binding. Reset-to-default input restores the captured startup defaults and
+removes the stored input configuration.
+
+## Validation and Limits
+
+Run `python tests/run_regressions.py` with Godot on PATH, or pass `--godot` with
+the desired executable. It uses a temporary project and unique application name;
+APPDATA/XDG_DATA_HOME redirect test data away from the game's saved progress.
+Expected negative-case engine errors appear alongside PASS lines. A successful run
+must exit zero and print `REGRESSION_FAILURES=0`.
+
+The suite covers missing/valid/corrupt/incompatible saves, backup collisions and
+failures, save-write errors, disk-loaded mixed keyboard/gamepad remaps, repeat
+restoration, and input reset. Interactive checks should also cover both recovery
+choices, menu navigation with keyboard and gamepad, and progress after restart.
+
+Resource type validation does not implement schema migrations for otherwise
+loadable but semantically incompatible data. Ordinary saves are not transactional
+or crash-safe. Settings-file corruption recovery is not provided by this change.
+The recovery backup is retained for manual inspection; no automatic restoration or
+backup deletion policy is imposed.
