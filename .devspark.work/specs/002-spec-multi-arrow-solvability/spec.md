@@ -1,6 +1,8 @@
 ---
 classification: full-spec
 risk_level: medium
+risk_profile: internal
+change_type: brownfield
 target_workflow: specify-full
 required_artifacts: spec, plan, tasks
 recommended_next_step: plan
@@ -137,7 +139,7 @@ As the person planning future puzzle-difficulty work, I want the solvability ana
 - A tail may bend more than once; the representation must not assume at most one turn.
 - Two arrows' shapes may never occupy the same cell; a puzzle definition that would create such an overlap is invalid and must be rejected by validation, not silently tolerated at runtime.
 - An arrowhead facing directly at the board edge with no cells ahead (including no tail cells of its own in the way) is always immediately clear.
-- An arrow's own tail cells, which sit behind its head relative to its direction of travel, never block that same arrow's own movement.
+- An arrow's own cells — its head and every tail cell it owns — never block that same arrow's own movement, regardless of whether a given tail cell happens to lie ahead of or behind the head in its direction of travel; a tail's right-angle turns may legally place one of its own cells directly in its own forward path.
 - A puzzle where every remaining arrow is mutually blocking (no legal move exists) mid-sequence must be distinguishable, during analysis, from a puzzle where a legal move exists but has not yet been tried — this is exactly the forced/branching/no-move distinction the analysis must make.
 - A deliberately unsolvable test puzzle definition (used only for verifying the analysis itself, never shipped for play) must produce a clean "no complete solution" report rather than an error, timeout, or partial result presented as success.
 - The shipped puzzle must have at least one arrow of each cardinal direction, at least one straight tail, at least one right-angle tail, at least one instance of a tail blocking another arrow, and at least one arrow that becomes removable only after another arrow is removed — all as literal edge-case content within its own layout.
@@ -154,7 +156,7 @@ automated tests remain selective but are required for solvability verification s
 - **FR-001**: An arrow MUST be representable as a connected shape: exactly one arrowhead cell plus zero or more ordered tail cells forming a single connected path from the head, where consecutive path segments run straight or turn at a right angle. The representation MUST support more than one right-angle turn in a single tail.
 - **FR-002**: Every cell occupied by any arrow's head or tail MUST belong to exactly one arrow. A puzzle definition in which two arrows' shapes would occupy the same cell MUST be treated as invalid.
 - **FR-003**: An arrow's direction of travel MUST be determined solely by its arrowhead. Tail geometry (straight or any number of right-angle turns) MUST NOT alter the direction in which the arrow exits when removed.
-- **FR-004**: An arrow MUST be legally removable if and only if every cell strictly between its arrowhead and the board edge, along its direction of travel, is free of any occupied cell belonging to another active arrow. Both head cells and tail cells of other arrows MUST count as occupied for this check; an arrow's own tail cells (behind its own head) MUST NOT count against itself.
+- **FR-004**: An arrow MUST be legally removable if and only if every cell strictly between its arrowhead and the board edge, along its direction of travel, is free of any occupied cell belonging to another active arrow. Both head cells and tail cells of other arrows MUST count as occupied for this check; every cell the arrow itself owns — its own head cell and every one of its own tail cells — MUST NOT count against itself, regardless of that cell's position relative to the head (a tail cell may legally sit ahead of the head after a right-angle turn; ownership, not position, is what excludes it).
 - **FR-005**: A legal removal MUST remove every cell of that arrow's entire shape from the board in the same accepted selection; no partial removal of a shape (e.g., tail remaining after head departs) is permitted.
 - **FR-006**: A blocked selection MUST preserve the existing blocked-selection contract unchanged: the arrow remains active and in its position, a visible non-blocking feedback cue plays, the mistake counter increments exactly once, and the player MAY continue selecting without restriction, including unlimited repeated blocked selections.
 - **FR-007**: The system MUST define solvability as a property of a puzzle definition: a puzzle is solvable when at least one sequence of legal arrow removals, applied in order under FR-004/FR-005, results in every arrow being removed.
