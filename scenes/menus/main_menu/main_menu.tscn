@@ -7,6 +7,9 @@
 
 [node name="MainMenu" instance=ExtResource("1_7yqli")]
 script = ExtResource("2_qowch")
-game_scene_path = "res://scenes/game_scene/game_ui.tscn"
+game_scene_path = "res://scenes/puzzle/arrow_puzzle.tscn"
 options_packed_scene = ExtResource("3_bh880")
 credits_packed_scene = ExtResource("4_hb88b")
+
+[node name="NewGameButton" parent="MenuContainer/MenuButtonsMargin/MenuButtonsContainer/MenuButtonsBoxContainer" index="0"]
+tooltip_text = "Existing level progress is preserved even though it's hidden here."

@@ -86,6 +86,10 @@ Research: research.md. Data: data-model.md. Interfaces: contracts/puzzle.md. Val
 
 Keep this planning bundle under .devspark.work until release archival. The shared preamble's retention rule takes precedence over the tasks command's stale instruction to delete FEATURE_DIR; no deletion task will be generated. Durable outputs must not reference planning identifiers.
 
+## Implementation Notes
+
+- 2026-09-26 (T017): Replay and the pause-menu Restart both call `SceneLoader.reload_current_scene()` instead of the generation-token/manual-tween-kill approach originally described above under Integration Design. Reloading the scene reconstructs `PuzzleState`, all `ArrowView` nodes and tweens from scratch on `_ready()`, which trivially guarantees no stale callback or pending tween from the finished attempt can affect the next one — the same guarantee the generation-token design was for, achieved with less code and no manual bookkeeping. Confirmed cancelled Restart and Replay-then-second-run behavior in tests/puzzle_regression.gd's fresh-state assertions and the desktop smoke pass (gates/verification.md).
+
 ## Agent Context Update
 
 The Codex context update script completed successfully. Its installed template lookup initially failed; a temporary copy of the stock template at its expected work path allowed execution, and that copied file was removed afterward. Existing AGENTS.md content was preserved; no new technology context was needed.

@@ -105,5 +105,47 @@ func _initialize() -> void:
 	Config.config_file = null
 	Config.load_config_file()
 	check(Config.get_config("Session", "value") == 99, "settings persist after reset and reload")
+	_test_no_reset_on_puzzle_entry()
 	print("REGRESSION_FAILURES=", failures)
 	quit(1 if failures else 0)
+
+## FR-013: opening the puzzle from Play/New Game MUST NOT reset or save
+## existing progress. Guards against a future template refresh silently
+## reintroducing GlobalState.reset()/GameState.start_game() on that path
+## (registered as "SceneLoader" autoload, tests/scene_loader_stub.gd records
+## calls without touching the filesystem or scene tree).
+func _test_no_reset_on_puzzle_entry() -> void:
+	GlobalState.current = null
+	GlobalState.open()
+	var game_state: GameState = GameState.get_game_state()
+	game_state.max_level_reached = 3
+	game_state.times_played = 5
+	game_state.current_level = 2
+	GameState.get_level_state("preserved_level")
+	GlobalState.save()
+
+	var menu = load("res://main_menu_with_animations.gd").new()
+	menu.game_scene_path = "res://dummy_puzzle.tscn"
+
+	menu.new_game()
+	var after_new_game: GameState = GameState.get_game_state()
+	check(after_new_game.times_played == 5,
+		"new_game() does not call GameState.start_game() (times_played unchanged)")
+	check(after_new_game.max_level_reached == 3,
+		"new_game() does not call GlobalState.reset() (max_level_reached unchanged)")
+	check(after_new_game.level_states.has("preserved_level"),
+		"new_game() does not call GlobalState.reset() (existing level_states preserved)")
+	# Accessed via get_node, not the bare "SceneLoader" identifier: this entry
+	# script is compiled before autoloads register as global constants, so a
+	# bare autoload identifier here fails to compile even though it resolves
+	# fine from a script loaded later (e.g. main_menu_with_animations.gd above).
+	var scene_loader := get_root().get_node("SceneLoader")
+	check(scene_loader.load_scene_calls >= 1,
+		"new_game() still opens the puzzle via SceneLoader.load_scene")
+
+	menu.load_game_scene()
+	var after_load_game_scene: GameState = GameState.get_game_state()
+	check(after_load_game_scene.times_played == 5,
+		"load_game_scene() does not call GameState.start_game() (times_played unchanged)")
+
+	menu.free()

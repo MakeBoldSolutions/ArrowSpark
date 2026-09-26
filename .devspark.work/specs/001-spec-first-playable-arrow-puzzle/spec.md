@@ -8,14 +8,14 @@ required_artifacts: spec, plan, tasks
 recommended_next_step: implement
 required_gates: checklist, analyze, critic
 route_intent: full-spec
-status: Draft
+status: Complete
 ---
 
 # Feature Specification: First Playable Arrow Puzzle
 
 **Feature Branch**: `001-spec-first-playable-arrow-puzzle`
 **Created**: 2026-09-26
-**Status**: Draft
+**Status**: Complete
 **Input**: Create the first playable arrow-clearing puzzle in the existing desktop game, with one manually defined board, unlimited mistakes, live counters, completion results, and replay.
 
 ## Product Owner TLDR
@@ -69,7 +69,7 @@ Focus on direction and distance handling, exactly-once counting during animation
 
 ## User Scenarios & Testing
 
-### User Story 1 - Start and Clear the Puzzle (Priority: P1)
+### User Story 1 - Start and Clear the Puzzle (Priority: P1) ✅ Complete
 
 As a player, I can launch the existing game, start a puzzle, and select clear arrows with the mouse so that I can empty the board.
 
@@ -84,7 +84,7 @@ As a player, I can launch the existing game, start a puzzle, and select clear ar
 3. **Given** another arrow behind the selected arrow, diagonal to it, or on a different parallel line, **When** the selected arrow has no arrow directly ahead, **Then** those other arrows do not block it.
 4. **Given** a removal animation in progress, **When** the player selects the departing arrow again, **Then** no additional removal, tap, or mistake is recorded; other active arrows remain selectable.
 
-### User Story 2 - Learn Through Unlimited Mistakes (Priority: P1)
+### User Story 2 - Learn Through Unlimited Mistakes (Priority: P1) ✅ Complete
 
 As a player, I can try blocked arrows repeatedly and continue playing so that mistakes never force me to restart.
 
@@ -99,7 +99,7 @@ As a player, I can try blocked arrows repeatedly and continue playing so that mi
 3. **Given** the blocker has been successfully selected and is departing, **When** the previously blocked arrow is selected, **Then** the departing blocker no longer obstructs it.
 4. **Given** any mistake count, **When** the player keeps playing, **Then** no lives, failure screen, retry cap, timer, advertisement, or interrupting penalty appears.
 
-### User Story 3 - Review Results and Replay (Priority: P1)
+### User Story 3 - Review Results and Replay (Priority: P1) ✅ Complete
 
 As a player, I can see how I performed and replay the same board so that the first session forms a complete repeatable game loop.
 
@@ -114,7 +114,7 @@ As a player, I can see how I performed and replay the same board so that the fir
 3. **Given** a completed puzzle, **When** Replay is activated, **Then** the same positions and directions return, remaining resets to N, mistakes and taps reset to zero, and no previous animation or result affects the new run.
 4. **Given** more mistakes than starting arrows, **When** the puzzle is completed, **Then** score is zero and results and replay remain available.
 
-### User Story 4 - Preserve Starter Controls and Settings (Priority: P1)
+### User Story 4 - Preserve Starter Controls and Settings (Priority: P1) ✅ Complete
 
 As an existing player, I retain usable menus and my configured controls and settings while trying the new puzzle.
 

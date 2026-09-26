@@ -5,14 +5,6 @@ extends MainMenu
 var level_select_scene
 var animation_state_machine : AnimationNodeStateMachinePlayback
 
-func load_game_scene():
-	GameState.start_game()
-	super.load_game_scene()
-
-func new_game():
-	GlobalState.reset()
-	load_game_scene()
-
 func intro_done():
 	animation_state_machine.travel("OpenMainMenu")
 
@@ -55,13 +47,10 @@ func _ready():
 	_setup_level_select()
 	animation_state_machine = $MenuAnimationTree.get("parameters/playback")
 
-func _setup_game_buttons():
-	super._setup_game_buttons()
-	if GameState.has_game_state():
-		%ContinueGameButton.show()
-		if level_select_packed_scene != null and GameState.get_max_level_reached() > 0:
-			%LevelSelectButton.show()
-
+## Continue and Level Select stay hidden: this puzzle is session-only and
+## implies no saved level progression to continue or select from. Their
+## scenes/scripts remain in source, unreachable from this menu, so they can
+## be restored later.
 func _on_continue_game_button_pressed():
 	load_game_scene()
 

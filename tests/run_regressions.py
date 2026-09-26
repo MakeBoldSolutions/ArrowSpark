@@ -23,13 +23,30 @@ def main():
         env["XDG_DATA_HOME"] = str(root / "userdata")
         name = "ArrowGameRegression-" + uuid.uuid4().hex
         (root / "project.godot").write_text(
-            f'config_version=5\n[application]\nconfig/name="{name}"\n', encoding="utf-8"
+            f'config_version=5\n[application]\nconfig/name="{name}"\n'
+            '[autoload]\nSceneLoader="*res://scene_loader_stub.gd"\n',
+            encoding="utf-8",
         )
         for script in ("global_state", "global_state_data", "app_settings", "config"):
             shutil.copyfile(
                 repo / "addons/maaacks_game_template/base/scripts" / f"{script}.gd",
                 root / f"{script}.gd",
             )
+        shutil.copyfile(
+            repo / "addons/maaacks_game_template/base/scenes/menus/main_menu/main_menu.gd",
+            root / "main_menu.gd",
+        )
+        # game_state.gd hardcodes FILE_PATH = "res://scripts/game_state.gd" for
+        # GlobalState.get_state()'s dynamic load(), so it must keep that
+        # relative path in the isolated project, not sit flat at the root.
+        (root / "scripts").mkdir(exist_ok=True)
+        for script in ("game_state", "level_state"):
+            shutil.copyfile(repo / "scripts" / f"{script}.gd", root / "scripts" / f"{script}.gd")
+        shutil.copyfile(
+            repo / "scenes/menus/main_menu/main_menu_with_animations.gd",
+            root / "main_menu_with_animations.gd",
+        )
+        shutil.copyfile(repo / "tests/scene_loader_stub.gd", root / "scene_loader_stub.gd")
         shutil.copyfile(repo / "tests/save_input_regression.gd", root / "regression.gd")
         for flags in (("--editor", "--quit"), ("--script", "regression.gd")):
             command = [args.godot, "--headless", "--path", str(root), *flags]
