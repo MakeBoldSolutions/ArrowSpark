@@ -144,6 +144,12 @@ participants:
 
 ## Requirements *(mandatory)*
 
+For ArrowGame, include affected keyboard/gamepad navigation, remapping, and saved
+progress/settings compatibility in requirements and acceptance scenarios. A breaking
+data change needs an explicit migration/reset plan. Gameplay acceptance must cover
+Godot validation and affected-gameplay smoke tests; automated tests remain selective.
+Apply these constraints when relevant, without adding unrelated CI or performance targets.
+
 <!--
   ACTION REQUIRED: The content in this section represents placeholders.
   Fill them out with the right functional requirements.

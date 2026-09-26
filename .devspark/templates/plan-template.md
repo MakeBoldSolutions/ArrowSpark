@@ -82,6 +82,13 @@ participants:
 
 [Gates determined based on constitution file]
 
+For ArrowGame, evaluate applicable constitution rules: snake_case for new scripts
+and functions (Godot-required names excepted), project-level customization preferred,
+keyboard/gamepad navigation and remapping preserved, and save/settings compatibility
+preserved or an explicit migration/reset plan supplied. Gameplay changes require
+Godot validation and an affected-gameplay smoke test. Record justified addon edits
+and outstanding verification. Do not invent frame-rate targets or mandatory CI gates.
+
 ## Context Resolution
 
 *The multi-hop `.knowledge/` traversal for this delta, pinned down here so `/devspark.implement` consumes it as already-resolved and never traverses more than one hop itself. `/devspark.analyze` validates every entry resolves against the current ontology; `/devspark.critic` judges whether the set is sufficient for the delta.*
