@@ -1,6 +1,8 @@
 ---
 classification: full-spec
 risk_level: medium
+risk_profile: internal
+change_type: brownfield
 target_workflow: specify-full
 required_artifacts: spec, plan, tasks
 recommended_next_step: implement
@@ -153,7 +155,7 @@ As an existing player, I retain usable menus and my configured controls and sett
 - **FR-010**: Completion MUST display starting total arrows, mistakes, `score = max(total arrows - mistakes, 0)`, `accuracy = successful arrow removals / total taps`, Replay, and Main Menu. Accuracy MUST be shown as a percentage rounded to one decimal place, with exact ties rounded half away from zero (for example, 6.25% displays as 6.3%); zero taps MUST yield zero accuracy.
 - **FR-011**: Replay MUST start the identical board as a fresh attempt, resetting mistakes, successful removals, taps, completion state, and visual effects while retaining the original total arrow count and unrelated player settings. The existing pause-menu Restart, once confirmed, MUST likewise start a fresh attempt; cancelling Restart MUST leave the current attempt unchanged.
 - **FR-012**: Puzzle rules and state MUST be independent of rendering, animation, and input event handling, allowing blocking, selection outcomes, counters, completion, score, accuracy, and reset behavior to be verified without a displayed game or mouse input.
-- **FR-013**: Integration MUST preserve the starter's opening/intro, main menu, options (audio, video, input remapping), credits, pause menu, scene loading, and existing keyboard/gamepad navigation and remapping, and compatibility with saved progress/settings and recovery behavior. Affected new menu controls, including Replay, MUST support the existing navigation conventions. Play/New Game MUST open the puzzle without resetting or saving progress. Continue and Level Select MUST be hidden, with their scenes and scripts left in source as described under Tradeoffs Considered. No new puzzle-result persistence or progression MUST be introduced.
+- **FR-013**: Integration MUST preserve the starter's opening/intro, main menu, options (audio, video, input remapping), credits, pause menu, scene loading, and existing keyboard/gamepad navigation and remapping, and compatibility with saved progress/settings and recovery behavior. Affected new menu controls, including Replay, MUST support the existing navigation conventions. Play/New Game MUST open the puzzle without resetting or saving progress. Continue and Level Select MUST be hidden, with their scenes and scripts left in source as described under Tradeoffs Considered, and the main menu MUST show a brief, low-effort note (label or tooltip) stating that existing level progress is preserved even though those entries are hidden. No new puzzle-result persistence or progression MUST be introduced.
 
 ### Key Entities
 
@@ -180,10 +182,12 @@ As an existing player, I retain usable menus and my configured controls and sett
 ### Required Verification
 
 - Validate affected scripts and scenes in Godot and smoke-test the actual desktop launch/start/play/completion/replay journey. Record results; unavailable required checks remain explicitly outstanding.
+- Add an automated regression assertion, not only a manual smoke check, that opening the puzzle from Play/New Game does not call the starter's progress-reset or play-count entry points; this guards FR-013's no-reset guarantee against a future template refresh silently reintroducing either call.
 - Verify blocking in all four directions: adjacent and distant blockers, gaps, blockers with different directions, arrows behind/off-axis, outward-facing edge arrows, and inactive blockers.
 - Verify exactly-once accounting, rapid repeated clicks, zero-tap handling, nonnegative score, result rounding, final completion, and replay reset. Focused automated rule tests are appropriate regression protection; no blanket test-coverage requirement is imposed.
 - Demonstrate a complete valid removal sequence for the fixed puzzle and a second complete run after replay.
 - Smoke-test affected menu, pause/resume, restart, and transition paths where integrated, with mouse and existing keyboard/gamepad navigation and remaps. Confirm existing save/settings compatibility and recovery behavior.
+- Assert the blocked-feedback cue's duration against its coded constant (FR-005's 0.3-second cap) and the HUD/board layout rects at the 1280x720 and 960x540 window sizes (FR-007's no-overlap requirement) programmatically; manual smoke observation alone is not sufficient evidence for either numeric constraint because sub-second timing and pixel-level overlap are unreliable to judge by eye.
 
 ## Success Criteria
 
