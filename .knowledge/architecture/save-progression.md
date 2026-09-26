@@ -50,6 +50,20 @@ settings implementation. Keep these local fixes when updating the bundled addon.
 
 ## Input Restoration
 
+### Unreadable Settings
+
+Config distinguishes missing files from failed loads. Failed loads discard partially
+parsed values, preserve the original file, and block every settings-save path.
+Setters and erase operations remain usable in memory for the current session.
+Startup offers temporary settings or explicit backup/reset; when both progress and
+settings need recovery, the settings prompt follows dismissal of the progress prompt.
+
+Reset copies the original settings to `config.cfg.recovery` (numbered on collisions)
+before writing an empty configuration. Backup or reset-write failures retain write
+protection. Successful reset enables persistence and asks the player to restart to
+apply defaults; it does not reinitialize audio/window/input state mid-session.
+Changes made after successful reset may be persisted normally.
+
 AppSettings reads saved events for each action, clears the action, and restores
 the complete configured event list. Duplicate detection uses the rebuilt InputMap,
 not the previous defaults. Changing a keyboard key therefore retains an unchanged
@@ -69,8 +83,12 @@ failures, save-write errors, disk-loaded mixed keyboard/gamepad remaps, repeat
 restoration, and input reset. Interactive checks should also cover both recovery
 choices, menu navigation with keyboard and gamepad, and progress after restart.
 
+Settings regressions also cover partially parsed files, in-memory updates, all
+mutation paths, backup failure, exact-byte preservation, and persistence after reset.
+
 Resource type validation does not implement schema migrations for otherwise
 loadable but semantically incompatible data. Ordinary saves are not transactional
-or crash-safe. Settings-file corruption recovery is not provided by this change.
+or crash-safe. Settings recovery covers parse/load failures, not semantic validation
+of every successfully parsed setting value.
 The recovery backup is retained for manual inspection; no automatic restoration or
 backup deletion policy is imposed.
