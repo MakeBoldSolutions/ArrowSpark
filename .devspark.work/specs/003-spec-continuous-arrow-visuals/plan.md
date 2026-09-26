@@ -71,7 +71,7 @@ Post-design check passes with no waivers. PASS means the design satisfies obliga
 
 ## Context Resolution
 
-Traversal started at presentation file appliesTo matches in `.knowledge/index.json`, read owning documents, and followed the puzzle's save-progression reference. The index has no ontology edges/entities; path references and appliesTo are the actual relations. Stop at hop 2 because no further relevant node or governance decision is exposed. Do not traverse archived work products.
+Context resolution started from presentation-file appliesTo matches in `.knowledge/index.json`. After reading arrow-puzzle, save-progression was resolved through their shared appliesTo entry for `scenes/menus/main_menu/main_menu_with_animations.gd`. This is a shared-file ownership connection, not an explicit document reference or ontology edge. No archived work products were consulted.
 
 ```yaml
 context_resolved:
@@ -87,7 +87,7 @@ context_resolved:
     informs: project-local customization, preserved controls/settings, mandatory validation and smoke
   - id: save-progression
     path: C:/GitHub/MakeBoldSolutions/ArrowGame/.knowledge/architecture/save-progression.md
-    via: arrow-puzzle menu/no-reset contract -> save-progression
+    via: shared appliesTo with arrow-puzzle for scenes/menus/main_menu/main_menu_with_animations.gd
     hop: 2
     informs: no reset, remap survival, isolated test data, preserve recovery behavior
 ```
