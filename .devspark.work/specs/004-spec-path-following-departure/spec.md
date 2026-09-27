@@ -176,7 +176,7 @@ Retain the existing `Line2D` body and `Polygon2D` head unless analysis identifie
 
 **Scene/integration**: Immediate removal/HUD, ignored departed-cell input/hover, synchronous normalization at different pulse phases, duplicate-start guards, independent concurrent departures with reversed finish order, pause/resume, resize, results barrier, cleanup/restart/reload, and domain independence from timing. Existing rule, solver, scoring, save/input, and presentation suites must remain green.
 
-**Manual visual play**: All shape categories; readable feeding motion and speed; fixed bends without diagonal cuts; acceptable tail-cap corner traversal; connected head/body without an initial jump; progressive grid clipping without UI spill; simultaneous departures; pause/resume; resize; final results transition. Exercise affected navigation/remapping and preservation of saved data, recording hardware limitations honestly.
+**Manual visual play**: All shape categories; readable feeding motion and speed (continuous frame-to-frame forward progress with no visible stutter, freeze, or backward step); fixed bends without diagonal cuts; acceptable tail-cap corner traversal (the tail cap follows the route through each bend with no visible skip or jump as it turns the corner); connected head/body without an initial jump; progressive grid clipping without UI spill; simultaneous departures; pause/resume; resize; final results transition. Exercise affected navigation/remapping and preservation of saved data, recording hardware limitations honestly.
 
 ## Success Criteria
 
