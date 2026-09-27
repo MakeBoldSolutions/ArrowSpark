@@ -70,6 +70,16 @@ func _run() -> void:
 	var puzzle: Control = load("res://scenes/puzzle/arrow_puzzle.tscn").instantiate()
 	root.add_child(puzzle)
 	await process_frame
+	# These presentation checks assert exact cell positions/relationships
+	# (a tail cell sharing an owner with its head, a blocked tail cell, an
+	# owned-but-empty cell) authored against the fixed board's specific
+	## geometry; explicitly load it here rather than whichever catalog entry
+	# PuzzleSession currently defaults to, keeping this suite's assertions
+	# independent of the authored catalog content (see tests/puzzle_regression.gd
+	# for the same create_fixed()-direct precedent).
+	var fixed_definition := PuzzleDefinition.create_fixed()
+	puzzle._state = PuzzleState.new(fixed_definition)
+	puzzle.get_node("%PuzzleBoard").setup(fixed_definition)
 	check(puzzle.get_node("%PuzzleBoard")._views.size() == 8, "real puzzle instantiates all eight views")
 	await _check_theme(puzzle)
 	await _check_overlay(puzzle)
@@ -278,7 +288,7 @@ func _check_theme(puzzle: Control) -> void:
 	check(GameVisualStyle.UI_FONT.get_font_name() == "Inter Tight" and GameVisualStyle.UI_FONT.variation_opentype.get("wght") == 600.0, "UI uses bundled Inter Tight 600")
 	check(GameVisualStyle.SUPPORTING_FONT.variation_opentype.get("wght") == 400.0, "supporting role uses weight 400")
 	var results: Control = puzzle.get_node("%PuzzleResults")
-	results.show_results({"total_arrows": 8, "mistakes": 3, "score": 5, "accuracy": 8.0 / 11.0})
+	results.show_results({"total_arrows": 8, "mistakes": 3, "score": 5, "accuracy": 8.0 / 11.0}, PuzzleCatalog.id_at(0), false)
 	check(results.get_node("%AccuracyLabel").text == "Accuracy: 72.7%" and results.get_node("%ScoreLabel").text == "Score: 5", "results retain numeric behavior")
 	check(results.get_node("%ScoreLabel").get_theme_color("font_color") == GameVisualStyle.GAME_SUCCESS, "existing score supplies success cue")
 	var replay: Button = results.get_node("%ReplayButton")

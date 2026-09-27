@@ -28,13 +28,13 @@ func _close_sub_menu():
 	super._close_sub_menu()
 	animation_state_machine.travel("OpenMainMenu")
 
-func _setup_level_select(): 
+func _setup_level_select():
 	if level_select_packed_scene != null:
 		level_select_scene = level_select_packed_scene.instantiate()
 		level_select_scene.hide()
 		%LevelSelectContainer.call_deferred("add_child", level_select_scene)
-		if level_select_scene.has_signal("level_selected"):
-			level_select_scene.connect("level_selected", load_game_scene)
+		if level_select_scene.has_signal("puzzle_selected"):
+			level_select_scene.connect("puzzle_selected", _on_puzzle_selected)
 
 func _input(event):
 	if _is_in_intro() and _event_skips_intro(event):
@@ -47,12 +47,23 @@ func _ready():
 	_setup_level_select()
 	animation_state_machine = $MenuAnimationTree.get("parameters/playback")
 
-## Continue and Level Select stay hidden: this puzzle is session-only and
-## implies no saved level progression to continue or select from. Their
-## scenes/scripts remain in source, unreachable from this menu, so they can
-## be restored later.
+## Continue stays hidden: this puzzle is session-only and implies no saved
+## level progression to continue from. Its scene/script remains in source,
+## unreachable from this menu, so it can be restored later.
 func _on_continue_game_button_pressed():
 	load_game_scene()
 
 func _on_level_select_button_pressed():
 	_open_sub_menu(level_select_scene)
+
+## New Game always starts catalog position 0, regardless of any prior Level
+## Select choice earlier in the same session. The base implementation's
+## existing no-GlobalState.reset()/no-GameState.start_game() guarantee is
+## otherwise untouched — this only sets which puzzle load_game_scene() opens.
+func new_game():
+	PuzzleSession.set_current_id(PuzzleCatalog.id_at(0))
+	super.new_game()
+
+func _on_puzzle_selected(id: String):
+	PuzzleSession.set_current_id(id)
+	load_game_scene()

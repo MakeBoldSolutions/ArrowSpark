@@ -8,6 +8,8 @@ appliesTo:
   - scripts/puzzle/puzzle_solver.gd
   - scripts/puzzle/puzzle_feedback.gd
   - scripts/puzzle/puzzle_results_format.gd
+  - scripts/puzzle/puzzle_catalog.gd
+  - scripts/puzzle_session.gd
   - scripts/presentation/arrow_departure_geometry.gd
   - scenes/puzzle/arrow_puzzle.tscn
   - scenes/puzzle/arrow_puzzle.gd
@@ -19,6 +21,7 @@ appliesTo:
   - scenes/menus/main_menu/main_menu_with_animations.tscn
   - scenes/menus/main_menu/main_menu_with_animations.gd
   - tests/puzzle_regression.gd
+  - tests/puzzle_catalog_check.gd
   - tests/run_puzzle_regressions.py
   - tests/arrow_departure_geometry_check.gd
   - tests/puzzle_layout_check.gd
@@ -201,6 +204,50 @@ the absence of any difficulty-labeled field. Run via
 `python tests/run_puzzle_regressions.py --godot <godot>`; requires exit zero
 and `PUZZLE_FAILURES=0`.
 
+## Puzzle Catalog and Session-Scoped Selection
+
+`PuzzleCatalog` (scripts/puzzle/puzzle_catalog.gd) is a static-registry
+`RefCounted` class, never instantiated, sitting between the domain
+(`PuzzleDefinition`) and presentation. It holds an ordered array of eight
+entries (`{id, title, build}`), each `build` a zero-argument static function
+constructing a fresh `PuzzleDefinition` exactly like `create_fixed()`'s own
+literal-construction style. `count()`, `id_at(index)`, `title_at(index)`,
+`index_of(id)` (`-1` if unknown), `ids()` (an independent ordered copy) and
+`get_title(id)` (`""` if unknown) expose ordering and identity as two
+separate concepts — a stable string id is never derived from array position,
+title, or any filesystem path. `get_definition(id)` (`null` if unknown)
+rebuilds and returns a fresh `PuzzleDefinition` on every call — no caching,
+no shared instance — so two calls for the same id are structurally equal but
+never share mutable substructure, the same isolation guarantee
+`create_fixed()` already had. `PuzzleDefinition` itself gained no
+catalog/progression fields; it remains anonymous structural data.
+
+`PuzzleSession` (scripts/puzzle_session.gd) is a process-lifetime,
+in-memory-only `RefCounted` class holding a single private `static var
+_current_id`, matching the same static-var precedent `GameVisualStyle._theme`
+already established for process-lifetime state with no scene-tree
+involvement. `get_current_id()` defaults to `PuzzleCatalog.id_at(0)` whenever
+unset or no longer a valid catalog id; `set_current_id(id)` is a direct
+setter (the caller is responsible for passing a valid id);
+`advance_to_next()` moves to the next catalog entry and returns `true`, or
+leaves the id unchanged and returns `false` at the last entry; `has_next()`
+reports whether a next entry exists. It never reads or writes `GlobalState`,
+`GameState`, `LevelState`, or `user://global_state.tres`, and is reset only
+by a fresh engine process — a scene reload (Replay, pause-menu Restart, Next
+Puzzle) leaves it unchanged, since a GDScript static var is bound to the
+running process, not to any node or scene.
+
+Source of truth: tests/puzzle_catalog_check.gd (unique/valid stable ids
+independent of position, deterministic `id_at`/`index_of`/`ids` ordering,
+fresh-and-isolated `get_definition` per call including cross-id
+independence, every entry structurally valid and solver-confirmed solvable
+with a replayed zero-mistake witness, no difficulty-labeled title wording,
+`PuzzleSession` default/set/advance/has-next behavior including the
+last-entry no-op and the invalid-id fallback), run via the same
+`run_puzzle_regressions.py` launcher in the same bare isolated temp project
+as tests/puzzle_regression.gd (PuzzleCatalog depends only on
+PuzzleDefinition); requires `PUZZLE_CATALOG_FAILURES=0`.
+
 ## Presentation Layer
 
 `ArrowView` (scenes/puzzle/arrow_view.gd) renders one continuous ink arrow
@@ -234,8 +281,14 @@ once each departing view fully clears the grid edge (see Feedback
 precedence and departures below for the `DepartureClip`/`_departing_views`
 mechanics).
 
-`ArrowPuzzle` (scenes/puzzle/arrow_puzzle.gd) owns the `PuzzleState`. On
-`cell_clicked`, it resolves the owning head via `PuzzleState.get_arrow_head`
+`ArrowPuzzle` (scenes/puzzle/arrow_puzzle.gd) owns the `PuzzleState`.
+`_start_new_attempt()` resolves its definition via
+`PuzzleCatalog.get_definition(PuzzleSession.get_current_id())` — never
+`PuzzleDefinition.create_fixed()` directly — and sets a `%PuzzleLabel` HUD
+entry (a single line no taller than the existing `RemainingLabel`/
+`MistakesLabel` row) from the same resolved id/title pair used to build the
+definition, so the displayed identity always matches what actually loaded.
+On `cell_clicked`, it resolves the owning head via `PuzzleState.get_arrow_head`
 first — so any cell of a multi-cell shape selects the same owner — then
 applies state before starting any visual effect, and updates the HUD
 (`RemainingLabel`, `MistakesLabel`) immediately after every accepted
@@ -257,10 +310,39 @@ background input while shown.
 rather than resetting counters in place: reloading the scene reconstructs a
 fresh `PuzzleState`, fresh views and fresh tweens from `_ready()`, which
 trivially guarantees no stale callback or pending tween from the finished
-attempt can affect the next one. Cancelling Restart leaves the current
+attempt can affect the next one. Because `PuzzleSession`'s `_current_id` is
+a process-lifetime static var, neither reload resets it — the freshly
+reconstructed `_start_new_attempt()` reads the same `PuzzleSession.get_current_id()`
+and naturally reproduces the currently selected puzzle, never silently
+falling back to catalog position 0. This requires **zero new code** for
+either entry point: `arrow_puzzle.gd::_on_results_replay_requested()` and
+the addon `PauseMenu`'s `_on_confirm_restart_confirmed()` both call the
+identical `SceneLoader.reload_current_scene()`, so the guarantee is
+structural, not duplicated logic. Cancelling Restart leaves the current
 attempt unchanged (unmodified addon behavior). Options/back and Main Menu
 reuse the existing `scenes/overlaid_menus/pause_menu.tscn` and background
 music player unmodified.
+
+A new `_on_results_next_puzzle_requested()` handler calls
+`PuzzleSession.advance_to_next()` then the same
+`SceneLoader.reload_current_scene()` — one extra call before the identical
+reload Replay already relies on, so Next Puzzle inherits the same
+fresh-attempt guarantee (no carried-over mistakes, score, active state, or
+departure state) with no separate reset logic. `puzzle_results.gd` gains a
+`next_puzzle_requested` signal and a `%NextPuzzleButton`, shown/enabled only
+when the controller passes `has_next = true` (from
+`PuzzleSession.has_next()`) into `show_results()`; on the last catalog
+puzzle it is hidden, while Replay, Level Select (via Main Menu) and Main
+Menu remain available. `show_results()` also takes the completed puzzle's
+id, rendering a `%PuzzleLabel` identity line from the same
+`PuzzleCatalog`/`PuzzleSession` pair the controller used for that attempt,
+alongside the unchanged total-arrows/mistakes/score/accuracy metrics.
+Switching puzzles via Replay, pause-menu Restart, Next Puzzle, or Level
+Select all go through a full scene reconstruction, so any prior attempt's
+departing views/callbacks are disposed exactly as `setup()` replacement
+already guarantees within one attempt (see Feedback precedence and
+departures below) — no stale completion signal from a finished attempt can
+reach the next one.
 
 Source of truth: tests/puzzle_layout_check.gd (a multi-cell shape's view
 bounding box and tail-cell click resolution against a standalone
@@ -276,12 +358,26 @@ in-flight departure so no stale completion reaches a replaced attempt; a
 post-completion selection being ignored; a freshly instantiated scene
 starting clean; 20 rapid repeated selections on a blocked tail cell counting
 exactly once each without disturbing the attempt; the blocked-cue duration
-cap), run via the same `run_puzzle_regressions.py` launcher against
-the real project with APPDATA/XDG_DATA_HOME redirected so no player save
-data is touched; requires `PUZZLE_LAYOUT_FAILURES=0`. Interactive desktop
-smoke testing (resize, rapid clicks, pause mid-feedback, restart) remains a
-separate manual verification step; the headless checks above are not a
-replacement for it.
+cap; and, for every one of the eight `PuzzleCatalog` entries in turn: the
+board's active view count matches the definition's arrow count, the HUD
+puzzle label matches the catalog title, and the same solver-derived
+zero-mistake witness clears through the real scene with unchanged
+scoring/mistakes/accuracy — proving engine-generality end-to-end, not only
+via the pure `puzzle_catalog_check.gd` solver gate), run via the same
+`run_puzzle_regressions.py` launcher against the real project with
+APPDATA/XDG_DATA_HOME redirected so no player save data is touched;
+requires `PUZZLE_LAYOUT_FAILURES=0`. A puzzle-specific check resolves its
+own clear order from `PuzzleSolver.analyze()` against whichever definition
+is actually loaded rather than a hardcoded witness, so it never assumes one
+specific board's geometry. A further check drives the real
+`SceneLoader.reload_current_scene()`/`get_tree().change_scene_to_packed()`
+path directly (not just repeated `instantiate()` calls) to prove a non-first
+selected puzzle survives that exact reload, that Next Puzzle advances to
+the following catalog entry with fresh state, and that the last catalog
+puzzle's results omit `%NextPuzzleButton`. Interactive desktop smoke testing
+(resize, rapid clicks, pause mid-feedback, restart) remains a separate
+manual verification step; the headless checks above are not a replacement
+for it.
 
 ## Menu Integration and the No-Reset Guarantee
 
@@ -327,8 +423,14 @@ window. Overlays therefore suppress underlying hover; resume and resize
 resample even a stationary pointer. Source of truth:
 tests/puzzle_presentation_check.gd (GUI motion/press/release, ownership,
 cache invalidation, counters, removal) and scenes/puzzle/puzzle_board.gd.
-Code-only for OS pointer eligibility: actual focus/window behavior requires
-rendered desktop input and cannot be established by direct headless events.
+Its real-scene hover/input check explicitly loads
+`PuzzleDefinition.create_fixed()` into the instantiated puzzle's board and
+state (rather than whichever catalog entry `PuzzleSession` defaults to), so
+its assertions about specific cell positions/relationships stay independent
+of the authored catalog content; tests/puzzle_layout_check.gd is the
+catalog-generality coverage instead. Code-only for OS pointer eligibility:
+actual focus/window behavior requires rendered desktop input and cannot be
+established by direct headless events.
 
 ## Feedback precedence and departures
 

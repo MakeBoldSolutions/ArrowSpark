@@ -15,6 +15,7 @@ appliesTo:
   - tests/run_regressions.py
   - scenes/menus/main_menu/main_menu.tscn
   - scenes/menus/main_menu/main_menu_with_animations.gd
+  - scenes/menus/main_menu/puzzle_select_menu.gd
 ---
 
 # Save Progression and Input Settings
@@ -76,20 +77,47 @@ removes the stored input configuration.
 
 `scenes/menus/main_menu/main_menu_with_animations.gd`'s Play/New Game path
 (`main_menu.tscn` and `main_menu_with_animations.tscn`, both routed to
-`res://scenes/puzzle/arrow_puzzle.tscn`) no longer overrides `new_game()` or
-`load_game_scene()`, so it never calls `GlobalState.reset()` or
-`GameState.start_game()`. The puzzle attempt itself
+`res://scenes/puzzle/arrow_puzzle.tscn`) overrides `new_game()` only to set
+`PuzzleSession.set_current_id(PuzzleCatalog.id_at(0))` before delegating to
+the base `new_game()` (`load_game_scene()`); it still never calls
+`GlobalState.reset()` or `GameState.start_game()`. The puzzle attempt itself
 (`scripts/puzzle/puzzle_state.gd`) is in-memory only and is never read from
 or written to `GlobalState`/`GameState`; see
-.knowledge/architecture/arrow-puzzle.md for its rules. Existing saved level
-progress, settings and recovery behavior described above are therefore
-unaffected by starting, playing, or replaying the puzzle. Continue and
-Level Select stay hidden on the main menu (their scenes/scripts remain in
-source, unreachable from this menu); the `NewGameButton` tooltip states that
-existing level progress is preserved. Puzzle entry also never touches the
-input-remap system: a keyboard/gamepad remap seeded before `new_game()`/
+.knowledge/architecture/arrow-puzzle.md for its rules, and for
+`PuzzleCatalog`/`PuzzleSession` themselves. Existing saved level progress,
+settings and recovery behavior described above are therefore unaffected by
+starting, playing, replaying, or selecting the puzzle. Continue stays
+hidden on the main menu (its scene/script remains in source, unreachable
+from this menu); the `NewGameButton` tooltip states that existing level
+progress is preserved. Puzzle entry also never touches the input-remap
+system: a keyboard/gamepad remap seeded before `new_game()`/
 `load_game_scene()` is unaffected by either call. Source of truth:
 tests/save_input_regression.gd's `_test_no_reset_on_puzzle_entry()`.
+
+### Level Select
+
+Level Select is now shown (`LevelSelectButton.visible = true`,
+`level_select_packed_scene` pointed at the new
+`scenes/menus/main_menu/puzzle_select_menu.tscn`/`puzzle_select_menu.gd`),
+replacing the addon example's `GameState`-backed level list script. It is
+built directly against `PuzzleCatalog`/`PuzzleSession`, not the addon's
+`LevelListManager`/`GameState` level infrastructure: `_setup_level_select()`
+connects the new scene's `puzzle_selected(id)` signal to a handler that
+calls `PuzzleSession.set_current_id(id)` then the existing
+`load_game_scene()` — never `GameState.set_current_level()` or any other
+template persistence call. Selecting a puzzle therefore carries the same
+no-reset, no-remap-disturbance guarantee as New Game. `puzzle_select_menu.gd`
+explicitly grabs focus onto its first entry when it becomes visible, since
+the inherited `_open_sub_menu()` mechanism does not do this itself (see
+.knowledge/architecture/arrow-puzzle.md's Puzzle Catalog and
+Session-Scoped Selection section, and the sub-menu open/close mechanics
+below). Source of truth: tests/puzzle_layout_check.gd (listing/ordering,
+initial focus placement, non-first-selection loading the correct puzzle)
+and tests/save_input_regression.gd's extended
+`_test_no_reset_on_puzzle_entry()` (selection sets `PuzzleSession`, opens via
+`SceneLoader.load_scene`, disturbs no save/settings/remap state, and
+`new_game()` still resets to catalog position 0 regardless of a prior
+Level Select choice earlier in the same session).
 
 ## Validation and Limits
 
