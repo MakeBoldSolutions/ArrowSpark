@@ -61,9 +61,11 @@ suites' assumptions about a single fixed board are broken — they continue to e
 Check: `PuzzleDefinition` gained no fields; `PuzzleCatalog`/`PuzzleSession` never reference
 `GlobalState`/`GameState`; Replay and pause-menu Restart correctness for a non-first puzzle relies
 on the static-var-survives-reload mechanism (verify this is actually tested, not just asserted);
-Level Select and Next Puzzle are keyboard/gamepad navigable via the pre-existing
-`_open_sub_menu`/focus mechanism; the automated catalog gate fails loudly on any malformed/
-unsolvable authored puzzle.
+Level Select grabs focus onto its first entry explicitly on open (the pre-existing
+`_open_sub_menu` mechanism alone does not establish focus — verify the automated focus-placement
+assertion, not just the manual pass); Next Puzzle remains reachable from Replay via normal
+directional navigation; the automated catalog gate fails loudly on any malformed/unsolvable
+authored puzzle.
 
 ## Summary
 
@@ -103,7 +105,7 @@ Pre-research and post-design: PASS, no waivers.
 |---|---|
 | I Simple maintainable code | `PuzzleCatalog`/`PuzzleSession` are small, explicit, static-only classes matching existing codebase precedent (`GameVisualStyle`'s static-var cache, `create_fixed()`'s literal-construction style); no new abstraction beyond what FR-001–FR-007 require |
 | II Project-level customization | New Level Select sub-menu is a project script/scene under `scenes/menus/main_menu/`; no addon edits; the addon's own example Level Select script is explicitly not reused |
-| III Accessible controls | Level Select and Next Puzzle reuse the base `MainMenu`'s existing keyboard/gamepad-navigable `_open_sub_menu`/focus mechanism and the Results panel's existing button-row focus convention (clarified requirement); manual keyboard/gamepad verification required in quickstart.md |
+| III Accessible controls | Level Select and Next Puzzle reuse the base `MainMenu`'s `_open_sub_menu` show/hide mechanism, but `puzzle_select_menu.gd` explicitly grabs focus onto its first entry on becoming visible (the inherited mechanism does not do this itself — see research.md); Next Puzzle follows the Results panel's existing button-row focus convention (clarified requirement); automated focus-placement assertion plus manual keyboard/gamepad verification required in quickstart.md |
 | IV Responsive gameplay | No blocking work added; catalog/session lookups are O(1)/O(n over 8); Next Puzzle and Restart reuse the existing scene-reload path, introducing no new synchronous heavy work |
 | V Practical verification | New automated catalog gate (`PUZZLE_CATALOG_FAILURES=0`), extended scene tests, existing launchers, Godot import validation, desktop smoke across all 8 puzzles including keyboard/gamepad checks |
 | VI Save/settings preservation | `PuzzleCatalog`/`PuzzleSession` never touch `GlobalState`/`GameState`/`user://global_state.tres`; existing no-reset-on-entry guarantee (`_test_no_reset_on_puzzle_entry`) remains applicable and is extended to cover Level Select/Next Puzzle |

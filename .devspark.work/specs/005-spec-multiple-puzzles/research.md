@@ -106,12 +106,18 @@ per direct inspection of the `.tscn`). Set the button `visible = true`, point
 `GameStateExample`-backed) to a new `puzzle_selected(id: String)` signal that sets
 `PuzzleSession` before loading the game scene.
 
-**Rationale**: The button, sub-menu open/close mechanics (`_open_sub_menu`/`_close_sub_menu`,
-keyboard/gamepad-navigable per the base `MainMenu`'s existing `_input` focus handling), and
-container are already present and already keyboard/gamepad accessible via the same mechanism
-every other sub-menu (Options, Credits) uses — reusing them satisfies the Clarifications
-session's keyboard/gamepad requirement for free. Only the *content* (an `ItemList`/button list
-bound to `PuzzleCatalog` instead of `GameStateExample`'s scene-file list) is new.
+**Rationale**: The button, sub-menu open/close mechanics (`_open_sub_menu`/`_close_sub_menu`), and
+container are already present, saving the mounting/wiring work every other sub-menu (Options,
+Credits) also relies on. However, `/devspark.critic`'s review (critic-001) found that
+`_open_sub_menu`/`_close_sub_menu` and the base `MainMenu`'s `_input` only recover focus onto the
+*main* button row on a later `ui_accept` press with no current focus owner — they never grab
+focus into a newly opened sub-menu itself (Options/Credits share this same latent gap; it just
+has no MUST keyboard/gamepad requirement pinned to it there). This spec's Clarifications session
+keyboard/gamepad requirement is therefore NOT satisfied "for free" by reuse alone:
+`puzzle_select_menu.gd` MUST explicitly `grab_focus()` its first entry when it becomes visible
+(project-level code in the new script only; the addon and Options/Credits are not touched). Only
+the *content* (an `ItemList`/button list bound to `PuzzleCatalog` instead of `GameStateExample`'s
+scene-file list) plus this explicit initial-focus grab are new.
 
 **Alternatives considered**: Building an entirely new sub-menu mount point: rejected — duplicates
 existing, already-accessible menu infrastructure for no benefit.

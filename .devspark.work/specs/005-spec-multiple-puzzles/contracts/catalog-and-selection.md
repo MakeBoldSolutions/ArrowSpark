@@ -82,8 +82,15 @@ only by a fresh engine process (spec FR-007).
   `main_menu_with_animations.tscn`) becomes `visible = true`; `level_select_packed_scene` (currently
   `null`) is set to the new `puzzle_select_menu.tscn`.
 - The sub-menu is opened/closed via the base `MainMenu`'s existing `_open_sub_menu`/
-  `_close_sub_menu` mechanism, which already provides keyboard/gamepad focus handling identical
-  to Options/Credits — no new input-handling code is introduced for this.
+  `_close_sub_menu` mechanism (show/hide, container swap) — reused as-is, no addon changes.
+  That mechanism does NOT itself grab focus into the sub-menu it opens (verified by
+  `/devspark.critic`, critic-001; the same gap exists in Options/Credits, which carry no
+  keyboard/gamepad MUST requirement). `puzzle_select_menu.gd` MUST explicitly `grab_focus()` its
+  first entry's control when the menu becomes visible (e.g. on `NOTIFICATION_VISIBILITY_CHANGED`
+  or an equivalent visibility hook), so Level Select opens with focus already on the first
+  selectable puzzle entry — mirroring `puzzle_results.gd`'s existing `_replay_button.grab_focus()`
+  convention. This is the one piece of new input-handling code introduced by this spec, scoped
+  entirely to the new script.
 - `main_menu_with_animations.gd::new_game()` (new override) MUST call
   `PuzzleSession.set_current_id(PuzzleCatalog.id_at(0))` before delegating to the base `new_game()`
   implementation, so New Game always starts catalog position 0 regardless of any prior Level
