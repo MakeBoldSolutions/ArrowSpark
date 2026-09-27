@@ -16,9 +16,14 @@ var _pending_departures: int = 0
 var _awaiting_completion: bool = false
 
 func _ready() -> void:
+	$Background.color = GameVisualStyle.GAME_BACKGROUND
+	$Layout.theme = GameVisualStyle.get_theme()
+	_remaining_label.theme_type_variation = &"NumericText"
+	_mistakes_label.theme_type_variation = &"NumericText"
 	_results.replay_requested.connect(_on_results_replay_requested)
 	_results.main_menu_requested.connect(_on_results_main_menu_requested)
 	_board.cell_clicked.connect(_on_cell_clicked)
+	_board.hover_cell_changed.connect(_on_hover_cell_changed)
 	_board.departure_finished.connect(_on_departure_finished)
 	_start_new_attempt()
 
@@ -35,6 +40,9 @@ func _start_new_attempt() -> void:
 func _update_hud() -> void:
 	_remaining_label.text = "Remaining: %d" % _state.remaining()
 	_mistakes_label.text = "Mistakes: %d" % _state.mistakes
+
+func _on_hover_cell_changed(cell: Vector2i) -> void:
+	_board.set_hovered_head(_state.get_arrow_head(cell) if not _results.visible else null)
 
 ## Any cell of a multi-cell shape (head or tail) resolves to the same
 ## canonical head before mutation, so the board's per-arrow views (keyed by
@@ -63,6 +71,7 @@ func _on_departure_finished() -> void:
 		_show_results()
 
 func _show_results() -> void:
+	_board.clear_hover()
 	_pause_menu_controller.set_process_unhandled_input(false)
 	_results.show_results(_state.get_results())
 

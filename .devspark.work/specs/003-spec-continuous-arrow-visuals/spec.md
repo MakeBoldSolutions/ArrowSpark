@@ -15,14 +15,16 @@ participants:
   reviewer: human
   critic: ai
   scribe: ai
-status: Draft
+status: In Progress
 ---
 
 # Feature Specification: Continuous Arrow Visuals and Game Visual Foundation
 
 **Feature Branch**: `003-spec-continuous-arrow-visuals`
 **Created**: 2026-09-26
-**Status**: Draft
+**Status**: In Progress
+
+Implementation story tasks are complete; full hands-on desktop and physical keyboard/gamepad acceptance remain outstanding. See gates/verification.md for automated and rendered evidence.
 **Input**: Replace disconnected arrow tiles with continuous arrows, add whole-arrow hover and normalized feedback, and establish the supplied Make Bold light visual system while preserving established puzzle behavior.
 
 ## Product Owner TLDR
@@ -101,7 +103,7 @@ This draft and checklist are temporary planning artifacts under `.devspark.work/
 
 ## User Scenarios & Testing
 
-### User Story 1 - Read a Continuous Arrow (Priority: P1)
+### User Story 1 - Read a Continuous Arrow (Priority: P1) ✅ Complete
 
 As a player, I can identify each arrow’s complete body and direction without interpreting disconnected blocks.
 
@@ -117,7 +119,7 @@ As a player, I can identify each arrow’s complete body and direction without i
 4. **Given** a single-cell arrow in any cardinal direction, **When** displayed, **Then** a compact shaft and recognizable head remain inside that cell without new logical occupancy.
 5. **Given** neighboring resting arrows, **When** inspected at either size, **Then** visible negative space separates their silhouettes, normal arrows share ink color, and no filled cell tiles or normal grid lines appear.
 
-### User Story 2 - Identify and Select the Whole Arrow (Priority: P1)
+### User Story 2 - Identify and Select the Whole Arrow (Priority: P1) ✅ Complete
 
 As a player, I can hover or click any occupied cell and interact with its complete arrow without needing to hit its narrow visible stroke.
 
@@ -133,7 +135,7 @@ As a player, I can hover or click any occupied cell and interact with its comple
 4. **Given** blank visible space within an occupied cell, **When** clicked, **Then** selection resolves exactly as clicking that arrow’s head or shaft, once per discrete press.
 5. **Given** a departing arrow remains visible under the pointer, **When** hovered or clicked, **Then** its removed cells produce no hover, selection, taps, or mistakes.
 
-### User Story 3 - Receive Clear Feedback and Clean Departures (Priority: P1)
+### User Story 3 - Receive Clear Feedback and Clean Departures (Priority: P1) ✅ Complete
 
 As a player, I receive brief invalid-move feedback and can immediately continue, while successful arrows depart as complete objects from a consistent appearance.
 
@@ -150,7 +152,7 @@ As a player, I receive brief invalid-move feedback and can immediately continue,
 5. **Given** a departing arrow, **When** a stale blocked/hover request arrives, **Then** it cannot restart feedback, recolor, or rescale that departure.
 6. **Given** concurrent departures, **When** the final logical removal occurs, **Then** results wait for every pending departure exactly as before.
 
-### User Story 4 - Experience a Coherent Light Visual System (Priority: P2)
+### User Story 4 - Experience a Coherent Light Visual System (Priority: P2) ✅ Complete
 
 As a player, I see consistent, readable styling throughout gameplay and completion without learning different navigation or result behavior.
 
@@ -166,7 +168,7 @@ As a player, I see consistent, readable styling throughout gameplay and completi
 4. **Given** existing settings, progress, and remapped controls, **When** entering, pausing, resuming, restarting, replaying, or returning to menu, **Then** unrelated saved values and navigation/remapping behavior remain unchanged.
 5. **Given** Restart during feedback, **When** cancelled, **Then** the attempt remains intact; **When** confirmed, **Then** the identical board has fresh counters and no residual effects.
 
-### User Story 5 - Reuse the Game Visual Language (Priority: P2)
+### User Story 5 - Reuse the Game Visual Language (Priority: P2) ✅ Complete
 
 As a future contributor, I can find authoritative visual decisions and reuse semantic styling rather than inventing local colors, fonts, spacing, or timings.
 

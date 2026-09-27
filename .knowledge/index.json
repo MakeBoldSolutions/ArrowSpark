@@ -1,7 +1,7 @@
 {
   "generated": {
     "by": "build-knowledge-index",
-    "at": "2026-09-26T21:44:55Z"
+    "at": "2026-09-27T00:16:23Z"
   },
   "roots": [
     {
@@ -49,7 +49,21 @@
         "tests/puzzle_regression.gd",
         "tests/run_puzzle_regressions.py",
         "tests/puzzle_layout_check.gd",
+        "tests/puzzle_presentation_check.gd",
         "tests/scene_loader_stub.gd"
+      ]
+    },
+    {
+      "id": "game-visual-system",
+      "type": "architecture",
+      "path": ".knowledge/architecture/game-visual-system.md",
+      "title": "Game Visual System",
+      "appliesTo": [
+        "scripts/presentation/game_visual_style.gd",
+        "resources/fonts/**",
+        "assets/fonts/**",
+        "scenes/puzzle/**",
+        "tests/puzzle_presentation_check.gd"
       ]
     },
     {

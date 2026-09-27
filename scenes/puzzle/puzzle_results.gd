@@ -15,6 +15,17 @@ signal main_menu_requested
 func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 
+func _ready() -> void:
+	theme = GameVisualStyle.get_theme()
+	$Background.color = GameVisualStyle.GAME_BACKGROUND
+	for label in [_total_label, _mistakes_label, _accuracy_label]:
+		label.theme_type_variation = &"NumericText"
+	_score_label.theme_type_variation = &"SuccessText"
+	_replay_button.theme_type_variation = &"PrimaryButton"
+	%MainMenuButton.theme_type_variation = &"SecondaryButton"
+	$CenterContainer/VBoxContainer.add_theme_constant_override("separation", GameVisualStyle.SPACING[2])
+	$CenterContainer/VBoxContainer/ButtonRow.add_theme_constant_override("separation", GameVisualStyle.SPACING[2])
+
 func show_results(results: Dictionary) -> void:
 	_total_label.text = "Total Arrows: %d" % results["total_arrows"]
 	_mistakes_label.text = "Mistakes: %d" % results["mistakes"]

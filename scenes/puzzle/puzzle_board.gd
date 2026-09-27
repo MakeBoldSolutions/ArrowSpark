@@ -6,16 +6,62 @@ extends Control
 
 signal cell_clicked(cell: Vector2i)
 signal departure_finished
+signal hover_cell_changed(cell: Vector2i)
 
 var definition: PuzzleDefinition
 var _views: Dictionary # Vector2i (head) -> ArrowView
 var _cell_size: Vector2 = Vector2.ZERO
 var _origin: Vector2 = Vector2.ZERO
+var _hovered_head: Variant = null
+var _last_hover_cell := Vector2i(-1, -1)
 
 func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 
+func _ready() -> void:
+	mouse_exited.connect(clear_hover)
+	get_window().mouse_exited.connect(clear_hover)
+	get_window().focus_exited.connect(clear_hover)
+
+func _process(_delta: float) -> void:
+	# GUI hover can be cached until the next mouse motion. Refresh it so a
+	# newly shown overlay also clears a stationary pointer's old owner.
+	get_viewport().update_mouse_cursor_state()
+	if not _pointer_eligible():
+		clear_hover()
+		return
+	_sample_hover(get_local_mouse_position())
+
+func _pointer_eligible() -> bool:
+	return is_visible_in_tree() and not get_tree().paused \
+		and get_window().has_focus() and get_viewport().gui_get_hovered_control() == self
+
+func _sample_hover(local_position: Vector2) -> void:
+	var cell := _cell_from_local(local_position)
+	if definition == null or not Rect2(Vector2.ZERO, size).has_point(local_position) \
+			or cell.x < 0 or cell.y < 0 or cell.x >= definition.width or cell.y >= definition.height:
+		cell = Vector2i(-1, -1)
+	if cell != _last_hover_cell:
+		_last_hover_cell = cell
+		hover_cell_changed.emit(cell)
+
+func clear_hover() -> void:
+	_last_hover_cell = Vector2i(-1, -1)
+	set_hovered_head(null)
+
+func set_hovered_head(head: Variant) -> void:
+	if head != null and not _views.has(head):
+		head = null
+	if head == _hovered_head:
+		return
+	if _hovered_head != null and _views.has(_hovered_head):
+		_views[_hovered_head].set_hovered(false)
+	_hovered_head = head
+	if head != null:
+		_views[head].set_hovered(true)
+
 func setup(new_definition: PuzzleDefinition) -> void:
+	clear_hover()
 	for view in _views.values():
 		view.queue_free()
 	_views.clear()
@@ -62,6 +108,10 @@ func _layout_views() -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_RESIZED:
 		_layout_views()
+		_last_hover_cell = Vector2i(-1, -1)
+	elif what == NOTIFICATION_PAUSED or what == NOTIFICATION_APPLICATION_FOCUS_OUT \
+			or what == NOTIFICATION_WM_MOUSE_EXIT or what == NOTIFICATION_VISIBILITY_CHANGED:
+		clear_hover()
 
 func _cell_from_local(local_position: Vector2) -> Vector2i:
 	if _cell_size.x <= 0.0 or _cell_size.y <= 0.0:
@@ -74,6 +124,8 @@ func _cell_from_local(local_position: Vector2) -> Vector2i:
 ## multi-cell shape (head or tail) is emitted as-is; the controller resolves
 ## the owning arrow before deciding the outcome.
 func _gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseMotion:
+		_sample_hover(event.position)
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT \
 			and event.pressed and not event.is_echo():
 		cell_clicked.emit(_cell_from_local(event.position))
@@ -82,12 +134,14 @@ func play_removed(head: Vector2i) -> void:
 	var view: ArrowView = _views.get(head)
 	if view == null:
 		return
+	if head == _hovered_head:
+		clear_hover()
 	_views.erase(head)
-	view.play_exit_animation(size.length())
 	view.exit_finished.connect(func():
 		departure_finished.emit()
 		view.queue_free()
-	)
+	, CONNECT_ONE_SHOT)
+	view.play_exit_animation(size.length())
 
 func play_blocked(head: Vector2i) -> void:
 	var view: ArrowView = _views.get(head)

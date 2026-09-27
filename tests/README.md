@@ -20,7 +20,7 @@ replace those interactive checks.
 Run `python tests/run_puzzle_regressions.py` (Python 3 and Godot on PATH), or
 use `python tests/run_puzzle_regressions.py --godot C:/path/to/godot.exe`.
 
-This runs two independent headless checks:
+This runs three independent headless checks:
 
 1. Pure rule regressions (`tests/puzzle_regression.gd`) against an isolated,
    unique temporary project containing only the puzzle's core scripts
@@ -45,6 +45,25 @@ This runs two independent headless checks:
    clicks and multi-departure draining, and that the blocked-cue duration
    constant does not exceed its coded cap. Success requires exit code zero and
    `PUZZLE_LAYOUT_FAILURES=0`.
+3. Real-scene presentation checks (`tests/puzzle_presentation_check.gd`):
+   ordered continuous geometry, cardinal heads, defensive copying, whole-cell
+   GUI events, owner hover, interrupted red pulses, immediate normalized
+   departures, fonts, tabular numerics and scoped themes. Text/control bounds
+   and visible focus styles are checked at both supported sizes. Requires
+   exit zero and `PUZZLE_PRESENTATION_FAILURES=0`.
+
+The launcher imports the real project before both scene checks, sharing one
+temporary APPDATA/XDG_DATA_HOME root across import and scene processes. The
+pure-rule copy list remains independent of scenes and fonts. Each real-project
+process has a 90-second timeout; missing markers, script errors and nonzero
+exit codes fail the run. No test reads or writes personal player data.
+
+Geometry assertions do not establish rendered seam/antialias quality. Inspect
+straight, bent and single-cell silhouettes, negative space, typography, hover,
+red feedback and results on a desktop display. Synthetic events do not replace
+physical keyboard/gamepad navigation, remapping, pause/Restart/Replay and menu
+roundtrips. Record the actual Godot version; testing on a newer engine alone
+does not establish compatibility with the declared 4.4 baseline.
 
 Before releasing, manually perform the full desktop smoke matrix (window
 resizing, rapid head/tail clicks, 100 mistakes, all-departures completion,

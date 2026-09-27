@@ -180,3 +180,10 @@ Specification checklist is complete. Analyze and critic remain required next-sta
 ## Agent Context
 
 Ran `.devspark/scripts/powershell/update-agent-context.ps1 -AgentType codex` successfully (no override present). It added duplicated stack descriptions tagged with the feature identifier to AGENTS.md. Removed only those generated lines to honor the no-planning-backlinks rule and retain current, rather than future, guidance. Existing manual content and active technologies are preserved; AGENTS.md has no net change. No new production stack is introduced.
+
+## Implementation Notes
+
+- 2026-09-26, T003/T028: use Godot --import for real-project preparation rather than --editor --quit; 4.4's immediate quit can abort a clean font import. Clean-copy 4.4 launcher passes with import waiting. Mixed 4.7/4.4 editor caches produced unrelated opening-scene SceneLoader errors; compatibility proof uses a clean copy.
+- 2026-09-26, T011/T029: rendered stationary-overlay check exposed cached gui_get_hovered_control. Refresh Viewport.update_mouse_cursor_state before each eligible-pointer decision, preserving read-only owner routing. Added durable overlay regression and reran rendered checks.
+- 2026-09-26, T019: static Be Vietnam Pro ExtraBold reports a Godot heuristic weight of 700 but its OS/2 table is 800. Validate real binary weight and family, without changing the selected asset.
+- 2026-09-26, T031: PowerShell planning-reference checker falsely matches IDs in unchanged vendor PNG binary bytes. Its stock Bash parity implementation ignores binaries and passes; no framework or vendor edits were made.

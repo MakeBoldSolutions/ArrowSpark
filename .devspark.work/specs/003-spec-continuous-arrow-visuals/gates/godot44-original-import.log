@@ -1,0 +1,24 @@
+Godot Engine v4.4.stable.official.4c311cbee - https://godotengine.org
+
+ERROR: Cannot open file 'res://default_env.tres'.
+   at: load (scene/resources/resource_format_text.cpp:1388)
+ERROR: Failed loading resource: res://default_env.tres. Make sure resources have been imported by opening the project in the editor at least once.
+   at: _load (core/io/resource_loader.cpp:335)
+ERROR: Do not use progress dialog (task) while flushing the message queue or using call_deferred()!
+   at: add_task (editor/progress_dialog.cpp:183)
+ERROR: Condition "!tasks.has(p_task)" is true. Returning: canceled
+   at: task_step (editor/progress_dialog.cpp:217)
+ERROR: Condition "!tasks.has(p_task)" is true. Returning: canceled
+   at: task_step (editor/progress_dialog.cpp:217)
+ERROR: Condition "!tasks.has(p_task)" is true. Returning: canceled
+   at: task_step (editor/progress_dialog.cpp:217)
+ERROR: Condition "!tasks.has(p_task)" is true. Returning: canceled
+   at: task_step (editor/progress_dialog.cpp:217)
+ERROR: Condition "!tasks.has(p_task)" is true. Returning: canceled
+   at: task_step (editor/progress_dialog.cpp:217)
+ERROR: Condition "!tasks.has(p_task)" is true. Returning: canceled
+   at: task_step (editor/progress_dialog.cpp:217)
+ERROR: Condition "!tasks.has(p_task)" is true.
+   at: end_task (editor/progress_dialog.cpp:240)
+WARNING: Scan thread aborted...
+   at: _notification (editor/editor_file_system.cpp:1704)

@@ -20,6 +20,7 @@ appliesTo:
   - tests/puzzle_regression.gd
   - tests/run_puzzle_regressions.py
   - tests/puzzle_layout_check.gd
+  - tests/puzzle_presentation_check.gd
   - tests/scene_loader_stub.gd
 ---
 
@@ -196,17 +197,19 @@ and `PUZZLE_FAILURES=0`.
 
 ## Presentation Layer
 
-`ArrowView` (scenes/puzzle/arrow_view.gd) draws a whole arrow shape — every
-occupied cell's background tile plus the head's own directional triangle —
-as local per-cell offsets scaled by a separately-set cell extent, so its own
-bounding rectangle can span more than one cell without duplicating any
-shape-geometry logic from `PuzzleDefinition`. It owns no rule state; its
-`mouse_filter` is `MOUSE_FILTER_IGNORE` so a departing view can never
-intercept a click meant for another cell. `play_blocked_feedback()` is a
-non-color-only scale pulse capped at `PuzzleFeedback.BLOCKED_CUE_DURATION_SECONDS`
-and never disables further input. `play_exit_animation()` translates the
-whole shape as one unit beyond the board edge along the head's direction,
-with one `exit_finished` signal regardless of how many cells it spans.
+`ArrowView` (scenes/puzzle/arrow_view.gd) renders one continuous ink arrow
+with a passive Line2D body and Polygon2D head. Copied ordered cell offsets
+become consecutive tail-to-head center points; adjacency never adds a
+connection. Round stroke joins and a round tail cap retain orthogonal
+centerlines. Single-cell arrows have an in-cell decorative shaft. Geometry
+rebuilds at the board's cell extent, without scaling the parent for layout.
+No occupied-cell tiles or grid lines are drawn. It holds no rule state and
+retains MOUSE_FILTER_IGNORE. Whole-view feedback and rigid departure use
+the existing PuzzleFeedback durations and one exit_finished signal.
+
+Source of truth: tests/puzzle_presentation_check.gd covers cardinal shapes,
+ordered multi-bend points, head overlap, copied inputs and extent rebuilds.
+See .knowledge/architecture/game-visual-system.md for shared proportions.
 
 `PuzzleBoard` (scenes/puzzle/puzzle_board.gd) creates one `ArrowView` per
 head, keyed by head, sized and positioned to each shape's own bounding box
@@ -289,3 +292,59 @@ isolated test project registers `tests/scene_loader_stub.gd` as the
 `game_state.gd` is copied to `scripts/game_state.gd` in that isolated
 project because `GlobalState.get_state()` loads it by that hardcoded path.
 Requires exit zero and `REGRESSION_FAILURES=0`.
+
+## Whole-arrow hover
+
+PuzzleBoard samples a board-local cell through mouse motion and stationary
+pointer refresh. The controller resolves only PuzzleState.get_arrow_head,
+then returns the active canonical owner to set_hovered_head. Same-owner
+cell changes do not restart the 120ms ease-out color tween. Body and head
+share ember #C6620C while hovered. Logical whole-cell targets, including
+blank space beside the shaft, remain unchanged; hover never selects.
+
+Pause, pointer/window exit, focus loss, hiding, setup and removal clear
+hover and invalidate the sampled cell. Per-frame cursor-target refresh prevents cached GUI hover from surviving a
+new overlay beneath a stationary pointer. Eligibility requires the
+board to be the viewport's actual hovered Control in a focused, unpaused
+window. Overlays therefore suppress underlying hover; resume and resize
+resample even a stationary pointer. Source of truth:
+tests/puzzle_presentation_check.gd (GUI motion/press/release, ownership,
+cache invalidation, counters, removal) and scenes/puzzle/puzzle_board.gd.
+Code-only for OS pointer eligibility: actual focus/window behavior requires
+rendered desktop input and cannot be established by direct headless events.
+
+## Feedback precedence and departures
+
+ArrowView orders presentation as departing > blocked > hover > normal.
+Blocked presses cancel both existing writers, set the entire arrow to
+critical #A8321A, and restart a 1.00 -> 1.10 -> 1.00 pulse over 150ms.
+Hover eligibility can change during red feedback without recoloring it.
+Completion restores unit scale and immediately assigns ember if eligible,
+otherwise ink; there is no extra hover-duration delay. No input lock or
+persistent disabled appearance is introduced.
+
+Departure first marks terminal state, kills color/effect tweens, resets
+scale/modulation/visibility and ink synchronously, then translates the whole
+view for 250ms with quadratic ease-out. Later hover/block/exit requests are
+ignored. Board erases active ownership and connects the one-shot completion
+before starting movement. Active resizing does not touch departing views.
+The controller retains immediate logical removal and the pending-departure
+barrier. Pause suspends effects with the tree; restart/replay reconstruction
+creates fresh state. PuzzleFeedback remains the duration authority, with no
+font or style dependency. GameVisualStyle owns pulse amplitude and hover time.
+
+Source of truth: tests/puzzle_presentation_check.gd checks rising/peak/falling
+interruption, immediate properties, repeated pulses, hover precedence and
+exactly-once exit; tests/puzzle_layout_check.gd checks staggered departures,
+pause, resize, completed-input ignoring and fresh attempts.
+
+## Gameplay theme boundary
+
+GameVisualStyle supplies the light background and local Layout/HUD and
+PuzzleResults themes. Numeric labels use bundled Inter Tight 600 tabular
+figures; the existing score uses success green. Four result fields, Replay,
+Main Menu and focus behavior remain unchanged. No root/global theme reaches
+inherited pause/options screens. Source of truth:
+tests/puzzle_presentation_check.gd checks theme scope, fonts, result text,
+focus styles and content bounds at both supported desktop sizes. Shared
+roles and font/license evidence are in .knowledge/architecture/game-visual-system.md.

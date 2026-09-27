@@ -1,0 +1,98 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+OpenGL API 3.3.0 Core Profile Context 25.10.30.02.250923 - Compatibility - Using Device: ATI Technologies Inc. - AMD Radeon(TM) Graphics
+
+WARNING: res://scenes/menus/main_menu/main_menu_with_animations.tscn:4 - ext_resource, invalid UID: uid://bjv2v4jhmcukd - using text path instead: res://scenes/menus/main_menu/main_menu_with_animations.gd
+   at: load (scene/resources/resource_format_text.cpp:501)
+WARNING: res://scenes/menus/options_menu/master_options_menu_with_tabs.tscn:4 - ext_resource, invalid UID: uid://c7yy2phckplob - using text path instead: res://scenes/menus/options_menu/master_options_menu.gd
+   at: load (scene/resources/resource_format_text.cpp:501)
+WARNING: res://scenes/menus/options_menu/master_options_menu_with_tabs.tscn:6 - ext_resource, invalid UID: uid://b3gt8onndu07 - using text path instead: res://scenes/menus/options_menu/input/input_extras_menu.tscn
+   at: load (scene/resources/resource_format_text.cpp:501)
+WARNING: res://scenes/menus/options_menu/master_options_menu_with_tabs.tscn:7 - ext_resource, invalid UID: uid://bi0n676ih5b1f - using text path instead: res://scenes/menus/options_menu/audio/audio_options_menu.tscn
+   at: load (scene/resources/resource_format_text.cpp:501)
+WARNING: res://scenes/menus/options_menu/video/video_options_menu_with_extras.tscn:4 - ext_resource, invalid UID: uid://dcvhxth13iqi4 - using text path instead: res://scenes/menus/options_menu/video/video_options_menu.gd
+   at: load (scene/resources/resource_format_text.cpp:501)
+WARNING: res://scenes/menus/options_menu/master_options_menu_with_tabs.tscn:9 - ext_resource, invalid UID: uid://d18iylrrc2lbj - using text path instead: res://scenes/menus/options_menu/game/game_options_menu.tscn
+   at: load (scene/resources/resource_format_text.cpp:501)
+ERROR: "_get_property_list()" should return "Array[Dictionary]", not "Array". The old behavior is supported for compatibility and may be removed in the future. This message is printed once and will not be repeated for similar errors.
+   at: get_property_list (modules/gdscript/gdscript.cpp:1780)
+   GDScript backtrace (most recent call first):
+       [0] _setup_options (res://addons/maaacks_game_template/base/scenes/menus/main_menu/main_menu.gd:57)
+       [1] _ready (res://addons/maaacks_game_template/base/scenes/menus/main_menu/main_menu.gd:73)
+       [2] _ready (res://scenes/menus/main_menu/main_menu_with_animations.gd:46)
+PASS: New Game opens puzzle
+PASS: keyboard Escape opens pause during feedback
+PASS: pause retains inherited theme
+PASS: pause clears hover
+PASS: Restart opens confirmation
+PASS: Restart cancellation preserves attempt
+PASS: Options opens within pause
+PASS: resume preserves counters
+PASS: confirmed Restart reconstructs clean puzzle
+PASS: completion focuses Replay
+PASS: keyboard navigates to Main Menu
+PASS: keyboard Replay reconstructs fresh attempt
+WARNING: res://scenes/menus/main_menu/main_menu_with_animations.tscn:4 - ext_resource, invalid UID: uid://bjv2v4jhmcukd - using text path instead: res://scenes/menus/main_menu/main_menu_with_animations.gd
+   at: load (scene/resources/resource_format_text.cpp:501)
+WARNING: res://scenes/menus/options_menu/master_options_menu_with_tabs.tscn:4 - ext_resource, invalid UID: uid://c7yy2phckplob - using text path instead: res://scenes/menus/options_menu/master_options_menu.gd
+   at: load (scene/resources/resource_format_text.cpp:501)
+WARNING: res://scenes/menus/options_menu/master_options_menu_with_tabs.tscn:6 - ext_resource, invalid UID: uid://b3gt8onndu07 - using text path instead: res://scenes/menus/options_menu/input/input_extras_menu.tscn
+   at: load (scene/resources/resource_format_text.cpp:501)
+WARNING: res://scenes/menus/options_menu/master_options_menu_with_tabs.tscn:7 - ext_resource, invalid UID: uid://bi0n676ih5b1f - using text path instead: res://scenes/menus/options_menu/audio/audio_options_menu.tscn
+   at: load (scene/resources/resource_format_text.cpp:501)
+WARNING: res://scenes/menus/options_menu/video/video_options_menu_with_extras.tscn:4 - ext_resource, invalid UID: uid://dcvhxth13iqi4 - using text path instead: res://scenes/menus/options_menu/video/video_options_menu.gd
+   at: load (scene/resources/resource_format_text.cpp:501)
+WARNING: res://scenes/menus/options_menu/master_options_menu_with_tabs.tscn:9 - ext_resource, invalid UID: uid://d18iylrrc2lbj - using text path instead: res://scenes/menus/options_menu/game/game_options_menu.tscn
+   at: load (scene/resources/resource_format_text.cpp:501)
+PASS: results Main Menu returns to menu
+PASS: seeded remap survives roundtrip
+PASS: saved progress bytes unchanged
+SETTINGS_BEFORE=[VideoSettings]
+
+ScreenResolution=Vector2i(960, 540)
+
+[InputSettings]
+
+move_up=[Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":16,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":81,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
+, Object(InputEventJoypadMotion,"resource_local_to_scene":false,"resource_name":"","device":0,"axis":1,"axis_value":-1.0,"script":null)
+]
+
+SETTINGS_AFTER=[VideoSettings]
+
+ScreenResolution=Vector2i(960, 540)
+FullscreenEnabled=false
+V-sync=1
+
+[InputSettings]
+
+move_up=[Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":16,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":81,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
+, Object(InputEventJoypadMotion,"resource_local_to_scene":false,"resource_name":"","device":0,"axis":1,"axis_value":-1.0,"script":null)
+]
+
+[AudioSettings]
+
+Master=1.0
+Music=1.0
+Sfx=1.0
+Mute=false
+
+PASS: saved setting retained: VideoSettings/ScreenResolution
+PASS: saved setting retained: InputSettings/move_up
+NAVIGATION_FAILURES=0 JOYPADS=[]
+ERROR: 5 RID allocations of type 'N5GLES37TextureE' were leaked at exit.
+ERROR: 1 RID allocations of type 'PN18TextServerAdvanced12FontAdvancedE' were leaked at exit.
+WARNING: 9 RIDs of type "CanvasItem" were leaked.
+   at: _free_rids (servers/rendering/renderer_canvas_cull.cpp:2735)
+ERROR: Texture with GL ID of 23: leaked 131072 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:82)
+ERROR: Texture with GL ID of 29: leaked 524288 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:82)
+ERROR: Texture with GL ID of 30: leaked 131072 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:82)
+ERROR: Texture with GL ID of 32: leaked 1364 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:82)
+ERROR: Texture with GL ID of 40: leaked 172 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:82)
+WARNING: 37 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2536)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)

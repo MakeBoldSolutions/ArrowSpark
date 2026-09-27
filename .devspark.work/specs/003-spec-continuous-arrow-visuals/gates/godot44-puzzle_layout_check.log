@@ -1,0 +1,24 @@
+Godot Engine v4.4.stable.official.4c311cbee - https://godotengine.org
+
+PASS: the coded blocked-feedback cue duration constant does not exceed its coded 0.3-second cap
+PASS: a bent tail's view bounding box covers its full 2x3 cell extent at 1280x720
+PASS: a click inside the tail-tip cell resolves to that tail cell's board coordinate
+PASS: the same bounding box relationship holds after a resize to 960x540
+PASS: HUD and board rects do not overlap at (1280, 720)
+PASS: HUD remains visible (nonzero size) at (1280, 720)
+PASS: board remains visible (nonzero size) at (1280, 720)
+PASS: HUD and board rects do not overlap at (960, 540)
+PASS: HUD remains visible (nonzero size) at (960, 540)
+PASS: board remains visible (nonzero size) at (960, 540)
+PASS: completed input does not add taps while departures drain
+PASS: resize preserves captured departing geometry
+PASS: pause preserves pending departures and completion barrier
+PASS: results stay hidden immediately after the last of several queued removals
+PASS: results appear once every queued departure tween has finished
+PASS: each staggered exit decrements barrier exactly once
+PASS: a selection after completion is ignored and results remain shown
+PASS: a freshly instantiated puzzle scene starts with results hidden
+PASS: a freshly instantiated puzzle scene starts with the full remaining count
+PASS: 20 rapid selections on a blocked tail cell, interrupting its own pulse each time, count exactly once each
+PASS: rapid blocked tail-cell clicks never complete or otherwise disturb the attempt
+PUZZLE_LAYOUT_FAILURES=0
