@@ -40,8 +40,14 @@ def main():
         # GlobalState.get_state()'s dynamic load(), so it must keep that
         # relative path in the isolated project, not sit flat at the root.
         (root / "scripts").mkdir(exist_ok=True)
-        for script in ("game_state", "level_state"):
+        for script in ("game_state", "level_state", "puzzle_session"):
             shutil.copyfile(repo / "scripts" / f"{script}.gd", root / "scripts" / f"{script}.gd")
+        (root / "scripts/puzzle").mkdir(exist_ok=True)
+        for script in ("puzzle_definition", "puzzle_catalog"):
+            shutil.copyfile(
+                repo / "scripts/puzzle" / f"{script}.gd",
+                root / "scripts/puzzle" / f"{script}.gd",
+            )
         shutil.copyfile(
             repo / "scenes/menus/main_menu/main_menu_with_animations.gd",
             root / "main_menu_with_animations.gd",

@@ -1,7 +1,7 @@
 {
   "generated": {
     "by": "build-knowledge-index",
-    "at": "2026-09-27T03:57:41Z"
+    "at": "2026-09-27T13:41:09Z"
   },
   "roots": [
     {
@@ -37,6 +37,8 @@
         "scripts/puzzle/puzzle_solver.gd",
         "scripts/puzzle/puzzle_feedback.gd",
         "scripts/puzzle/puzzle_results_format.gd",
+        "scripts/puzzle/puzzle_catalog.gd",
+        "scripts/puzzle_session.gd",
         "scripts/presentation/arrow_departure_geometry.gd",
         "scenes/puzzle/arrow_puzzle.tscn",
         "scenes/puzzle/arrow_puzzle.gd",
@@ -48,6 +50,7 @@
         "scenes/menus/main_menu/main_menu_with_animations.tscn",
         "scenes/menus/main_menu/main_menu_with_animations.gd",
         "tests/puzzle_regression.gd",
+        "tests/puzzle_catalog_check.gd",
         "tests/run_puzzle_regressions.py",
         "tests/arrow_departure_geometry_check.gd",
         "tests/puzzle_layout_check.gd",
@@ -89,7 +92,8 @@
         "tests/save_input_regression.gd",
         "tests/run_regressions.py",
         "scenes/menus/main_menu/main_menu.tscn",
-        "scenes/menus/main_menu/main_menu_with_animations.gd"
+        "scenes/menus/main_menu/main_menu_with_animations.gd",
+        "scenes/menus/main_menu/puzzle_select_menu.gd"
       ]
     },
     {

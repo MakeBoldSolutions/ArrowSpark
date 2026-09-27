@@ -1,9 +1,10 @@
-[gd_scene load_steps=18 format=3 uid="uid://d3ab284l3yd4r"]
+[gd_scene load_steps=19 format=3 uid="uid://d3ab284l3yd4r"]
 
 [ext_resource type="PackedScene" uid="uid://c6k5nnpbypshi" path="res://addons/maaacks_game_template/base/scenes/menus/main_menu/main_menu.tscn" id="1_6btwc"]
 [ext_resource type="Script" uid="uid://bjv2v4jhmcukd" path="res://scenes/menus/main_menu/main_menu_with_animations.gd" id="2_rr1rn"]
 [ext_resource type="PackedScene" uid="uid://dfycb1h41yhrw" path="res://scenes/menus/options_menu/master_options_menu_with_tabs.tscn" id="3_sr523"]
 [ext_resource type="PackedScene" uid="uid://da7uj8u87g24i" path="res://scenes/credits/credits.tscn" id="4_ixa71"]
+[ext_resource type="PackedScene" path="res://scenes/menus/main_menu/puzzle_select_menu.tscn" id="5_puzsel"]
 
 [sub_resource type="Animation" id="1"]
 resource_name = "Intro"
@@ -351,7 +352,7 @@ graph_offset = Vector2(-180.277, 49)
 
 [node name="MainMenu" instance=ExtResource("1_6btwc")]
 script = ExtResource("2_rr1rn")
-level_select_packed_scene = null
+level_select_packed_scene = ExtResource("5_puzsel")
 game_scene_path = "res://scenes/puzzle/arrow_puzzle.tscn"
 options_packed_scene = ExtResource("3_sr523")
 credits_packed_scene = ExtResource("4_ixa71")
@@ -382,7 +383,7 @@ modulate = Color(1, 1, 1, 0)
 lock = true
 
 [node name="NewGameButton" parent="MenuContainer/MenuButtonsMargin/MenuButtonsContainer/MenuButtonsBoxContainer" index="0"]
-tooltip_text = "Existing level progress is preserved even though it's hidden here."
+tooltip_text = "Starts the first catalog puzzle. Existing level progress (Continue) is preserved even though it's hidden here."
 
 [node name="ContinueGameButton" type="Button" parent="MenuContainer/MenuButtonsMargin/MenuButtonsContainer/MenuButtonsBoxContainer" index="1"]
 unique_name_in_owner = true
@@ -392,7 +393,7 @@ text = "Continue"
 
 [node name="LevelSelectButton" type="Button" parent="MenuContainer/MenuButtonsMargin/MenuButtonsContainer/MenuButtonsBoxContainer" index="2"]
 unique_name_in_owner = true
-visible = false
+visible = true
 layout_mode = 2
 text = "Level Select"
 

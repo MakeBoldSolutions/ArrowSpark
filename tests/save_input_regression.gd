@@ -170,4 +170,27 @@ func _test_no_reset_on_puzzle_entry() -> void:
 	check(InputMap.action_has_event(remap_action, seeded_remap) and InputMap.action_has_event(remap_action, remap_joy),
 		"load_game_scene() does not disturb a seeded keyboard/gamepad remap")
 
+	# Level Select selection: PuzzleSession updates and the puzzle opens via
+	# SceneLoader, with the same no-reset/no-remap-disturbance guarantee.
+	var chosen_id := PuzzleCatalog.id_at(3)
+	var load_scene_calls_before: int = scene_loader.load_scene_calls
+	menu._on_puzzle_selected(chosen_id)
+	check(PuzzleSession.get_current_id() == chosen_id,
+		"selecting a Level Select entry sets PuzzleSession to that catalog id")
+	check(scene_loader.load_scene_calls > load_scene_calls_before,
+		"selecting a Level Select entry still opens the puzzle via SceneLoader.load_scene")
+	var after_level_select: GameState = GameState.get_game_state()
+	check(after_level_select.times_played == 5,
+		"selecting a Level Select entry does not call GameState.start_game() (times_played unchanged)")
+	check(after_level_select.max_level_reached == 3,
+		"selecting a Level Select entry does not call GlobalState.reset() (max_level_reached unchanged)")
+	check(InputMap.action_has_event(remap_action, seeded_remap) and InputMap.action_has_event(remap_action, remap_joy),
+		"selecting a Level Select entry does not disturb a seeded keyboard/gamepad remap")
+
+	# New Game always starts catalog position 0, regardless of the Level
+	# Select choice above having already changed PuzzleSession this session.
+	menu.new_game()
+	check(PuzzleSession.get_current_id() == PuzzleCatalog.id_at(0),
+		"new_game() resets PuzzleSession to catalog position 0 regardless of a prior Level Select selection")
+
 	menu.free()

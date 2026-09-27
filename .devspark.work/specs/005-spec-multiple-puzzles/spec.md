@@ -17,14 +17,14 @@ participants:
   reviewer: human
   critic: ai
   scribe: ai
-status: Draft
+status: In Progress
 ---
 
 # Feature Specification: Multiple Authored Puzzles and Session-Only Puzzle Selection
 
 **Feature Branch**: `005-spec-multiple-puzzles`
 **Created**: 2026-09-27
-**Status**: Draft
+**Status**: In Progress
 **Input**: Expand ArrowGame from one hardcoded puzzle into a small catalog of eight handcrafted puzzles, selectable and played through the same reusable puzzle scene, entirely session-only.
 
 ## Product Owner TLDR
@@ -96,7 +96,7 @@ This temporary bundle remains under `.devspark.work/` until release archival. Pr
 
 ## User Scenarios & Testing
 
-### User Story 1 - Play any authored puzzle through the same engine (Priority: P1)
+### User Story 1 - Play any authored puzzle through the same engine (Priority: P1) ✅ Complete
 
 As a player, I want every authored puzzle to play through the exact same rules, rendering, and departure behavior I already know, so the game feels consistent regardless of which puzzle I'm on.
 
@@ -113,7 +113,7 @@ As a player, I want every authored puzzle to play through the exact same rules, 
 
 ---
 
-### User Story 2 - Browse and choose a puzzle (Priority: P1)
+### User Story 2 - Browse and choose a puzzle (Priority: P1) ✅ Complete
 
 As a player, I want to see all available puzzles and pick one directly, so I'm not limited to playing only in catalog order.
 
@@ -129,7 +129,7 @@ As a player, I want to see all available puzzles and pick one directly, so I'm n
 
 ---
 
-### User Story 3 - Move between puzzles after completion (Priority: P2)
+### User Story 3 - Move between puzzles after completion (Priority: P2) ✅ Complete
 
 As a player, I want to replay the puzzle I just finished or move on to the next one without navigating back through menus, so finishing a puzzle flows naturally into what I do next.
 
