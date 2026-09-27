@@ -15,14 +15,14 @@ participants:
   reviewer: human
   critic: ai
   scribe: ai
-status: In Progress
+status: Complete
 ---
 
 # Feature Specification: Path-Following Arrow Departure
 
 **Feature Branch**: `004-spec-path-following-departure`
 **Created**: 2026-09-26
-**Status**: In Progress
+**Status**: Complete
 **Input**: Pull legally removed continuous arrows through their stationary ordered route and clip them at the puzzle-board edge, preserving immediate logical removal and all puzzle rules.
 
 ## Product Owner TLDR
