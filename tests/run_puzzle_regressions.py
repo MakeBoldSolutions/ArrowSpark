@@ -1,17 +1,23 @@
 """Run headless Godot checks for the arrow puzzle without touching player data.
 
-Three independent checks run:
+Four independent checks run:
 1. Pure rule regressions (tests/puzzle_regression.gd) against an isolated,
    unique temporary project containing only the puzzle core scripts. No
    scenes, addons or autoloads are needed since PuzzleState/PuzzleDefinition
    have no Node, mouse, tween or persistence dependency.
-2. A scene-based HUD/board layout and feedback-duration check
+2. Pure route-geometry regressions (tests/arrow_departure_geometry_check.gd)
+   against a second isolated, unique temporary project containing only
+   scripts/presentation/arrow_departure_geometry.gd. The helper takes its
+   style-ratio constants as constructor arguments rather than referencing
+   GameVisualStyle directly, so this suite needs no font/resource assets and
+   keeps the same pure-script isolation as the rule regressions above.
+3. A scene-based HUD/board layout and feedback-duration check
    (tests/puzzle_layout_check.gd) against the real project (so the full
    scene tree and addon autoloads are available), with the platform
    application-data root redirected to an isolated temporary directory so no
    player save/settings data is read or written.
-3. Geometry, interaction, fonts and animation presentation checks after a
-   real-project import, sharing the layout suite's isolated user-data root.
+4. Interaction, fonts and animation presentation checks after a real-project
+   import, sharing the layout suite's isolated user-data root.
 """
 
 from pathlib import Path
@@ -55,6 +61,33 @@ def run_rule_regressions(godot: str, repo: Path) -> None:
                 raise RuntimeError("Godot did not report a completed passing puzzle rule regression run")
 
 
+def run_geometry_regressions(godot: str, repo: Path) -> None:
+    with tempfile.TemporaryDirectory(prefix="arrowgame-departure-geometry-") as directory:
+        root = Path(directory)
+        env = _isolated_env(root)
+        name = "ArrowGameDepartureGeometryRegression-" + uuid.uuid4().hex
+        (root / "project.godot").write_text(
+            f'config_version=5\n[application]\nconfig/name="{name}"\n', encoding="utf-8"
+        )
+        shutil.copyfile(
+            repo / "scripts/presentation/arrow_departure_geometry.gd",
+            root / "arrow_departure_geometry.gd",
+        )
+        shutil.copyfile(
+            repo / "tests/arrow_departure_geometry_check.gd",
+            root / "arrow_departure_geometry_check.gd",
+        )
+        for flags in (("--editor", "--quit"), ("--script", "arrow_departure_geometry_check.gd")):
+            command = [godot, "--headless", "--path", str(root), *flags]
+            print("Running:", " ".join(command), flush=True)
+            result = subprocess.run(command, env=env, check=True, timeout=45,
+                                    capture_output=True, text=True)
+            print(result.stdout, flush=True)
+            print(result.stderr, flush=True)
+            if "--script" in flags and "ARROW_DEPARTURE_GEOMETRY_FAILURES=0" not in result.stdout:
+                raise RuntimeError("Godot did not report a completed passing arrow departure geometry regression run")
+
+
 def run_layout_check(godot: str, repo: Path) -> None:
     with tempfile.TemporaryDirectory(prefix="arrowgame-puzzle-layout-") as directory:
         root = Path(directory)
@@ -84,6 +117,7 @@ def main():
     args = parser.parse_args()
     repo = Path(__file__).resolve().parents[1]
     run_rule_regressions(args.godot, repo)
+    run_geometry_regressions(args.godot, repo)
     run_layout_check(args.godot, repo)
 
 

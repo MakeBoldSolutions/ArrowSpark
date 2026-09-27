@@ -8,6 +8,7 @@ appliesTo:
   - scripts/puzzle/puzzle_solver.gd
   - scripts/puzzle/puzzle_feedback.gd
   - scripts/puzzle/puzzle_results_format.gd
+  - scripts/presentation/arrow_departure_geometry.gd
   - scenes/puzzle/arrow_puzzle.tscn
   - scenes/puzzle/arrow_puzzle.gd
   - scenes/puzzle/puzzle_board.gd
@@ -19,8 +20,10 @@ appliesTo:
   - scenes/menus/main_menu/main_menu_with_animations.gd
   - tests/puzzle_regression.gd
   - tests/run_puzzle_regressions.py
+  - tests/arrow_departure_geometry_check.gd
   - tests/puzzle_layout_check.gd
   - tests/puzzle_presentation_check.gd
+  - tests/arrow_departure_visual_check.gd
   - tests/scene_loader_stub.gd
 ---
 
@@ -100,10 +103,13 @@ at every step, counting arrows, never cells.
 renders that ratio as a one-decimal percentage, rounding an exact tie half
 away from zero (e.g. 6.25% -> "6.3%").
 
-`PuzzleFeedback` (puzzle_feedback.gd) holds the named animation-duration
-constants shared by the view layer and headless tests:
+`PuzzleFeedback` (puzzle_feedback.gd) holds the named animation-duration and
+departure-speed constants shared by the view layer and headless tests:
 `BLOCKED_CUE_DURATION_SECONDS` (0.15s, capped at `BLOCKED_CUE_DURATION_CAP_SECONDS`
-= 0.3s) and `EXIT_TWEEN_DURATION_SECONDS` (0.25s).
+= 0.3s), `EXIT_SPEED_CELLS_PER_SECOND` (10.0, the shared cell-distance
+departure speed) and `EXIT_CLEARANCE_MARGIN_CELLS` (0.001, the tolerance
+margin added beyond exact edge contact so full-tail finish never completes
+early from floating-point boundary equality).
 
 ### Solvability Analysis
 
@@ -204,8 +210,11 @@ connection. Round stroke joins and a round tail cap retain orthogonal
 centerlines. Single-cell arrows have an in-cell decorative shaft. Geometry
 rebuilds at the board's cell extent, without scaling the parent for layout.
 No occupied-cell tiles or grid lines are drawn. It holds no rule state and
-retains MOUSE_FILTER_IGNORE. Whole-view feedback and rigid departure use
-the existing PuzzleFeedback durations and one exit_finished signal.
+retains MOUSE_FILTER_IGNORE. Departure feeds this same shape through its own
+stationary route via `ArrowDepartureGeometry` (see
+.knowledge/architecture/game-visual-system.md for the route math and
+completion contract) and emits `exit_finished` exactly once on full-tail
+clearance.
 
 Source of truth: tests/puzzle_presentation_check.gd covers cardinal shapes,
 ordered multi-bend points, head overlap, copied inputs and extent rebuilds.
@@ -221,7 +230,9 @@ held button cannot repeat) to a raw cell via `_gui_input`, and emits
 no arrow. It has no rule dependency: the controller resolves ownership and
 decides the outcome. `play_removed(head)`/`play_blocked(head)` always take
 the canonical head, never a raw clicked cell. `departure_finished` fires
-once each queued exit tween completes.
+once each departing view fully clears the grid edge (see Feedback
+precedence and departures below for the `DepartureClip`/`_departing_views`
+mechanics).
 
 `ArrowPuzzle` (scenes/puzzle/arrow_puzzle.gd) owns the `PuzzleState`. On
 `cell_clicked`, it resolves the owning head via `PuzzleState.get_arrow_head`
@@ -255,11 +266,17 @@ Source of truth: tests/puzzle_layout_check.gd (a multi-cell shape's view
 bounding box and tail-cell click resolution against a standalone
 `PuzzleBoard`, checked at both window sizes; HUD/board rect non-overlap and
 nonzero visibility at 1280x720 and 960x540; results awaiting every queued
-departure across a full multi-arrow clear; a post-completion selection being
-ignored; a freshly instantiated scene starting clean; 20 rapid repeated
-selections on a blocked tail cell counting exactly once each without
-disturbing the attempt; the blocked-cue duration cap), run via the same
-`run_puzzle_regressions.py` launcher against
+departure across a full multi-arrow clear; resize preserving departure
+cell-distance progress and rescaling pixel geometry to the new extent;
+resize at 960x540/1280x720/800x800, resize while paused and zero-extent
+recovery; a combined scenario with two concurrent departures of different
+route lengths paused mid-flight, resized while paused, then resumed, each
+finishing exactly once; `setup()` replacement canceling and disposing any
+in-flight departure so no stale completion reaches a replaced attempt; a
+post-completion selection being ignored; a freshly instantiated scene
+starting clean; 20 rapid repeated selections on a blocked tail cell counting
+exactly once each without disturbing the attempt; the blocked-cue duration
+cap), run via the same `run_puzzle_regressions.py` launcher against
 the real project with APPDATA/XDG_DATA_HOME redirected so no player save
 data is touched; requires `PUZZLE_LAYOUT_FAILURES=0`. Interactive desktop
 smoke testing (resize, rapid clicks, pause mid-feedback, restart) remains a
@@ -324,19 +341,45 @@ otherwise ink; there is no extra hover-duration delay. No input lock or
 persistent disabled appearance is introduced.
 
 Departure first marks terminal state, kills color/effect tweens, resets
-scale/modulation/visibility and ink synchronously, then translates the whole
-view for 250ms with quadratic ease-out. Later hover/block/exit requests are
-ignored. Board erases active ownership and connects the one-shot completion
-before starting movement. Active resizing does not touch departing views.
-The controller retains immediate logical removal and the pending-departure
-barrier. Pause suspends effects with the tree; restart/replay reconstruction
-creates fresh state. PuzzleFeedback remains the duration authority, with no
-font or style dependency. GameVisualStyle owns pulse amplitude and hover time.
+scale/modulation/visibility and ink synchronously, then feeds the whole
+shape through its own stationary route at a shared cell-distance speed and
+clips it at the occupied grid edge — see
+.knowledge/architecture/game-visual-system.md for the full route-math,
+speed and clearance contract. Later hover/block/exit requests are ignored,
+and repeated start requests are ignored once departing.
+
+`PuzzleBoard` owns two presentation-only collections: `_views` (canonical
+head -> active view, ownership-routing) and `_departing_views` (original
+head -> departing view, layout/tracking only, never selection/hover
+routing). `play_removed(head)` erases the active entry, reparents the view
+into a passive `DepartureClip` child `Control` (clip_contents, mouse-filter
+ignore, sized to the occupied grid) at its own bbox-relative position, and
+connects the one-shot completion before starting movement, so a same-frame
+full-clearance advance cannot race the callback. `_layout_views()` relayouts
+both collections from the same board cell extent on every resize; a
+departing view's cell-distance progress never changes from a layout update
+alone, only its pixel projection. `setup()` cancels and disposes any
+in-flight departures (via `cancel_departure()`, which guarantees no later
+completion signal) before clearing both collections, so a replaced attempt
+never receives a stale callback. The controller retains immediate logical
+removal and the pending-departure barrier, decrementing `_pending_departures`
+only from `departure_finished`. Pause suspends effects with the tree, also
+enforced by an explicit paused check inside `advance_departure` so direct
+test calls cannot bypass it; restart/replay reconstruction creates fresh
+state. PuzzleFeedback remains the speed/clearance-margin authority, with no
+font or style dependency. GameVisualStyle owns pulse amplitude, hover time
+and the geometry ratios the route math is built from.
 
 Source of truth: tests/puzzle_presentation_check.gd checks rising/peak/falling
-interruption, immediate properties, repeated pulses, hover precedence and
-exactly-once exit; tests/puzzle_layout_check.gd checks staggered departures,
-pause, resize, completed-input ignoring and fresh attempts.
+interruption, immediate properties, repeated pulses, hover precedence,
+initial silhouette equivalence, head/body overlap, cardinal orientation,
+equal-delta-partition speed and exactly-once full-tail completion;
+tests/puzzle_layout_check.gd checks staggered departures, pause, resize
+(including while paused and to zero extent), the combined concurrent-
+departure/pause/resize/resume scenario, setup-replacement disposal,
+completed-input ignoring and fresh attempts; tests/arrow_departure_geometry_check.gd
+covers the pure route/clearance math in isolation (see
+.knowledge/architecture/game-visual-system.md).
 
 ## Gameplay theme boundary
 

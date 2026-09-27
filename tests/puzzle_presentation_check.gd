@@ -66,6 +66,7 @@ func _check_geometry() -> void:
 func _run() -> void:
 	_check_geometry()
 	_check_effects()
+	_check_departure_geometry()
 	var puzzle: Control = load("res://scenes/puzzle/arrow_puzzle.tscn").instantiate()
 	root.add_child(puzzle)
 	await process_frame
@@ -153,14 +154,18 @@ func _check_effects() -> void:
 		view._tween.custom_step(phase)
 		var completions := [0]
 		view.exit_finished.connect(func(): completions[0] += 1)
-		view.play_exit_animation(400)
+		view.start_departure(Vector2i.ZERO, Vector2i(50, 50))
 		check(view.scale == Vector2.ONE and view._body.default_color == GameVisualStyle.ARROW_NORMAL and view._head.color == GameVisualStyle.ARROW_NORMAL, "departure synchronously normalizes every pulse phase")
-		var exit_tween: Tween = view._tween
+		var geometry_before_duplicate: ArrowDepartureGeometry = view._geometry
+		var distance_before_duplicate: float = view._departure_distance
 		view.set_hovered(true)
 		view.play_blocked_feedback()
-		view.play_exit_animation(400)
-		check(view._tween == exit_tween and view.scale == Vector2.ONE and view._head.color == GameVisualStyle.ARROW_NORMAL, "terminal departure ignores stale effects and duplicate exits")
-		exit_tween.custom_step(0.3)
+		view.start_departure(Vector2i.ZERO, Vector2i(50, 50))
+		check(view._geometry == geometry_before_duplicate and view._departure_distance == distance_before_duplicate \
+				and view.scale == Vector2.ONE and view._head.color == GameVisualStyle.ARROW_NORMAL,
+			"terminal departure ignores stale effects and duplicate starts")
+		view.advance_departure(0.3)
+		view.advance_departure(0.3)
 		check(completions[0] == 1, "departure emits completion exactly once")
 		view.free()
 	var view := ArrowView.new()
@@ -179,9 +184,86 @@ func _check_effects() -> void:
 	check(view.scale == Vector2.ONE and view._head.color == GameVisualStyle.ARROW_NORMAL, "blocked completion without hover restores ink")
 	view.set_hovered(true)
 	view._hover_tween.custom_step(0.03)
-	view.play_exit_animation(400)
+	view.start_departure(Vector2i.ZERO, Vector2i(50, 50))
 	check(view._head.color == GameVisualStyle.ARROW_NORMAL and view.scale == Vector2.ONE, "departure cancels in-progress hover before next frame")
 	view.free()
+
+func _points_approx_equal(a: PackedVector2Array, b: PackedVector2Array) -> bool:
+	if a.size() != b.size():
+		return false
+	for i in range(a.size()):
+		if not a[i].is_equal_approx(b[i]):
+			return false
+	return true
+
+## Initial silhouette equivalence, head/body overlap, cardinal orientation in
+## all four directions, equal-delta-partition speed and full-tail finish
+## (never early, always exactly once) for the path-following departure.
+func _check_departure_geometry() -> void:
+	for direction in PuzzleDefinition.Direction.values():
+		var forward := Vector2(PuzzleDefinition.direction_vector(direction))
+		var head := Vector2i(4, 4)
+		var cells: Array[Vector2i] = [head, head - Vector2i(forward), head - Vector2i(forward) * 2]
+		var view := ArrowView.new()
+		root.add_child(view)
+		view.set_shape(head, cells, direction)
+		view.set_cell_extent(50.0)
+		var static_body: PackedVector2Array = view._body.points.duplicate()
+		var static_head: PackedVector2Array = view._head.polygon.duplicate()
+		view.start_departure(head, Vector2i(9, 9))
+		check(_points_approx_equal(view._body.points, static_body) and _points_approx_equal(view._head.polygon, static_head),
+			"departure begins with the identical static silhouette, no first-frame geometry jump, for direction %s" % [direction])
+		check(Geometry2D.is_point_in_polygon(view._body.points[-1], view._head.polygon),
+			"head/body overlap is preserved once departing for direction %s" % [direction])
+		var head_base: Vector2 = (view._head.polygon[1] + view._head.polygon[2]) / 2.0
+		check((view._head.polygon[0] - head_base).normalized().is_equal_approx(forward),
+			"head keeps its cardinal orientation while departing for direction %s" % [direction])
+		view.free()
+
+	var one_step := ArrowView.new()
+	root.add_child(one_step)
+	one_step.set_shape(Vector2i(4, 4), [Vector2i(4, 4)], PuzzleDefinition.Direction.RIGHT)
+	one_step.set_cell_extent(50.0)
+	one_step.start_departure(Vector2i(4, 4), Vector2i(20, 20))
+	one_step.advance_departure(0.2)
+	var many_steps := ArrowView.new()
+	root.add_child(many_steps)
+	many_steps.set_shape(Vector2i(4, 4), [Vector2i(4, 4)], PuzzleDefinition.Direction.RIGHT)
+	many_steps.set_cell_extent(50.0)
+	many_steps.start_departure(Vector2i(4, 4), Vector2i(20, 20))
+	for i in range(20):
+		many_steps.advance_departure(0.01)
+	check(is_equal_approx(one_step._departure_distance, many_steps._departure_distance),
+		"equal elapsed time partitioned into more/smaller steps advances the same total cell distance")
+	one_step.free()
+	many_steps.free()
+
+	var short_view := ArrowView.new()
+	root.add_child(short_view)
+	short_view.set_shape(Vector2i(4, 4), [Vector2i(4, 4)], PuzzleDefinition.Direction.RIGHT)
+	short_view.set_cell_extent(50.0)
+	var long_view := ArrowView.new()
+	root.add_child(long_view)
+	long_view.set_shape(Vector2i(4, 4), [Vector2i(4, 4), Vector2i(3, 4), Vector2i(2, 4)], PuzzleDefinition.Direction.RIGHT)
+	long_view.set_cell_extent(50.0)
+	var short_completions := [0]
+	var long_completions := [0]
+	short_view.exit_finished.connect(func(): short_completions[0] += 1)
+	long_view.exit_finished.connect(func(): long_completions[0] += 1)
+	short_view.start_departure(Vector2i(4, 4), Vector2i(6, 6))
+	long_view.start_departure(Vector2i(4, 4), Vector2i(6, 6))
+	check(long_view._finish_distance > short_view._finish_distance,
+		"a longer route requires strictly more cell-distance to fully clear than a shorter one")
+	for i in range(30):
+		short_view.advance_departure(0.05)
+		long_view.advance_departure(0.05)
+		if short_completions[0] > 0:
+			check(short_view._departure_distance >= short_view._finish_distance - ArrowDepartureGeometry.GEOMETRY_TOLERANCE,
+				"the short route never signals completion before its own full-tail clearance")
+	check(short_completions[0] == 1 and long_completions[0] == 1,
+		"both routes eventually finish exactly once via repeated per-frame advancement")
+	short_view.free()
+	long_view.free()
 
 func _check_theme(puzzle: Control) -> void:
 	check(puzzle.theme == null and puzzle.get_node("Layout").theme != null, "theme is scoped to Layout, leaving root overlays unchanged")

@@ -4,10 +4,13 @@ type: architecture
 title: Game Visual System
 appliesTo:
   - scripts/presentation/game_visual_style.gd
+  - scripts/presentation/arrow_departure_geometry.gd
   - resources/fonts/**
   - assets/fonts/**
   - scenes/puzzle/**
   - tests/puzzle_presentation_check.gd
+  - tests/arrow_departure_geometry_check.gd
+  - tests/arrow_departure_visual_check.gd
 ---
 
 # Game Visual System
@@ -23,7 +26,9 @@ Geometry ratios relative to cell extent: shaft width 0.14, head tip +0.30,
 head base -0.06, head half-width 0.22, shaft end -0.02. Single-cell shafts
 start at -0.30. The endpoint overlaps the head; normal silhouettes stay
 inside their cell corridors and leave negative space. Resize rebuilds
-geometry; departure is whole-object translation rather than tail following.
+geometry; departure feeds the whole shape through its own stationary route
+and out past the grid edge (see Feedback precedence and departures below),
+not whole-object translation.
 
 Source of truth: tests/puzzle_presentation_check.gd verifies ordered
 geometry, all four directions, copied offsets, head overlap and extent
@@ -62,19 +67,70 @@ otherwise ink; there is no extra hover-duration delay. No input lock or
 persistent disabled appearance is introduced.
 
 Departure first marks terminal state, kills color/effect tweens, resets
-scale/modulation/visibility and ink synchronously, then translates the whole
-view for 250ms with quadratic ease-out. Later hover/block/exit requests are
-ignored. Board erases active ownership and connects the one-shot completion
-before starting movement. Active resizing does not touch departing views.
-The controller retains immediate logical removal and the pending-departure
-barrier. Pause suspends effects with the tree; restart/replay reconstruction
-creates fresh state. PuzzleFeedback remains the duration authority, with no
-font or style dependency. GameVisualStyle owns pulse amplitude and hover time.
+scale/modulation/visibility and ink synchronously, builds a stationary
+tail-to-head cell-unit route from the arrow's own ordered shape (or the
+existing single-cell synthetic shaft), then advances one scalar cell-unit
+distance forward at a centrally configured, shared speed (10 cells/second,
+`PuzzleFeedback.EXIT_SPEED_CELLS_PER_SECOND`). Bends stay fixed in board
+coordinates and are consumed as the tail passes them; the head continues
+analytically along its own forward direction past its original position.
+Later hover/block/exit requests are ignored, and repeated start requests are
+ignored once departing.
 
-Source of truth: tests/puzzle_presentation_check.gd checks rising/peak/falling
-interruption, immediate properties, repeated pulses, hover precedence and
-exactly-once exit; tests/puzzle_layout_check.gd checks staggered departures,
-pause, resize, completed-input ignoring and fresh attempts.
+`scripts/presentation/arrow_departure_geometry.gd` (`ArrowDepartureGeometry`,
+a pure `RefCounted` helper with no Node/domain dependency) owns the route
+math: cumulative-length sampling (`sample_distance`), moving-interval
+extraction with every intervening corner retained (`extract_interval`), and
+the direction/grid-size-only forward-grid clearance calculation
+(`forward_clearance`). It takes the caller's style-ratio offsets (head-base
+distance, tail-cap radius) as constructor arguments rather than referencing
+GameVisualStyle directly, and asserts the tail-cap-dominance invariant
+(`length + head_base >= -tail_cap_radius`) on construction so a future
+style-ratio edit that breaks it fails loudly in the editor/regression
+pipeline — this assert is stripped from exported release templates, so it is
+a dev/test-time guard, not a production safety net; `ArrowView` is the sole
+caller and supplies `GameVisualStyle.HEAD_BASE`/`BODY_WIDTH`. `ArrowView`
+rebuilds this route once per departure start and re-renders the same cell
+distance at the current pixel extent on every layout update, never
+restarting or recomputing the route itself on resize.
+
+A departure finishes only once cell-distance progress reaches
+`length + forward_clearance(...)` (route length plus remaining edge distance
+plus the tail-cap radius plus a small tolerance margin), so full-tail
+clearance — not head exit — triggers completion, exactly once, guarded
+against direct-call bypass of pause/invalid-layout/already-finished state.
+`PuzzleBoard` erases active ownership, reparents the view into a passive
+`DepartureClip` `Control` (clip_contents, mouse-filter ignore) sized to the
+occupied grid and positioned at its origin, and connects the one-shot
+completion before starting movement. Both active and departing collections
+relayout from the same board cell extent on resize; departing views never
+restart or recompute their route, only their pixel projection. Pause
+suspends advancement with the tree (also enforced by an explicit paused
+check so direct test calls cannot bypass it); a zero-extent layout suspends
+advancement without corrupting or falsely completing it. `setup()`
+replacement cancels and disposes any in-flight departures before clearing
+collections, so a replaced attempt never receives a stale completion.
+PuzzleFeedback remains the speed/clearance-margin authority, with no font or
+style dependency; GameVisualStyle owns pulse amplitude, hover time and the
+geometry ratios the route math is built from.
+
+Source of truth: tests/arrow_departure_geometry_check.gd (pure route math:
+all four directions, synthetic shaft, straight/one-bend/multi-bend routes,
+cumulative length, exact/corner-adjacent sampling, forward-ray extension,
+coincident-point and short-segment safety, constant unclipped centerline
+length, forward-grid clearance, tail-cap-dominance guard) covers the helper
+in isolation; tests/puzzle_presentation_check.gd checks rising/peak/falling
+blocked-pulse interruption, immediate properties, repeated pulses, hover
+precedence, initial silhouette equivalence, head/body overlap, cardinal
+orientation, equal-delta-partition speed and exactly-once full-tail
+completion; tests/puzzle_layout_check.gd checks staggered departures, pause,
+resize (960x540/1280x720/800x800, including while paused and to zero
+extent), a combined concurrent-departure/pause/resize/resume scenario,
+setup-replacement disposal, completed-input ignoring and fresh attempts.
+Rendered seam/antialias and feeding-motion readability quality require
+desktop review (tests/arrow_departure_visual_check.gd is the manual fixture
+for shape/direction categories the shipped board omits); point/interval
+assertions cannot establish it.
 
 ## Typography and local theme
 
@@ -141,10 +197,13 @@ padding, 24 for HUD separation. Small radius 6 suits buttons; large radius
 offset (0,4), size 12, rgba(30,30,30,0.08). Optional surface/shadow/heading
 roles remain available without adding decorative content to demonstrate them.
 
-Lightweight hover is 120ms. Blocked feedback is 150ms (300ms coded cap);
-departure is 250ms. Tweens use quadratic ease-out without bounce. All
-interaction effects are interruptible; no frame-loop geometry rebuilding
-or blocking animation waits occur. The initial ratios and 1.10 pulse are
-retained; rendered acceptance is required before treating their appearance
-as approved. Palette and vocabulary authority: scripts/presentation/game_visual_style.gd;
+Lightweight hover is 120ms. Blocked feedback is 150ms (300ms coded cap) with
+a quadratic ease-out tween without bounce. Departure instead advances at a
+constant, centrally configured cell-distance speed (10 cells/second) rather
+than a fixed duration or tween, so travel time scales with route length and
+edge distance; per-departure frame work is a bounded interval-extraction
+pass, not a blocking wait. All interaction effects are interruptible; no
+frame-loop geometry rebuilding beyond that bounded pass occurs. The initial
+ratios and 1.10 pulse are retained; rendered acceptance is required before
+treating their appearance as approved. Palette and vocabulary authority: scripts/presentation/game_visual_style.gd;
 code-only for unused roles because they intentionally have no onscreen consumer.

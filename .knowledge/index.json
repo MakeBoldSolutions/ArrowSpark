@@ -1,7 +1,7 @@
 {
   "generated": {
     "by": "build-knowledge-index",
-    "at": "2026-09-27T01:55:35Z"
+    "at": "2026-09-27T03:57:41Z"
   },
   "roots": [
     {
@@ -37,6 +37,7 @@
         "scripts/puzzle/puzzle_solver.gd",
         "scripts/puzzle/puzzle_feedback.gd",
         "scripts/puzzle/puzzle_results_format.gd",
+        "scripts/presentation/arrow_departure_geometry.gd",
         "scenes/puzzle/arrow_puzzle.tscn",
         "scenes/puzzle/arrow_puzzle.gd",
         "scenes/puzzle/puzzle_board.gd",
@@ -48,8 +49,10 @@
         "scenes/menus/main_menu/main_menu_with_animations.gd",
         "tests/puzzle_regression.gd",
         "tests/run_puzzle_regressions.py",
+        "tests/arrow_departure_geometry_check.gd",
         "tests/puzzle_layout_check.gd",
         "tests/puzzle_presentation_check.gd",
+        "tests/arrow_departure_visual_check.gd",
         "tests/scene_loader_stub.gd"
       ]
     },
@@ -60,10 +63,13 @@
       "title": "Game Visual System",
       "appliesTo": [
         "scripts/presentation/game_visual_style.gd",
+        "scripts/presentation/arrow_departure_geometry.gd",
         "resources/fonts/**",
         "assets/fonts/**",
         "scenes/puzzle/**",
-        "tests/puzzle_presentation_check.gd"
+        "tests/puzzle_presentation_check.gd",
+        "tests/arrow_departure_geometry_check.gd",
+        "tests/arrow_departure_visual_check.gd"
       ]
     },
     {
