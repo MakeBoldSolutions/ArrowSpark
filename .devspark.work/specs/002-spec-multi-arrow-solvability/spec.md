@@ -15,14 +15,14 @@ participants:
   reviewer: human
   critic: ai
   scribe: ai
-status: In Progress
+status: Complete
 ---
 
 # Feature Specification: Rich Arrow Model and Solvability Foundation
 
 **Feature Branch**: `002-spec-multi-arrow-solvability`
 **Created**: 2026-09-26
-**Status**: In Progress
+**Status**: Complete
 **Input**: User description: "Rich Arrow Model and Solvability Foundation — extend the existing First Playable Arrow Puzzle to support multi-cell arrows (arrowhead plus a straight or right-angle-turning tail occupying one or more cells) and establish solvability as a formal, presentation-independent domain property with witness-solution generation, retaining basic structural counts as a foundation for future difficulty analysis, while preserving current scoring, HUD, Replay, Main Menu integration, and rule/presentation separation."
 
 ## Product Owner TLDR
