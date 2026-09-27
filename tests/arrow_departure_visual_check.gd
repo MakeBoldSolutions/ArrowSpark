@@ -35,6 +35,12 @@ func _stagger_departures(board: PuzzleBoard, heads: Array[Vector2i]) -> void:
 func _initialize() -> void:
 	get_root().size = Vector2i(900, 900)
 	get_root().title = "Arrow Departure Visual Fixture (manual review only)"
+	get_root().close_requested.connect(quit)
+	var background := ColorRect.new()
+	background.color = GameVisualStyle.GAME_BACKGROUND
+	background.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	get_root().add_child(background)
 	var board := PuzzleBoard.new()
 	board.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	get_root().add_child(board)
@@ -46,3 +52,9 @@ func _initialize() -> void:
 	print("Loaded fixture: single-cell, straight, one-bend and long multi-bend shapes, all four directions.")
 	print("Watching each depart in sequence over the next few seconds; close the window when done.")
 	await _stagger_departures(board, heads)
+	# A bare `--script` SceneTree exits once _initialize()'s coroutine chain
+	# fully completes; without this, the window would vanish right after the
+	# last departure instead of staying open for review. close_requested
+	# above lets the window's own close button end the process normally.
+	while true:
+		await create_timer(1.0).timeout
