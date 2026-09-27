@@ -3,7 +3,7 @@ gate: critic
 status: warn
 blocking: false
 severity: warning
-summary: "FULL scope, game archetype, internal risk profile. One HIGH finding: T005's runtime assert() safety net for the tail-cap-dominance invariant is compiled out in exported Godot release templates, so it protects the dev/test pipeline but silently disappears for players. No showstoppers or constitution violations. VERDICT: PROCEED with one recommended mitigation."
+summary: "FULL scope, game archetype, internal risk profile. One HIGH finding (critic-001, now resolved): T005's runtime assert() safety net for the tail-cap-dominance invariant is compiled out in exported Godot release templates; resolved by documenting its dev/test-only scope in game-visual-system.md rather than adding export-build branching to the pure helper. No showstoppers or constitution violations. VERDICT: PROCEED."
 reviewed_artifacts:
   - path: spec.md
     hash: "cee5be947045b056c4d28847ebe6e96568051ef6"
@@ -43,8 +43,8 @@ findings:
     effective_severity: high
     recommended_action: Keep the assert() for fast dev/editor feedback, but also make the geometry helper fail safe in export builds — e.g. clamp the invalid ratio and push_error()/push_warning() with the offending values so the failure is visible in exported-build logs instead of silently disappearing, or add one line to the knowledge update (T012/T022) explicitly documenting that this specific guard is dev/test-only and naming what (if anything) protects the exported build.
     execution_mode: selective
-    status: open
-    outcome: ""
+    status: resolved
+    outcome: "Documented the dev/test-only scope of this assert() in .knowledge/architecture/game-visual-system.md's Feedback precedence and departures section (T012), which now states explicitly that the guard is stripped from exported release templates and is not a production safety net. Chosen over the push_error()/clamp fallback alternative to keep the pure geometry helper free of any export-build-detection branching; the documentation instead flags for reviewers/maintainers that a future style-ratio change must be re-verified via the regression suite (which does exercise the assert), since an exported build alone would not catch a violation. See gates/verification.md T028."
 ```
 
 ### High

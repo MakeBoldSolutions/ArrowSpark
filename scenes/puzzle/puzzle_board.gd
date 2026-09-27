@@ -10,6 +10,8 @@ signal hover_cell_changed(cell: Vector2i)
 
 var definition: PuzzleDefinition
 var _views: Dictionary # Vector2i (head) -> ArrowView
+var _departing_views: Dictionary # Vector2i (original head) -> ArrowView, presentation-only
+var _departure_clip: Control
 var _cell_size: Vector2 = Vector2.ZERO
 var _origin: Vector2 = Vector2.ZERO
 var _hovered_head: Variant = null
@@ -17,6 +19,11 @@ var _last_hover_cell := Vector2i(-1, -1)
 
 func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	_departure_clip = Control.new()
+	_departure_clip.name = "DepartureClip"
+	_departure_clip.clip_contents = true
+	_departure_clip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_departure_clip)
 
 func _ready() -> void:
 	mouse_exited.connect(clear_hover)
@@ -65,6 +72,10 @@ func setup(new_definition: PuzzleDefinition) -> void:
 	for view in _views.values():
 		view.queue_free()
 	_views.clear()
+	for view in _departing_views.values():
+		view.cancel_departure()
+		view.queue_free()
+	_departing_views.clear()
 	definition = new_definition
 	for head in definition.arrows.keys():
 		var cells: Array[Vector2i] = definition.get_arrow_cells(head)
@@ -96,14 +107,25 @@ func _layout_views() -> void:
 	var cell_extent: float = min(size.x / float(definition.width), size.y / float(definition.height))
 	_cell_size = Vector2(cell_extent, cell_extent)
 	_origin = (size - Vector2(cell_extent * definition.width, cell_extent * definition.height)) / 2.0
+	_departure_clip.position = _origin
+	_departure_clip.size = Vector2(cell_extent * definition.width, cell_extent * definition.height)
 	for head in _views.keys():
 		var view: ArrowView = _views[head]
-		var cells: Array[Vector2i] = definition.get_arrow_cells(head)
-		var bbox_min: Vector2i = _bounding_min(cells)
-		var bbox_max: Vector2i = _bounding_max(cells)
-		view.position = _origin + Vector2(bbox_min.x, bbox_min.y) * cell_extent
-		view.size = Vector2(bbox_max.x - bbox_min.x + 1, bbox_max.y - bbox_min.y + 1) * cell_extent
-		view.set_cell_extent(cell_extent)
+		_position_view(view, head, cell_extent, _origin)
+	for head in _departing_views.keys():
+		var view: ArrowView = _departing_views[head]
+		_position_view(view, head, cell_extent, Vector2.ZERO)
+
+## bbox-relative position/size for an owned shape, offset by origin (board
+## coordinates for active views, or zero for departing views already
+## parented under _departure_clip which itself sits at the grid origin).
+func _position_view(view: ArrowView, head: Vector2i, cell_extent: float, origin: Vector2) -> void:
+	var cells: Array[Vector2i] = definition.get_arrow_cells(head)
+	var bbox_min: Vector2i = _bounding_min(cells)
+	var bbox_max: Vector2i = _bounding_max(cells)
+	view.position = origin + Vector2(bbox_min.x, bbox_min.y) * cell_extent
+	view.size = Vector2(bbox_max.x - bbox_min.x + 1, bbox_max.y - bbox_min.y + 1) * cell_extent
+	view.set_cell_extent(cell_extent)
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_RESIZED:
@@ -130,6 +152,11 @@ func _gui_input(event: InputEvent) -> void:
 			and event.pressed and not event.is_echo():
 		cell_clicked.emit(_cell_from_local(event.position))
 
+## Moves the arrow's view from active ownership into the passive departing
+## collection, reparented under the clipping layer at its own bbox-relative
+## position, then starts its feed-through-the-route departure. Completion is
+## connected before motion starts so a same-frame full-clearance advance
+## cannot race the callback.
 func play_removed(head: Vector2i) -> void:
 	var view: ArrowView = _views.get(head)
 	if view == null:
@@ -137,11 +164,17 @@ func play_removed(head: Vector2i) -> void:
 	if head == _hovered_head:
 		clear_hover()
 	_views.erase(head)
+	_departing_views[head] = view
+	view.reparent(_departure_clip, false)
+	if _cell_size.x > 0.0:
+		_position_view(view, head, _cell_size.x, Vector2.ZERO)
 	view.exit_finished.connect(func():
-		departure_finished.emit()
+		if _departing_views.get(head) == view:
+			_departing_views.erase(head)
 		view.queue_free()
+		departure_finished.emit()
 	, CONNECT_ONE_SHOT)
-	view.play_exit_animation(size.length())
+	view.start_departure(head, Vector2i(definition.width, definition.height))
 
 func play_blocked(head: Vector2i) -> void:
 	var view: ArrowView = _views.get(head)

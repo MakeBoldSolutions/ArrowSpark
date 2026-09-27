@@ -15,14 +15,14 @@ participants:
   reviewer: human
   critic: ai
   scribe: ai
-status: Draft
+status: In Progress
 ---
 
 # Feature Specification: Path-Following Arrow Departure
 
 **Feature Branch**: `004-spec-path-following-departure`
 **Created**: 2026-09-26
-**Status**: Draft
+**Status**: In Progress
 **Input**: Pull legally removed continuous arrows through their stationary ordered route and clip them at the puzzle-board edge, preserving immediate logical removal and all puzzle rules.
 
 ## Product Owner TLDR
@@ -82,7 +82,7 @@ This temporary bundle remains under `.devspark.work/` until release archival. Pr
 
 ## User Scenarios & Testing
 
-### User Story 1 - See an arrow feed through its route (Priority: P1)
+### User Story 1 - See an arrow feed through its route (Priority: P1) ✅ Complete
 
 As a player, I want a removed arrow to unwind through its existing bends so its departure feels connected to its shape.
 
@@ -98,7 +98,7 @@ As a player, I want a removed arrow to unwind through its existing bends so its 
 4. **Given** an arrow crossing the grid edge, **When** part of its head or body passes outside, **Then** that part is clipped and no departing geometry draws over surrounding UI.
 5. **Given** two different required travel distances, **When** both depart, **Then** they advance at the same cells-per-second speed and the farther travel takes longer.
 
-### User Story 2 - Continue play while departures drain (Priority: P1)
+### User Story 2 - Continue play while departures drain (Priority: P1) ✅ Complete
 
 As a player, I want subsequent legal moves to work immediately and results to wait for every departing arrow.
 
@@ -113,7 +113,7 @@ As a player, I want subsequent legal moves to work immediately and results to wa
 3. **Given** logical completion with multiple outstanding departures, **When** only some finish, **Then** results stay hidden; after the final full-tail clearance, results appear with unchanged score and accuracy.
 4. **Given** different departure speeds used in verification, **When** the same selection sequence runs, **Then** logical outcomes and solver results are identical.
 
-### User Story 3 - Preserve visual state and lifecycle (Priority: P2)
+### User Story 3 - Preserve visual state and lifecycle (Priority: P2) ✅ Complete
 
 As a player, I want hover, blocked feedback, pause, resizing, and restarting to remain predictable during departure.
 

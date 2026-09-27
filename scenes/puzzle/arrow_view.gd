@@ -20,6 +20,12 @@ var _blocked_active: bool = false
 var _departing: bool = false
 var _hover_tween: Tween
 
+var _geometry: ArrowDepartureGeometry
+var _departure_distance: float = 0.0
+var _finish_distance: float = 0.0
+var _layout_valid: bool = false
+var _completion_emitted: bool = false
+
 func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_body = Line2D.new()
@@ -64,7 +70,11 @@ func set_shape(head_offset: Vector2i, cell_offsets: Array[Vector2i], new_directi
 
 func set_cell_extent(extent: float) -> void:
 	_cell_extent = extent
-	_rebuild_geometry()
+	if _departing:
+		_layout_valid = _cell_extent > 0.0
+		_render_departure()
+	else:
+		_rebuild_geometry()
 
 func _direction_vector() -> Vector2:
 	match direction:
@@ -128,10 +138,28 @@ func _finish_blocked_feedback() -> void:
 	scale = Vector2.ONE
 	_set_visual_color(GameVisualStyle.ARROW_HOVER if _hovered else GameVisualStyle.ARROW_NORMAL)
 
-## Translates the entire shape (all cells move together) beyond the board
-## edge along the head's own direction; travel_distance is passed by the
-## board sized to clear any shape's bounds with margin.
-func play_exit_animation(travel_distance: float) -> void:
+## Builds this view's stationary tail-to-head route (in its own local cell
+## units, relative to its own bounding-box origin) plus the synthetic shaft
+## for single-cell shapes, exactly matching the static d=0 rendering built
+## by _rebuild_geometry.
+func _build_geometry() -> ArrowDepartureGeometry:
+	var forward: Vector2 = _direction_vector()
+	var points: Array[Vector2] = []
+	if _cell_offsets.size() <= 1:
+		var head_center: Vector2 = Vector2(_head_offset) + Vector2(0.5, 0.5)
+		points.append(head_center + forward * GameVisualStyle.SINGLE_TAIL)
+		points.append(head_center)
+	else:
+		for i in range(_cell_offsets.size() - 1, -1, -1):
+			points.append(Vector2(_cell_offsets[i]) + Vector2(0.5, 0.5))
+	return ArrowDepartureGeometry.new(points, forward, GameVisualStyle.HEAD_BASE, GameVisualStyle.BODY_WIDTH / 2.0)
+
+## Starts feeding this arrow through its own stationary route and out past
+## the grid edge. head_cell is this arrow's grid-absolute head position and
+## grid_size is the board's cell dimensions, used only once here to compute
+## the fixed cell-unit finish distance (independent of pixel layout).
+## Repeated invocation while already departing is ignored.
+func start_departure(head_cell: Vector2i, grid_size: Vector2i) -> void:
 	if _departing:
 		return
 	_departing = true
@@ -146,7 +174,87 @@ func play_exit_animation(travel_distance: float) -> void:
 	self_modulate = Color.WHITE
 	show()
 	_set_visual_color(GameVisualStyle.ARROW_NORMAL)
-	var target_position: Vector2 = position + _direction_vector() * travel_distance
-	_tween = create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	_tween.tween_property(self, "position", target_position, PuzzleFeedback.EXIT_TWEEN_DURATION_SECONDS)
-	_tween.finished.connect(func(): exit_finished.emit())
+	_geometry = _build_geometry()
+	_departure_distance = 0.0
+	_completion_emitted = false
+	_layout_valid = _cell_extent > 0.0
+	if _geometry.is_valid():
+		var rear_support: float = GameVisualStyle.BODY_WIDTH / 2.0
+		var clearance: float = ArrowDepartureGeometry.forward_clearance(
+			_geometry.forward(), Vector2(head_cell), Vector2(grid_size),
+			rear_support, PuzzleFeedback.EXIT_CLEARANCE_MARGIN_CELLS)
+		_finish_distance = _geometry.length() + clearance
+	else:
+		_finish_distance = 0.0
+		_completion_emitted = true
+	set_process(true)
+	_render_departure()
+	if _completion_emitted:
+		_finish_departure()
+
+func _process(delta: float) -> void:
+	if not _departing:
+		set_process(false)
+		return
+	advance_departure(delta)
+
+## Advances cell-distance progress at the configured speed, capped at the
+## finish distance. Refuses to advance while paused, while this view's
+## layout is invalid, once already finished, or for a nonpositive delta, so
+## direct test calls cannot bypass lifecycle policy the same way real
+## per-frame scheduling does.
+func advance_departure(delta: float) -> void:
+	if not _departing or _completion_emitted:
+		return
+	if get_tree() != null and get_tree().paused:
+		return
+	if not _layout_valid or delta <= 0.0:
+		return
+	_departure_distance = minf(
+		_departure_distance + PuzzleFeedback.EXIT_SPEED_CELLS_PER_SECOND * delta, _finish_distance)
+	_render_departure()
+	if _departure_distance >= _finish_distance - ArrowDepartureGeometry.GEOMETRY_TOLERANCE:
+		_finish_departure()
+
+func _finish_departure() -> void:
+	if _completion_emitted:
+		return
+	_completion_emitted = true
+	set_process(false)
+	exit_finished.emit()
+
+## Renders the moving body interval and head polygon at the current
+## departure distance, scaled by the current pixel cell extent. Never
+## advances progress or emits completion — safe to call from a layout
+## update while paused or resized.
+func _render_departure() -> void:
+	_body.clear_points()
+	_head.polygon = PackedVector2Array()
+	if _geometry == null or not _geometry.is_valid() or _cell_extent <= 0.0:
+		return
+	var d: float = _departure_distance
+	var l: float = _geometry.length()
+	var body_points: PackedVector2Array = _geometry.extract_interval(d, l + d + GameVisualStyle.BODY_END)
+	var scaled_body := PackedVector2Array()
+	for point in body_points:
+		scaled_body.append(point * _cell_extent)
+	_body.points = scaled_body
+	_body.width = _cell_extent * GameVisualStyle.BODY_WIDTH
+	var forward: Vector2 = _geometry.forward()
+	var right: Vector2 = Vector2(-forward.y, forward.x)
+	var tip: Vector2 = _geometry.sample_distance(l + d + GameVisualStyle.HEAD_TIP)
+	var base: Vector2 = _geometry.sample_distance(l + d + GameVisualStyle.HEAD_BASE)
+	_head.polygon = PackedVector2Array([
+		tip * _cell_extent,
+		(base + right * GameVisualStyle.HEAD_HALF_WIDTH) * _cell_extent,
+		(base - right * GameVisualStyle.HEAD_HALF_WIDTH) * _cell_extent,
+	])
+
+## Stops advancement/effects and prevents any future completion signal.
+## Used before setup disposal or scene teardown so a replaced attempt never
+## receives a stale callback.
+func cancel_departure() -> void:
+	if not _departing:
+		return
+	_completion_emitted = true
+	set_process(false)
