@@ -69,13 +69,29 @@ func _check_multi_cell_board_bounds() -> void:
 func _check_multiple_departures_and_completion(puzzle) -> void:
 	var board = puzzle.get_node("%PuzzleBoard")
 	var results = puzzle.get_node("%PuzzleResults")
+	var first_view: ArrowView = board._views[CLEAR_ORDER[0]]
+	var first_points: PackedVector2Array = first_view._body.points.duplicate()
 	for head in CLEAR_ORDER:
 		board.cell_clicked.emit(head)
+		if head == CLEAR_ORDER[0]:
+			await create_timer(0.04).timeout
+	var taps: int = puzzle._state.total_taps
+	board.cell_clicked.emit(CLEAR_ORDER[-1])
+	check(puzzle._state.total_taps == taps, "completed input does not add taps while departures drain")
+	get_root().size = Vector2i(1280, 720)
+	await process_frame
+	check(first_view._body.points == first_points, "resize preserves captured departing geometry")
+	paused = true
+	var pending: int = puzzle._pending_departures
+	await create_timer(0.1).timeout
+	check(puzzle._pending_departures == pending and not results.visible, "pause preserves pending departures and completion barrier")
+	paused = false
 	check(not results.visible,
 		"results stay hidden immediately after the last of several queued removals")
 	await create_timer(0.5).timeout
 	check(results.visible,
 		"results appear once every queued departure tween has finished")
+	check(puzzle._pending_departures == 0, "each staggered exit decrements barrier exactly once")
 
 ## Once completed, further selections are ignored: no additional departure,
 ## no error, results remain shown.

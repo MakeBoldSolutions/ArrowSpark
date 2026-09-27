@@ -1,0 +1,201 @@
+Running: godot_console --headless --path C:\Users\markh\AppData\Local\Temp\arrowgame-regression-5m2zssmt --editor --quit
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Started Project initialization (5 steps)[39m[0m
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Scanning file structure...[39m[0m
+[  16% ] [90m[1mfirst_scan_filesystem[22m | Loading global class names...[39m[0m
+[  33% ] [90m[1mfirst_scan_filesystem[22m | Verifying GDExtensions...[39m[0m
+[  50% ] [90m[1mfirst_scan_filesystem[22m | Creating autoload scripts...[39m[0m
+[  66% ] [90m[1mfirst_scan_filesystem[22m | Initializing plugins...[39m[0m
+[  83% ] [90m[1mfirst_scan_filesystem[22m | Starting file scan...[39m[0m
+[92m[ DONE ][39m [1mfirst_scan_filesystem[22m
+[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | Started Registering global classes... (10 steps)[39m[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | GameState[39m[0m
+[   9% ] [90m[1mupdate_scripts_classes[22m | LevelState[39m[0m
+[  18% ] [90m[1mupdate_scripts_classes[22m | AppSettings[39m[0m
+[  27% ] [90m[1mupdate_scripts_classes[22m | Config[39m[0m
+[  36% ] [90m[1mupdate_scripts_classes[22m | GlobalState[39m[0m
+[  45% ] [90m[1mupdate_scripts_classes[22m | GlobalStateData[39m[0m
+[  54% ] [90m[1mupdate_scripts_classes[22m | MainMenu[39m[0m
+[  63% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  72% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  81% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[92m[ DONE ][39m [1mupdate_scripts_classes[22m
+[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Started Loading editor (5 steps)[39m[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Loading editor layout...[39m[0m
+[  16% ] [90m[1mloading_editor_layout[22m | Loading docks...[39m[0m
+[92m[ DONE ][39m [1mloading_editor_layout[22m
+[0m
+
+
+Running: godot_console --headless --path C:\Users\markh\AppData\Local\Temp\arrowgame-regression-5m2zssmt --script regression.gd
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+TEST_USER_DIR=C:/Users/markh/AppData/Local/Temp/arrowgame-regression-5m2zssmt/userdata/Godot/app_userdata/ArrowGameRegression-cb127656537a445c8b45deb89f083b0a
+PASS: missing save initializes normally
+PASS: valid state saves
+PASS: valid state survives reload
+PASS: corrupt save blocks writes
+PASS: ordinary save cannot bypass recovery
+PASS: corrupt original remains intact
+PASS: explicit reset succeeds after backup
+PASS: reset preserves exact original bytes
+PASS: reset re-enables saving
+PASS: wrong resource type blocks saving
+PASS: incompatible original remains intact
+PASS: incompatible save can be explicitly reset
+PASS: backup collision retains both originals
+PASS: backup failure cancels reset
+PASS: backup failure keeps write protection
+PASS: backup failure preserves original
+PASS: write errors reach caller
+PASS: saved keyboard remap restored from disk
+PASS: unchanged gamepad binding restored from disk
+PASS: complete mapping restored
+PASS: old keyboard binding removed
+PASS: repeated restoration does not duplicate bindings
+PASS: reset restores keyboard and gamepad defaults
+PASS: corrupt settings block writes
+PASS: partially parsed settings discarded
+PASS: temporary settings remain usable
+PASS: direct settings save stays blocked
+PASS: all settings mutation paths preserve original
+PASS: settings backup failure cancels reset
+PASS: settings backup failure preserves original
+PASS: explicit settings reset succeeds
+PASS: settings backup preserves exact bytes
+PASS: settings reset enables writes
+PASS: settings persist after reset and reload
+PASS: a keyboard/gamepad remap is seeded and active before puzzle entry
+PASS: new_game() does not disturb a seeded keyboard/gamepad remap
+PASS: new_game() does not call GameState.start_game() (times_played unchanged)
+PASS: new_game() does not call GlobalState.reset() (max_level_reached unchanged)
+PASS: new_game() does not call GlobalState.reset() (existing level_states preserved)
+PASS: new_game() still opens the puzzle via SceneLoader.load_scene
+PASS: load_game_scene() does not call GameState.start_game() (times_played unchanged)
+PASS: load_game_scene() does not disturb a seeded keyboard/gamepad remap
+REGRESSION_FAILURES=0
+
+ERROR: user://global_state.tres:1 - Parse Error: Expected '['.
+   at: _printerr (scene/resources/resource_format_text.cpp:41)
+   GDScript backtrace (most recent call first):
+       [0] _load_or_new (res://global_state.gd:28)
+       [1] open (res://global_state.gd:40)
+       [2] _initialize (res://regression.gd:29)
+ERROR: Failed loading resource: user://global_state.tres.
+   at: _load (core/io/resource_loader.cpp:317)
+   GDScript backtrace (most recent call first):
+       [0] _load_or_new (res://global_state.gd:28)
+       [1] open (res://global_state.gd:40)
+       [2] _initialize (res://regression.gd:29)
+ERROR: Error loading resource: 'user://global_state.tres'.
+   at: load (core/core_bind.cpp:82)
+   GDScript backtrace (most recent call first):
+       [0] _load_or_new (res://global_state.gd:28)
+       [1] open (res://global_state.gd:40)
+       [2] _initialize (res://regression.gd:29)
+ERROR: Save could not be loaded. Original preserved; saving disabled until explicit reset.
+   at: push_error (core/variant/variant_utility.cpp:1023)
+   GDScript backtrace (most recent call first):
+       [0] _load_or_new (res://global_state.gd:33)
+       [1] open (res://global_state.gd:40)
+       [2] _initialize (res://regression.gd:29)
+ERROR: Save could not be loaded. Original preserved; saving disabled until explicit reset.
+   at: push_error (core/variant/variant_utility.cpp:1023)
+   GDScript backtrace (most recent call first):
+       [0] _load_or_new (res://global_state.gd:33)
+       [1] open (res://global_state.gd:40)
+       [2] _initialize (res://regression.gd:40)
+ERROR: user://global_state.tres:1 - Parse Error: Expected '['.
+   at: _printerr (scene/resources/resource_format_text.cpp:41)
+   GDScript backtrace (most recent call first):
+       [0] _load_or_new (res://global_state.gd:28)
+       [1] open (res://global_state.gd:40)
+       [2] _initialize (res://regression.gd:48)
+ERROR: Failed loading resource: user://global_state.tres.
+   at: _load (core/io/resource_loader.cpp:317)
+   GDScript backtrace (most recent call first):
+       [0] _load_or_new (res://global_state.gd:28)
+       [1] open (res://global_state.gd:40)
+       [2] _initialize (res://regression.gd:48)
+ERROR: Error loading resource: 'user://global_state.tres'.
+   at: load (core/core_bind.cpp:82)
+   GDScript backtrace (most recent call first):
+       [0] _load_or_new (res://global_state.gd:28)
+       [1] open (res://global_state.gd:40)
+       [2] _initialize (res://regression.gd:48)
+ERROR: Save could not be loaded. Original preserved; saving disabled until explicit reset.
+   at: push_error (core/variant/variant_utility.cpp:1023)
+   GDScript backtrace (most recent call first):
+       [0] _load_or_new (res://global_state.gd:33)
+       [1] open (res://global_state.gd:40)
+       [2] _initialize (res://regression.gd:48)
+ERROR: Failed to open 'C:/Users/markh/AppData/Local/Temp/arrowgame-regression-5m2zssmt/userdata/Godot/app_userdata/ArrowGameRegression-cb127656537a445c8b45deb89f083b0a/global_state.tres.recovery.2'.
+   at: copy (core/io/dir_access.cpp:429)
+   GDScript backtrace (most recent call first):
+       [0] reset (res://global_state.gd:72)
+       [1] _initialize (res://regression.gd:50)
+ERROR: Could not back up unreadable save; reset canceled: Can't open file
+   at: push_error (core/variant/variant_utility.cpp:1023)
+   GDScript backtrace (most recent call first):
+       [0] reset (res://global_state.gd:74)
+       [1] _initialize (res://regression.gd:50)
+ERROR: Cannot save file 'user://global_state.tres'.
+   at: save (scene/resources/resource_format_text.cpp:1768)
+   GDScript backtrace (most recent call first):
+       [0] save (res://global_state.gd:50)
+       [1] _initialize (res://regression.gd:57)
+ERROR: Failed to save progress: Can't open
+   at: push_error (core/variant/variant_utility.cpp:1023)
+   GDScript backtrace (most recent call first):
+       [0] save (res://global_state.gd:52)
+       [1] _initialize (res://regression.gd:57)
+ERROR: ConfigFile parse error at user://config.cfg:2: Unexpected identifier 'INVALID_SENTINEL'.
+   at: _parse (core/io/config_file.cpp:293)
+   GDScript backtrace (most recent call first):
+       [0] load_config_file (res://config.gd:29)
+       [1] _initialize (res://regression.gd:87)
+ERROR: Settings could not be loaded. Original preserved; settings writes disabled.
+   at: push_error (core/variant/variant_utility.cpp:1023)
+   GDScript backtrace (most recent call first):
+       [0] load_config_file (res://config.gd:34)
+       [1] _initialize (res://regression.gd:87)
+ERROR: Failed to open 'C:/Users/markh/AppData/Local/Temp/arrowgame-regression-5m2zssmt/userdata/Godot/app_userdata/ArrowGameRegression-cb127656537a445c8b45deb89f083b0a/config.cfg.recovery'.
+   at: copy (core/io/dir_access.cpp:429)
+   GDScript backtrace (most recent call first):
+       [0] reset_unreadable_config (res://config.gd:45)
+       [1] _initialize (res://regression.gd:98)
+ERROR: Settings backup failed; reset canceled: Can't open file
+   at: push_error (core/variant/variant_utility.cpp:1023)
+   GDScript backtrace (most recent call first):
+       [0] reset_unreadable_config (res://config.gd:47)
+       [1] _initialize (res://regression.gd:98)
+ERROR: Cannot save file 'user://global_state.tres'.
+   at: save (scene/resources/resource_format_text.cpp:1768)
+   GDScript backtrace (most recent call first):
+       [0] save (res://global_state.gd:50)
+       [1] open (res://global_state.gd:43)
+       [2] _test_no_reset_on_puzzle_entry (res://regression.gd:121)
+       [3] _initialize (res://regression.gd:108)
+ERROR: Failed to save progress: Can't open
+   at: push_error (core/variant/variant_utility.cpp:1023)
+   GDScript backtrace (most recent call first):
+       [0] save (res://global_state.gd:52)
+       [1] open (res://global_state.gd:43)
+       [2] _test_no_reset_on_puzzle_entry (res://regression.gd:121)
+       [3] _initialize (res://regression.gd:108)
+ERROR: Cannot save file 'user://global_state.tres'.
+   at: save (scene/resources/resource_format_text.cpp:1768)
+   GDScript backtrace (most recent call first):
+       [0] save (res://global_state.gd:50)
+       [1] _test_no_reset_on_puzzle_entry (res://regression.gd:127)
+       [2] _initialize (res://regression.gd:108)
+ERROR: Failed to save progress: Can't open
+   at: push_error (core/variant/variant_utility.cpp:1023)
+   GDScript backtrace (most recent call first):
+       [0] save (res://global_state.gd:52)
+       [1] _test_no_reset_on_puzzle_entry (res://regression.gd:127)
+       [2] _initialize (res://regression.gd:108)
+

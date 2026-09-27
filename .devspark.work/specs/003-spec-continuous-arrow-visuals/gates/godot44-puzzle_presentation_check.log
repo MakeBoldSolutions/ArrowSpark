@@ -1,0 +1,373 @@
+Godot Engine v4.4.stable.official.4c311cbee - https://godotengine.org
+
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: bends follow consecutive cells without closing neighboring endpoints
+PASS: bends follow consecutive cells without closing neighboring endpoints
+PASS: bends follow consecutive cells without closing neighboring endpoints
+PASS: view defensively copies shape offsets
+PASS: extent rebuild scales geometry without scaling parent
+PASS: extent rebuild scales geometry without scaling parent
+PASS: extent rebuild scales geometry without scaling parent
+PASS: extent rebuild scales geometry without scaling parent
+PASS: layout preserves unit parent scale
+PASS: bends follow consecutive cells without closing neighboring endpoints
+PASS: view defensively copies shape offsets
+PASS: extent rebuild scales geometry without scaling parent
+PASS: extent rebuild scales geometry without scaling parent
+PASS: layout preserves unit parent scale
+PASS: view defensively copies shape offsets
+PASS: extent rebuild scales geometry without scaling parent
+PASS: extent rebuild scales geometry without scaling parent
+PASS: layout preserves unit parent scale
+PASS: bends follow consecutive cells without closing neighboring endpoints
+PASS: view defensively copies shape offsets
+PASS: extent rebuild scales geometry without scaling parent
+PASS: extent rebuild scales geometry without scaling parent
+PASS: layout preserves unit parent scale
+PASS: view defensively copies shape offsets
+PASS: extent rebuild scales geometry without scaling parent
+PASS: extent rebuild scales geometry without scaling parent
+PASS: layout preserves unit parent scale
+PASS: view defensively copies shape offsets
+PASS: extent rebuild scales geometry without scaling parent
+PASS: extent rebuild scales geometry without scaling parent
+PASS: layout preserves unit parent scale
+PASS: view defensively copies shape offsets
+PASS: extent rebuild scales geometry without scaling parent
+PASS: extent rebuild scales geometry without scaling parent
+PASS: layout preserves unit parent scale
+PASS: view defensively copies shape offsets
+PASS: extent rebuild scales geometry without scaling parent
+PASS: extent rebuild scales geometry without scaling parent
+PASS: layout preserves unit parent scale
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: bends follow consecutive cells without closing neighboring endpoints
+PASS: bends follow consecutive cells without closing neighboring endpoints
+PASS: bends follow consecutive cells without closing neighboring endpoints
+PASS: view defensively copies shape offsets
+PASS: extent rebuild scales geometry without scaling parent
+PASS: extent rebuild scales geometry without scaling parent
+PASS: extent rebuild scales geometry without scaling parent
+PASS: extent rebuild scales geometry without scaling parent
+PASS: layout preserves unit parent scale
+PASS: bends follow consecutive cells without closing neighboring endpoints
+PASS: view defensively copies shape offsets
+PASS: extent rebuild scales geometry without scaling parent
+PASS: extent rebuild scales geometry without scaling parent
+PASS: layout preserves unit parent scale
+PASS: view defensively copies shape offsets
+PASS: extent rebuild scales geometry without scaling parent
+PASS: extent rebuild scales geometry without scaling parent
+PASS: layout preserves unit parent scale
+PASS: bends follow consecutive cells without closing neighboring endpoints
+PASS: view defensively copies shape offsets
+PASS: extent rebuild scales geometry without scaling parent
+PASS: extent rebuild scales geometry without scaling parent
+PASS: layout preserves unit parent scale
+PASS: view defensively copies shape offsets
+PASS: extent rebuild scales geometry without scaling parent
+PASS: extent rebuild scales geometry without scaling parent
+PASS: layout preserves unit parent scale
+PASS: view defensively copies shape offsets
+PASS: extent rebuild scales geometry without scaling parent
+PASS: extent rebuild scales geometry without scaling parent
+PASS: layout preserves unit parent scale
+PASS: view defensively copies shape offsets
+PASS: extent rebuild scales geometry without scaling parent
+PASS: extent rebuild scales geometry without scaling parent
+PASS: layout preserves unit parent scale
+PASS: view defensively copies shape offsets
+PASS: extent rebuild scales geometry without scaling parent
+PASS: extent rebuild scales geometry without scaling parent
+PASS: layout preserves unit parent scale
+PASS: decorative geometry never changes domain occupancy
+PASS: blocked feedback colors whole arrow red
+PASS: pulse stays restrained
+PASS: repeated blocked cue restarts at baseline
+PASS: departure synchronously normalizes every pulse phase
+PASS: terminal departure ignores stale effects and duplicate exits
+PASS: departure emits completion exactly once
+PASS: blocked feedback colors whole arrow red
+PASS: pulse stays restrained
+PASS: repeated blocked cue restarts at baseline
+PASS: departure synchronously normalizes every pulse phase
+PASS: terminal departure ignores stale effects and duplicate exits
+PASS: departure emits completion exactly once
+PASS: blocked feedback colors whole arrow red
+PASS: pulse stays restrained
+PASS: repeated blocked cue restarts at baseline
+PASS: departure synchronously normalizes every pulse phase
+PASS: terminal departure ignores stale effects and duplicate exits
+PASS: departure emits completion exactly once
+PASS: hover exit cannot overwrite active red feedback
+PASS: blocked completion immediately restores eligible ember
+PASS: blocked completion without hover restores ink
+PASS: departure cancels in-progress hover before next frame
+PASS: real puzzle instantiates all eight views
+PASS: theme is scoped to Layout, leaving root overlays unchanged
+PASS: gameplay has a local background
+PASS: light background never intercepts input
+PASS: major heading uses bundled Be Vietnam Pro ExtraBold
+PASS: heading binaries carry required weights
+PASS: UI uses bundled Inter Tight 600
+PASS: supporting role uses weight 400
+PASS: results retain numeric behavior
+PASS: existing score supplies success cue
+PASS: results preserve Replay focus
+PASS: button focus has a visible border
+PASS: text/control fits minimum at (1280, 720)
+PASS: required content stays onscreen at (1280, 720)
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (1280, 720)
+PASS: required content stays onscreen at (1280, 720)
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (1280, 720)
+PASS: required content stays onscreen at (1280, 720)
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (1280, 720)
+PASS: required content stays onscreen at (1280, 720)
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (1280, 720)
+PASS: required content stays onscreen at (1280, 720)
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (1280, 720)
+PASS: required content stays onscreen at (1280, 720)
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (1280, 720)
+PASS: required content stays onscreen at (1280, 720)
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (1280, 720)
+PASS: required content stays onscreen at (1280, 720)
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (960, 540)
+PASS: required content stays onscreen at (960, 540)
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (960, 540)
+PASS: required content stays onscreen at (960, 540)
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (960, 540)
+PASS: required content stays onscreen at (960, 540)
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (960, 540)
+PASS: required content stays onscreen at (960, 540)
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (960, 540)
+PASS: required content stays onscreen at (960, 540)
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (960, 540)
+PASS: required content stays onscreen at (960, 540)
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (960, 540)
+PASS: required content stays onscreen at (960, 540)
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (960, 540)
+PASS: required content stays onscreen at (960, 540)
+PASS: text stays readable without shrinking with cells
+PASS: board provides canonical-owner hover routing
+PASS: head motion hovers whole owner
+PASS: moving within owner does not restart transition
+PASS: owner change clears previous hover
+PASS: empty cell clears hover
+PASS: pause clears hover and invalidates cell cache
+PASS: focus loss clears hover
+PASS: pointer exit clears hover
+PASS: outside cell clears hover
+PASS: hover never changes taps or active arrows
+PASS: button release never selects
+PASS: blank space in occupied tail cell selects once
+PASS: logical removal immediately clears owner hover
+PASS: departed cells cannot select or hover visible departure
+PASS: bundled Inter Tight supports tabular figures
+PASS: numeric digit 0 has tabular advance
+PASS: numeric digit 1 has tabular advance
+PASS: numeric digit 2 has tabular advance
+PASS: numeric digit 3 has tabular advance
+PASS: numeric digit 4 has tabular advance
+PASS: numeric digit 5 has tabular advance
+PASS: numeric digit 6 has tabular advance
+PASS: numeric digit 7 has tabular advance
+PASS: numeric digit 8 has tabular advance
+PASS: numeric digit 9 has tabular advance
+PUZZLE_PRESENTATION_FAILURES=0

@@ -1,0 +1,517 @@
+Running: godot_console --headless --path C:\Users\markh\AppData\Local\Temp\arrowgame-puzzle-7gdz9hep --editor --quit
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Started Project initialization (5 steps)[39m[0m
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Scanning file structure...[39m[0m
+[  16% ] [90m[1mfirst_scan_filesystem[22m | Loading global class names...[39m[0m
+[  33% ] [90m[1mfirst_scan_filesystem[22m | Verifying GDExtensions...[39m[0m
+[  50% ] [90m[1mfirst_scan_filesystem[22m | Creating autoload scripts...[39m[0m
+[  66% ] [90m[1mfirst_scan_filesystem[22m | Initializing plugins...[39m[0m
+[  83% ] [90m[1mfirst_scan_filesystem[22m | Starting file scan...[39m[0m
+[92m[ DONE ][39m [1mfirst_scan_filesystem[22m
+[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | Started Registering global classes... (6 steps)[39m[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | PuzzleDefinition[39m[0m
+[  14% ] [90m[1mupdate_scripts_classes[22m | PuzzleFeedback[39m[0m
+[  28% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  42% ] [90m[1mupdate_scripts_classes[22m | PuzzleResultsFormat[39m[0m
+[  57% ] [90m[1mupdate_scripts_classes[22m | PuzzleSolver[39m[0m
+[  71% ] [90m[1mupdate_scripts_classes[22m | PuzzleState[39m[0m
+[92m[ DONE ][39m [1mupdate_scripts_classes[22m
+[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Started Loading editor (5 steps)[39m[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Loading editor layout...[39m[0m
+[  16% ] [90m[1mloading_editor_layout[22m | Loading docks...[39m[0m
+[92m[ DONE ][39m [1mloading_editor_layout[22m
+[0m
+
+
+Running: godot_console --headless --path C:\Users\markh\AppData\Local\Temp\arrowgame-puzzle-7gdz9hep --script puzzle_regression.gd
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+PASS: fixed definition is structurally valid
+PASS: zero width is invalid
+PASS: empty arrow map is invalid
+PASS: out-of-bounds cell is invalid
+PASS: non-cardinal direction is invalid
+PASS: fixed board includes all four cardinal directions
+PASS: a straight two-cell tail behind the head is valid
+PASS: a tail with more than one right-angle turn is valid
+PASS: an omitted tail (single-cell arrow) is valid
+PASS: a first tail cell beside (not behind) the head is invalid
+PASS: a tail with a non-adjacent gap is invalid
+PASS: a tail with a diagonal step is invalid
+PASS: a tail that reverses onto an earlier cell is invalid
+PASS: a tail cell outside board bounds is invalid
+PASS: a tail cell landing on the arrow's own forward escape ray is invalid
+PASS: two arrows whose shapes share a cell is invalid
+PASS: different arrows' cells may be orthogonally adjacent without overlap
+PASS: mutating the caller's arrows dictionary after construction does not affect the definition
+PASS: mutating the caller's tails dictionary after construction does not affect the definition
+PASS: get_arrow_cells returns an independent copy on every call
+PASS: get_cell_owners returns an independent copy on every call
+PASS: selecting a tail cell removes the whole shape
+PASS: both head and tail cells are gone after a tail-cell selection
+PASS: a two-cell shape counts as exactly one removal
+PASS: reselecting the departed head after a tail-cell removal is ignored
+PASS: selecting the head cell also removes the whole shape
+PASS: the tail cell is gone after a head-cell removal
+PASS: LEFT-facing arrow is blocked by a straight tail cell on its ray
+PASS: the LEFT blocker's own head is a different arrow than the blocked one
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 0
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 1
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 2
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 3
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 4
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 5
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 6
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 7
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 8
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 9
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 10
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 11
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 12
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 13
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 14
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 15
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 16
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 17
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 18
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 19
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 20
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 21
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 22
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 23
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 24
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 25
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 26
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 27
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 28
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 29
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 30
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 31
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 32
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 33
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 34
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 35
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 36
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 37
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 38
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 39
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 40
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 41
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 42
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 43
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 44
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 45
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 46
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 47
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 48
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 49
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 50
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 51
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 52
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 53
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 54
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 55
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 56
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 57
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 58
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 59
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 60
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 61
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 62
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 63
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 64
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 65
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 66
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 67
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 68
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 69
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 70
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 71
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 72
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 73
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 74
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 75
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 76
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 77
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 78
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 79
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 80
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 81
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 82
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 83
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 84
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 85
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 86
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 87
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 88
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 89
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 90
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 91
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 92
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 93
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 94
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 95
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 96
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 97
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 98
+PASS: LEFT-facing arrow stays tail-blocked on repeated selection 99
+PASS: 100 repeated tail-caused blocks add exactly 100 mistakes
+PASS: removing the tail blocker succeeds
+PASS: the LEFT-facing arrow becomes a newly legal dependent once its tail blocker departs
+PASS: RIGHT-facing arrow is blocked by a straight tail cell on its ray
+PASS: UP-facing arrow is blocked by a straight tail cell on its ray
+PASS: the UP blocker's own head is a different arrow than the blocked one
+PASS: DOWN-facing arrow is blocked by a straight tail cell on its ray
+PASS: UP-facing arrow is blocked by a two-turn bent tail's final cell
+PASS: an arrow with a long bent tail is never blocked by its own cells
+PASS: an arrow with a long bent tail and a clear path removes successfully
+PASS: an edge-facing arrow with a tail behind it is still immediately clear
+PASS: A (LEFT) has nothing ahead: clear
+PASS: B (LEFT) is blocked by A's tail cell at (1,0), then A's head at (0,0)
+PASS: C (DOWN) is blocked by D regardless of D's own direction
+PASS: D (RIGHT) points outward from the edge: clear
+PASS: E (UP) is blocked by A's tail cell at (0,1), then A's head at (0,0)
+PASS: F (LEFT) is blocked by E ahead on the same row
+PASS: G (UP) is blocked by B ahead on the same column
+PASS: H (RIGHT) has nothing ahead before the edge: clear
+PASS: A is not blocked by arrows behind it along its own axis
+PASS: behind, diagonal and different-parallel-line arrows do not block a clear arrow
+PASS: witness selection at (0, 0) is clear
+PASS: remaining decreases by exactly one per clear removal
+PASS: witness selection at (2, 0) is clear
+PASS: remaining decreases by exactly one per clear removal
+PASS: witness selection at (4, 3) is clear
+PASS: remaining decreases by exactly one per clear removal
+PASS: witness selection at (4, 0) is clear
+PASS: remaining decreases by exactly one per clear removal
+PASS: witness selection at (0, 3) is clear
+PASS: remaining decreases by exactly one per clear removal
+PASS: witness selection at (2, 3) is clear
+PASS: remaining decreases by exactly one per clear removal
+PASS: witness selection at (2, 1) is clear
+PASS: remaining decreases by exactly one per clear removal
+PASS: witness selection at (3, 2) is clear
+PASS: remaining decreases by exactly one per clear removal
+PASS: puzzle completes once all arrows are removed
+PASS: witness solution records no mistakes
+PASS: total taps equal successful removals with no mistakes
+PASS: the shipped board includes at least one straight tail
+PASS: the shipped board includes at least one multi-turn tail
+PASS: the shipped board includes at least one tail cell blocking another arrow
+PASS: B starts blocked by A on the shipped board
+PASS: removing A succeeds
+PASS: B becomes a newly legal dependent once A departs
+PASS: B removes successfully once clear
+PASS: empty cell selection is ignored
+PASS: ignored empty-cell selection does not tap
+PASS: A is clear and removed
+PASS: re-selecting a departed arrow is ignored, so it cannot be removed twice
+PASS: ignored reselection does not add a duplicate tap
+PASS: querying blocking on an absent cell returns false
+PASS: total-taps invariant holds for a clear/ignored-only sequence
+PASS: total-arrows invariant holds for a clear/ignored-only sequence
+PASS: an ignored empty-cell selection is never counted as a mistake
+PASS: B stays blocked on repeated selection 0
+PASS: B stays blocked on repeated selection 1
+PASS: B stays blocked on repeated selection 2
+PASS: B stays blocked on repeated selection 3
+PASS: B stays blocked on repeated selection 4
+PASS: B stays blocked on repeated selection 5
+PASS: B stays blocked on repeated selection 6
+PASS: B stays blocked on repeated selection 7
+PASS: B stays blocked on repeated selection 8
+PASS: B stays blocked on repeated selection 9
+PASS: B stays blocked on repeated selection 10
+PASS: B stays blocked on repeated selection 11
+PASS: B stays blocked on repeated selection 12
+PASS: B stays blocked on repeated selection 13
+PASS: B stays blocked on repeated selection 14
+PASS: B stays blocked on repeated selection 15
+PASS: B stays blocked on repeated selection 16
+PASS: B stays blocked on repeated selection 17
+PASS: B stays blocked on repeated selection 18
+PASS: B stays blocked on repeated selection 19
+PASS: B stays blocked on repeated selection 20
+PASS: B stays blocked on repeated selection 21
+PASS: B stays blocked on repeated selection 22
+PASS: B stays blocked on repeated selection 23
+PASS: B stays blocked on repeated selection 24
+PASS: B stays blocked on repeated selection 25
+PASS: B stays blocked on repeated selection 26
+PASS: B stays blocked on repeated selection 27
+PASS: B stays blocked on repeated selection 28
+PASS: B stays blocked on repeated selection 29
+PASS: B stays blocked on repeated selection 30
+PASS: B stays blocked on repeated selection 31
+PASS: B stays blocked on repeated selection 32
+PASS: B stays blocked on repeated selection 33
+PASS: B stays blocked on repeated selection 34
+PASS: B stays blocked on repeated selection 35
+PASS: B stays blocked on repeated selection 36
+PASS: B stays blocked on repeated selection 37
+PASS: B stays blocked on repeated selection 38
+PASS: B stays blocked on repeated selection 39
+PASS: B stays blocked on repeated selection 40
+PASS: B stays blocked on repeated selection 41
+PASS: B stays blocked on repeated selection 42
+PASS: B stays blocked on repeated selection 43
+PASS: B stays blocked on repeated selection 44
+PASS: B stays blocked on repeated selection 45
+PASS: B stays blocked on repeated selection 46
+PASS: B stays blocked on repeated selection 47
+PASS: B stays blocked on repeated selection 48
+PASS: B stays blocked on repeated selection 49
+PASS: B stays blocked on repeated selection 50
+PASS: B stays blocked on repeated selection 51
+PASS: B stays blocked on repeated selection 52
+PASS: B stays blocked on repeated selection 53
+PASS: B stays blocked on repeated selection 54
+PASS: B stays blocked on repeated selection 55
+PASS: B stays blocked on repeated selection 56
+PASS: B stays blocked on repeated selection 57
+PASS: B stays blocked on repeated selection 58
+PASS: B stays blocked on repeated selection 59
+PASS: B stays blocked on repeated selection 60
+PASS: B stays blocked on repeated selection 61
+PASS: B stays blocked on repeated selection 62
+PASS: B stays blocked on repeated selection 63
+PASS: B stays blocked on repeated selection 64
+PASS: B stays blocked on repeated selection 65
+PASS: B stays blocked on repeated selection 66
+PASS: B stays blocked on repeated selection 67
+PASS: B stays blocked on repeated selection 68
+PASS: B stays blocked on repeated selection 69
+PASS: B stays blocked on repeated selection 70
+PASS: B stays blocked on repeated selection 71
+PASS: B stays blocked on repeated selection 72
+PASS: B stays blocked on repeated selection 73
+PASS: B stays blocked on repeated selection 74
+PASS: B stays blocked on repeated selection 75
+PASS: B stays blocked on repeated selection 76
+PASS: B stays blocked on repeated selection 77
+PASS: B stays blocked on repeated selection 78
+PASS: B stays blocked on repeated selection 79
+PASS: B stays blocked on repeated selection 80
+PASS: B stays blocked on repeated selection 81
+PASS: B stays blocked on repeated selection 82
+PASS: B stays blocked on repeated selection 83
+PASS: B stays blocked on repeated selection 84
+PASS: B stays blocked on repeated selection 85
+PASS: B stays blocked on repeated selection 86
+PASS: B stays blocked on repeated selection 87
+PASS: B stays blocked on repeated selection 88
+PASS: B stays blocked on repeated selection 89
+PASS: B stays blocked on repeated selection 90
+PASS: B stays blocked on repeated selection 91
+PASS: B stays blocked on repeated selection 92
+PASS: B stays blocked on repeated selection 93
+PASS: B stays blocked on repeated selection 94
+PASS: B stays blocked on repeated selection 95
+PASS: B stays blocked on repeated selection 96
+PASS: B stays blocked on repeated selection 97
+PASS: B stays blocked on repeated selection 98
+PASS: B stays blocked on repeated selection 99
+PASS: 100 consecutive blocked selections add exactly 100 mistakes
+PASS: the board is unchanged after 100 blocked selections
+PASS: all 100 blocked selections count once each
+PASS: removing A unblocks B
+PASS: B is clear immediately once its blocker departs; play continues without interruption
+PASS: tap total reflects exactly 102 accepted selections
+PASS: mistakes remain exactly 100 after B is finally cleared
+PASS: two successful removals recorded (A, then B)
+PASS: the coded blocked-feedback cue duration constant does not exceed its coded 0.3-second cap
+PASS: the blocked-feedback cue has a positive, visible duration
+PASS: state completes for 0 mistakes
+PASS: recorded mistakes match for 0 mistakes
+PASS: score matches max(total-mistakes,0) for 0 mistakes
+PASS: accuracy display '100.0%' matches expected '100.0%' for 0 mistakes
+PASS: state completes for 3 mistakes
+PASS: recorded mistakes match for 3 mistakes
+PASS: score matches max(total-mistakes,0) for 3 mistakes
+PASS: accuracy display '72.7%' matches expected '72.7%' for 3 mistakes
+PASS: state completes for 8 mistakes
+PASS: recorded mistakes match for 8 mistakes
+PASS: score matches max(total-mistakes,0) for 8 mistakes
+PASS: accuracy display '50.0%' matches expected '50.0%' for 8 mistakes
+PASS: state completes for 9 mistakes
+PASS: recorded mistakes match for 9 mistakes
+PASS: score matches max(total-mistakes,0) for 9 mistakes
+PASS: accuracy display '47.1%' matches expected '47.1%' for 9 mistakes
+PASS: state completes for 120 mistakes
+PASS: recorded mistakes match for 120 mistakes
+PASS: score matches max(total-mistakes,0) for 120 mistakes
+PASS: accuracy display '6.3%' matches expected '6.3%' for 120 mistakes
+PASS: zero accepted taps yields zero accuracy, avoiding division by zero
+PASS: a completed attempt ignores further board selections
+PASS: completed state does not add taps
+PASS: completed state does not add removals
+PASS: a fresh state built from the same definition (Replay) starts with zero counters
+PASS: a fresh state restores the full remaining count
+PASS: a fresh state is not completed
+PASS: the prior attempt's counters are independent of the fresh Replay state
+PASS: the shipped puzzle definition is valid and solvable
+PASS: a solvable definition has no validation errors
+PASS: the witness is complete: one entry per arrow
+PASS: the witness has no duplicate heads (uniqueness)
+PASS: replaying the witness head (0, 0) against a fresh state is never blocked
+PASS: replaying the witness head (2, 0) against a fresh state is never blocked
+PASS: replaying the witness head (2, 1) against a fresh state is never blocked
+PASS: replaying the witness head (3, 2) against a fresh state is never blocked
+PASS: replaying the witness head (0, 3) against a fresh state is never blocked
+PASS: replaying the witness head (2, 3) against a fresh state is never blocked
+PASS: replaying the witness head (4, 3) against a fresh state is never blocked
+PASS: replaying the witness head (4, 0) against a fresh state is never blocked
+PASS: executing the exact witness sequence against the rule layer clears the board with zero mistakes
+PASS: analyzing an invalid definition reports invalid, not unsolvable
+PASS: an invalid definition never returns a witness
+PASS: an invalid definition reports at least one diagnostic
+PASS: invalid input yields a zero states_examined metric
+PASS: invalid input yields a zero active_choices_encountered metric
+PASS: invalid input yields a zero legal_choices_encountered metric
+PASS: invalid input yields a zero forced_states metric
+PASS: invalid input yields a zero branching_states metric
+PASS: invalid input yields a zero no_move_states metric
+PASS: a two-arrow facing cycle is a structurally valid definition
+PASS: a two-arrow facing cycle is valid but unsolvable
+PASS: an unsolvable definition never returns a partial sequence as a witness
+PASS: a removable prefix followed by a residual cycle is still reported unsolvable, not a false success
+PASS: a residual cycle after a removable prefix never returns a partial witness
+PASS: repeated analyze() calls on the same definition return identical outcomes and witnesses
+PASS: analyze() never mutates the caller's definition
+PASS: analyze() never affects a separately live attempt built from the same definition
+PASS: both independent arrows are simultaneously legal at the start (a genuine branching state)
+PASS: forcing X first succeeds
+PASS: Y then completes the board
+PASS: forcing X before Y still reaches a complete, mistake-free solution
+PASS: forcing Y first succeeds
+PASS: X then completes the board
+PASS: forcing Y before X still reaches a complete, mistake-free solution
+PASS: a single clear arrow is solvable
+PASS: one-arrow board examines exactly one state
+PASS: one-arrow board: active=1, legal=1
+PASS: one-arrow board: forced=1, branching=0, no_move=0
+PASS: states_examined equals the sum of forced, branching and no_move states
+PASS: metric 'states_examined' is nonnegative
+PASS: metric 'active_choices_encountered' is nonnegative
+PASS: metric 'legal_choices_encountered' is nonnegative
+PASS: metric 'forced_states' is nonnegative
+PASS: metric 'branching_states' is nonnegative
+PASS: metric 'no_move_states' is nonnegative
+PASS: the result has no top-level 'difficulty' field
+PASS: metrics has no 'difficulty' field
+PASS: the result has no top-level 'difficulty_score' field
+PASS: metrics has no 'difficulty_score' field
+PASS: the result has no top-level 'difficulty_level' field
+PASS: metrics has no 'difficulty_level' field
+PASS: the result has no top-level 'level' field
+PASS: metrics has no 'level' field
+PASS: the result has no top-level 'easy_medium_hard' field
+PASS: metrics has no 'easy_medium_hard' field
+PASS: repeated analyze() calls on the single-arrow board are stable
+PASS: two independent arrows are solvable
+PASS: two independent arrows examine exactly two states
+PASS: two independent arrows: active=3, legal=3 (2 then 1 remaining, both fully legal)
+PASS: two independent arrows: branching=1 (both legal at once), forced=1 (one left), no_move=0
+PASS: states_examined equals the sum of forced, branching and no_move states
+PASS: metric 'states_examined' is nonnegative
+PASS: metric 'active_choices_encountered' is nonnegative
+PASS: metric 'legal_choices_encountered' is nonnegative
+PASS: metric 'forced_states' is nonnegative
+PASS: metric 'branching_states' is nonnegative
+PASS: metric 'no_move_states' is nonnegative
+PASS: the result has no top-level 'difficulty' field
+PASS: metrics has no 'difficulty' field
+PASS: the result has no top-level 'difficulty_score' field
+PASS: metrics has no 'difficulty_score' field
+PASS: the result has no top-level 'difficulty_level' field
+PASS: metrics has no 'difficulty_level' field
+PASS: the result has no top-level 'level' field
+PASS: metrics has no 'level' field
+PASS: the result has no top-level 'easy_medium_hard' field
+PASS: metrics has no 'easy_medium_hard' field
+PASS: repeated analyze() calls on the two-independent-arrow board are stable
+PASS: a two-arrow facing cycle is unsolvable
+PASS: a two-arrow cycle examines exactly one (stuck) state
+PASS: a two-arrow cycle: active=2, legal=0
+PASS: a two-arrow cycle: no_move=1, forced=0, branching=0
+PASS: states_examined equals the sum of forced, branching and no_move states
+PASS: metric 'states_examined' is nonnegative
+PASS: metric 'active_choices_encountered' is nonnegative
+PASS: metric 'legal_choices_encountered' is nonnegative
+PASS: metric 'forced_states' is nonnegative
+PASS: metric 'branching_states' is nonnegative
+PASS: metric 'no_move_states' is nonnegative
+PASS: the result has no top-level 'difficulty' field
+PASS: metrics has no 'difficulty' field
+PASS: the result has no top-level 'difficulty_score' field
+PASS: metrics has no 'difficulty_score' field
+PASS: the result has no top-level 'difficulty_level' field
+PASS: metrics has no 'difficulty_level' field
+PASS: the result has no top-level 'level' field
+PASS: metrics has no 'level' field
+PASS: the result has no top-level 'easy_medium_hard' field
+PASS: metrics has no 'easy_medium_hard' field
+PASS: repeated analyze() calls on the two-arrow cycle are stable
+PUZZLE_FAILURES=0
+
+
+Running: godot_console --headless --path C:\GitHub\MakeBoldSolutions\ArrowGame --editor --quit
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Started Project initialization (5 steps)[39m[0m
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Scanning file structure...[39m[0m
+[  16% ] [90m[1mfirst_scan_filesystem[22m | Loading global class names...[39m[0m
+[  33% ] [90m[1mfirst_scan_filesystem[22m | Verifying GDExtensions...[39m[0m
+[  50% ] [90m[1mfirst_scan_filesystem[22m | Creating autoload scripts...[39m[0m
+[  66% ] [90m[1mfirst_scan_filesystem[22m | Initializing plugins...[39m[0m
+[  83% ] [90m[1mfirst_scan_filesystem[22m | Starting file scan...[39m[0m
+[92m[ DONE ][39m [1mfirst_scan_filesystem[22m
+[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Started Loading editor (5 steps)[39m[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Loading editor layout...[39m[0m
+[  16% ] [90m[1mloading_editor_layout[22m | Loading docks...[39m[0m
+[92m[ DONE ][39m [1mloading_editor_layout[22m
+[0m
+
+
+Running: godot_console --headless --path C:\GitHub\MakeBoldSolutions\ArrowGame --script res://tests/puzzle_layout_check.gd
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+PASS: the coded blocked-feedback cue duration constant does not exceed its coded 0.3-second cap
+PASS: a bent tail's view bounding box covers its full 2x3 cell extent at 1280x720
+PASS: a click inside the tail-tip cell resolves to that tail cell's board coordinate
+PASS: the same bounding box relationship holds after a resize to 960x540
+PASS: HUD and board rects do not overlap at (1280, 720)
+PASS: HUD remains visible (nonzero size) at (1280, 720)
+PASS: board remains visible (nonzero size) at (1280, 720)
+PASS: HUD and board rects do not overlap at (960, 540)
+PASS: HUD remains visible (nonzero size) at (960, 540)
+PASS: board remains visible (nonzero size) at (960, 540)
+PASS: results stay hidden immediately after the last of several queued removals
+PASS: results appear once every queued departure tween has finished
+PASS: a selection after completion is ignored and results remain shown
+PASS: a freshly instantiated puzzle scene starts with results hidden
+PASS: a freshly instantiated puzzle scene starts with the full remaining count
+PASS: 20 rapid selections on a blocked tail cell, interrupting its own pulse each time, count exactly once each
+PASS: rapid blocked tail-cell clicks never complete or otherwise disturb the attempt
+PUZZLE_LAYOUT_FAILURES=0
+
+
+Running: godot_console --headless --path C:\GitHub\MakeBoldSolutions\ArrowGame --script res://tests/puzzle_presentation_check.gd
+Traceback (most recent call last):
+  File "C:\GitHub\MakeBoldSolutions\ArrowGame\tests\run_puzzle_regressions.py", line 90, in <module>
+    main()
+    ~~~~^^
+  File "C:\GitHub\MakeBoldSolutions\ArrowGame\tests\run_puzzle_regressions.py", line 86, in main
+    run_layout_check(args.godot, repo)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\GitHub\MakeBoldSolutions\ArrowGame\tests\run_puzzle_regressions.py", line 70, in run_layout_check
+    result = subprocess.run(command, env=env, check=True, timeout=90,
+                            capture_output=True, text=True)
+  File "C:\Python314\Lib\subprocess.py", line 577, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['godot_console', '--headless', '--path', 'C:\\GitHub\\MakeBoldSolutions\\ArrowGame', '--script', 'res://tests/puzzle_presentation_check.gd']' returned non-zero exit status 1.

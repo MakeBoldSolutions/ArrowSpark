@@ -1,0 +1,67 @@
+{
+  "at": "2026-09-27T01:11:26.816952+00:00",
+  "runs": [
+    {
+      "name": "puzzle",
+      "command": [
+        "python",
+        "tests/run_puzzle_regressions.py",
+        "--godot",
+        "godot_console"
+      ],
+      "APPDATA": "C:\\Users\\markh\\AppData\\Local\\Temp\\arrow-verify-q_wgik4b",
+      "XDG_DATA_HOME": "C:\\Users\\markh\\AppData\\Local\\Temp\\arrow-verify-q_wgik4b",
+      "exit": 0,
+      "log": "C:\\GitHub\\MakeBoldSolutions\\ArrowGame\\.devspark.work\\specs\\003-spec-continuous-arrow-visuals\\gates\\verify-evidence\\puzzle.log"
+    },
+    {
+      "name": "save-input",
+      "command": [
+        "python",
+        "tests/run_regressions.py",
+        "--godot",
+        "godot_console"
+      ],
+      "APPDATA": "C:\\Users\\markh\\AppData\\Local\\Temp\\arrow-verify-z3a1ng4y",
+      "XDG_DATA_HOME": "C:\\Users\\markh\\AppData\\Local\\Temp\\arrow-verify-z3a1ng4y",
+      "exit": 0,
+      "log": "C:\\GitHub\\MakeBoldSolutions\\ArrowGame\\.devspark.work\\specs\\003-spec-continuous-arrow-visuals\\gates\\verify-evidence\\save-input.log"
+    },
+    {
+      "name": "render",
+      "command": [
+        "godot_console",
+        "--path",
+        "C:\\GitHub\\MakeBoldSolutions\\ArrowGame",
+        "--rendering-method",
+        "gl_compatibility",
+        "--script",
+        "C:\\GitHub\\MakeBoldSolutions\\ArrowGame\\.devspark.work\\specs\\003-spec-continuous-arrow-visuals\\gates\\render_check.gd",
+        "--",
+        "C:\\GitHub\\MakeBoldSolutions\\ArrowGame\\.devspark.work\\specs\\003-spec-continuous-arrow-visuals\\gates\\verify-evidence"
+      ],
+      "APPDATA": "C:\\Users\\markh\\AppData\\Local\\Temp\\arrow-verify-unyiunbt",
+      "XDG_DATA_HOME": "C:\\Users\\markh\\AppData\\Local\\Temp\\arrow-verify-unyiunbt",
+      "exit": 0,
+      "log": "C:\\GitHub\\MakeBoldSolutions\\ArrowGame\\.devspark.work\\specs\\003-spec-continuous-arrow-visuals\\gates\\verify-evidence\\render.log"
+    },
+    {
+      "name": "navigation",
+      "command": [
+        "godot_console",
+        "--path",
+        "C:\\GitHub\\MakeBoldSolutions\\ArrowGame",
+        "--rendering-method",
+        "gl_compatibility",
+        "--script",
+        "C:\\GitHub\\MakeBoldSolutions\\ArrowGame\\.devspark.work\\specs\\003-spec-continuous-arrow-visuals\\gates\\navigation_check.gd",
+        "--",
+        "C:\\GitHub\\MakeBoldSolutions\\ArrowGame\\.devspark.work\\specs\\003-spec-continuous-arrow-visuals\\gates\\verify-evidence"
+      ],
+      "APPDATA": "C:\\Users\\markh\\AppData\\Local\\Temp\\arrow-verify-fzww9w1k",
+      "XDG_DATA_HOME": "C:\\Users\\markh\\AppData\\Local\\Temp\\arrow-verify-fzww9w1k",
+      "exit": 0,
+      "log": "C:\\GitHub\\MakeBoldSolutions\\ArrowGame\\.devspark.work\\specs\\003-spec-continuous-arrow-visuals\\gates\\verify-evidence\\navigation.log"
+    }
+  ]
+}

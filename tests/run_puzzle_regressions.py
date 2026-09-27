@@ -1,6 +1,6 @@
 """Run headless Godot checks for the arrow puzzle without touching player data.
 
-Two independent checks run:
+Three independent checks run:
 1. Pure rule regressions (tests/puzzle_regression.gd) against an isolated,
    unique temporary project containing only the puzzle core scripts. No
    scenes, addons or autoloads are needed since PuzzleState/PuzzleDefinition
@@ -10,6 +10,8 @@ Two independent checks run:
    scene tree and addon autoloads are available), with the platform
    application-data root redirected to an isolated temporary directory so no
    player save/settings data is read or written.
+3. Geometry, interaction, fonts and animation presentation checks after a
+   real-project import, sharing the layout suite's isolated user-data root.
 """
 
 from pathlib import Path
@@ -57,17 +59,23 @@ def run_layout_check(godot: str, repo: Path) -> None:
     with tempfile.TemporaryDirectory(prefix="arrowgame-puzzle-layout-") as directory:
         root = Path(directory)
         env = _isolated_env(root)
-        command = [
-            godot, "--headless", "--path", str(repo),
-            "--script", "res://tests/puzzle_layout_check.gd",
-        ]
-        print("Running:", " ".join(command), flush=True)
-        result = subprocess.run(command, env=env, check=True, timeout=45,
-                                capture_output=True, text=True)
-        print(result.stdout, flush=True)
-        print(result.stderr, flush=True)
-        if "PUZZLE_LAYOUT_FAILURES=0" not in result.stdout:
-            raise RuntimeError("Godot did not report a completed passing puzzle layout check")
+        checks = (
+            (("--import",), None),
+            (("--script", "res://tests/puzzle_layout_check.gd"), "PUZZLE_LAYOUT_FAILURES=0"),
+            (("--script", "res://tests/puzzle_presentation_check.gd"), "PUZZLE_PRESENTATION_FAILURES=0"),
+        )
+        for flags, marker in checks:
+            command = [godot, "--headless", "--path", str(repo), *flags]
+            print("Running:", " ".join(command), flush=True)
+            result = subprocess.run(command, env=env, check=False, timeout=90,
+                                    capture_output=True, text=True)
+            print(result.stdout, flush=True)
+            print(result.stderr, flush=True)
+            result.check_returncode()
+            if "SCRIPT ERROR:" in result.stderr or "Parse Error:" in result.stderr:
+                raise RuntimeError("Godot reported a script/import error")
+            if marker and marker not in result.stdout:
+                raise RuntimeError(f"Godot did not report {marker}")
 
 
 def main():
