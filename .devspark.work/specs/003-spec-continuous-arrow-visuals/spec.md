@@ -5,7 +5,7 @@ risk_profile: internal
 change_type: brownfield
 target_workflow: specify-full
 required_artifacts: spec, plan, tasks
-recommended_next_step: plan
+recommended_next_step: create-pr
 required_gates: checklist, analyze, critic
 route_intent: full-spec
 participants:
@@ -15,16 +15,16 @@ participants:
   reviewer: human
   critic: ai
   scribe: ai
-status: In Progress
+status: Complete
 ---
 
 # Feature Specification: Continuous Arrow Visuals and Game Visual Foundation
 
 **Feature Branch**: `003-spec-continuous-arrow-visuals`
 **Created**: 2026-09-26
-**Status**: In Progress
+**Status**: Complete
 
-Implementation story tasks are complete; full hands-on desktop and physical keyboard/gamepad acceptance remain outstanding. See gates/verification.md for automated and rendered evidence.
+All 31 tasks are complete. Hands-on acceptance is recorded from the user’s successful testing report; automated and rendered proof remains unchanged. See gates/verification.md and gates/verify.md for evidence and attribution.
 **Input**: Replace disconnected arrow tiles with continuous arrows, add whole-arrow hover and normalized feedback, and establish the supplied Make Bold light visual system while preserving established puzzle behavior.
 
 ## Product Owner TLDR

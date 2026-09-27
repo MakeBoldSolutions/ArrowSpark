@@ -1,17 +1,19 @@
 ---
 gate: verify
-status: fail
-blocking: true
-summary: "Fresh automated and rendered checks pass; complete end-to-end proof blocked by outstanding physical desktop/keyboard/gamepad acceptance."
+status: pass
+blocking: false
+summary: "Committed automated/rendered proof remains unchanged; user reported successful acceptance testing, closing the outstanding hands-on checks."
 selected_for_this_run_only: true
+acceptance_recorded_at: "2026-09-27T01:55:35.327108+00:00"
+acceptance_basis: user-reported
+human_acceptance: "my user testing was good"
 selection_reason: "No verify modes declared; end-to-end selected under standing autonomy as the conservative applicable proof for this visual feature."
 verified_at: "2026-09-27T01:12:26.632194+00:00"
 engine: "4.7.2.stable.official.ed1daf0bf"
 source_manifest: verify-evidence/source-sha256.json
 modes:
   - mode: end-to-end
-    status: fail
-    blocker: "T029/T030 require hands-on desktop and physical keyboard/gamepad checks. No physical-input evidence was supplied or performed; runtime reports JOYPADS=[]. Synthetic events and button signals do not satisfy that requirement."
+    status: pass
     evidence: |
       COMMAND: python tests/run_puzzle_regressions.py --godot godot_console
       APPDATA=C:\Users\markh\AppData\Local\Temp\arrow-verify-q_wgik4b
@@ -93,10 +95,11 @@ modes:
 
 # End-to-end verification
 
-The mode applies to this invocation only. Spec frontmatter, task completion,
-production code and tests were not changed by verification. All evidence above
-was rerun in this invocation; earlier implementation logs were not promoted to
-fresh proof. Exact argument arrays and isolated data roots are also retained in
+The mode applies to this invocation only. Production code and tests were not changed by verification. The original
+verification invocation left task completion unchanged; the subsequent user
+acceptance closes T029/T030 through implement. The command evidence above
+was captured during the original verification invocation; earlier implementation
+logs were not promoted to fresh proof. Exact argument arrays and isolated data roots are also retained in
 [commands.json](verify-evidence/commands.json). The source SHA-256 manifest pins
 the working-tree state, including uncommitted new resources and tests.
 
@@ -112,7 +115,7 @@ the working-tree state, including uncommitted new resources and tests.
 | Stationary-pointer overlay clearing/restoration | OVERLAY_CLEAR=true; STATIONARY_RESTORE=(0,0), both sizes |
 | Scripted New Game/pause/options/Restart/Replay/Main Menu | Exit 0; NAVIGATION_FAILURES=0 |
 | Seeded progress/remap/settings values | Preserved in scripted roundtrip |
-| Physical input and complete hands-on desktop matrix | Not executed; no connected gamepad |
+| Hands-on acceptance | User reported successful testing after T029/T030 were listed; no detailed device/step transcript supplied |
 
 Inspected fresh 960x540 hover/results and 1280x720 cardinal fixture captures:
 connected shafts/heads, round tails and joins, separated silhouettes, readable
@@ -133,14 +136,24 @@ runtime script exception or failed gameplay assertion was observed in this
 verification run. Godot 4.4 was not rerun by this command; its earlier evidence
 remains in verification.md and is not claimed as fresh verification here.
 
-There is no passed mode to which the command's committed-test test_ref rule
-applies. Supporting tests and ad hoc drivers are identified in the actual
-commands, logs and source manifest. Physical acceptance cannot be inferred
-from their passing results.
+Supporting tests and drivers are identified in the commands, committed logs
+and source manifest. The manual acceptance comes from the user's report,
+not an inference from passing synthetic tests. The earlier JOYPADS=[] output
+remains a fact about the agent's automated session; no controller model or
+physical-controller result was separately reported.
+
+## Acceptance update
+
+2026-09-27T01:55:35.327108+00:00 — The user reported "/devspark.implement my user testing was good" after the remaining T029/T030 checks were listed. Recorded as user-reported acceptance of those remaining checks. No per-device, per-resolution, or individual-step transcript was supplied; no additional agent-observed hardware test is claimed.
+
+The 41-file source SHA-256 manifest was checked against the current working
+tree and returned VERIFIED_SOURCE_DRIFT=[]. Existing evidence is committed
+at 8e8e5e52a9a498f41dc2b4522da8d31fa97e5959. No automatic checks were rerun or
+relabeled as newly executed in this acceptance update. The original verified_at
+and command output are retained. The prior blocking outcome reflected missing
+user acceptance, now supplied; no code fix or requirement waiver was needed.
 
 ## Next action
 
-Complete and record T029/T030 physical checks through /devspark.implement,
-then rerun /devspark.verify. The spec remains In Progress; this gate does not
-establish readiness for /devspark.create-pr. No waiver or fabricated pass was
-recorded.
+/devspark.create-pr. This gate combines unchanged committed execution evidence
+with attributed user acceptance; it does not invent an agent-observed hardware run.

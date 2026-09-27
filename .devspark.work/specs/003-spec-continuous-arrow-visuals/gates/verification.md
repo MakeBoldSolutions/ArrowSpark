@@ -79,3 +79,11 @@ navigation.log ends NAVIGATION_FAILURES=0, exit 0 on Godot 4.7.2. Button activat
 The temporary driver initially targeted the wrong options child name and did not reliably activate the animated main-menu button by viewport mouse events; corrected to the actual MiniOptionsOverlaidMenu and explicit scripted button activation. This is supplemental integration coverage, not a passing hands-on mouse/keyboard/gamepad check. Vendor UID fallbacks, a legacy property-list compatibility diagnostic, and shutdown resource-leak diagnostics remain in the rendered menu run; production addons were not changed. Required physical verification is still open.
 
 Final task count: 29/31 complete. T029 and T030 retain WIP notes and populated linkage. All other tasks have durable references or explained n/a. Final reference check saved in planning-references.json reports ok=true.
+
+## Acceptance closure — 2026-09-27T01:55:35.327108+00:00
+
+The user reported "/devspark.implement my user testing was good" after the remaining T029/T030 checks were listed. Recorded as user-reported acceptance of those remaining checks. No per-device, per-resolution, or individual-step transcript was supplied; no additional agent-observed hardware test is claimed.
+
+This closes the earlier outstanding-acceptance entries above. T029/T030 are complete on that reported basis; 31/31 tasks complete. Source manifest comparison found no drift, so the previously passing regression/render/navigation evidence remains applicable without redundant reruns. No waiver, new hardware observations, or code changes are asserted. Final checklist remains 26/26, analyze/critic have no open findings, and verify.md now records the combined evidence as pass.
+
+Finalization checks: 31/31 tasks, 8/8 phase checkpoints, 5/5 story completion markers; analyze/critic/verify pass; no pending linkage. Knowledge index regeneration/schema check and git diff --check pass. Final stock Bash planning-reference check returned ok=true with empty findings. Spec status set to Complete; bundle retained for release.
