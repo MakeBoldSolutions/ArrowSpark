@@ -1,0 +1,97 @@
+# Tasks: Path-Following Arrow Departure
+
+**Input**: C:/GitHub/MakeBoldSolutions/ArrowGame/.devspark.work/specs/004-spec-path-following-departure/
+**Path base**: Every repository-relative path below resolves against C:/GitHub/MakeBoldSolutions/ArrowGame.
+**Prerequisites**: spec.md, plan.md, research.md, data-model.md, contracts/presentation.md, quickstart.md.
+
+## Rationale Summary
+
+Implement the accepted presentation effect while preserving atomic domain removal. Focus tests on corner/length invariants, clipping, full-tail clearance and concurrent lifecycle. Every behavior change includes relevant tests and current-knowledge updates. No implementation has started.
+
+## Format and Verification
+
+All tasks have pending code_ref/knowledge_ref fields; populate all affected production/test paths and durable knowledge paths before checking a task, or justify n/a. Required desktop/hardware checks cannot be replaced by synthetic evidence. Required analyze/critic gates have not yet run; requirements checklist passes 22/22. No existing findings were waived.
+
+## Phase 1: Setup
+
+Record baseline and review existing requirements before changing behavior.
+
+- [ ] T001 Record engine version, both baseline regression launcher results, and working-tree/domain-source baseline in .devspark.work/specs/004-spec-path-following-departure/gates/verification.md; isolate user data as quickstart.md specifies. (Implements: FR-016) (code_ref: pending | knowledge_ref: pending)
+- [ ] T002 Review spec.md, plan.md, contracts/presentation.md and resolved knowledge; record implementation preflight and any existing required-gate blockers in .devspark.work/specs/004-spec-path-following-departure/gates/verification.md. (code_ref: pending | knowledge_ref: pending)
+
+**Checkpoint**: Pending.
+
+## Phase 2: Foundational geometry
+
+Pure route calculations pass before view integration.
+
+- [ ] T003 Create tests/arrow_departure_geometry_check.gd with all four directions, synthetic shaft, straight/one/multiple bends, cumulative length, exact/corner-adjacent samples, ray extension, coincident points, short segments, constant interval length and retained-corner assertions; tests initially fail until helper exists. (Implements: FR-002, FR-003, FR-004, FR-013, FR-016) (code_ref: pending | knowledge_ref: pending)
+- [ ] T004 Implement scripts/presentation/arrow_departure_geometry.gd as a pure RefCounted helper with defensive copies, prefix lengths, sampling, interval extraction, explicit invalid-route handling and documented numeric tolerances; no domain or Node dependency. (Implements: FR-002, FR-003, FR-013, FR-014) (code_ref: pending | knowledge_ref: pending)
+- [ ] T005 Add forward-grid clearance calculation and tests in scripts/presentation/arrow_departure_geometry.gd and tests/arrow_departure_geometry_check.gd, proving whole body/head support clearance in all directions and no early finish. (Implements: FR-007) (code_ref: pending | knowledge_ref: pending)
+- [ ] T006 Integrate isolated geometry suite into tests/run_puzzle_regressions.py with explicit passing marker, timeouts and failure propagation; preserve pure rule isolation and real-project font import/checks. (Implements: FR-016) (code_ref: pending | knowledge_ref: pending)
+
+**Checkpoint**: Pending.
+
+## Phase 3: US1 — Feed through the route
+
+Independent test: every shape and direction preserves length/corners at sampled distances, moves at equal speed, and clips to the grid.
+
+- [ ] T007 [US1] Add initial silhouette, head/body overlap, cardinal orientation, equal-delta-partition speed, full-tail finish and duplicate-start assertions in tests/puzzle_presentation_check.gd before replacing departure implementation. (Implements: FR-003, FR-004, FR-005, FR-007, FR-008) (code_ref: pending | knowledge_ref: pending)
+- [ ] T008 [US1] Replace fixed exit duration with centralized 10 cells/second and 0.001-cell clearance constants in scripts/puzzle/puzzle_feedback.gd; preserve blocked durations and keep domain classes independent of motion. (Implements: FR-005, FR-007, FR-014) (code_ref: pending | knowledge_ref: pending)
+- [ ] T009 [US1] Implement cell-unit route construction, scalar advance_departure and body/head interval reconstruction in scenes/puzzle/arrow_view.gd; keep d=0 geometry identical, stop position animation, normalize competing effects, guard duplicate completion, and disable processing outside departure. (Implements: FR-002, FR-003, FR-004, FR-005, FR-007, FR-008, FR-014) (code_ref: pending | knowledge_ref: pending)
+- [ ] T010 [US1] Add passive DepartureClip and separate departing collection in scenes/puzzle/puzzle_board.gd; reparent on removal with explicit bbox-relative position, calculate grid clearance, connect completion before motion and retain active-only input mapping. (Implements: FR-006, FR-007, FR-009) (code_ref: pending | knowledge_ref: pending)
+- [ ] T011 [US1] Extend tests/puzzle_presentation_check.gd and tests/puzzle_layout_check.gd for grid-vs-letterbox clipping rect, passive cursor targeting, normalization at existing pulse phases, and head/body continuity; update obsolete exit-tween expectations without dropping coverage. (Implements: FR-004, FR-006, FR-008, FR-009, FR-016) (code_ref: pending | knowledge_ref: pending)
+- [ ] T012 [US1] Update .knowledge/architecture/game-visual-system.md for pure route math, cell speed, departure-only clipping and visual ownership; include new helper/tests in appliesTo and cite durable code/tests only. (Implements: FR-017) (code_ref: pending | knowledge_ref: pending)
+
+**Checkpoint**: Pending.
+
+## Phase 4: US2 — Preserve immediate play and completion
+
+Independent test: remove a blocker then its dependent during visible motion; departures finish in reversed selection order and results wait for all.
+
+- [ ] T013 [US2] Add tests/puzzle_layout_check.gd scenarios asserting state/HUD changes before visual advancement, ignored departed cells, immediate dependent legality, differing route lengths and reversed completion order. (Implements: FR-001, FR-009, FR-010) (code_ref: pending | knowledge_ref: pending)
+- [ ] T014 [US2] Finalize one-shot tracked-instance departure callback in scenes/puzzle/puzzle_board.gd and audit scenes/puzzle/arrow_puzzle.gd pending-count coordination; make only lifecycle corrections demonstrated necessary by tests and do not introduce controller path mathematics. (Implements: FR-001, FR-010, FR-014) (code_ref: pending | knowledge_ref: pending)
+- [ ] T015 [US2] Verify identical input/domain snapshots and results at different presentation step speeds in tests/puzzle_layout_check.gd; replace fixed-duration waits with computed bounded deadlines and assert exactly-once results/no negative pending count. (Implements: FR-001, FR-005, FR-010, FR-014, FR-016) (code_ref: pending | knowledge_ref: pending)
+- [ ] T016 [US2] Update .knowledge/architecture/arrow-puzzle.md to describe immediate removal versus concurrent visual departure, active ownership and all-departures barrier, retaining unchanged solver/rule contracts. (Implements: FR-017) (code_ref: pending | knowledge_ref: pending)
+
+**Checkpoint**: Pending.
+
+## Phase 5: US3 — Resize, pause and clean lifecycle
+
+Independent test: pause/resize a departing shape, recover zero extent, then replace the attempt without stale callbacks or input regressions.
+
+- [ ] T017 [US3] Add tests/puzzle_layout_check.gd coverage for resize at 960x540/1280x720/800x800, resize while paused, zero extent recovery, unchanged d, recalculated geometry/clip rect and no completion inside layout callbacks. (Implements: FR-011, FR-012, FR-013) (code_ref: pending | knowledge_ref: pending)
+- [ ] T018 [US3] Relayout both active and departing collections in scenes/puzzle/puzzle_board.gd, propagating invalid layout and cell extent; update scenes/puzzle/arrow_view.gd to suspend invalid/paused advancement and rebuild from preserved progress without restarting. (Implements: FR-011, FR-012, FR-013) (code_ref: pending | knowledge_ref: pending)
+- [ ] T019 [US3] Add and verify cancel_departure and collection disposal in scenes/puzzle/arrow_view.gd and scenes/puzzle/puzzle_board.gd; extend tests/puzzle_layout_check.gd for setup replacement, scene destruction, fresh attempts and no old completion callbacks. (Implements: FR-008, FR-012) (code_ref: pending | knowledge_ref: pending)
+- [ ] T020 [US3] Preserve and exercise hover/blocked transition guards and board pointer eligibility after reparenting, resize and overlay changes in tests/puzzle_presentation_check.gd, including ignored stale feedback and duplicate exits. (Implements: FR-008, FR-009, FR-011) (code_ref: pending | knowledge_ref: pending)
+- [ ] T021 [US3] Verify seeded progress/settings and keyboard/gamepad remaps through affected puzzle/menu lifecycle using tests/save_input_regression.gd and tests/run_regressions.py; extend only uncovered changed paths and record preservation evidence. (Implements: FR-015, FR-016) (code_ref: pending | knowledge_ref: pending)
+- [ ] T022 [US3] Reconcile resize, pause, cancellation and departure tracking guidance in .knowledge/architecture/game-visual-system.md and .knowledge/architecture/arrow-puzzle.md; verify save-progression.md remains accurate without unrelated rewriting. (Implements: FR-011, FR-012, FR-017) (code_ref: pending | knowledge_ref: pending)
+
+**Checkpoint**: Pending.
+
+## Phase 6: Polish and required verification
+
+All required checks pass or remain openly outstanding; no implementation completion while mandatory checks remain.
+
+- [ ] T023 Add a reusable manual visual fixture launcher tests/arrow_departure_visual_check.gd for missing one-bend/all-direction/long-path examples without changing shipped PuzzleDefinition content; document launch and isolation in tests/README.md. (Implements: FR-004, FR-016) (code_ref: pending | knowledge_ref: pending)
+- [ ] T024 Run final Godot import validation and both regression launchers on the declared 4.4 baseline; record exact commands, versions, markers and failures in .devspark.work/specs/004-spec-path-following-departure/gates/verification.md. (Implements: FR-016) (code_ref: pending | knowledge_ref: pending)
+- [ ] T025 Perform the full manual visual matrix in quickstart.md using real gameplay and tests/arrow_departure_visual_check.gd; record feeding readability, cap/seam quality, clipping, concurrency, pause/resize and final transition in .devspark.work/specs/004-spec-path-following-departure/gates/verification.md. (Implements: FR-002, FR-004, FR-005, FR-006, FR-007, FR-016) (code_ref: pending | knowledge_ref: pending)
+- [ ] T026 Perform keyboard/gamepad navigation/remapping, restart cancel/confirm, Replay/Main Menu/options and saved-data smoke checks; record actual hardware and unavailable checks honestly in .devspark.work/specs/004-spec-path-following-departure/gates/verification.md. (Implements: FR-012, FR-015, FR-016) (code_ref: pending | knowledge_ref: pending)
+- [ ] T027 Refresh .knowledge/index.json and .knowledge/ontology/coverage.json after appliesTo updates; check schema/index consistency, durable planning backlinks and git diff whitespace, documenting results in gates/verification.md. (Implements: FR-017) (code_ref: pending | knowledge_ref: pending)
+- [ ] T028 Reconcile every task linkage in .devspark.work/specs/004-spec-path-following-departure/tasks.md with actual changed code/tests/current knowledge; resolve required analyze/critic findings, verify domain sources remain unchanged, and retain complete bundle for release archival. (Implements: FR-014, FR-016, FR-017) (code_ref: pending | knowledge_ref: pending)
+
+**Checkpoint**: Pending.
+
+## Dependencies and Parallel Execution
+
+T001–T002 precede T003–T006; pure helper tests precede helper implementation and launcher verification. US1 (T007–T012) precedes US2 (T013–T016), then US3 (T017–T022), then final verification (T023–T028). Test-writing tasks may initially fail; each story checkpoint requires its completed suite to pass.
+
+US1 geometry/view/board tasks share files or depend on unfinished interfaces, so execute sequentially. US2 test authoring can be prepared alongside its documentation draft, but publish knowledge only after behavior is verified. US3 save/input checks can run independently after lifecycle code stabilizes; serialize its shared layout tests and knowledge edits. No unconditional [P] marker is assigned because these small tasks share code/test ownership; no agent delegation is required.
+
+## Implementation Strategy
+
+US1 is the smallest demonstrable preview. Shipping requires US1, US2 and US3 plus all final checks, because immediate-removal, pause/resize and completion correctness are mandatory. Avoid domain/addon changes. Each story includes its own test and knowledge step.
+
+## Constitution and Retention
+
+I/II: focused project scripts and pure helper throughout. III/VI: T021/T026 preserve navigation/remaps/data. IV: T009/T013–T015 preserve responsiveness and atomic removal. V: T001/T024–T026 require engine and desktop evidence. No waivers. Shared preamble retention policy overrides the older task-template deletion instruction: do not delete or archive this feature directory during implementation.
