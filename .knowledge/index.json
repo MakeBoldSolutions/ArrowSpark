@@ -97,6 +97,18 @@
       ]
     },
     {
+      "id": "product-branding",
+      "type": "product",
+      "path": ".knowledge/product/branding.md",
+      "title": "Product Identity and Branding Hierarchy",
+      "appliesTo": [
+        "project.godot",
+        "ATTRIBUTION.md",
+        "scenes/menus/main_menu/main_menu_with_animations.tscn",
+        "scenes/credits/credits.tscn"
+      ]
+    },
+    {
       "id": "arrowgame-constitution",
       "type": "governance",
       "path": ".knowledge/governance/constitution.md",
