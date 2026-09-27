@@ -9,6 +9,7 @@ appliesTo:
   - scripts/puzzle/puzzle_feedback.gd
   - scripts/puzzle/puzzle_results_format.gd
   - scripts/puzzle/puzzle_catalog.gd
+  - scripts/puzzle/puzzle_analyzer.gd
   - scripts/puzzle_session.gd
   - scripts/presentation/arrow_departure_geometry.gd
   - scenes/puzzle/arrow_puzzle.tscn
@@ -22,7 +23,10 @@ appliesTo:
   - scenes/menus/main_menu/main_menu_with_animations.gd
   - tests/puzzle_regression.gd
   - tests/puzzle_catalog_check.gd
+  - tests/puzzle_analyzer_check.gd
+  - tests/puzzle_structural_report.gd
   - tests/run_puzzle_regressions.py
+  - tests/run_puzzle_structural_report.py
   - tests/arrow_departure_geometry_check.gd
   - tests/puzzle_layout_check.gd
   - tests/puzzle_presentation_check.gd
@@ -208,8 +212,14 @@ and `PUZZLE_FAILURES=0`.
 
 `PuzzleCatalog` (scripts/puzzle/puzzle_catalog.gd) is a static-registry
 `RefCounted` class, never instantiated, sitting between the domain
-(`PuzzleDefinition`) and presentation. It holds an ordered array of eight
-entries (`{id, title, build}`), each `build` a zero-argument static function
+(`PuzzleDefinition`) and presentation. It holds an ordered array of fourteen
+entries (`{id, title, build}`) — the original eight baseline puzzles plus six
+experimental puzzles (`nested_chain`, `cascade_key_arrow`,
+`dense_unravel`, `bent_network`, `long_range_blocker`, `composed_shaped`),
+each deliberately authored to combine structural features (dependency depth,
+cascade fan-out, density, bent-tail dependencies, long-range blocking,
+macro-scale composition) the baseline eight never did in combination — each
+`build` a zero-argument static function
 constructing a fresh `PuzzleDefinition` exactly like `create_fixed()`'s own
 literal-construction style. `count()`, `id_at(index)`, `title_at(index)`,
 `index_of(id)` (`-1` if unknown), `ids()` (an independent ordered copy) and
@@ -240,13 +250,114 @@ running process, not to any node or scene.
 Source of truth: tests/puzzle_catalog_check.gd (unique/valid stable ids
 independent of position, deterministic `id_at`/`index_of`/`ids` ordering,
 fresh-and-isolated `get_definition` per call including cross-id
-independence, every entry structurally valid and solver-confirmed solvable
-with a replayed zero-mistake witness, no difficulty-labeled title wording,
-`PuzzleSession` default/set/advance/has-next behavior including the
+independence, every one of the fourteen entries structurally valid and
+solver-confirmed solvable with a replayed zero-mistake witness, no
+difficulty-labeled title wording, each of the six experimental
+entries confirmed against its exact `PuzzleAnalyzer`-derived threshold (see
+below), `PuzzleSession` default/set/advance/has-next behavior including the
 last-entry no-op and the invalid-id fallback), run via the same
 `run_puzzle_regressions.py` launcher in the same bare isolated temp project
 as tests/puzzle_regression.gd (PuzzleCatalog depends only on
 PuzzleDefinition); requires `PUZZLE_CATALOG_FAILURES=0`.
+
+## Structural Analysis (PuzzleAnalyzer)
+
+`PuzzleAnalyzer` (scripts/puzzle/puzzle_analyzer.gd) is a headless,
+deterministic, static `RefCounted` class sitting beside `PuzzleSolver` —
+never an extension of it, and never a second rules engine. `analyze(definition)`
+asserts `definition != null` as its first statement (a caller-programming-error
+precondition, matching `PuzzleState._init()`'s own `assert(definition.is_valid(), ...)`
+style; empirically, a failed assertion in this repo's headless test
+environment aborts before `analyze()`'s `return`, so the caller receives an
+empty `Dictionary` rather than a crash or a well-formed result — this is the
+documented, tested outcome, never implementation-defined). For a non-null
+definition it returns board-scale metrics (`width`, `height`, `total_cells`,
+`arrow_count`, `occupied_cell_count`, `density`), arrow-geometry metrics
+(single/multi-cell counts, average/max length, bend counts derived from
+direction changes along each tail), legal-move-structure metrics reusing
+`PuzzleSolver.analyze()`'s own witness (initial/min/max/average legal counts,
+forced/branching state counts and ratios, longest forced run, and the full
+per-step `legal_choice_sequence`), a dependency graph, per-step
+`unlock_sequence`, and geometric `blocker_distance` proxies. Every blocking
+fact is derived from `PuzzleState.is_blocked`/`get_arrow_head` (via a
+disposable internal `PuzzleState` for the witness walk) or from
+`PuzzleDefinition.forward_ray_cells`/`get_cell_owners` directly (for the
+static graph) — never an independently reimplemented blocking rule.
+`PuzzleSolver`'s existing `analyze()` return contract, metric semantics, and
+correctness path are completely unchanged; `PuzzleDefinition` gained no new
+fields. No composite difficulty score, formula, or player-facing rating
+exists anywhere in this capability's output.
+
+**Dependency graph orientation**: one node per active arrow; a directed edge
+`A -> B` means "A currently occupies a cell on B's forward escape ray" (A
+blocks B), read directly off `PuzzleState.is_blocked`'s own check. Under this
+orientation an arrow's out-degree counts arrows it blocks and its in-degree
+counts arrows currently blocking it. `depth`/`longest_chain` are precisely
+defined as the graph's longest **simple** directed path (no repeated node),
+which is always finite even when a geometric dependency cycle exists (a
+per-path visited set forbids revisiting a node, so a cycle simply ends that
+branch of the search rather than looping) — ties are broken deterministically
+by the lexicographically smallest head sequence under `PuzzleSolver`'s own
+existing (y, x)-ascending comparator. This is an analysis-only allowance over
+a *candidate* definition; it never implies solvability or catalog eligibility
+— `PuzzleSolver.analyze(definition).solvable` remains the sole authority on
+completability, and the catalog regression gate remains the sole authority on
+what may ship. A static out-degree is never reported or treated as "cascade
+fan-out": because a blocked arrow may have more than one blocker, removing
+one neighbor does not guarantee another becomes legal, so cascade/unlock
+fan-out (`max_unlock_fan_out`) is measured empirically by diffing the legal
+set immediately before/after each witness removal step, never derived from
+static out-degree.
+
+**Objective metrics vs. labeled perceptual hypotheses**: every metric above
+(board scale, arrow geometry, legal-move structure, dependency-graph
+properties, cascade/unlock fan-out, blocker distance) is objectively computed
+from `PuzzleDefinition`/`PuzzleSolver` alone, with no human input. Several
+related concepts remain explicitly-labeled **hypotheses** to be checked
+against real play, never established product truth: *dependency
+discoverability*, *false affordance*, *unlock rhythm* (as a felt experience,
+distinct from the objectively-inspectable `legal_choice_sequence` it names),
+*reasoning span* (as a full perceptual measure, distinct from the geometric
+`blocker_distance` proxy), and *composition/shape as a source of memorability
+or identity*. A lightweight human-calibration worksheet/record process exists
+for checking these hypotheses against actual play, entirely separate from
+this objective analysis capability. `blocker_distance` in particular is
+documented as a geometric proxy for "how far away is this," not a validated
+measurement of human perception.
+
+Source of truth: tests/puzzle_analyzer_check.gd (fourteen hand-constructed
+synthetic fixtures with hand-computed expected values, run in the same bare
+isolated temp project as tests/puzzle_regression.gd/puzzle_catalog_check.gd:
+an independent pair, a simple three-arrow chain, a deep four-arrow total-order
+chain, a three-arrow branching/open puzzle, a three-arrow cascade with
+fan-out 3, a two-blocker-on-one-arrow puzzle, a bent-tail dependency, a
+long-range blocker at ray distance 5, a structurally invalid definition
+(every field but board/geometry zeroed), a valid-but-unsolvable two-arrow
+cycle (dependency_graph/blocker_distance still computed; witness/legal-move
+fields empty), a mixed acyclic-chain-plus-cyclic-component graph proving
+exact termination, determinism and non-mutation including interleaved live
+gameplay, the null-definition precondition, and the occupancy-grid
+visualization helper); requires `PUZZLE_ANALYZER_FAILURES=0`. Each of the six
+experimental `PuzzleCatalog` entries is additionally checked against
+its own exact numeric threshold in tests/puzzle_catalog_check.gd
+(`_check_experimental_puzzle_properties`): `nested_chain` depth >= 3 with a
+non-collinear longest chain; `cascade_key_arrow` max_unlock_fan_out >= 2 (in
+fact 3); `dense_unravel` density >= 0.55 with initial_legal_ratio <= 0.50;
+`bent_network` >= 2 bent arrows with a tail-sourced dependency edge;
+`long_range_blocker` a blocker-distance edge >= 4 on a board >= 5 wide/tall;
+`composed_shaped` >= 49 total cells with >= 1 genuine dependency edge, its
+occupied cells forming a filled diamond.
+
+A separate, deliberately **non-gating** developer report
+(tests/puzzle_structural_report.gd, run via
+tests/run_puzzle_structural_report.py in the same bare-isolated-project
+pattern) enumerates the full catalog through `PuzzleAnalyzer` and prints a
+deterministic per-puzzle block plus a fixed nine-question Catalog Comparison
+section (deepest chain, fewest initial legal arrows, widest branching,
+largest cascade, longest forced run, highest density, most bends, longest
+blocker distance, largest board). It carries no `check()`/failure counter and
+no `PUZZLE_*_FAILURES=0` marker — it reports facts, never a pass/fail
+judgment or a composite score.
 
 ## Presentation Layer
 
@@ -358,7 +469,7 @@ in-flight departure so no stale completion reaches a replaced attempt; a
 post-completion selection being ignored; a freshly instantiated scene
 starting clean; 20 rapid repeated selections on a blocked tail cell counting
 exactly once each without disturbing the attempt; the blocked-cue duration
-cap; and, for every one of the eight `PuzzleCatalog` entries in turn: the
+cap; and, for every one of the fourteen `PuzzleCatalog` entries in turn: the
 board's active view count matches the definition's arrow count, the HUD
 puzzle label matches the catalog title, and the same solver-derived
 zero-mistake witness clears through the real scene with unchanged

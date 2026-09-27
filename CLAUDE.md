@@ -6,7 +6,7 @@ Auto-generated from all feature plans. Last updated: 2026-09-27
 
 ## Active Technologies
 
-- GDScript / Godot 4.4, Maaack's Game Template addon; Python 3.11+ headless regression launchers (006-spec-puzzle-structure-analysis)
+- GDScript / Godot 4.4, Maaack's Game Template addon; Python 3.11+ headless regression launchers
 
 ## Project Structure
 
@@ -17,7 +17,7 @@ scenes/              # presentation/menus (Godot scenes)
 tests/               # GDScript headless checks + Python launchers (run_*.py)
 addons/              # Maaack's Game Template
 .knowledge/          # durable architecture/product/governance docs
-.devspark.work/      # temporary specs/plans/tasks (this feature: specs/006-spec-puzzle-structure-analysis/)
+.devspark.work/      # temporary specs/plans/tasks (ephemeral, never referenced by durable code)
 ```
 
 ## Commands
@@ -34,7 +34,7 @@ prefer explicit types where they aid clarity; keep changes small and justify new
 
 ## Recent Changes
 
-- 006-spec-puzzle-structure-analysis: Added `PuzzleAnalyzer` (headless structural/dependency-graph analysis sibling to `PuzzleSolver`), six new experimental `PuzzleCatalog` puzzles (8 → 14), an extended catalog regression gate, a non-gating developer comparison report, and a human-calibration worksheet — no gameplay rule, rendering, or persistence changes.
+- Added `PuzzleAnalyzer` (headless structural/dependency-graph analysis sibling to `PuzzleSolver`), six new experimental `PuzzleCatalog` puzzles (8 → 14), an extended catalog regression gate, and a non-gating developer comparison report — no gameplay rule, rendering, or persistence changes.
 
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->

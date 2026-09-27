@@ -254,7 +254,7 @@ func _check_fresh_instance_starts_clean_and_rapid_tail_clicks() -> void:
 	fresh.queue_free()
 	PuzzleSession.set_current_id(PuzzleCatalog.id_at(0))
 
-## US1 independent test: every one of the eight catalog puzzles is playable
+## US1 independent test: every one of the fourteen catalog puzzles is playable
 ## start-to-finish through the real, unmodified scene — proving engine
 ## generality end-to-end, not only via the pure solver gate. For each: the
 ## board's active view count matches the definition's arrow count, the HUD

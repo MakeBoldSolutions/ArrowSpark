@@ -26,7 +26,7 @@ replace those interactive checks.
 Run `python tests/run_puzzle_regressions.py` (Python 3 and Godot on PATH), or
 use `python tests/run_puzzle_regressions.py --godot C:/path/to/godot.exe`.
 
-This runs five independent headless checks:
+This runs six independent headless checks:
 
 1. Pure rule regressions (`tests/puzzle_regression.gd`) against an isolated,
    unique temporary project containing only the puzzle's core scripts
@@ -44,22 +44,41 @@ This runs five independent headless checks:
    `PUZZLE_FAILURES=0`.
 2. Pure catalog/session regressions (`tests/puzzle_catalog_check.gd`) against
    the same bare temporary project as (1), extended with
-   `scripts/puzzle/puzzle_catalog.gd` and `scripts/puzzle_session.gd` (no
-   scenes, fonts or `GameVisualStyle` dependency — `PuzzleCatalog` depends
-   only on `PuzzleDefinition`). Enumerates all 8 authored catalog entries and
-   asserts, for each: a unique, non-empty stable id independent of array
-   position; structural validity via `PuzzleDefinition.is_valid()`;
-   solver-confirmed solvability via `PuzzleSolver.analyze()`; the returned
-   witness replays against a fresh `PuzzleState` clearing with zero mistakes;
-   and no difficulty-tier wording in any title. Also covers
-   `PuzzleCatalog.ids()/index_of()/get_definition()` independent-copy and
-   unknown-id sentinel behavior, fresh-and-isolated `get_definition()` per
-   call (including cross-id independence), and `PuzzleSession`'s
-   default/set/advance/has-next behavior including the last-entry no-op and
-   the invalid-id fallback. Fails loudly (never partially skips a malformed
-   entry) if any authored puzzle is malformed or unsolvable. Success requires
-   exit code zero and `PUZZLE_CATALOG_FAILURES=0`.
-3. Pure route-geometry regressions (`tests/arrow_departure_geometry_check.gd`)
+   `scripts/puzzle/puzzle_catalog.gd`, `scripts/puzzle/puzzle_analyzer.gd` and
+   `scripts/puzzle_session.gd` (no scenes, fonts or `GameVisualStyle`
+   dependency — `PuzzleCatalog` depends only on `PuzzleDefinition`). Enumerates
+   all 14 authored catalog entries (the original 8 plus 6 experimental
+   puzzles) and asserts, for each: a unique, non-empty stable id
+   independent of array position; structural validity via
+   `PuzzleDefinition.is_valid()`; solver-confirmed solvability via
+   `PuzzleSolver.analyze()`; the returned witness replays against a fresh
+   `PuzzleState` clearing with zero mistakes; and no difficulty-tier wording in
+   any title. Also asserts each of the six experimental entries meets
+   its own exact `PuzzleAnalyzer`-derived threshold (dependency depth, cascade
+   fan-out, density, bent-tail dependency, blocker distance, board/edge count
+   — see `.knowledge/architecture/arrow-puzzle.md`'s "Structural Analysis"
+   section). Also covers `PuzzleCatalog.ids()/index_of()/get_definition()`
+   independent-copy and unknown-id sentinel behavior, fresh-and-isolated
+   `get_definition()` per call (including cross-id independence), and
+   `PuzzleSession`'s default/set/advance/has-next behavior including the
+   last-entry no-op and the invalid-id fallback. Fails loudly (never partially
+   skips a malformed entry) if any authored puzzle is malformed or unsolvable.
+   Success requires exit code zero and `PUZZLE_CATALOG_FAILURES=0`.
+3. Pure structural-analysis regressions (`tests/puzzle_analyzer_check.gd`)
+   against the same bare temporary project as (1)/(2) (no scenes, fonts or
+   `GameVisualStyle` dependency — `PuzzleAnalyzer` depends only on
+   `PuzzleDefinition`/`PuzzleState`/`PuzzleSolver`). Fourteen hand-constructed
+   synthetic fixtures with hand-computed expected values: an independent pair,
+   a simple three-arrow chain, a deep four-arrow total-order chain, a
+   branching/open puzzle, a three-way cascade, a two-blocker-on-one-arrow
+   puzzle, a bent-tail dependency, a long-range blocker, a structurally
+   invalid definition, a valid-but-unsolvable two-arrow cycle, a mixed
+   acyclic-chain-plus-cyclic-component graph (proving the longest-simple-path
+   search terminates and returns the exact documented value), determinism and
+   non-mutation (including interleaved live gameplay), the null-definition
+   precondition, and the occupancy-grid visualization helper. Success requires
+   exit code zero and `PUZZLE_ANALYZER_FAILURES=0`.
+4. Pure route-geometry regressions (`tests/arrow_departure_geometry_check.gd`)
    against a second isolated, unique temporary project containing only
    `scripts/presentation/arrow_departure_geometry.gd` — no scenes, addons,
    fonts or GameVisualStyle dependency, since the helper takes its style-ratio
@@ -74,7 +93,7 @@ This runs five independent headless checks:
    clearance in all four directions, and the tail-cap-dominance style-ratio
    guard. Success requires exit code zero and
    `ARROW_DEPARTURE_GEOMETRY_FAILURES=0`.
-4. A scene-based HUD/board layout and feedback-duration check
+5. A scene-based HUD/board layout and feedback-duration check
    (`tests/puzzle_layout_check.gd`) against the real project — so the full
    scene/addon dependency graph is available — with `APPDATA`/`XDG_DATA_HOME`
    redirected to an isolated temporary directory so no player save/settings
@@ -84,7 +103,7 @@ This runs five independent headless checks:
    resize and zero-extent recovery while paused, a combined concurrent-
    departure/pause/resize/resume scenario, setup-replacement disposal of
    in-flight departures, and that the blocked-cue duration constant does not
-   exceed its coded cap. Also covers every one of the 8 `PuzzleCatalog`
+   exceed its coded cap. Also covers every one of the 14 `PuzzleCatalog`
    entries played start-to-finish through the real scene (active view count,
    HUD puzzle label, unchanged scoring for a zero-mistake witness); Level
    Select's listing/ordering/titles, its initial keyboard/gamepad focus
@@ -96,7 +115,7 @@ This runs five independent headless checks:
    that Next Puzzle advances to the following catalog entry with fresh
    state, and that the last catalog puzzle's results omit `%NextPuzzleButton`.
    Success requires exit code zero and `PUZZLE_LAYOUT_FAILURES=0`.
-5. Real-scene presentation checks (`tests/puzzle_presentation_check.gd`):
+6. Real-scene presentation checks (`tests/puzzle_presentation_check.gd`):
    ordered continuous geometry, cardinal heads, defensive copying, whole-cell
    GUI events, owner hover, interrupted red pulses, immediate normalized
    departures (including duplicate-start guards and exactly-once completion),
@@ -108,7 +127,7 @@ This runs five independent headless checks:
    explicitly loads `PuzzleDefinition.create_fixed()` into the instantiated
    real scene's board/state (rather than whichever catalog entry
    `PuzzleSession` defaults to), so its exact-cell-position assertions stay
-   independent of the authored catalog content — check 4 above is the
+   independent of the authored catalog content — check 5 above is the
    catalog-generality coverage instead. Requires exit zero and
    `PUZZLE_PRESENTATION_FAILURES=0`.
 
@@ -117,6 +136,22 @@ temporary APPDATA/XDG_DATA_HOME root across import and scene processes. The
 pure-rule copy list remains independent of scenes and fonts. Each real-project
 process has a 90-second timeout; missing markers, script errors and nonzero
 exit codes fail the run. No test reads or writes personal player data.
+
+## Developer Structural Report (non-gating)
+
+`python tests/run_puzzle_structural_report.py --godot C:/path/to/godot.exe`
+runs `tests/puzzle_structural_report.gd` in the same bare-isolated-project
+pattern as the pure checks above, and prints a deterministic per-puzzle
+structural breakdown (board scale, geometry, dependency graph, cascade,
+blocker distance) plus a nine-question catalog-comparison summary (deepest
+chain, fewest initial legal arrows, widest branching, largest cascade,
+longest forced run, highest density, most bends, longest blocker distance,
+largest board). Unlike the six checks above, this is **not a pass/fail
+gate** — it has no `check()`/failure counter and no `PUZZLE_*_FAILURES=0`
+marker, and always exits 0 on successful completion. It exists for
+developers comparing puzzles during authoring/review, never as an in-game
+screen, and its output contains no difficulty label, tier, or composite
+score.
 
 Geometry assertions do not establish rendered seam/antialias quality. Inspect
 straight, bent and single-cell silhouettes, negative space, typography, hover,

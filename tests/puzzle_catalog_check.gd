@@ -20,7 +20,7 @@ func check(condition: bool, description: String) -> void:
 ## fails loudly rather than skipping the malformed one.
 func _check_full_catalog_solvable() -> void:
 	var count := PuzzleCatalog.count()
-	check(count == 8, "the catalog contains exactly 8 entries")
+	check(count == 14, "the catalog contains exactly 14 entries (8 baseline + 6 experimental)")
 
 	var seen_ids: Dictionary = {}
 	for i in range(count):
@@ -94,6 +94,56 @@ func _check_no_difficulty_labels() -> void:
 			check(not title.to_lower().contains(key.to_lower().replace("_", " ")),
 				"catalog title '%s' carries no difficulty-tier wording" % title)
 
+## Each of the six experimental puzzles must continue to satisfy the exact
+## numeric threshold its authoring comment documents in puzzle_catalog.gd --
+## not merely "exists in the catalog." This is the automated, permanent
+## backstop for a one-time manual check, so drift can never ship silently as
+## a mislabeled experiment.
+func _check_experimental_puzzle_properties() -> void:
+	var nested_chain: Dictionary = PuzzleAnalyzer.analyze(PuzzleCatalog.get_definition("nested_chain"))
+	check(nested_chain.dependency_graph.depth >= 3, "nested_chain: dependency depth is at least 3")
+	var chain: Array = nested_chain.dependency_graph.longest_chain
+	var all_same_row := true
+	var all_same_col := true
+	for i in range(1, chain.size()):
+		if (chain[i] as Vector2i).y != (chain[0] as Vector2i).y:
+			all_same_row = false
+		if (chain[i] as Vector2i).x != (chain[0] as Vector2i).x:
+			all_same_col = false
+	check(not all_same_row and not all_same_col,
+		"nested_chain: the longest dependency chain is not laid out in one row or column")
+
+	var cascade: Dictionary = PuzzleAnalyzer.analyze(PuzzleCatalog.get_definition("cascade_key_arrow"))
+	check(cascade.dependency_graph.max_unlock_fan_out >= 2,
+		"cascade_key_arrow: at least one removal unlocks two or more arrows at once")
+
+	var dense_unravel: Dictionary = PuzzleAnalyzer.analyze(PuzzleCatalog.get_definition("dense_unravel"))
+	check(dense_unravel.board.density >= 0.55, "dense_unravel: occupied density is at least 0.55")
+	check(dense_unravel.legal_move_structure.initial_legal_ratio <= 0.50,
+		"dense_unravel: initial legal ratio is at most 0.50 (not an 'everything already legal' dense board)")
+
+	var bent_network: Dictionary = PuzzleAnalyzer.analyze(PuzzleCatalog.get_definition("bent_network"))
+	check(bent_network.geometry.bent_arrow_count >= 2, "bent_network: at least two bent arrows")
+	var has_tail_sourced_edge := false
+	for edge in (bent_network.blocker_distance.edges as Array):
+		if edge["distance"] > 1:
+			has_tail_sourced_edge = true
+	check(has_tail_sourced_edge,
+		"bent_network: at least one dependency edge's blocking cell is beyond the immediately adjacent cell (a tail cell, not a head)")
+
+	var long_range: Dictionary = PuzzleAnalyzer.analyze(PuzzleCatalog.get_definition("long_range_blocker"))
+	var long_range_ok := false
+	for edge in (long_range.blocker_distance.edges as Array):
+		if edge["distance"] >= 4:
+			long_range_ok = true
+	check(long_range_ok, "long_range_blocker: at least one blocker sits at ray distance >= 4")
+	check(long_range.board.width >= 5 or long_range.board.height >= 5,
+		"long_range_blocker: the board is large enough for that distance to be meaningful")
+
+	var composed: Dictionary = PuzzleAnalyzer.analyze(PuzzleCatalog.get_definition("composed_shaped"))
+	check(composed.board.total_cells >= 49, "composed_shaped: the board has at least 49 cells (7x7)")
+	check(composed.dependency_graph.edge_count >= 1, "composed_shaped: the shape contains at least one genuine dependency edge")
+
 func _check_puzzle_session_defaults_and_navigation() -> void:
 	check(PuzzleSession.get_current_id() == PuzzleCatalog.id_at(0),
 		"PuzzleSession defaults to the first catalog entry when unset")
@@ -120,6 +170,7 @@ func _initialize() -> void:
 	_check_id_independent_of_position()
 	_check_fresh_and_isolated_definitions()
 	_check_no_difficulty_labels()
+	_check_experimental_puzzle_properties()
 	_check_puzzle_session_defaults_and_navigation()
 	print("PUZZLE_CATALOG_FAILURES=", failures)
 	quit(1 if failures else 0)

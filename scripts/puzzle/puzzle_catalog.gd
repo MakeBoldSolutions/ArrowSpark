@@ -1,12 +1,15 @@
 class_name PuzzleCatalog
 extends RefCounted
-## Static registry of the eight authored puzzles. Never instantiated; every
-## member is static. Each entry pairs a stable id (independent of array
-## position, title, or any filesystem path) with a display title and a
-## zero-argument builder returning a freshly constructed PuzzleDefinition —
-## exactly PuzzleDefinition.create_fixed()'s existing literal-construction
-## style, so isolation (no shared mutable substructure across calls) falls
-## out of the construction pattern itself, with no caching layer.
+## Static registry of the fourteen authored puzzles: the original eight
+## baseline puzzles plus six experimental puzzles, each deliberately
+## combining structural features the baseline eight never do (see
+## PuzzleAnalyzer). Never instantiated; every member is static. Each entry
+## pairs a stable id (independent of array position, title, or any filesystem
+## path) with a display title and a zero-argument builder returning a freshly
+## constructed PuzzleDefinition — exactly PuzzleDefinition.create_fixed()'s
+## existing literal-construction style, so isolation (no shared mutable
+## substructure across calls) falls out of the construction pattern itself,
+## with no caching layer.
 
 static var _entries: Array[Dictionary] = []
 
@@ -22,6 +25,12 @@ static func _ensure_entries() -> void:
 		{"id": "multiple_choices", "title": "Multiple Choices", "build": Callable(PuzzleCatalog, "_build_multiple_choices")},
 		{"id": "dense_board", "title": "Dense Board", "build": Callable(PuzzleCatalog, "_build_dense_board")},
 		{"id": "subtle_blockers", "title": "Subtle Blockers", "build": Callable(PuzzleCatalog, "_build_subtle_blockers")},
+		{"id": "nested_chain", "title": "Nested Chain", "build": Callable(PuzzleCatalog, "_build_nested_chain")},
+		{"id": "cascade_key_arrow", "title": "Cascade / Key Arrow", "build": Callable(PuzzleCatalog, "_build_cascade_key_arrow")},
+		{"id": "dense_unravel", "title": "Dense Unravel", "build": Callable(PuzzleCatalog, "_build_dense_unravel")},
+		{"id": "bent_network", "title": "Bent Network", "build": Callable(PuzzleCatalog, "_build_bent_network")},
+		{"id": "long_range_blocker", "title": "Long-Range Blocker", "build": Callable(PuzzleCatalog, "_build_long_range_blocker")},
+		{"id": "composed_shaped", "title": "Composed / Shaped", "build": Callable(PuzzleCatalog, "_build_composed_shaped")},
 	]
 
 static func count() -> int:
@@ -189,3 +198,101 @@ static func _build_subtle_blockers() -> PuzzleDefinition:
 		Vector2i(1, 4): [Vector2i(2, 4), Vector2i(2, 3), Vector2i(2, 2)],
 	}
 	return PuzzleDefinition.new(5, 5, arrows, tails)
+
+# --- Experimental puzzles ---------------------------------------------------
+# Each deliberately isolates a structural combination the eight baseline
+# puzzles above never exercise (see PuzzleAnalyzer). A puzzle may satisfy
+# more than one experiment's structural goal at once; overlap is fine and
+# expected, not a requirement that each puzzle isolate exactly one hypothesis.
+
+## A→B→C→D dependency chain (PuzzleAnalyzer depth 3) whose four heads span
+## opposite corners of the board rather than one obvious row/column, so the
+## chain must be traced across separated regions instead of read at a glance.
+static func _build_nested_chain() -> PuzzleDefinition:
+	var d := PuzzleDefinition.Direction
+	var arrows := {
+		Vector2i(4, 0): d.LEFT,  # A: always legal
+		Vector2i(4, 1): d.UP,    # B: blocked by A
+		Vector2i(0, 1): d.RIGHT, # C: blocked by B
+		Vector2i(0, 4): d.UP,    # D: blocked by C
+	}
+	return PuzzleDefinition.new(5, 5, arrows)
+
+## A single key arrow (a bent, always-legal arrow whose shape must be traced
+## to discover) whose removal simultaneously unblocks three others at once
+## (PuzzleAnalyzer max_unlock_fan_out 3) -- the "cascade" primitive the
+## pre-Spec-006 research found untested anywhere in the baseline catalog.
+static func _build_cascade_key_arrow() -> PuzzleDefinition:
+	var d := PuzzleDefinition.Direction
+	var arrows := {
+		Vector2i(2, 2): d.RIGHT, # key arrow: always legal, its bent tail blocks all three below
+		Vector2i(0, 1): d.RIGHT,
+		Vector2i(1, 4): d.UP,
+		Vector2i(2, 4): d.UP,
+	}
+	var tails := {
+		Vector2i(2, 2): [Vector2i(1, 2), Vector2i(1, 1)],
+	}
+	return PuzzleDefinition.new(5, 5, arrows, tails)
+
+## Six independent depth-3 dependency chains (one per column) packed onto a
+## 6x6 board: meaningfully higher density than any baseline puzzle (0.67 vs.
+## the existing catalog's 0.20-0.50 range) combined with real dependency
+## depth, unlike the existing dense_board puzzle (90% already legal at the
+## start -- looks dense but has nothing to unravel). Here only 25% of arrows
+## are legal initially, and each column peels away independently.
+static func _build_dense_unravel() -> PuzzleDefinition:
+	var d := PuzzleDefinition.Direction
+	var arrows := {}
+	for x in range(6):
+		for y in range(4):
+			arrows[Vector2i(x, y)] = d.UP
+	return PuzzleDefinition.new(6, 6, arrows)
+
+## Two separately bent arrows (M1, M2), each blocking a different target
+## arrow specifically via a TAIL cell rather than its head -- tracing only
+## the head position is not enough to understand either dependency; the
+## player must follow both bent shapes to their tail ends.
+static func _build_bent_network() -> PuzzleDefinition:
+	var d := PuzzleDefinition.Direction
+	var m1 := Vector2i(1, 0)
+	var m2 := Vector2i(4, 3)
+	var arrows := {
+		m1: d.RIGHT,
+		Vector2i(2, 1): d.LEFT, # blocked by M1's tail cell
+		m2: d.LEFT,
+		Vector2i(3, 2): d.RIGHT, # blocked by M2's tail cell
+	}
+	var tails := {
+		m1: [Vector2i(0, 0), Vector2i(0, 1)],
+		m2: [Vector2i(5, 3), Vector2i(5, 2)],
+	}
+	return PuzzleDefinition.new(6, 4, arrows, tails)
+
+## A locally-free-looking arrow (Target) is actually blocked by the tail cell
+## of a two-cell arrow (Blocker) seven cells away along its forward ray --
+## far past the immediately adjacent cell, and via a tail rather than a head.
+static func _build_long_range_blocker() -> PuzzleDefinition:
+	var d := PuzzleDefinition.Direction
+	var arrows := {
+		Vector2i(0, 0): d.RIGHT, # Target: looks free, but its ray reaches all the way across
+		Vector2i(7, 1): d.DOWN,  # Blocker: its tail cell (not its head) sits on Target's ray
+	}
+	var tails := {
+		Vector2i(7, 1): [Vector2i(7, 0)],
+	}
+	return PuzzleDefinition.new(8, 2, arrows, tails)
+
+## A filled diamond of 25 single-cell arrows on a 7x7 board, every one facing
+## UP. The occupied cells form a clearly recognizable diamond silhouette,
+## while the uniform facing means every column is its own real dependency
+## chain (up to depth 6 down the center column) -- the shape is not
+## decorative, it is what generates the puzzle's actual structure.
+static func _build_composed_shaped() -> PuzzleDefinition:
+	var d := PuzzleDefinition.Direction
+	var arrows := {}
+	for y in range(7):
+		var dx_max: int = 3 - abs(y - 3)
+		for x in range(3 - dx_max, 3 + dx_max + 1):
+			arrows[Vector2i(x, y)] = d.UP
+	return PuzzleDefinition.new(7, 7, arrows)

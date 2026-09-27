@@ -21,7 +21,7 @@ participants:
 
 **Feature Branch**: `006-spec-puzzle-structure-analysis`
 **Created**: 2026-09-27
-**Status**: Draft
+**Status**: Complete
 **Input**: Build a small experimental laboratory inside ArrowSpark's existing architecture: a headless structural-analysis capability over `PuzzleDefinition` (board scale, arrow geometry, legal-move structure, a dependency graph, cascade/unlock-fan-out, blocker-distance proxies), six deliberately different new experimental authored puzzles that push the existing rules harder than the first eight, an extended catalog regression gate, a developer-facing comparison report, and a lightweight human-calibration worksheet — explicitly to gather evidence about what makes an ArrowSpark puzzle challenging, satisfying, and recognizable before any procedural generation is attempted. No rule changes. No generator. No player-facing difficulty labels or composite score.
 
 ## Product Owner TLDR
@@ -90,7 +90,7 @@ This temporary bundle remains under `.devspark.work/` until release archival. Pr
 
 ## User Scenarios & Testing
 
-### User Story 1 - Measure any puzzle's objective structure (Priority: P1)
+### User Story 1 - Measure any puzzle's objective structure (Priority: P1) ✅ Complete
 
 As an ArrowSpark developer, I want to run structural analysis over any `PuzzleDefinition` and get back objective measurements (board scale, density, arrow geometry, legal-move structure, dependency-graph properties, cascade/unlock fan-out, blocker-distance proxies), so that I can compare puzzles using characteristics that actually exist in the puzzle model rather than guesswork.
 
@@ -108,7 +108,7 @@ As an ArrowSpark developer, I want to run structural analysis over any `PuzzleDe
 
 ---
 
-### User Story 2 - Play six new experiments that combine what the old eight never did (Priority: P1)
+### User Story 2 - Play six new experiments that combine what the old eight never did (Priority: P1) ✅ Complete
 
 As a player, I want to play new puzzles that feel meaningfully different from the existing eight — puzzles where dependencies are spread across the board, where clearing one arrow visibly opens up several others, where a dense-looking board actually has real structure to unravel, where following bent shapes matters, where something I assumed was free turns out to be blocked from far away, and where the board itself looks like something recognizable — so puzzle 9 onward doesn't just feel like more of the same six patterns I already learned.
 
@@ -129,7 +129,7 @@ As a player, I want to play new puzzles that feel meaningfully different from th
 
 ---
 
-### User Story 3 - Compare puzzles and record what actually felt interesting (Priority: P2)
+### User Story 3 - Compare puzzles and record what actually felt interesting (Priority: P2) ✅ Complete
 
 As an ArrowSpark developer, I want a way to see structural differences across the whole catalog at a glance, and a lightweight way to record what a puzzle actually felt like to play, so I can start building an evidence base for what makes a puzzle interesting before designing any generator.
 

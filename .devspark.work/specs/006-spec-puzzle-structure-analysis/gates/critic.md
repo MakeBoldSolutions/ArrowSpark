@@ -53,7 +53,7 @@ findings:
     recommended_action: "Verified fixed: data-model.md now defines depth as the longest simple directed path (no repeated node), proves finiteness for any graph including cyclic ones, states a deterministic (y,x)-ascending tie-break reusing PuzzleSolver's existing comparator, and explicitly separates this analysis-only allowance from catalog-solvability requirements (FR-020 remains the sole gate for what may ship). T016 adds the exact mixed acyclic+cyclic test (depth=2, longest_chain=[A,B,C], component_count=2)."
     execution_mode: selective
     status: resolved
-    outcome: "data-model.md + contracts/puzzle-analyzer-api.md + tasks.md T016 all updated."
+    outcome: "Implemented in scripts/puzzle/puzzle_analyzer.gd (_longest_simple_path/_dfs_extend/_chain_less_than); T016's mixed-cyclic test in tests/puzzle_analyzer_check.gd passes with the exact predicted values (depth=2, longest_chain=[A,B,C], component_count=2), confirmed via run_puzzle_regressions.py (PUZZLE_ANALYZER_FAILURES=0, 2026-09-27)."
   - finding_id: critic-002
     category: testing_strategy
     archetype_applicable: true
@@ -67,7 +67,7 @@ findings:
     recommended_action: "Verified fixed: T017 now explicitly requires measuring actual post-expansion wall-clock runtime and, if headroom is thin, increasing the timeout with a generous multiplier (~2x measured) rather than tuning tightly to one local measurement — directly addressing CI/environment variance tolerance, not just the reviewer's own machine."
     execution_mode: manual
     status: resolved
-    outcome: "tasks.md T017 description rewritten."
+    outcome: "T017 executed: instrumented per-subprocess timing after adding puzzle_analyzer_check.gd (14 synthetic cases) to run_rule_regressions(); measured [4.28s, 0.27s, 0.28s, 0.27s] per call against the 45s budget (>85% headroom). No timeout change needed. Recorded in gates/verification.md (2026-09-27); will be re-measured in T034 once the catalog reaches 14 entries."
   - finding_id: critic-003
     category: documentation
     archetype_applicable: true
@@ -94,7 +94,7 @@ findings:
     recommended_action: "Verified fixed: T013 now includes a two-independent-chains synthetic case asserting the exact expected component_count (2)."
     execution_mode: auto
     status: resolved
-    outcome: "tasks.md T013 extended."
+    outcome: "Implemented: tests/puzzle_analyzer_check.gd's _check_mixed_acyclic_and_cyclic_components tests two disjoint components (a 3-arrow chain plus a 2-arrow cycle) asserting component_count==2 distinctly from depth==2; passes via run_puzzle_regressions.py (2026-09-27)."
   - finding_id: critic-005
     category: error_handling_resilience
     archetype_applicable: true
@@ -107,7 +107,7 @@ findings:
     recommended_action: "Verified fixed: both data-model.md and contracts/puzzle-analyzer-api.md now specify a hard assert(definition != null, ...) precondition, matching PuzzleState._init's existing style, and T016 tests it explicitly rather than leaving it implementation-defined."
     execution_mode: auto
     status: resolved
-    outcome: "data-model.md + contracts/puzzle-analyzer-api.md + tasks.md T016 all updated."
+    outcome: "Implemented: scripts/puzzle/puzzle_analyzer.gd's analyze() asserts definition != null as its first statement; empirically verified (Godot 4.4.1 headless) that the failed assertion yields an empty Dictionary rather than a crash or a well-formed result. tests/puzzle_analyzer_check.gd's _check_null_definition_precondition asserts exactly this (not result.has(\"valid\")); passes via run_puzzle_regressions.py (2026-09-27)."
 ```
 
 ### Showstoppers

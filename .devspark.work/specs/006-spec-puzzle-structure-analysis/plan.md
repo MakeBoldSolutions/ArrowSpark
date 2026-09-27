@@ -153,3 +153,7 @@ tests/
 ## Complexity Tracking
 
 No Constitution Check violations were identified; this section is intentionally empty.
+
+## Implementation Notes
+
+- **2026-09-27, discovered during T002-T009 (US1)**: data-model.md's original "Invalid input" wording was ambiguous about whether `dependency_graph`/`blocker_distance` (both purely geometric, not literally witness-derived) should still be computed for a structurally *invalid* definition. Clarified before writing any code: for invalid input, every field except `board`/`geometry` is entirely zero/empty (including `dependency_graph`/`blocker_distance`), matching `PuzzleSolver.analyze()`'s own "invalid input yields every metric at zero" contract exactly — an invalid definition's cell ownership may itself be ill-formed (e.g. two arrows claiming one cell), so no single well-formed graph exists to report. The valid-but-unsolvable case is unaffected: its cell ownership is well-formed, so `dependency_graph`'s static fields and `blocker_distance` remain computed there. Updated data-model.md and contracts/puzzle-analyzer-api.md to state this precisely; no task or FR changed.
