@@ -3,6 +3,7 @@ id: save-progression
 type: architecture
 title: Save Progression and Input Settings
 appliesTo:
+  - project.godot
   - scripts/game_state.gd
   - scripts/level_state.gd
   - scripts/level_list_state_manager.gd
@@ -16,6 +17,7 @@ appliesTo:
   - scenes/menus/main_menu/main_menu.tscn
   - scenes/menus/main_menu/main_menu_with_animations.gd
   - scenes/menus/main_menu/puzzle_select_menu.gd
+  - scenes/menus/main_menu/puzzle_select_menu.tscn
 ---
 
 # Save Progression and Input Settings
@@ -73,6 +75,27 @@ not the previous defaults. Changing a keyboard key therefore retains an unchange
 gamepad binding. Reset-to-default input restores the captured startup defaults and
 removes the stored input configuration.
 
+### Canvas Actions and Transient Camera State
+
+The canvas zoom/fit actions (`canvas_zoom_in`, `canvas_zoom_out`, `canvas_fit`)
+are additive custom `InputMap` actions declared in project.godot beside the
+untouched `move_*` and `interact` actions. The inherited input list shows every
+custom action (`show_all_actions` stays true; no project options scene hides
+them), so they appear, remap and reset like the existing actions: a remapped
+key, a remapped gamepad button or a mixed keyboard-plus-gamepad mapping is
+restored from the `[Input]` settings section without duplicating events, and
+reset-to-default restores the shipped keyboard and gamepad bindings. The
+zoom/pan/fit view, Pan mode and navigation eligibility are presentation-only and
+reset with every attempt: nothing about the viewport is written to
+`user://global_state.tres` or the settings file, and navigating, replaying or
+changing puzzles never changes their bytes. tests/save_input_regression.gd
+verifies the additive actions, mixed restoration and reset behavior against the
+project's real `[input]` section (copied into its isolated project) and the
+unmodified inherited list defaults; tests/puzzle_canvas_check.gd verifies the
+saved-bytes invariants around navigation flows. Limits: movement actions
+remapped onto Tab or D-pad buttons are deliberately not consumed by the board so
+focus can always leave it, which means such a remap also moves GUI focus.
+
 ## Session-Only Puzzle Entry vs. Preserved Legacy Storage
 
 `scenes/menus/main_menu/main_menu_with_animations.gd`'s Play/New Game path
@@ -111,8 +134,13 @@ explicitly grabs focus onto its first entry when it becomes visible, since
 the inherited `_open_sub_menu()` mechanism does not do this itself (see
 .knowledge/architecture/arrow-puzzle.md's Puzzle Catalog and
 Session-Scoped Selection section, and the sub-menu open/close mechanics
-below). Source of truth: tests/puzzle_layout_check.gd (listing/ordering,
-initial focus placement, non-first-selection loading the correct puzzle)
+below). The entry list sits in a vertically scrolling, focus-following
+`ScrollContainer` (horizontal scrolling disabled) so all fifteen entries stay
+reachable and fully visible when focused at 960x540, 800x800 and 1280x720; the
+list is centered when it fits. Source of truth: tests/puzzle_layout_check.gd (listing/ordering,
+initial focus placement, non-first-selection loading the correct puzzle),
+tests/puzzle_canvas_check.gd (every entry focusable fully into view at the
+three supported window sizes)
 and tests/save_input_regression.gd's extended
 `_test_no_reset_on_puzzle_entry()` (selection sets `PuzzleSession`, opens via
 `SceneLoader.load_scene`, disturbs no save/settings/remap state, and

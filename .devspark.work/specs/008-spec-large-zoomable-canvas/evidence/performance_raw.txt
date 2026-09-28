@@ -1,0 +1,11 @@
+VISUAL_ENV engine=4.7.2-stable (official) renderer=opengl3 cpu=AMD Ryzen 9 7900X 12-Core Processor gpu=AMD Radeon(TM) Graphics window=(1280, 720)
+VISUAL_BOARD size=(1280.0, 566.0) fit_cell_pixels=17.80
+VISUAL_CAPTURE C:/GitHub/MakeBoldSolutions/ArrowGame/.devspark.work/specs/008-spec-large-zoomable-canvas/evidence/overview.png (1280x720)
+VISUAL_CAPTURE C:/GitHub/MakeBoldSolutions/ArrowGame/.devspark.work/specs/008-spec-large-zoomable-canvas/evidence/working_scale.png (1280x720)
+VISUAL_CAPTURE C:/GitHub/MakeBoldSolutions/ArrowGame/.devspark.work/specs/008-spec-large-zoomable-canvas/evidence/maximum_zoom.png (1280x720)
+VISUAL_FIXTURE samples=599 handler_p95_ms=0.109 frame_p95_ms=17.08 longest_frame_ms=17.6
+VISUAL_FIXTURE_WITHIN_BUDGET=true (handler <= 2.0 ms, frame p95 <= 33.3 ms, no frame >= 100 ms)
+VISUAL_FIXTURE_DEPARTURES_REMAINING=0
+VISUAL_DENSE arrows=600
+VISUAL_DENSE_INFORMATIONAL samples=599 handler_p95_ms=0.451 frame_p95_ms=17.06 longest_frame_ms=17.4
+VISUAL_CAPTURE C:/GitHub/MakeBoldSolutions/ArrowGame/.devspark.work/specs/008-spec-large-zoomable-canvas/evidence/dense_working_scale.png (1280x720)

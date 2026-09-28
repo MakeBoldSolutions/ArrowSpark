@@ -4,7 +4,7 @@ risk_level: high
 risk_profile: customer-facing
 archetype: game
 change_type: brownfield
-status: Draft
+status: Complete
 target_workflow: specify-full
 required_artifacts: spec, plan, tasks
 recommended_next_step: plan
@@ -16,7 +16,7 @@ route_intent: full-spec
 
 **Feature Branch**: `008-spec-large-zoomable-canvas`
 **Created**: 2026-09-28
-**Status**: Draft
+**Status**: Complete <!-- Valid: Draft | In Progress | Complete -->
 **Input**: Spec 008 — the puzzle defines the world; the screen is only a window into it. Add large-board zoom, pan, and Fit Puzzle while preserving established gameplay.
 
 ## Product Owner TLDR
@@ -78,7 +78,7 @@ This spec and related planning artifacts remain in `.devspark.work/` until relea
 
 ## User Scenarios & Testing
 
-### User Story 1 - Inspect the Large Board (Priority: P1)
+### User Story 1 - Inspect the Large Board (Priority: P1) ✅ Complete
 
 As a player, I can understand the whole puzzle, zoom into an interesting region, and pan through its geometry so I can trace arrows larger than my current view.
 
@@ -94,7 +94,7 @@ As a player, I can understand the whole puzzle, zoom into an interesting region,
 4. **Given** any navigated view, **When** I activate Fit Puzzle, **Then** the complete original logical bounds fit within the puzzle area with margin, regardless of remaining arrow count.
 5. **Given** an existing small puzzle, **When** it starts, **Then** it is immediately playable without zoom or pan and retains readable feedback.
 
-### User Story 2 - Inspect Without a Pointing Device (Priority: P1)
+### User Story 2 - Inspect Without a Pointing Device (Priority: P1) ✅ Complete
 
 As a keyboard or gamepad user, I can zoom, move through the whole board, and recover the overview without needing a mouse.
 
@@ -108,7 +108,7 @@ As a keyboard or gamepad user, I can zoom, move through the whole board, and rec
 2. **Given** gamepad-only input, **When** I perform that flow, **Then** it works without pointing-device input or a focus trap.
 3. **Given** existing remaps, **When** navigation is used, **Then** mappings remain intact and affected controls respect the established configurable-input model and menu/pause navigation.
 
-### User Story 3 - Select and Request Help Locally (Priority: P1)
+### User Story 3 - Select and Request Help Locally (Priority: P1) ✅ Complete
 
 As a player, I can select the intended arrow after navigation and perceive Open Move assistance even when its target begins off-screen.
 
@@ -124,7 +124,7 @@ As a player, I can select the intended arrow after navigation and perceive Open 
 4. **Given** an off-screen assistance target, **When** I request Open Move, **Then** exactly that deterministic legal arrow and its highlight become perceivable, no arrow is removed, and the existing assist cost applies once.
 5. **Given** an already perceivable target, **When** I request help, **Then** it remains perceivable without an unnecessary disruptive view change; repeated valid requests retain their existing cost.
 
-### User Story 4 - Preserve Departures and Attempts (Priority: P1)
+### User Story 4 - Preserve Departures and Attempts (Priority: P1) ✅ Complete
 
 As a player, I can navigate and resize while a long arrow unwinds without corrupting the animation, attempt, or completion result.
 

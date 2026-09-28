@@ -34,8 +34,8 @@ func check(condition: bool, description: String) -> void:
 ## observed once per puzzle id per process.
 func _check_session_best_and_overall_score_progression() -> void:
 	# Runs before any other check has sized the root viewport; without a real
-	# size here, PuzzleBoard's cell_extent stays 0 and ArrowView._layout_valid
-	# stays false, so departure animations can never progress/complete.
+	# size here, PuzzleBoard's viewport transform stays invalid and departure
+	# advancement stays suspended, so departure animations can never progress/complete.
 	get_root().size = Vector2i(1280, 720)
 	await process_frame
 	var id := PuzzleCatalog.id_at(0)
@@ -147,18 +147,30 @@ func _check_multi_cell_board_bounds() -> void:
 	await process_frame
 
 	var view: ArrowView = board._views[Vector2i(2, 2)]
+	var canonical: float = PuzzleViewportTransform.CANONICAL_CELL_PIXELS
 	# Shape bounding box spans x in [1,2], y in [0,2]: 2 cells wide, 3 cells tall.
-	check(is_equal_approx(view.size.x, board._cell_size.x * 2.0) and is_equal_approx(view.size.y, board._cell_size.y * 3.0),
-		"a bent tail's view bounding box covers its full 2x3 cell extent at 1280x720")
+	check(is_equal_approx(view.size.x, canonical * 2.0) and is_equal_approx(view.size.y, canonical * 3.0),
+		"a bent tail's view bounding box covers its full 2x3 canonical cell extent")
+	var projected: Vector2 = view.size * board._world.scale
+	var cell_pixels: float = board.view_transform.cell_pixels
+	check(is_equal_approx(projected.x, cell_pixels * 2.0) and is_equal_approx(projected.y, cell_pixels * 3.0),
+		"the projected bounding box covers 2x3 displayed cells at 1280x720")
 
-	var tail_tip_local: Vector2 = view.position + Vector2(0.5, 0.5) * board._cell_size.x
+	var tail_tip_local: Vector2 = board.view_transform.logical_to_local(Vector2(1.5, 0.5))
 	check(board._cell_from_local(tail_tip_local) == Vector2i(1, 0),
 		"a click inside the tail-tip cell resolves to that tail cell's board coordinate")
 
 	board.size = Vector2(960, 540)
 	await process_frame
-	check(is_equal_approx(view.size.x, board._cell_size.x * 2.0) and is_equal_approx(view.size.y, board._cell_size.y * 3.0),
-		"the same bounding box relationship holds after a resize to 960x540")
+	projected = view.size * board._world.scale
+	cell_pixels = board.view_transform.cell_pixels
+	check(is_equal_approx(view.size.x, canonical * 2.0) and is_equal_approx(view.size.y, canonical * 3.0),
+		"the canonical view extent is unchanged after a resize to 960x540")
+	check(is_equal_approx(projected.x, cell_pixels * 2.0) and is_equal_approx(projected.y, cell_pixels * 3.0),
+		"the projected bounding box relationship holds after a resize to 960x540")
+	tail_tip_local = board.view_transform.logical_to_local(Vector2(1.5, 0.5))
+	check(board._cell_from_local(tail_tip_local) == Vector2i(1, 0),
+		"the tail-tip cell still resolves through the inverse transform after the resize")
 
 	board.queue_free()
 
@@ -169,6 +181,15 @@ func _check_multi_cell_board_bounds() -> void:
 ## ceiling that never assumes a specific fixed animation duration.
 const _WORST_CASE_FINISH_DISTANCE_CELLS: float = 5.0 + 4.0 + PuzzleFeedback.EXIT_CLEARANCE_MARGIN_CELLS + 0.1
 const _WORST_CASE_DEPARTURE_SECONDS: float = _WORST_CASE_FINISH_DISTANCE_CELLS / PuzzleFeedback.EXIT_SPEED_CELLS_PER_SECOND + 1.0
+
+## Bounded deadline for a definition of any size: the longest possible finish
+## distance is its longest route plus a full board crossing.
+func _worst_case_seconds_for(definition: PuzzleDefinition) -> float:
+	var longest_route := 1
+	for head in definition.arrows.keys():
+		longest_route = maxi(longest_route, definition.get_arrow_cells(head).size())
+	var distance_cells: float = float(longest_route + definition.width + definition.height) + 1.0
+	return distance_cells / PuzzleFeedback.EXIT_SPEED_CELLS_PER_SECOND + 1.0
 
 func _await_departures_complete(puzzle, max_seconds: float) -> void:
 	var elapsed := 0.0
@@ -191,17 +212,18 @@ func _check_multiple_departures_and_completion(puzzle) -> void:
 	board.cell_clicked.emit(clear_order[-1])
 	check(puzzle._state.total_taps == taps, "completed input does not add taps while departures drain")
 	var distance_before_resize: float = first_view._departure_distance
-	var extent_before_resize: float = board._cell_size.x
+	var extent_before_resize: float = board.view_transform.cell_pixels
 	var body_before_resize: PackedVector2Array = first_view._body.points.duplicate()
 	get_root().size = Vector2i(1280, 720)
 	await process_frame
 	check(is_equal_approx(first_view._departure_distance, distance_before_resize),
 		"resize preserves departure cell-distance progress without restarting")
-	if extent_before_resize > 0.0 and board._cell_size.x > 0.0 and body_before_resize.size() > 0 \
+	if extent_before_resize > 0.0 and board.view_transform.cell_pixels > 0.0 and body_before_resize.size() > 0 \
 			and first_view._body.points.size() == body_before_resize.size():
-		var ratio: float = board._cell_size.x / extent_before_resize
-		check(first_view._body.points[0].is_equal_approx(body_before_resize[0] * ratio),
-			"resize rescales departing geometry to the new pixel extent at the same cell-distance progress")
+		check(first_view._body.points[0].is_equal_approx(body_before_resize[0]),
+			"resize keeps departing geometry canonical at the same cell-distance progress")
+		check(is_equal_approx(board._world.scale.x, board.view_transform.cell_pixels / PuzzleViewportTransform.CANONICAL_CELL_PIXELS),
+			"resize only rescales the parent projection of the departing geometry")
 	paused = true
 	var pending: int = puzzle._pending_departures
 	await create_timer(0.1).timeout
@@ -258,10 +280,14 @@ func _check_departure_resize_and_pause_lifecycle() -> void:
 	for size in [Vector2(960, 540), Vector2(1280, 720), Vector2(800, 800)]:
 		board.size = size
 		await process_frame
-		var extent: float = board._cell_size.x
-		check(is_equal_approx(board._departure_clip.size.x, extent * definition.width) \
-				and is_equal_approx(board._departure_clip.size.y, extent * definition.height),
-			"the departure clip rect recalculates to the occupied grid at %s" % [size])
+		var canonical: float = PuzzleViewportTransform.CANONICAL_CELL_PIXELS
+		var extent: float = board.view_transform.cell_pixels
+		check(is_equal_approx(board._departure_clip.size.x, canonical * definition.width) \
+				and is_equal_approx(board._departure_clip.size.y, canonical * definition.height),
+			"the departure clip keeps the canonical occupied grid extent at %s" % [size])
+		check(is_equal_approx(board._departure_clip.size.x * board._world.scale.x, extent * definition.width) \
+				and is_equal_approx(board._departure_clip.size.y * board._world.scale.y, extent * definition.height),
+			"the projected departure clip covers the occupied grid at %s" % [size])
 		check(completions[short_head] == 0 and completions[long_head] == 0,
 			"resizing alone never completes a departure at %s" % [size])
 
@@ -348,7 +374,7 @@ func _check_fresh_instance_starts_clean_and_rapid_tail_clicks() -> void:
 	fresh.queue_free()
 	PuzzleSession.set_current_id(PuzzleCatalog.id_at(0))
 
-## US1 independent test: every one of the fourteen catalog puzzles is playable
+## US1 independent test: every one of the fifteen catalog puzzles is playable
 ## start-to-finish through the real, unmodified scene — proving engine
 ## generality end-to-end, not only via the pure solver gate. For each: the
 ## board's active view count matches the definition's arrow count, the HUD
@@ -375,7 +401,7 @@ func _check_all_catalog_puzzles_play_through_real_scene() -> void:
 		var clear_order := _clear_order_for(board.definition)
 		for head in clear_order:
 			board.cell_clicked.emit(head)
-		await _await_departures_complete(puzzle, _WORST_CASE_DEPARTURE_SECONDS)
+		await _await_departures_complete(puzzle, _worst_case_seconds_for(board.definition))
 		check(results.visible, "catalog entry '%s': results appear once every queued departure clears" % id)
 		var final_results: Dictionary = puzzle._state.get_results()
 		check(final_results["mistakes"] == 0, "catalog entry '%s': the witness clears with zero mistakes" % id)
@@ -625,7 +651,7 @@ func _check_replay_restart_and_next_puzzle() -> void:
 	var last_order := _clear_order_for(last_board.definition)
 	for head in last_order:
 		last_board.cell_clicked.emit(head)
-	await _await_departures_complete(last_puzzle, _WORST_CASE_DEPARTURE_SECONDS)
+	await _await_departures_complete(last_puzzle, _worst_case_seconds_for(last_board.definition))
 	var last_results = last_puzzle.get_node("%PuzzleResults")
 	check(last_results.visible, "the last catalog puzzle's results appear once every departure clears")
 	check(not last_results.get_node("%NextPuzzleButton").visible,
@@ -671,7 +697,7 @@ func _check_replay_resets_open_move_fields() -> void:
 
 func _initialize() -> void:
 	check(PuzzleFeedback.BLOCKED_CUE_DURATION_SECONDS <= PuzzleFeedback.BLOCKED_CUE_DURATION_CAP_SECONDS,
-		"the coded blocked-feedback cue duration constant does not exceed its coded 0.3-second cap")
+		"the coded blocked-feedback cue duration constant does not exceed its coded cap")
 
 	await _check_multi_cell_board_bounds()
 	await _check_session_best_and_overall_score_progression()

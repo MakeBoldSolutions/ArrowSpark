@@ -71,6 +71,46 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "Show Me an Open Move"
 
+[node name="ToolbarMargin" type="MarginContainer" parent="Layout"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 8
+
+[node name="Toolbar" type="HFlowContainer" parent="Layout/ToolbarMargin"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 4
+
+[node name="ZoomOutButton" type="Button" parent="Layout/ToolbarMargin/Toolbar"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Zoom Out"
+
+[node name="ZoomInButton" type="Button" parent="Layout/ToolbarMargin/Toolbar"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Zoom In"
+
+[node name="FitButton" type="Button" parent="Layout/ToolbarMargin/Toolbar"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Fit Puzzle"
+
+[node name="PanButton" type="Button" parent="Layout/ToolbarMargin/Toolbar"]
+unique_name_in_owner = true
+layout_mode = 2
+toggle_mode = true
+text = "Pan"
+
+[node name="HelpLabel" type="Label" parent="Layout/ToolbarMargin/Toolbar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(480, 0)
+layout_mode = 2
+size_flags_vertical = 4
+autowrap_mode = 3
+
 [node name="BoardArea" type="Control" parent="Layout"]
 layout_mode = 2
 size_flags_vertical = 3

@@ -377,6 +377,23 @@ func _check_occupancy_grid() -> void:
 	check(grid[0].length() == 3 and grid[1].length() == 3, "occupancy grid: one column per board width")
 	check(grid[0] == "#.." and grid[1] == "..#", "occupancy grid: '#' marks occupied cells, '.' marks empty ones")
 
+## The appended large-canvas fixture analyzes like any other catalog entry:
+## solver-confirmed solvable with a full zero-mistake witness, and its
+## structural metrics reflect the authored board.
+func _check_canvas_validation_fixture() -> void:
+	var definition: PuzzleDefinition = PuzzleCatalog.get_definition("canvas_validation")
+	var result: Dictionary = PuzzleAnalyzer.analyze(definition)
+	check(result.solvable, "canvas_validation: analyzer reports it solvable")
+	check(result.board.width == 40 and result.board.height == 30, "canvas_validation: analyzer reports the 40x30 board")
+	check(result.geometry.bent_arrow_count >= 3, "canvas_validation: analyzer reports at least three bent arrows")
+	check(result.legal_move_structure.initial_legal_count >= 1, "canvas_validation: at least one arrow is legal at the start")
+	var witness: Array = PuzzleSolver.analyze(definition).witness
+	check(witness.size() == 52, "canvas_validation: the solver witness covers all fifty-two arrows")
+	var replay := PuzzleState.new(definition)
+	for head in witness:
+		replay.select_arrow(head)
+	check(replay.completed and replay.mistakes == 0, "canvas_validation: the witness clears the board with zero mistakes")
+
 func _initialize() -> void:
 	_check_independent_pair()
 	_check_simple_three_arrow_chain()
@@ -392,5 +409,6 @@ func _initialize() -> void:
 	_check_determinism_and_non_mutation()
 	_check_null_definition_precondition()
 	_check_occupancy_grid()
+	_check_canvas_validation_fixture()
 	print("PUZZLE_ANALYZER_FAILURES=", failures)
 	quit(1 if failures else 0)

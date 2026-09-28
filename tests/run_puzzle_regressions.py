@@ -1,6 +1,6 @@
 """Run headless Godot checks for the arrow puzzle without touching player data.
 
-Six independent checks run:
+Eight independent checks run:
 1. Pure rule regressions (tests/puzzle_regression.gd) against an isolated,
    unique temporary project containing only the puzzle core scripts. No
    scenes, addons or autoloads are needed since PuzzleState/PuzzleDefinition
@@ -22,12 +22,19 @@ Six independent checks run:
    operates purely on plain result Dictionaries with no PuzzleState/
    PuzzleDefinition dependency of its own, so it is safe to add to the same
    isolation project.
-5. A scene-based HUD/board layout and feedback-duration check
+5. Pure viewport-transform regressions (tests/puzzle_viewport_transform_check.gd)
+   against a third isolated, unique temporary project containing only
+   scripts/presentation/puzzle_viewport_transform.gd, which has no rule,
+   scene or asset dependency.
+6. A scene-based HUD/board layout and feedback-duration check
    (tests/puzzle_layout_check.gd) against the real project (so the full
    scene tree and addon autoloads are available), with the platform
    application-data root redirected to an isolated temporary directory so no
    player save/settings data is read or written.
-6. Interaction, fonts and animation presentation checks after a real-project
+7. Integrated canvas navigation, transformed input and lifecycle checks
+   (tests/puzzle_canvas_check.gd) against the real project and the same
+   isolated user-data root.
+8. Interaction, fonts and animation presentation checks after a real-project
    import, sharing the layout suite's isolated user-data root.
 """
 
@@ -110,6 +117,33 @@ def run_geometry_regressions(godot: str, repo: Path) -> None:
                 raise RuntimeError("Godot did not report a completed passing arrow departure geometry regression run")
 
 
+def run_viewport_transform_regressions(godot: str, repo: Path) -> None:
+    with tempfile.TemporaryDirectory(prefix="arrowgame-viewport-transform-") as directory:
+        root = Path(directory)
+        env = _isolated_env(root)
+        name = "ArrowGameViewportTransformRegression-" + uuid.uuid4().hex
+        (root / "project.godot").write_text(
+            f'config_version=5\n[application]\nconfig/name="{name}"\n', encoding="utf-8"
+        )
+        shutil.copyfile(
+            repo / "scripts/presentation/puzzle_viewport_transform.gd",
+            root / "puzzle_viewport_transform.gd",
+        )
+        shutil.copyfile(
+            repo / "tests/puzzle_viewport_transform_check.gd",
+            root / "puzzle_viewport_transform_check.gd",
+        )
+        for flags in (("--editor", "--quit"), ("--script", "puzzle_viewport_transform_check.gd")):
+            command = [godot, "--headless", "--path", str(root), *flags]
+            print("Running:", " ".join(command), flush=True)
+            result = subprocess.run(command, env=env, check=True, timeout=45,
+                                    capture_output=True, text=True)
+            print(result.stdout, flush=True)
+            print(result.stderr, flush=True)
+            if "--script" in flags and "PUZZLE_VIEWPORT_FAILURES=0" not in result.stdout:
+                raise RuntimeError("Godot did not report a completed passing viewport transform regression run")
+
+
 def run_layout_check(godot: str, repo: Path) -> None:
     with tempfile.TemporaryDirectory(prefix="arrowgame-puzzle-layout-") as directory:
         root = Path(directory)
@@ -117,12 +151,13 @@ def run_layout_check(godot: str, repo: Path) -> None:
         checks = (
             (("--import",), None),
             (("--script", "res://tests/puzzle_layout_check.gd"), "PUZZLE_LAYOUT_FAILURES=0"),
+            (("--script", "res://tests/puzzle_canvas_check.gd"), "PUZZLE_CANVAS_FAILURES=0"),
             (("--script", "res://tests/puzzle_presentation_check.gd"), "PUZZLE_PRESENTATION_FAILURES=0"),
         )
         for flags, marker in checks:
             command = [godot, "--headless", "--path", str(repo), *flags]
             print("Running:", " ".join(command), flush=True)
-            result = subprocess.run(command, env=env, check=False, timeout=90,
+            result = subprocess.run(command, env=env, check=False, timeout=180,
                                     capture_output=True, text=True)
             print(result.stdout, flush=True)
             print(result.stderr, flush=True)
@@ -140,6 +175,7 @@ def main():
     repo = Path(__file__).resolve().parents[1]
     run_rule_regressions(args.godot, repo)
     run_geometry_regressions(args.godot, repo)
+    run_viewport_transform_regressions(args.godot, repo)
     run_layout_check(args.godot, repo)
 
 

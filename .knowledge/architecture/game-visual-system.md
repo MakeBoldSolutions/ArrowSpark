@@ -5,10 +5,14 @@ title: Game Visual System
 appliesTo:
   - scripts/presentation/game_visual_style.gd
   - scripts/presentation/arrow_departure_geometry.gd
+  - scripts/presentation/puzzle_viewport_transform.gd
   - resources/fonts/**
   - assets/fonts/**
   - scenes/puzzle/**
   - tests/puzzle_presentation_check.gd
+  - tests/puzzle_canvas_check.gd
+  - tests/puzzle_canvas_visual_check.gd
+  - tests/puzzle_viewport_transform_check.gd
   - tests/arrow_departure_geometry_check.gd
   - tests/arrow_departure_visual_check.gd
 ---
@@ -25,8 +29,11 @@ not connect. Invisible logical cells remain the input targets.
 Geometry ratios relative to cell extent: shaft width 0.14, head tip +0.30,
 head base -0.06, head half-width 0.22, shaft end -0.02. Single-cell shafts
 start at -0.30. The endpoint overlaps the head; normal silhouettes stay
-inside their cell corridors and leave negative space. Resize rebuilds
-geometry; departure feeds the whole shape through its own stationary route
+inside their cell corridors and leave negative space. Geometry is built
+once at a fixed canonical 64-pixel cell extent and displayed through a
+parent `World` transform (scale = displayed pixels per cell / 64), so fit,
+zoom, pan and resize never rebuild it and stroke width, head size and
+proportions scale together; departure feeds the whole shape through its own stationary route
 and out past the grid edge (see Feedback precedence and departures below),
 not whole-object translation.
 
@@ -58,9 +65,10 @@ rendered desktop input and cannot be established by direct headless events.
 
 ## Feedback precedence and departures
 
-ArrowView orders presentation as departing > blocked > hover > normal.
+ArrowView orders presentation as departing > blocked > suggested > hover > normal.
 Blocked presses cancel both existing writers, set the entire arrow to
-critical #A8321A, and restart a 1.00 -> 1.10 -> 1.00 pulse over 150ms.
+critical #E8221A, restart a 1.00 -> 1.10 -> 1.00 pulse over 150ms, and hold the
+red for 600ms in total before returning to normal.
 Hover eligibility can change during red feedback without recoloring it.
 Completion restores unit scale and immediately assigns ember if eligible,
 otherwise ink; there is no extra hover-duration delay. No input lock or
@@ -91,8 +99,8 @@ pipeline — this assert is stripped from exported release templates, so it is
 a dev/test-time guard, not a production safety net; `ArrowView` is the sole
 caller and supplies `GameVisualStyle.HEAD_BASE`/`BODY_WIDTH`. `ArrowView`
 rebuilds this route once per departure start and re-renders the same cell
-distance at the current pixel extent on every layout update, never
-restarting or recomputing the route itself on resize.
+distance at its canonical extent, never restarting or recomputing the
+route on resize or navigation (only the parent projection changes).
 
 A departure finishes only once cell-distance progress reaches
 `length + forward_clearance(...)` (route length plus remaining edge distance
@@ -101,13 +109,17 @@ clearance — not head exit — triggers completion, exactly once, guarded
 against direct-call bypass of pause/invalid-layout/already-finished state.
 `PuzzleBoard` erases active ownership, reparents the view into a passive
 `DepartureClip` `Control` (clip_contents, mouse-filter ignore) sized to the
-occupied grid and positioned at its origin, and connects the one-shot
-completion before starting movement. Both active and departing collections
-relayout from the same board cell extent on resize; departing views never
-restart or recompute their route, only their pixel projection. Pause
+full logical board extent (canonical pixels, at the `World` origin under the
+World transform), and connects the one-shot
+completion before starting movement. Active and departing views share the one `World` projection; departing
+views never restart or recompute their route, only their parent projection
+changes, and a departure watched at any zoom (or entirely off-screen) still
+clears the full logical board. Pause
 suspends advancement with the tree (also enforced by an explicit paused
-check so direct test calls cannot bypass it); a zero-extent layout suspends
-advancement without corrupting or falsely completing it. `setup()`
+check so direct test calls cannot bypass it); an invalid (zero, tiny or non-finite) layout suspends
+advancement through `ArrowView.set_presentation_layout_valid` without
+corrupting or falsely completing it, and advancement resumes from the frozen
+progress once the area is valid. `setup()`
 replacement cancels and disposes any in-flight departures before clearing
 collections, so a replaced attempt never receives a stale completion.
 PuzzleFeedback remains the speed/clearance-margin authority, with no font or
@@ -123,7 +135,10 @@ in isolation; tests/puzzle_presentation_check.gd checks rising/peak/falling
 blocked-pulse interruption, immediate properties, repeated pulses, hover
 precedence, initial silhouette equivalence, head/body overlap, cardinal
 orientation, equal-delta-partition speed and exactly-once full-tail
-completion; tests/puzzle_layout_check.gd checks staggered departures, pause,
+completion; tests/puzzle_canvas_check.gd checks canonical geometry under
+navigation, concurrent long departures under zoom/pan/resize/pause/zero-area,
+replacement and exactly-once completion; tests/puzzle_viewport_transform_check.gd
+checks the projection math; tests/puzzle_layout_check.gd checks staggered departures, pause,
 resize (960x540/1280x720/800x800, including while paused and to zero
 extent), a combined concurrent-departure/pause/resize/resume scenario,
 setup-replacement disposal, completed-input ignoring and fresh attempts.
@@ -181,7 +196,7 @@ font quality require desktop checks in addition to those assertions.
 | text_primary | #1E1E1E | Labels and secondary-button text |
 | text_secondary | #56544F | Supporting text |
 | text_on_accent | #F8F6F2 | Primary-button text |
-| critical | #A8321A | Temporary blocked feedback |
+| critical | #E8221A | Temporary blocked feedback |
 | surface_border | #DDD9D0 | Surface/button outline |
 
 Rust and ember are accents, never the default arrow color. There is one
@@ -197,7 +212,7 @@ padding, 24 for HUD separation. Small radius 6 suits buttons; large radius
 offset (0,4), size 12, rgba(30,30,30,0.08). Optional surface/shadow/heading
 roles remain available without adding decorative content to demonstrate them.
 
-Lightweight hover is 120ms. Blocked feedback is 150ms (300ms coded cap) with
+Lightweight hover is 120ms. Blocked feedback is a 150ms pulse inside a 600ms red hold (750ms coded cap) with
 a quadratic ease-out tween without bounce. Departure instead advances at a
 constant, centrally configured cell-distance speed (10 cells/second) rather
 than a fixed duration or tween, so travel time scales with route length and
@@ -207,3 +222,18 @@ frame-loop geometry rebuilding beyond that bounded pass occurs. The initial
 ratios and 1.10 pulse are retained; rendered acceptance is required before
 treating their appearance as approved. Palette and vocabulary authority: scripts/presentation/game_visual_style.gd;
 code-only for unused roles because they intentionally have no onscreen consumer.
+
+## Canvas rendering and feedback readability
+
+Working scale is 64 pixels per cell; overview may be smaller and zoom reaches
+192 pixels per cell (see `.knowledge/architecture/arrow-puzzle.md`, Canvas
+Navigation, for the transform and input contract). Hover, blocked and Open
+Move feedback are unchanged in color and pulse amplitude at any zoom. The
+board shows a 2-pixel ember focus outline while it owns keyboard/gamepad focus,
+and the Pan toggle uses the standard pressed-button vocabulary. Selecting the
+head of a long arrow reveals it at a readable scale with padding before the
+existing pulse. Antialiased Line2D/Polygon2D readability across zoom levels is a
+rendered-desktop review item, not a headless assertion:
+tests/puzzle_canvas_visual_check.gd (non-headless, manual) records navigation-
+handler and frame times on the large fixture and saves overview/working-scale/
+maximum-zoom captures for that review.

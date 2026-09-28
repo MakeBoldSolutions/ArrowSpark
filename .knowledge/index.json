@@ -1,7 +1,7 @@
 {
   "generated": {
     "by": "build-knowledge-index",
-    "at": "2026-09-28T12:54:35Z"
+    "at": "2026-09-28T18:12:07Z"
   },
   "roots": [
     {
@@ -42,12 +42,14 @@
         "scripts/puzzle_session.gd",
         "scripts/puzzle_scoreboard.gd",
         "scripts/presentation/arrow_departure_geometry.gd",
+        "scripts/presentation/puzzle_viewport_transform.gd",
         "scenes/puzzle/arrow_puzzle.tscn",
         "scenes/puzzle/arrow_puzzle.gd",
         "scenes/puzzle/puzzle_board.gd",
         "scenes/puzzle/arrow_view.gd",
         "scenes/puzzle/puzzle_results.tscn",
         "scenes/puzzle/puzzle_results.gd",
+        "project.godot",
         "scenes/menus/main_menu/main_menu.tscn",
         "scenes/menus/main_menu/main_menu_with_animations.tscn",
         "scenes/menus/main_menu/main_menu_with_animations.gd",
@@ -62,6 +64,9 @@
         "tests/run_puzzle_structural_report.py",
         "tests/arrow_departure_geometry_check.gd",
         "tests/puzzle_layout_check.gd",
+        "tests/puzzle_canvas_check.gd",
+        "tests/puzzle_canvas_visual_check.gd",
+        "tests/puzzle_viewport_transform_check.gd",
         "tests/puzzle_presentation_check.gd",
         "tests/arrow_departure_visual_check.gd",
         "tests/scene_loader_stub.gd"
@@ -74,6 +79,7 @@
         "Open Move Assistance and Session Scoring",
         "Structural Analysis (PuzzleAnalyzer)",
         "Presentation Layer",
+        "Canvas Navigation",
         "Menu Integration and the No-Reset Guarantee",
         "Whole-arrow hover",
         "Feedback precedence and departures",
@@ -88,10 +94,14 @@
       "appliesTo": [
         "scripts/presentation/game_visual_style.gd",
         "scripts/presentation/arrow_departure_geometry.gd",
+        "scripts/presentation/puzzle_viewport_transform.gd",
         "resources/fonts/**",
         "assets/fonts/**",
         "scenes/puzzle/**",
         "tests/puzzle_presentation_check.gd",
+        "tests/puzzle_canvas_check.gd",
+        "tests/puzzle_canvas_visual_check.gd",
+        "tests/puzzle_viewport_transform_check.gd",
         "tests/arrow_departure_geometry_check.gd",
         "tests/arrow_departure_visual_check.gd"
       ],
@@ -101,7 +111,8 @@
         "Feedback precedence and departures",
         "Typography and local theme",
         "Semantic palette",
-        "Spacing, shape and motion vocabulary"
+        "Spacing, shape and motion vocabulary",
+        "Canvas rendering and feedback readability"
       ]
     },
     {
@@ -110,6 +121,7 @@
       "path": ".knowledge/architecture/save-progression.md",
       "title": "Save Progression and Input Settings",
       "appliesTo": [
+        "project.godot",
         "scripts/game_state.gd",
         "scripts/level_state.gd",
         "scripts/level_list_state_manager.gd",
@@ -122,7 +134,8 @@
         "tests/run_regressions.py",
         "scenes/menus/main_menu/main_menu.tscn",
         "scenes/menus/main_menu/main_menu_with_animations.gd",
-        "scenes/menus/main_menu/puzzle_select_menu.gd"
+        "scenes/menus/main_menu/puzzle_select_menu.gd",
+        "scenes/menus/main_menu/puzzle_select_menu.tscn"
       ],
       "headings": [
         "Save Progression and Input Settings",
@@ -130,6 +143,7 @@
         "Save Recovery",
         "Input Restoration",
         "Unreadable Settings",
+        "Canvas Actions and Transient Camera State",
         "Session-Only Puzzle Entry vs. Preserved Legacy Storage",
         "Level Select",
         "Validation and Limits"

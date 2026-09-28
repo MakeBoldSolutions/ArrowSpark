@@ -13,12 +13,14 @@ appliesTo:
   - scripts/puzzle_session.gd
   - scripts/puzzle_scoreboard.gd
   - scripts/presentation/arrow_departure_geometry.gd
+  - scripts/presentation/puzzle_viewport_transform.gd
   - scenes/puzzle/arrow_puzzle.tscn
   - scenes/puzzle/arrow_puzzle.gd
   - scenes/puzzle/puzzle_board.gd
   - scenes/puzzle/arrow_view.gd
   - scenes/puzzle/puzzle_results.tscn
   - scenes/puzzle/puzzle_results.gd
+  - project.godot
   - scenes/menus/main_menu/main_menu.tscn
   - scenes/menus/main_menu/main_menu_with_animations.tscn
   - scenes/menus/main_menu/main_menu_with_animations.gd
@@ -33,6 +35,9 @@ appliesTo:
   - tests/run_puzzle_structural_report.py
   - tests/arrow_departure_geometry_check.gd
   - tests/puzzle_layout_check.gd
+  - tests/puzzle_canvas_check.gd
+  - tests/puzzle_canvas_visual_check.gd
+  - tests/puzzle_viewport_transform_check.gd
   - tests/puzzle_presentation_check.gd
   - tests/arrow_departure_visual_check.gd
   - tests/scene_loader_stub.gd
@@ -139,8 +144,9 @@ away from zero (e.g. 6.25% -> "6.3%").
 
 `PuzzleFeedback` (puzzle_feedback.gd) holds the named animation-duration and
 departure-speed constants shared by the view layer and headless tests:
-`BLOCKED_CUE_DURATION_SECONDS` (0.15s, capped at `BLOCKED_CUE_DURATION_CAP_SECONDS`
-= 0.3s), `EXIT_SPEED_CELLS_PER_SECOND` (10.0, the shared cell-distance
+`BLOCKED_PULSE_SECONDS` (0.15s, the scale pulse inside the cue),
+`BLOCKED_CUE_DURATION_SECONDS` (0.6s, the whole bright-red cue, capped at
+`BLOCKED_CUE_DURATION_CAP_SECONDS` = 0.75s), `EXIT_SPEED_CELLS_PER_SECOND` (10.0, the shared cell-distance
 departure speed) and `EXIT_CLEARANCE_MARGIN_CELLS` (0.001, the tolerance
 margin added beyond exact edge contact so full-tail finish never completes
 early from floating-point boundary equality).
@@ -229,7 +235,7 @@ reaches a complete, mistake-free solution either way (the order-independence
 property the no-backtracking design depends on). Order-independence is
 further checked at every branching state a witness actually passes through
 (not only a puzzle's opening move): for the shipped `create_fixed()` board
-here, and for all fourteen `PuzzleCatalog` entries in
+here, and for all fifteen `PuzzleCatalog` entries in
 tests/puzzle_catalog_check.gd, forcing each *other* currently-legal
 alternative next instead of the witness's own choice still reaches a
 complete, mistake-free solution from there — the automated, catalog-wide
@@ -251,13 +257,15 @@ and `PUZZLE_FAILURES=0`.
 
 `PuzzleCatalog` (scripts/puzzle/puzzle_catalog.gd) is a static-registry
 `RefCounted` class, never instantiated, sitting between the domain
-(`PuzzleDefinition`) and presentation. It holds an ordered array of fourteen
-entries (`{id, title, build}`) — the original eight baseline puzzles plus six
+(`PuzzleDefinition`) and presentation. It holds an ordered array of fifteen
+entries (`{id, title, build}`) — the original eight baseline puzzles, six
 experimental puzzles (`nested_chain`, `cascade_key_arrow`,
 `dense_unravel`, `bent_network`, `long_range_blocker`, `composed_shaped`),
 each deliberately authored to combine structural features (dependency depth,
 cascade fan-out, density, bent-tail dependencies, long-range blocking,
-macro-scale composition) the baseline eight never did in combination — each
+macro-scale composition) the baseline eight never did in combination, and one
+large-canvas validation board (`canvas_validation`, titled "Large Canvas
+Validation") — each
 `build` a zero-argument static function
 constructing a fresh `PuzzleDefinition` exactly like `create_fixed()`'s own
 literal-construction style. `count()`, `id_at(index)`, `title_at(index)`,
@@ -270,6 +278,22 @@ no shared instance — so two calls for the same id are structurally equal but
 never share mutable substructure, the same isolation guarantee
 `create_fixed()` already had. `PuzzleDefinition` itself gained no
 catalog/progression fields; it remains anonymous structural data.
+
+`canvas_validation` is a plainly titled, player-visible final entry (puzzle 15,
+reached by Next after puzzle 14, listed in Level Select and counted in the
+session score like any other). It is an authored 40x30 board packed with fifty-two arrows (about 87% of
+the cells occupied): almost every arrow is long and bent (most 22-43 cells,
+only three shorter than eight), all four directions appear, long tails cross
+the rays of other arrows so most removals unlock several others, all four
+corner regions are occupied, and the initial open move (the first legal head
+in (y, x) order) is near the top-left. The layout is fixed literal data built
+from orthogonal path vertices expanded deterministically by
+`PuzzleCatalog._tail_along`; it was found once by a seeded offline search that
+kept every step solvable and is not generated at runtime. It exists to
+exercise large-board navigation, off-screen assistance and long departures;
+its difficulty is deliberately untuned. The original fourteen entries' ids,
+order, dimensions and exact arrow/tail content are pinned by a fingerprint
+check so later catalog additions cannot silently change them.
 
 `PuzzleSession` (scripts/puzzle_session.gd) is a process-lifetime,
 in-memory-only `RefCounted` class holding a single private `static var
@@ -289,12 +313,16 @@ running process, not to any node or scene.
 Source of truth: tests/puzzle_catalog_check.gd (unique/valid stable ids
 independent of position, deterministic `id_at`/`index_of`/`ids` ordering,
 fresh-and-isolated `get_definition` per call including cross-id
-independence, every one of the fourteen entries structurally valid and
-solver-confirmed solvable with a replayed zero-mistake witness, no
+independence, every one of the fifteen entries structurally valid and
+solver-confirmed solvable with a replayed zero-mistake witness, the original
+fourteen entries' ids, order, dimensions and content unchanged, the
+`canvas_validation` fixture's dimensions/arrow count/bent long arrows/four
+directions/tail dependency/top-left open move/corner regions, `Next` from
+puzzle 14 reaching it and the last-entry `Next` absence, no
 difficulty-labeled title wording, each of the six experimental
 entries confirmed against its exact `PuzzleAnalyzer`-derived threshold (see
 below), the catalog-wide branching order-independence check (every one of
-the fourteen entries' witness, at every branching state it passes through,
+the fifteen entries' witness, at every branching state it passes through,
 still completes when any other legal alternative is forced instead — see the
 Rule Layer's Solvability Analysis section above), `PuzzleSession` default/set/advance/has-next behavior including the
 last-entry no-op and the invalid-id fallback), run via the same
@@ -503,7 +531,9 @@ with a passive Line2D body and Polygon2D head. Copied ordered cell offsets
 become consecutive tail-to-head center points; adjacency never adds a
 connection. Round stroke joins and a round tail cap retain orthogonal
 centerlines. Single-cell arrows have an in-cell decorative shaft. Geometry
-rebuilds at the board's cell extent, without scaling the parent for layout.
+is built at the board's fixed canonical 64-pixel cell extent; the board's World
+parent scales it for display, and the view's own `scale` stays reserved for
+feedback pulses.
 No occupied-cell tiles or grid lines are drawn. It holds no rule state and
 retains MOUSE_FILTER_IGNORE. Departure feeds this same shape through its own
 stationary route via `ArrowDepartureGeometry` (see
@@ -516,18 +546,23 @@ ordered multi-bend points, head overlap, copied inputs and extent rebuilds.
 See .knowledge/architecture/game-visual-system.md for shared proportions.
 
 `PuzzleBoard` (scenes/puzzle/puzzle_board.gd) creates one `ArrowView` per
-head, keyed by head, sized and positioned to each shape's own bounding box
-(computed from `PuzzleDefinition.get_arrow_cells(head)`) in a centered,
-uniformly scaled grid recomputed on `NOTIFICATION_RESIZED`. It maps a
-primary mouse-button press (not release, and `not event.is_echo()`, so a
-held button cannot repeat) to a raw cell via `_gui_input`, and emits
-`cell_clicked` with that cell as-is — head or tail, or even one belonging to
-no arrow. It has no rule dependency: the controller resolves ownership and
-decides the outcome. `play_removed(head)`/`play_blocked(head)` always take
-the canonical head, never a raw clicked cell. `departure_finished` fires
-once each departing view fully clears the grid edge (see Feedback
-precedence and departures below for the `DepartureClip`/`_departing_views`
-mechanics).
+head, keyed by head, sized and positioned once at the canonical 64-pixel cell
+extent to each shape's own bounding box (computed from
+`PuzzleDefinition.get_arrow_cells(head)`) under a passive `World` child. The
+board Control itself is a fixed, clipped, focusable GUI target; it never
+scales. `PuzzleViewportTransform` (see Canvas Navigation below) owns fitting,
+zoom, pan and the board-local <-> logical mapping, and the board applies its
+`world_position()`/`world_scale()` to `World` on every view or size change.
+A primary mouse-button press (not release, and `not event.is_echo()`, so a
+held button cannot repeat) is mapped through the inverse transform to a raw
+cell via `_gui_input`, and `cell_clicked` is emitted with that cell as-is —
+head or tail, or even a cell belonging to no arrow (but never one outside
+the board or while the layout is invalid). It has no rule dependency: the
+controller resolves ownership and decides the outcome.
+`play_removed(head)`/`play_blocked(head)` always take the canonical head,
+never a raw clicked cell. `departure_finished` fires once each departing view
+fully clears the grid edge (see Feedback precedence and departures below for
+the `DepartureClip`/`_departing_views` mechanics).
 
 `ArrowPuzzle` (scenes/puzzle/arrow_puzzle.gd) owns the `PuzzleState`.
 `_start_new_attempt()` resolves its definition via
@@ -549,7 +584,10 @@ Showing results disables the `PauseMenuController`'s unhandled input
 behind the results panel; a fresh attempt re-enables it.
 
 `arrow_puzzle.tscn`'s `Layout` is a `VBoxContainer` with the HUD
-(`HUDMargin`) stacked above `BoardArea`/`PuzzleBoard`; a container stack
+(`HUDMargin`) and a navigation toolbar row (`ToolbarMargin`/`Toolbar`, an
+`HFlowContainer` holding Zoom Out, Zoom In, Fit Puzzle, a Pan toggle and a
+one-line help label that wraps below the buttons when narrow) stacked above
+`BoardArea`/`PuzzleBoard`; a container stack
 cannot overlap its children by construction at every window size. `PuzzleResults` is `mouse_filter = MOUSE_FILTER_STOP` and covers the
 full rect as the last child (so it draws above the board), absorbing
 background input while shown.
@@ -593,11 +631,13 @@ departures below) — no stale completion signal from a finished attempt can
 reach the next one.
 
 Source of truth: tests/puzzle_layout_check.gd (a multi-cell shape's view
-bounding box and tail-cell click resolution against a standalone
-`PuzzleBoard`, checked at both window sizes; HUD/board rect non-overlap and
+bounding box (canonical extent, and its projected size) and tail-cell click
+resolution through the inverse transform against a standalone `PuzzleBoard`,
+checked at both window sizes; HUD/board rect non-overlap and
 nonzero visibility at 1280x720 and 960x540; results awaiting every queued
 departure across a full multi-arrow clear; resize preserving departure
-cell-distance progress and rescaling pixel geometry to the new extent;
+cell-distance progress and re-projecting the unchanged canonical geometry
+through the World transform;
 resize at 960x540/1280x720/800x800, resize while paused and zero-extent
 recovery; a combined scenario with two concurrent departures of different
 route lengths paused mid-flight, resized while paused, then resumed, each
@@ -606,7 +646,7 @@ in-flight departure so no stale completion reaches a replaced attempt; a
 post-completion selection being ignored; a freshly instantiated scene
 starting clean; 20 rapid repeated selections on a blocked tail cell counting
 exactly once each without disturbing the attempt; the blocked-cue duration
-cap; and, for every one of the fourteen `PuzzleCatalog` entries in turn: the
+cap; and, for every one of the fifteen `PuzzleCatalog` entries in turn: the
 board's active view count matches the definition's arrow count, the HUD
 puzzle label matches the catalog title, and the same solver-derived
 zero-mistake witness clears through the real scene with unchanged
@@ -636,6 +676,109 @@ puzzle's results omit `%NextPuzzleButton`. Interactive desktop smoke testing
 (resize, rapid clicks, pause mid-feedback, restart) remains a separate
 manual verification step; the headless checks above are not a replacement
 for it.
+
+## Canvas Navigation
+
+The puzzle is a world; the screen is a window onto it. Board size, zoom and
+viewport are separate: authored dimensions define the board, the transform's
+`cell_pixels` defines the visual scale, and the board Control's area defines
+the visible region.
+
+`PuzzleViewportTransform` (scripts/presentation/puzzle_viewport_transform.gd) is
+a pure `RefCounted` presentation helper (no rule, scene or asset dependency)
+owning all of it, one authority for projection and inverse mapping. A logical
+point `q` (cells) appears at board-local pixel `p = viewport / 2 + (q -
+center_cells) * cell_pixels`. `configure(grid_size)` resets dimensions and
+fit/manual state; `resize_view(area)` applies the resize policy;
+`fit_puzzle()` centers the original dimensions with a 16-pixel margin per edge
+(`fit scale = min((V.x-32)/D.x, (V.y-32)/D.y)`); `zoom_at(factor, anchor)`
+keeps the anchored logical point fixed except for the bounds clamp; `pan_pixels`
+/`pan_camera_pixels` move the content/camera; `cell_at(local)` floors the
+inverse and returns `(-1, -1)` for an invalid layout, a point outside the
+viewport or outside the board; `reveal_cell(cell)` zooms up to at least 48
+pixels per cell about the current center and pans minimally so the head cell
+plus 8 pixels of padding is inside the viewport (a satisfied reveal changes
+nothing). `world_position()`/`world_scale()` derive the World projection. Zoom
+is bounded to `[fit scale, max(192, fit scale)]` pixels per cell in 1.2x steps;
+each center axis is clamped to the interior half-extent (an axis whose board
+fits stays centered). Setup and Fit set fit mode; an effective zoom/pan sets
+manual mode (a no-op at a bound does not). A resize refits in fit mode and, in
+manual mode, keeps the absolute scale and logical center (then clamps). An
+unusable area (an axis <= 32 pixels or non-finite) marks the layout invalid:
+conversions yield no coordinate, navigation is refused, the last valid
+projection is retained, and a valid area re-applies the stored-mode policy.
+Camera state is never serialized and resets with every attempt (Replay, Next,
+Level Select and pause-menu Restart all rebuild the scene).
+
+`PuzzleBoard` owns one transform. `World` (passive, mouse-ignore) holds the
+active views and the `DepartureClip`, which clips departing views to the full
+logical board extent; the board clips to the viewport. Navigation only moves
+`World`. `ArrowView.set_presentation_layout_valid(bool)` suspends departure
+advancement (also for direct `advance_departure` calls) while the area is
+invalid without altering routes, progress or the canonical extent; the board
+propagates it only on validity changes, and an off-screen view with a valid
+layout keeps advancing. Public navigation API: `fit_puzzle()`, `zoom_in()`,
+`zoom_out()`, `set_pan_mode(bool)`, `set_navigation_enabled(bool)`, plus
+`view_changed` and `pan_mode_changed` signals.
+
+Input arbitration (all through the one transform): wheel zoom anchors at the
+pointer with the step scaled by `event.factor` and clamped to one 1.2x step per
+event, so a trackpad burst cannot overshoot; middle-button drag pans; the
+Pan toggle makes a primary drag pan instead of select. In Select mode a primary
+press keeps its established select-once behavior and never doubles as a pan.
+A middle press suppresses simultaneous primary presses; drags capture the
+button, motion changes presentation only, release anywhere (including outside
+the board) ends the gesture, and pause, hiding, window/board focus loss, results,
+setup, leaving Pan mode and a motion event reporting no held button cancel it.
+Navigation input is eligible only while navigation is enabled (the controller
+disables it while results cover the board and re-enables it on a new attempt),
+the layout is valid, the board is visible and the tree is not paused; the
+controller does not gate it on pending departures, so the player may
+navigate while the last departures drain.
+
+Focused board actions: `canvas_zoom_in` (Equal / numpad plus / right shoulder),
+`canvas_zoom_out` (Minus / numpad minus / left shoulder) and `canvas_fit` (F /
+gamepad Y) are additive custom `InputMap` actions in project.godot, shown and
+remappable by the inherited options list and restored by `AppSettings`. They
+act about the view center only while the board has focus. The existing
+`move_*` actions (WASD / left stick) pan the camera at 600 screen pixels per
+second (normalized diagonals, board-focused and window-focused only, polled per
+frame); events matching these actions are consumed by the focused board so a
+stick push cannot also move GUI focus. Focus navigation is never consumed
+whatever the remapping: Tab/Shift+Tab and D-pad buttons always keep a way off the
+board. Tab order is Open Move, Zoom Out, Zoom In, Fit Puzzle, Pan, board, then
+back; the board's D-pad up returns to Pan and every toolbar control has
+directional neighbors that leave the toolbar. The board draws a visible focus
+outline; toolbar controls are never disabled at a limit. The toolbar's help
+line and tooltips derive their key names from the live `InputMap` (refreshed on
+unpause after a remap). This adds navigation only — there is no new
+keyboard/gamepad arrow-selection system; arrow selection remains a primary
+mouse press.
+
+Open Move reveal: the controller still calls `PuzzleState.request_open_move()`
+exactly once. `suggest_open_move(head)` first reveals the head at >= 48 pixels
+per cell with 8 pixels of padding (unchanged when already readable and visible;
+a long arrow need not fit, only its head), then starts the existing pulse. During
+an invalid area the reveal stays pending and applies once on valid recovery with
+no extra rule call or assist; clearing or replacing the suggestion cancels it.
+
+Source of truth: tests/puzzle_viewport_transform_check.gd (pure numeric fit,
+inverse round trips, anchors, per-axis clamps, mode policy, resize, invalid area,
+reveal, projection; run in an isolated project), tests/puzzle_canvas_check.gd
+(scene-level fit and layout for the large board and all original puzzles at
+four window sizes, wheel/drag/button navigation, limits, corner reachability,
+state and view-identity invariance, focus loop and remapping safety, drag
+eligibility and cancellation, transformed head/tail/empty/departed hits,
+blocked counters, Open Move reveal and pending reveal, state/solver/analyzer/
+scoreboard parity across navigation, concurrent long departures under
+navigation/resize/pause/zero-area/replacement, results gating, per-attempt view
+reset and no persisted viewport data) and tests/save_input_regression.gd
+(additive action remapping and restore); run via
+`python tests/run_puzzle_regressions.py` (requires `PUZZLE_VIEWPORT_FAILURES=0`
+and `PUZZLE_CANVAS_FAILURES=0`) and `python tests/run_regressions.py`. Real
+mouse/keyboard/gamepad feel, focus visuals, rendered antialiasing readability
+and frame-time behavior need desktop review; headless events cannot establish
+them.
 
 ## Menu Integration and the No-Reset Guarantee
 
@@ -694,7 +837,8 @@ established by direct headless events.
 
 ArrowView orders presentation as departing > blocked > suggested > hover >
 normal. Blocked presses cancel both existing writers, set the entire arrow to
-critical #A8321A, and restart a 1.00 -> 1.10 -> 1.00 pulse over 150ms.
+critical #E8221A, restart a 1.00 -> 1.10 -> 1.00 pulse over 150ms, and hold the
+red for 600ms in total before returning to normal.
 Hover eligibility can change during red feedback without recoloring it.
 Completion restores unit scale and immediately assigns ember if eligible,
 otherwise ink, and resumes any still-active suggested pulse first if one was

@@ -20,7 +20,7 @@ func check(condition: bool, description: String) -> void:
 ## fails loudly rather than skipping the malformed one.
 func _check_full_catalog_solvable() -> void:
 	var count := PuzzleCatalog.count()
-	check(count == 14, "the catalog contains exactly 14 entries (8 baseline + 6 experimental)")
+	check(count == 15, "the catalog contains exactly 15 entries (8 baseline + 6 experimental + 1 large-canvas validation)")
 
 	var seen_ids: Dictionary = {}
 	for i in range(count):
@@ -44,6 +44,111 @@ func _check_full_catalog_solvable() -> void:
 				"catalog entry '%s' witness head %s replays clear against a fresh PuzzleState" % [id, head])
 		check(replay.completed, "catalog entry '%s' witness clears the board" % id)
 		check(replay.mistakes == 0, "catalog entry '%s' witness completes with zero mistakes" % id)
+
+## The original fourteen entries keep their ids, order, dimensions, arrow
+## counts and exact arrow/tail content: a change to any of them fails here
+## rather than shipping silently alongside later catalog additions.
+const ORIGINAL_ENTRIES: Array[Dictionary] = [
+	{"id": "intro", "size": Vector2i(4, 4), "arrows": 6, "sha": "640fc3603a4ef038c37668e72024eac437ce194c80ba937516e661108dd2bbba"},
+	{"id": "first_bend", "size": Vector2i(4, 3), "arrows": 4, "sha": "c6c81ebe1aba3966d596f27af907bdb6ededcbd320e2c15b0634fe5f5da1df43"},
+	{"id": "multi_bend", "size": Vector2i(5, 5), "arrows": 4, "sha": "3c7028b5d6e4ab582e8696d9e09840eb57b0fea2937dbb8b74fcaf3307971a0a"},
+	{"id": "dependency_chain", "size": Vector2i(5, 3), "arrows": 3, "sha": "3fdb2784f4323ed074cc118b976009970ade2f01a983de9a0300ea76bf02a745"},
+	{"id": "forced_sequence", "size": Vector2i(5, 2), "arrows": 5, "sha": "ab6cf9cfa10f40348bb5d425832fc7076510397295911f180a8ed9b3ea72c6e3"},
+	{"id": "multiple_choices", "size": Vector2i(4, 4), "arrows": 4, "sha": "0064c6e9c3785bfe5229cd8561dc6836400f0f24b2c6bdc86d85ecbcc29afc70"},
+	{"id": "dense_board", "size": Vector2i(6, 6), "arrows": 10, "sha": "dfaadf54ab2a3dbbaba85c856818cec5fdee359f33beb39efd8361133bee9855"},
+	{"id": "subtle_blockers", "size": Vector2i(5, 5), "arrows": 4, "sha": "a2d3af94606e1f6ca4e1f4bf1a4a7de3384c5018aafd59b24946b2468cd194d0"},
+	{"id": "nested_chain", "size": Vector2i(5, 5), "arrows": 4, "sha": "62b34dae6617444cf40fc67ebac38425956a47b76e26aad1358f637a908b9b39"},
+	{"id": "cascade_key_arrow", "size": Vector2i(5, 5), "arrows": 4, "sha": "e7d38347f2ab5ebaddd471fe326f11fc41c6ebccf8af58311d4e084afef32113"},
+	{"id": "dense_unravel", "size": Vector2i(6, 6), "arrows": 24, "sha": "aba155d6ea40743c64a7dad82187232f8e01c71478e1c3e698fd8e21a484e42e"},
+	{"id": "bent_network", "size": Vector2i(6, 4), "arrows": 4, "sha": "88f755458edb7d87caeee24b8f66d904617043315634f0b2e4475a4b0b4cdc7c"},
+	{"id": "long_range_blocker", "size": Vector2i(8, 2), "arrows": 2, "sha": "6eff1107c26b25606532ed589f5af796d7de84dd7c0c72c5b829c6323d6243b1"},
+	{"id": "composed_shaped", "size": Vector2i(7, 7), "arrows": 25, "sha": "5d07cb0bf5051824525c1ad1aecf92e25d7519ca8df7df366801251c84a19fce"},
+]
+
+## Order-independent text of a definition: dimensions, then every head in
+## (y, x) order with its direction and ordered tail cells.
+func _fingerprint(definition: PuzzleDefinition) -> String:
+	var heads: Array = definition.arrows.keys()
+	heads.sort_custom(func(a: Vector2i, b: Vector2i) -> bool: return a.y < b.y or (a.y == b.y and a.x < b.x))
+	var parts: PackedStringArray = []
+	for head in heads:
+		var tail_text := ""
+		if definition.tails.has(head):
+			var cells: PackedStringArray = []
+			for cell in definition.tails[head]:
+				cells.append("%d,%d" % [cell.x, cell.y])
+			tail_text = ";".join(cells)
+		parts.append("%d,%d:%d[%s]" % [head.x, head.y, definition.arrows[head], tail_text])
+	return "%dx%d|%s" % [definition.width, definition.height, "|".join(parts)]
+
+func _check_original_entries_unchanged() -> void:
+	check(PuzzleCatalog.count() >= ORIGINAL_ENTRIES.size(), "the catalog still contains every original entry")
+	for i in range(ORIGINAL_ENTRIES.size()):
+		var expected: Dictionary = ORIGINAL_ENTRIES[i]
+		var id: String = expected["id"]
+		check(PuzzleCatalog.id_at(i) == id, "original entry %d keeps id '%s' at its position" % [i, id])
+		var definition: PuzzleDefinition = PuzzleCatalog.get_definition(id)
+		check(Vector2i(definition.width, definition.height) == expected["size"],
+			"original entry '%s' keeps its board dimensions" % id)
+		check(definition.arrows.size() == expected["arrows"], "original entry '%s' keeps its arrow count" % id)
+		check(_fingerprint(definition).sha256_text() == expected["sha"],
+			"original entry '%s' keeps its exact arrow and tail content" % id)
+
+## The appended large-canvas fixture: a plainly titled, player-visible final
+## entry (puzzle 15) that is larger than a typical window at a comfortable
+## arrow size, authored rather than generated, and solver-validated like every
+## other entry.
+func _check_canvas_validation_fixture() -> void:
+	var id := "canvas_validation"
+	check(PuzzleCatalog.index_of(id) == PuzzleCatalog.count() - 1 and PuzzleCatalog.index_of(id) == 14,
+		"canvas_validation is the fifteenth and final catalog entry")
+	check(PuzzleCatalog.get_title(id) == "Large Canvas Validation", "canvas_validation carries its plain title")
+	var definition: PuzzleDefinition = PuzzleCatalog.get_definition(id)
+	check(definition.width == 40 and definition.height == 30, "canvas_validation is a 40x30 board")
+	check(definition.arrows.size() == 52, "canvas_validation has exactly fifty-two arrows")
+
+	var directions: Dictionary = {}
+	var long_bent := 0
+	for head in definition.arrows.keys():
+		directions[definition.arrows[head]] = true
+		var cells: Array[Vector2i] = definition.get_arrow_cells(head)
+		var turns := 0
+		for i in range(2, cells.size()):
+			if cells[i] - cells[i - 1] != cells[i - 1] - cells[i - 2]:
+				turns += 1
+		if turns >= 1 and cells.size() >= 20 and cells.size() <= 60:
+			long_bent += 1
+	check(directions.size() == 4, "canvas_validation uses all four cardinal directions")
+	check(long_bent >= 3, "canvas_validation has at least three bent arrows of 20-60 cells")
+
+	var tail_dependency := _has_tail_caused_dependency(definition)
+	check(tail_dependency, "canvas_validation contains a dependency caused by a tail cell")
+
+	var state := PuzzleState.new(definition)
+	var open_head = state.find_open_move()
+	check(open_head != null and open_head.x < 10 and open_head.y < 10,
+		"canvas_validation's initial open move is near the top-left corner")
+
+	var owners: Dictionary = definition.get_cell_owners()
+	var corners_occupied := 0
+	for corner in [Vector2i(0, 0), Vector2i(39, 0), Vector2i(0, 29), Vector2i(39, 29)]:
+		var region_hit := false
+		for cell in owners.keys():
+			if absi(cell.x - corner.x) <= 10 and absi(cell.y - corner.y) <= 10:
+				region_hit = true
+				break
+		if region_hit:
+			corners_occupied += 1
+	check(corners_occupied == 4, "canvas_validation occupies a region near each of the four corners")
+
+## True when some arrow's forward ray crosses a non-head cell of another arrow.
+func _has_tail_caused_dependency(definition: PuzzleDefinition) -> bool:
+	var owners: Dictionary = definition.get_cell_owners()
+	for head in definition.arrows.keys():
+		for cell in definition.forward_ray_cells(head, definition.arrows[head]):
+			if owners.has(cell) and owners[cell] != head and cell != owners[cell]:
+				return true
+	return false
 
 ## FR-002: identity (stable id) is independent of array position, title, or
 ## any filesystem path — ordering and identity are separate concepts.
@@ -217,7 +322,7 @@ func _check_order_independence_at_every_branch(definition: PuzzleDefinition, lab
 		live_state.select_arrow(chosen_head)
 		prefix.append(chosen_head)
 
-## Runs the branch check above across every one of the fourteen catalog
+## Runs the branch check above across every one of the fifteen catalog
 ## entries, giving the "always a legal move" invariant catalog-wide
 ## coverage rather than the single hand-built board tests/puzzle_regression.gd
 ## already covers.
@@ -225,6 +330,15 @@ func _check_catalog_wide_order_independence() -> void:
 	for i in range(PuzzleCatalog.count()):
 		var id := PuzzleCatalog.id_at(i)
 		_check_order_independence_at_every_branch(PuzzleCatalog.get_definition(id), "catalog entry '%s'" % id)
+
+func _check_next_from_fourteenth_reaches_canvas_validation() -> void:
+	PuzzleSession.set_current_id(PuzzleCatalog.id_at(13))
+	check(PuzzleSession.has_next(), "the fourteenth puzzle offers a next entry")
+	check(PuzzleSession.advance_to_next(), "advancing from the fourteenth puzzle succeeds")
+	check(PuzzleSession.get_current_id() == "canvas_validation", "Next from puzzle 14 reaches canvas_validation")
+	check(not PuzzleSession.has_next(), "canvas_validation, as the last entry, offers no next puzzle")
+	check(not PuzzleSession.advance_to_next(), "advancing past the last entry is a no-op")
+	PuzzleSession.set_current_id("")
 
 func _check_puzzle_session_defaults_and_navigation() -> void:
 	check(PuzzleSession.get_current_id() == PuzzleCatalog.id_at(0),
@@ -249,11 +363,14 @@ func _check_puzzle_session_defaults_and_navigation() -> void:
 
 func _initialize() -> void:
 	_check_full_catalog_solvable()
+	_check_original_entries_unchanged()
+	_check_canvas_validation_fixture()
 	_check_id_independent_of_position()
 	_check_fresh_and_isolated_definitions()
 	_check_no_difficulty_labels()
 	_check_experimental_puzzle_properties()
 	_check_catalog_wide_order_independence()
+	_check_next_from_fourteenth_reaches_canvas_validation()
 	_check_puzzle_session_defaults_and_navigation()
 	print("PUZZLE_CATALOG_FAILURES=", failures)
 	quit(1 if failures else 0)

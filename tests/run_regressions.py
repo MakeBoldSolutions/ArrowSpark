@@ -21,10 +21,17 @@ def main():
         env = dict(os.environ)
         env["APPDATA"] = str(root / "userdata")
         env["XDG_DATA_HOME"] = str(root / "userdata")
+        env["ARROWGAME_REPO"] = str(repo)
         name = "ArrowGameRegression-" + uuid.uuid4().hex
+        # The project's real [input] section is copied so custom actions (the
+        # canvas zoom/fit actions, movement) exist in the isolated InputMap.
+        project_text = (repo / "project.godot").read_text(encoding="utf-8")
+        input_section = ""
+        if "\n[input]" in project_text:
+            input_section = "\n[input]" + project_text.split("\n[input]", 1)[1].split("\n[", 1)[0] + "\n"
         (root / "project.godot").write_text(
             f'config_version=5\n[application]\nconfig/name="{name}"\n'
-            '[autoload]\nSceneLoader="*res://scene_loader_stub.gd"\n',
+            '[autoload]\nSceneLoader="*res://scene_loader_stub.gd"\n' + input_section,
             encoding="utf-8",
         )
         for script in ("global_state", "global_state_data", "app_settings", "config"):
