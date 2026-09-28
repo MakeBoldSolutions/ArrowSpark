@@ -25,7 +25,7 @@ var _suggested_tween: Tween
 var _geometry: ArrowDepartureGeometry
 var _departure_distance: float = 0.0
 var _finish_distance: float = 0.0
-var _layout_valid: bool = false
+var _presentation_layout_valid: bool = true
 var _completion_emitted: bool = false
 
 func _init() -> void:
@@ -88,7 +88,7 @@ func _start_suggested_pulse() -> void:
 	_set_visual_color(GameVisualStyle.ARROW_HOVER)
 	pivot_offset = size / 2.0
 	scale = Vector2.ONE
-	var half_duration: float = PuzzleFeedback.BLOCKED_CUE_DURATION_SECONDS
+	var half_duration: float = PuzzleFeedback.BLOCKED_PULSE_SECONDS
 	_suggested_tween = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT).set_loops()
 	_suggested_tween.tween_property(self, "scale", Vector2.ONE * GameVisualStyle.BLOCKED_SCALE, half_duration)
 	_suggested_tween.tween_property(self, "scale", Vector2.ONE, half_duration)
@@ -111,10 +111,16 @@ func set_shape(head_offset: Vector2i, cell_offsets: Array[Vector2i], new_directi
 func set_cell_extent(extent: float) -> void:
 	_cell_extent = extent
 	if _departing:
-		_layout_valid = _cell_extent > 0.0
 		_render_departure()
 	else:
 		_rebuild_geometry()
+
+## The presentation layout is invalid while the board has no usable area:
+## departure advancement is suspended without changing the route, progress
+## or canonical extent, and resumes when the area is valid again. A view that
+## is merely off-screen still has a valid layout and keeps advancing.
+func set_presentation_layout_valid(valid: bool) -> void:
+	_presentation_layout_valid = valid
 
 func _direction_vector() -> Vector2:
 	match direction:
@@ -167,10 +173,12 @@ func play_blocked_feedback() -> void:
 	_set_visual_color(GameVisualStyle.CRITICAL)
 	pivot_offset = size / 2.0
 	scale = Vector2.ONE
-	var half_duration: float = PuzzleFeedback.BLOCKED_CUE_DURATION_SECONDS / 2.0
+	var half_duration: float = PuzzleFeedback.BLOCKED_PULSE_SECONDS / 2.0
 	_tween = create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	_tween.tween_property(self, "scale", Vector2.ONE * GameVisualStyle.BLOCKED_SCALE, half_duration)
 	_tween.tween_property(self, "scale", Vector2.ONE, half_duration)
+	# Stay bright red after the pulse so the mistake is unmistakable.
+	_tween.tween_interval(PuzzleFeedback.BLOCKED_CUE_DURATION_SECONDS - PuzzleFeedback.BLOCKED_PULSE_SECONDS)
 	_tween.tween_callback(_finish_blocked_feedback)
 
 func _finish_blocked_feedback() -> void:
@@ -225,7 +233,6 @@ func start_departure(head_cell: Vector2i, grid_size: Vector2i) -> void:
 	_geometry = _build_geometry()
 	_departure_distance = 0.0
 	_completion_emitted = false
-	_layout_valid = _cell_extent > 0.0
 	if _geometry.is_valid():
 		var rear_support: float = GameVisualStyle.BODY_WIDTH / 2.0
 		var clearance: float = ArrowDepartureGeometry.forward_clearance(
@@ -248,7 +255,7 @@ func _process(delta: float) -> void:
 
 ## Advances cell-distance progress at the configured speed, capped at the
 ## finish distance. Refuses to advance while paused, while this view's
-## layout is invalid, once already finished, or for a nonpositive delta, so
+## presentation layout is invalid, once already finished, or for a nonpositive delta, so
 ## direct test calls cannot bypass lifecycle policy the same way real
 ## per-frame scheduling does.
 func advance_departure(delta: float) -> void:
@@ -256,7 +263,7 @@ func advance_departure(delta: float) -> void:
 		return
 	if get_tree() != null and get_tree().paused:
 		return
-	if not _layout_valid or delta <= 0.0:
+	if not _presentation_layout_valid or _cell_extent <= 0.0 or delta <= 0.0:
 		return
 	_departure_distance = minf(
 		_departure_distance + PuzzleFeedback.EXIT_SPEED_CELLS_PER_SECOND * delta, _finish_distance)

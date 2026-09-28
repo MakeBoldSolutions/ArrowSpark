@@ -308,7 +308,7 @@ func _test_unlimited_blocked_selections() -> void:
 
 func _test_blocked_feedback_duration_constant() -> void:
 	check(PuzzleFeedback.BLOCKED_CUE_DURATION_SECONDS <= PuzzleFeedback.BLOCKED_CUE_DURATION_CAP_SECONDS,
-		"the coded blocked-feedback cue duration constant does not exceed its coded 0.3-second cap")
+		"the coded blocked-feedback cue duration constant does not exceed its coded cap")
 	check(PuzzleFeedback.BLOCKED_CUE_DURATION_SECONDS > 0.0,
 		"the blocked-feedback cue has a positive, visible duration")
 

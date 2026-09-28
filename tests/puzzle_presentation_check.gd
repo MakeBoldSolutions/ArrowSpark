@@ -98,14 +98,14 @@ func _run() -> void:
 
 func _motion(board: PuzzleBoard, cell: Vector2i) -> void:
 	var event := InputEventMouseMotion.new()
-	event.position = board._origin + (Vector2(cell) + Vector2(0.15, 0.15)) * board._cell_size
+	event.position = board.view_transform.logical_to_local(Vector2(cell) + Vector2(0.15, 0.15))
 	board._gui_input(event)
 
 func _press(board: PuzzleBoard, cell: Vector2i, pressed: bool = true) -> void:
 	var event := InputEventMouseButton.new()
 	event.button_index = MOUSE_BUTTON_LEFT
 	event.pressed = pressed
-	event.position = board._origin + (Vector2(cell) + Vector2(0.15, 0.15)) * board._cell_size
+	event.position = board.view_transform.logical_to_local(Vector2(cell) + Vector2(0.15, 0.15))
 	board._gui_input(event)
 
 func _check_hover_and_input(puzzle) -> void:
@@ -186,11 +186,11 @@ func _check_effects() -> void:
 	view.set_hovered(false)
 	check(view._head.color == GameVisualStyle.CRITICAL, "hover exit cannot overwrite active red feedback")
 	view.set_hovered(true)
-	view._tween.custom_step(0.2)
+	view._tween.custom_step(PuzzleFeedback.BLOCKED_CUE_DURATION_SECONDS + 0.05)
 	check(view.scale == Vector2.ONE and view._head.color == GameVisualStyle.ARROW_HOVER, "blocked completion immediately restores eligible ember")
 	view.play_blocked_feedback()
 	view.set_hovered(false)
-	view._tween.custom_step(0.2)
+	view._tween.custom_step(PuzzleFeedback.BLOCKED_CUE_DURATION_SECONDS + 0.05)
 	check(view.scale == Vector2.ONE and view._head.color == GameVisualStyle.ARROW_NORMAL, "blocked completion without hover restores ink")
 	view.set_hovered(true)
 	view._hover_tween.custom_step(0.03)
@@ -326,7 +326,7 @@ func _font_file_weight(path: String) -> int:
 func _check_overlay(puzzle: Control) -> void:
 	var board: PuzzleBoard = puzzle.get_node("%PuzzleBoard")
 	var event := InputEventMouseMotion.new()
-	event.position = board.global_position + board._origin + Vector2(0.5, 0.5) * board._cell_size
+	event.position = board.global_position + board.view_transform.logical_to_local(Vector2(0.5, 0.5))
 	root.push_input(event)
 	board.set_hovered_head(Vector2i(0, 0))
 	var cover := ColorRect.new()

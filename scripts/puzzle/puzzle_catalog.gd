@@ -1,9 +1,10 @@
 class_name PuzzleCatalog
 extends RefCounted
-## Static registry of the fourteen authored puzzles: the original eight
-## baseline puzzles plus six experimental puzzles, each deliberately
+## Static registry of the fifteen authored puzzles: the original eight
+## baseline puzzles, six experimental puzzles, each deliberately
 ## combining structural features the baseline eight never do (see
-## PuzzleAnalyzer). Never instantiated; every member is static. Each entry
+## PuzzleAnalyzer), and one large-canvas validation board that is larger
+## than a typical window at a comfortable arrow size. Never instantiated; every member is static. Each entry
 ## pairs a stable id (independent of array position, title, or any filesystem
 ## path) with a display title and a zero-argument builder returning a freshly
 ## constructed PuzzleDefinition — exactly PuzzleDefinition.create_fixed()'s
@@ -31,6 +32,7 @@ static func _ensure_entries() -> void:
 		{"id": "bent_network", "title": "Bent Network", "build": Callable(PuzzleCatalog, "_build_bent_network")},
 		{"id": "long_range_blocker", "title": "Long-Range Blocker", "build": Callable(PuzzleCatalog, "_build_long_range_blocker")},
 		{"id": "composed_shaped", "title": "Composed / Shaped", "build": Callable(PuzzleCatalog, "_build_composed_shaped")},
+		{"id": "canvas_validation", "title": "Large Canvas Validation", "build": Callable(PuzzleCatalog, "_build_canvas_validation")},
 	]
 
 static func count() -> int:
@@ -296,3 +298,91 @@ static func _build_composed_shaped() -> PuzzleDefinition:
 		for x in range(3 - dx_max, 3 + dx_max + 1):
 			arrows[Vector2i(x, y)] = d.UP
 	return PuzzleDefinition.new(7, 7, arrows)
+
+## Expands literal orthogonal path vertices (head first, then each turn or end
+## point) into the ordered tail cells behind the head. Deterministic; no
+## generator or randomness.
+static func _tail_along(vertices: Array[Vector2i]) -> Array[Vector2i]:
+	var cells: Array[Vector2i] = []
+	for i in range(vertices.size() - 1):
+		var step := Vector2i((vertices[i + 1] - vertices[i]).sign())
+		var cell := vertices[i]
+		while cell != vertices[i + 1]:
+			cell += step
+			cells.append(cell)
+	return cells
+
+## A 40x30 authored board packed with fifty-two arrows, roughly 87% of the
+## cells occupied, larger than any window at a 64-pixel arrow scale. Almost
+## every arrow is long and bent (most are 22-43 cells; only three are shorter
+## than eight), all four directions appear, and long tails cross the rays of
+## other arrows, so most removals unlock several others. The first arrow, at
+## the top-left, is the initial open move. Difficulty is deliberately untuned;
+## it exists to exercise navigation, off-screen assistance and long
+## departures across a large canvas. The layout is fixed literal data (found
+## once by a seeded search that kept every step solvable), not generated at
+## runtime.
+static func _build_canvas_validation() -> PuzzleDefinition:
+	var d := PuzzleDefinition.Direction
+	var shapes := [
+		[Vector2i(4, 1), d.UP, [Vector2i(4, 1), Vector2i(4, 10), Vector2i(14, 10), Vector2i(14, 3)]],
+		[Vector2i(3, 27), d.DOWN, [Vector2i(3, 27), Vector2i(3, 19), Vector2i(12, 19), Vector2i(12, 24)]],
+		[Vector2i(30, 10), d.LEFT, [Vector2i(30, 10), Vector2i(36, 10), Vector2i(36, 20), Vector2i(28, 20)]],
+		[Vector2i(35, 3), d.RIGHT, [Vector2i(35, 3), Vector2i(26, 3), Vector2i(26, 12), Vector2i(20, 12)]],
+		[Vector2i(18, 13), d.DOWN, [Vector2i(18, 13), Vector2i(18, 2), Vector2i(29, 2), Vector2i(29, 0), Vector2i(38, 0), Vector2i(38, 6)]],
+		[Vector2i(19, 12), d.DOWN, [Vector2i(19, 12), Vector2i(19, 3), Vector2i(25, 3), Vector2i(25, 11), Vector2i(22, 11)]],
+		[Vector2i(6, 16), d.LEFT, [Vector2i(6, 16), Vector2i(13, 16), Vector2i(13, 24), Vector2i(22, 24), Vector2i(22, 16), Vector2i(32, 16)]],
+		[Vector2i(0, 6), d.UP, [Vector2i(0, 6), Vector2i(0, 16), Vector2i(3, 16), Vector2i(3, 9), Vector2i(1, 9)]],
+		[Vector2i(4, 29), d.LEFT, [Vector2i(4, 29), Vector2i(9, 29), Vector2i(9, 25), Vector2i(20, 25), Vector2i(20, 26)]],
+		[Vector2i(14, 23), d.DOWN, [Vector2i(14, 23), Vector2i(14, 15), Vector2i(9, 15), Vector2i(9, 14), Vector2i(16, 14), Vector2i(16, 2)]],
+		[Vector2i(10, 18), d.DOWN, [Vector2i(10, 18), Vector2i(10, 17), Vector2i(0, 17), Vector2i(0, 21), Vector2i(2, 21), Vector2i(2, 27), Vector2i(1, 27)]],
+		[Vector2i(6, 3), d.LEFT, [Vector2i(6, 3), Vector2i(10, 3), Vector2i(10, 0), Vector2i(13, 0), Vector2i(13, 4), Vector2i(7, 4), Vector2i(7, 8)]],
+		[Vector2i(29, 25), d.LEFT, [Vector2i(29, 25), Vector2i(34, 25), Vector2i(34, 29), Vector2i(39, 29), Vector2i(39, 24), Vector2i(34, 24)]],
+		[Vector2i(24, 18), d.UP, [Vector2i(24, 18), Vector2i(24, 26), Vector2i(33, 26), Vector2i(33, 29), Vector2i(22, 29), Vector2i(22, 25)]],
+		[Vector2i(30, 8), d.LEFT, [Vector2i(30, 8), Vector2i(37, 8), Vector2i(37, 22), Vector2i(26, 22)]],
+		[Vector2i(10, 11), d.LEFT, [Vector2i(10, 11), Vector2i(15, 11), Vector2i(15, 0), Vector2i(27, 0)]],
+		[Vector2i(17, 4), d.UP, [Vector2i(17, 4), Vector2i(17, 14), Vector2i(18, 14), Vector2i(18, 23), Vector2i(21, 23), Vector2i(21, 21)]],
+		[Vector2i(36, 21), d.RIGHT, [Vector2i(36, 21), Vector2i(27, 21), Vector2i(27, 19), Vector2i(35, 19), Vector2i(35, 11), Vector2i(29, 11)]],
+		[Vector2i(20, 11), d.DOWN, [Vector2i(20, 11), Vector2i(20, 4), Vector2i(24, 4), Vector2i(24, 10), Vector2i(22, 10), Vector2i(22, 5)]],
+		[Vector2i(22, 15), d.LEFT, [Vector2i(22, 15), Vector2i(28, 15), Vector2i(28, 11), Vector2i(27, 11), Vector2i(27, 6), Vector2i(32, 6)]],
+		[Vector2i(8, 21), d.UP, [Vector2i(8, 21), Vector2i(8, 28), Vector2i(4, 28), Vector2i(4, 20), Vector2i(6, 20), Vector2i(6, 26)]],
+		[Vector2i(17, 19), d.DOWN, [Vector2i(17, 19), Vector2i(17, 15), Vector2i(15, 15), Vector2i(15, 23), Vector2i(16, 23), Vector2i(16, 17)]],
+		[Vector2i(38, 19), d.DOWN, [Vector2i(38, 19), Vector2i(38, 15), Vector2i(39, 15), Vector2i(39, 7), Vector2i(28, 7)]],
+		[Vector2i(37, 1), d.UP, [Vector2i(37, 1), Vector2i(37, 6), Vector2i(33, 6), Vector2i(33, 4), Vector2i(27, 4), Vector2i(27, 5), Vector2i(31, 5)]],
+		[Vector2i(5, 1), d.UP, [Vector2i(5, 1), Vector2i(5, 9), Vector2i(8, 9), Vector2i(8, 5), Vector2i(12, 5), Vector2i(12, 8)]],
+		[Vector2i(32, 12), d.LEFT, [Vector2i(32, 12), Vector2i(34, 12), Vector2i(34, 18), Vector2i(31, 18), Vector2i(31, 17), Vector2i(26, 17), Vector2i(26, 18), Vector2i(29, 18)]],
+		[Vector2i(10, 29), d.LEFT, [Vector2i(10, 29), Vector2i(19, 29), Vector2i(19, 26), Vector2i(16, 26), Vector2i(16, 28), Vector2i(10, 28)]],
+		[Vector2i(25, 17), d.UP, [Vector2i(25, 17), Vector2i(25, 23), Vector2i(39, 23), Vector2i(39, 20), Vector2i(38, 20)]],
+		[Vector2i(21, 20), d.DOWN, [Vector2i(21, 20), Vector2i(21, 14), Vector2i(27, 14), Vector2i(27, 13), Vector2i(20, 13), Vector2i(20, 21)]],
+		[Vector2i(23, 20), d.UP, [Vector2i(23, 20), Vector2i(23, 28), Vector2i(26, 28), Vector2i(26, 27), Vector2i(32, 27), Vector2i(32, 28), Vector2i(29, 28)]],
+		[Vector2i(15, 13), d.DOWN, [Vector2i(15, 13), Vector2i(15, 12), Vector2i(9, 12), Vector2i(9, 11), Vector2i(4, 11), Vector2i(4, 13), Vector2i(10, 13)]],
+		[Vector2i(11, 24), d.DOWN, [Vector2i(11, 24), Vector2i(11, 20), Vector2i(7, 20), Vector2i(7, 27), Vector2i(5, 27), Vector2i(5, 21)]],
+		[Vector2i(3, 8), d.DOWN, [Vector2i(3, 8), Vector2i(3, 3), Vector2i(1, 3), Vector2i(1, 8), Vector2i(2, 8), Vector2i(2, 7)]],
+		[Vector2i(36, 1), d.RIGHT, [Vector2i(36, 1), Vector2i(30, 1), Vector2i(30, 2), Vector2i(36, 2)]],
+		[Vector2i(32, 17), d.LEFT, [Vector2i(32, 17), Vector2i(33, 17), Vector2i(33, 15), Vector2i(29, 15), Vector2i(29, 13), Vector2i(33, 13)]],
+		[Vector2i(16, 1), d.LEFT, [Vector2i(16, 1), Vector2i(28, 1), Vector2i(28, 0)]],
+		[Vector2i(13, 5), d.UP, [Vector2i(13, 5), Vector2i(13, 9), Vector2i(11, 9), Vector2i(11, 6), Vector2i(9, 6), Vector2i(9, 9)]],
+		[Vector2i(38, 25), d.RIGHT, [Vector2i(38, 25), Vector2i(35, 25), Vector2i(35, 28), Vector2i(38, 28), Vector2i(38, 26), Vector2i(36, 26)]],
+		[Vector2i(1, 13), d.UP, [Vector2i(1, 13), Vector2i(1, 15), Vector2i(2, 15), Vector2i(2, 11)]],
+		[Vector2i(28, 8), d.UP, [Vector2i(28, 8), Vector2i(28, 9), Vector2i(36, 9)]],
+		[Vector2i(0, 22), d.UP, [Vector2i(0, 22), Vector2i(0, 26), Vector2i(1, 26), Vector2i(1, 24)]],
+		[Vector2i(19, 22), d.DOWN, [Vector2i(19, 22), Vector2i(19, 15)]],
+		[Vector2i(10, 24), d.DOWN, [Vector2i(10, 24), Vector2i(10, 21), Vector2i(9, 21), Vector2i(9, 24)]],
+		[Vector2i(10, 27), d.DOWN, [Vector2i(10, 27), Vector2i(10, 26), Vector2i(15, 26), Vector2i(15, 27), Vector2i(12, 27)]],
+		[Vector2i(1, 20), d.DOWN, [Vector2i(1, 20), Vector2i(1, 18), Vector2i(6, 18)]],
+		[Vector2i(25, 24), d.UP, [Vector2i(25, 24), Vector2i(25, 25), Vector2i(26, 25), Vector2i(26, 24), Vector2i(30, 24)]],
+		[Vector2i(5, 15), d.LEFT, [Vector2i(5, 15), Vector2i(8, 15), Vector2i(8, 14), Vector2i(4, 14)]],
+		[Vector2i(6, 2), d.LEFT, [Vector2i(6, 2), Vector2i(9, 2), Vector2i(9, 0), Vector2i(8, 0), Vector2i(8, 1)]],
+		[Vector2i(0, 28), d.LEFT, [Vector2i(0, 28), Vector2i(3, 28), Vector2i(3, 29), Vector2i(0, 29)]],
+		[Vector2i(31, 24), d.LEFT, [Vector2i(31, 24), Vector2i(33, 24)]],
+		[Vector2i(38, 13), d.DOWN, [Vector2i(38, 13), Vector2i(38, 11)]],
+		[Vector2i(7, 1), d.DOWN, [Vector2i(7, 1), Vector2i(7, 0), Vector2i(6, 0)]],
+	]
+	var arrows := {}
+	var tails := {}
+	for shape in shapes:
+		var vertices: Array[Vector2i] = []
+		vertices.assign(shape[2])
+		arrows[shape[0]] = shape[1]
+		tails[shape[0]] = _tail_along(vertices)
+	return PuzzleDefinition.new(40, 30, arrows, tails)

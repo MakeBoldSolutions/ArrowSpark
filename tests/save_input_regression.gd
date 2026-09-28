@@ -107,6 +107,7 @@ func _initialize() -> void:
 	check(Config.get_config("Session", "value") == 99, "settings persist after reset and reload")
 	_test_no_reset_on_puzzle_entry()
 	_test_puzzle_scoreboard_session_only()
+	_test_canvas_actions_additive_and_remappable()
 	print("REGRESSION_FAILURES=", failures)
 	quit(1 if failures else 0)
 
@@ -218,3 +219,91 @@ func _test_no_reset_on_puzzle_entry() -> void:
 		"new_game() resets PuzzleSession to catalog position 0 regardless of a prior Level Select selection")
 
 	menu.free()
+
+## The zoom/fit actions are additive custom actions: the inherited remap UI
+## lists every custom action, remaps restore from disk (including a mixed
+## keyboard-plus-gamepad mapping), reset-to-default restores them, and the
+## existing movement bindings are untouched. Runs against the project's real
+## [input] section, which the launcher copies into this isolated project.
+func _test_canvas_actions_additive_and_remappable() -> void:
+	var canvas_actions: Array[StringName] = [&"canvas_zoom_in", &"canvas_zoom_out", &"canvas_fit"]
+	var listed := AppSettings.get_action_names(false)
+	for action in canvas_actions:
+		check(InputMap.has_action(action) and action in listed,
+			"%s is a custom action the inherited remap list shows" % action)
+	for action in [&"move_up", &"move_down", &"move_left", &"move_right"]:
+		var has_key := false
+		var has_stick := false
+		for event in InputMap.action_get_events(action):
+			has_key = has_key or event is InputEventKey
+			has_stick = has_stick or event is InputEventJoypadMotion
+		check(has_key and has_stick and InputMap.action_get_events(action).size() == 2,
+			"%s keeps its original keyboard and left-stick bindings" % action)
+
+	AppSettings.set_default_inputs()
+	var defaults := InputMap.action_get_events(&"canvas_zoom_in")
+	var original_key: InputEventKey
+	var original_joy: InputEventJoypadButton
+	for event in defaults:
+		if event is InputEventKey and original_key == null:
+			original_key = event
+		if event is InputEventJoypadButton:
+			original_joy = event
+	check(original_key != null and original_joy != null, "canvas_zoom_in has both keyboard and gamepad defaults")
+
+	# Mixed remap: a new keyboard key, gamepad binding unchanged.
+	var replacement := InputEventKey.new()
+	replacement.physical_keycode = KEY_Z
+	var remapped: Array = []
+	for event in defaults:
+		remapped.append(replacement if event == original_key else event)
+	Config.set_config(AppSettings.INPUT_SECTION, "canvas_zoom_in", remapped)
+	Config.config_file = null
+	Config.load_config_file()
+	AppSettings.set_input_from_config(&"canvas_zoom_in")
+	check(InputMap.action_has_event(&"canvas_zoom_in", replacement), "a remapped zoom key is restored from disk")
+	check(InputMap.action_has_event(&"canvas_zoom_in", original_joy), "the unchanged gamepad zoom binding is restored with it")
+	check(not InputMap.action_has_event(&"canvas_zoom_in", original_key), "the replaced zoom key is gone")
+	check(InputMap.action_get_events(&"canvas_zoom_in").size() == defaults.size(), "the full zoom mapping is restored without duplicates")
+
+	# Gamepad-only remap restores alongside untouched keys.
+	var swapped_joy := InputEventJoypadButton.new()
+	swapped_joy.button_index = JOY_BUTTON_X
+	var fit_defaults := InputMap.action_get_events(&"canvas_fit")
+	var fit_remapped: Array = []
+	for event in fit_defaults:
+		fit_remapped.append(swapped_joy if event is InputEventJoypadButton else event)
+	Config.set_config(AppSettings.INPUT_SECTION, "canvas_fit", fit_remapped)
+	Config.config_file = null
+	Config.load_config_file()
+	AppSettings.set_input_from_config(&"canvas_fit")
+	check(InputMap.action_has_event(&"canvas_fit", swapped_joy), "a remapped gamepad fit button is restored from disk")
+	var fit_key_kept := false
+	for event in InputMap.action_get_events(&"canvas_fit"):
+		fit_key_kept = fit_key_kept or event is InputEventKey
+	check(fit_key_kept, "the keyboard fit binding survives a gamepad-only remap")
+
+	AppSettings.reset_to_default_inputs()
+	check(InputMap.action_has_event(&"canvas_zoom_in", original_key) and InputMap.action_has_event(&"canvas_zoom_in", original_joy) 			and not InputMap.action_has_event(&"canvas_zoom_in", replacement),
+		"reset to defaults restores the zoom keyboard and gamepad bindings")
+	check(InputMap.action_get_events(&"canvas_fit").size() == fit_defaults.size() 			and not InputMap.action_has_event(&"canvas_fit", swapped_joy),
+		"reset to defaults restores the fit bindings")
+
+	# The inherited remap UI is left unmodified and shows all custom actions.
+	var repo := OS.get_environment("ARROWGAME_REPO")
+	if repo != "":
+		var list_script := FileAccess.get_file_as_string(repo + "/addons/maaacks_game_template/base/scenes/menus/options_menu/input/input_actions_list.gd")
+		check(list_script.contains("@export var show_all_actions : bool = true"),
+			"the inherited remap list shows every custom action by default")
+		for path in [
+			"/scenes/menus/options_menu/input/input_options_menu.tscn",
+			"/scenes/menus/options_menu/input/input_extras_menu.tscn",
+			"/scenes/menus/options_menu/input/input_options_menu_with_mouse_sensitivity.tscn",
+		]:
+			var scene_text := FileAccess.get_file_as_string(repo + path)
+			check(not scene_text.is_empty() and not scene_text.contains("show_all_actions = false"),
+				"%s does not hide custom actions from the remap list" % path)
+	# Camera state is transient: no viewport field is ever written to settings.
+	var settings_text := FileAccess.get_file_as_string(Config.CONFIG_FILE_LOCATION).to_lower()
+	check(not settings_text.contains("viewport") and not settings_text.contains("camera") 			and not settings_text.contains("zoom_level") and not settings_text.contains("pan_mode"),
+		"no viewport, camera, zoom-level or pan-mode field appears in saved settings")
