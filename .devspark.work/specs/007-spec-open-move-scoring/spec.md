@@ -24,7 +24,7 @@ participants:
 
 **Feature Branch**: `007-spec-open-move-scoring`
 **Created**: 2026-09-27
-**Status**: In Progress
+**Status**: Complete
 **Input**: User description: "Spec 007 — Core Gameplay Contract, Open Move Assistance, and Session Scoring"
 
 ## Product Owner TLDR
@@ -119,7 +119,7 @@ existing solvability and no-open-move-defect guarantees remain intact and tested
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - Mistakes never block completion (Priority: P1)
+### User Story 1 - Mistakes never block completion (Priority: P1) ✅ Complete
 
 A player attempts to remove an arrow that turns out to be blocked. The arrow stays
 in place, the attempt continues immediately, and the player can keep trying —
@@ -144,7 +144,7 @@ concept, never a play-permission concept.
 
 ---
 
-### User Story 2 - Show Me an Open Move (Priority: P1)
+### User Story 2 - Show Me an Open Move (Priority: P1) ✅ Complete
 
 A player who cannot spot a legal move requests assistance. Exactly one currently
 legal arrow is visually identified. The player must still select it themselves to
@@ -175,7 +175,7 @@ consistently.
 
 ---
 
-### User Story 3 - Understandable attempt results (Priority: P2)
+### User Story 3 - Understandable attempt results (Priority: P2) ✅ Complete
 
 After completing a puzzle, the player sees a results summary that explains the
 attempt: total arrows, mistakes, open-move assists used, the resulting score, and
@@ -201,7 +201,7 @@ maximum possible score for that puzzle.
 
 ---
 
-### User Story 4 - Replay to improve this session's best score (Priority: P2)
+### User Story 4 - Replay to improve this session's best score (Priority: P2) ✅ Complete
 
 A player replays a puzzle they already completed this session, trying to beat their
 own best score for that puzzle. The result of the new attempt is compared against
