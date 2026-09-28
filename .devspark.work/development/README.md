@@ -1,6 +1,6 @@
 # ArrowSpark Development Documentation
 
-**Snapshot date:** 2026-09-28\
+**Snapshot date:** 2026-09-28 (updated: Specs 001--007 complete, Spec 008 in progress)\
 **Project:** ArrowSpark\
 **Family:** A Make Bold Spark Game\
 **Creator:** Make Bold Solutions\
@@ -66,8 +66,7 @@ The next architectural direction is:
     --- DevSpark lifecycle, automated gates, Critic/Analyze findings,
     and testing strategy.
 8.  [08-current-state.md](08-current-state.md) --- current
-    implementation status, open manual checks, known deviations, and
-    branch state.
+    implementation status, known deviations, and branch state.
 9.  [09-spec-008-direction.md](09-spec-008-direction.md) --- large
     zoomable puzzle canvas direction and acceptance concerns.
 10. [10-roadmap.md](10-roadmap.md) --- near-term and later roadmap,
@@ -78,11 +77,13 @@ The next architectural direction is:
     non-goals.
 12. [12-devspark-lessons.md](12-devspark-lessons.md) --- what this
     project has taught us about DevSpark itself.
-13. [source-spec-007.md](source-spec-007.md) --- captured Spec 007
+13. [13-roadmap-008-010.md](13-roadmap-008-010.md) --- living roadmap
+    for Specs 008--010 with entry/exit criteria and a revision protocol.
+14. [source-spec-007.md](source-spec-007.md) --- captured Spec 007
     source document supplied during this development discussion.
-14. [source-analyze-007.md](source-analyze-007.md) --- captured Analyze
+15. [source-analyze-007.md](source-analyze-007.md) --- captured Analyze
     gate output.
-15. [source-critic-007.md](source-critic-007.md) --- captured Critic
+16. [source-critic-007.md](source-critic-007.md) --- captured Critic
     gate output.
 
 ## Current Executive Summary
@@ -117,10 +118,11 @@ they are pulling a thread out of a knot.
 Spec 007 establishes the safety contract required before making puzzles
 significantly harder: unlimited mistakes, no fail state, a costly Open
 Move assist, replay for score improvement, and no persistent player
-memory. Spec 008 is intended to remove the next artificial constraint:
+memory. Spec 008 (in progress) removes the next artificial constraint:
 puzzle size should no longer be limited by screen size. A large puzzle
 should be navigable through zoom, pan, and Fit Puzzle.
 
-This documentation snapshot represents the state immediately after Spec
-007 implementation, with automated checks green and five manual desktop
-checks still outstanding.
+This documentation snapshot represents the state after Spec 007 was
+completed and merged (automated checks green, manual desktop checks
+passed) and while Spec 008 is planned but not yet implemented. Specs
+001--007 are complete; Spec 008 is in progress.

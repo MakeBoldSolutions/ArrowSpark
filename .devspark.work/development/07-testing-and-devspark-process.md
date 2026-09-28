@@ -148,7 +148,7 @@ lesson.
 
 ## Spec 007 Automated Implementation Results
 
-At the current snapshot: - Godot headless editor check exits 0. -
+At Spec 007 completion: - Godot headless editor check exits 0. -
 Failure markers all report zero: - `PUZZLE_FAILURES` -
 `PUZZLE_ANALYZER_FAILURES` - `PUZZLE_CATALOG_FAILURES` -
 `PUZZLE_SCOREBOARD_FAILURES` - `ARROW_DEPARTURE_GEOMETRY_FAILURES` -

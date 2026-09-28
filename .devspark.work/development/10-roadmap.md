@@ -8,17 +8,20 @@ Do not add systems merely because successful games often contain them.
 
 Each major step should remove one constraint or answer one uncertainty.
 
-## Now --- Finish Spec 007
+> **Status note (2026-09-28):** Specs 001--007 are complete. Spec 008 is in
+> progress. The detailed, living plan for Specs 008--010 is
+> [13-roadmap-008-010.md](13-roadmap-008-010.md); it supersedes this file where
+> they differ. This file remains the longer-range view.
 
-Status: implementation complete except manual desktop checks.
+## Done --- Specs 001--007
 
-Actions: 1. complete T009, T017, T023, T032, T035; 2. close T036
-linkage; 3. mark spec Complete; 4. create PR; 5. review and merge.
+Spec 007 (Open Move and session scoring) is complete and merged. Its manual
+desktop checks passed on 2026-09-28.
 
-No additional 007 scope should be added unless a manual check reveals a
-genuine defect.
+## Now --- Spec 008: Large Zoomable Puzzle Canvas (in progress)
 
-## Next --- Spec 008: Large Zoomable Puzzle Canvas
+Status: planned; checklist, analyze, and critic gates pass; implementation not
+started.
 
 Question answered:
 
@@ -30,7 +33,7 @@ departure animation; - resize stability.
 
 This is an enabling architecture specification.
 
-## After 008 --- Gordian Knot Experiments
+## Next --- Spec 009: Gordian Knot Experiments
 
 Question answered:
 

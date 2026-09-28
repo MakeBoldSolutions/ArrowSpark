@@ -251,12 +251,16 @@ redesign.
 
 ### Current implementation status
 
-Automated implementation is complete and green. Five manual desktop
-checks remain, so the spec correctly remains `In Progress`.
+**Complete.** Automated implementation was green and the five manual
+desktop checks passed on 2026-09-28. The spec was merged into the main
+line.
 
 ------------------------------------------------------------------------
 
-## Proposed Spec 008 --- Large Zoomable Puzzle Canvas
+## Spec 008 --- Large Zoomable Puzzle Canvas (in progress)
+
+Status: specified, planned, and tasked; checklist, analyze, and critic
+gates pass; no implementation task executed yet.
 
 ### Intent
 
@@ -290,7 +294,7 @@ Spec 008 should establish the canvas first.
 
 ------------------------------------------------------------------------
 
-## Expected Spec 009 --- Gordian Knot Experiments
+## Planned Spec 009 --- Gordian Knot Experiments
 
 This is intentionally not yet a finalized specification.
 

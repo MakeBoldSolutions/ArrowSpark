@@ -293,13 +293,16 @@ This is the intended subject of Spec 008.
 
 ## 12. Current Moment
 
-At this documentation snapshot: - Spec 007 implementation is
-substantially complete. - automated checks are green; - five manual
-desktop checks remain; - the spec correctly remains `In Progress`; - no
-changes are committed yet on `007-spec-open-move-scoring`; - Spec 008
-has been conceptually drafted as **Large Zoomable Puzzle Canvas**; - the
-following puzzle-design work is expected to explore **Gordian Knot
-Experiments**.
+At this documentation snapshot: - Specs 001--007 are complete; Spec 007
+was merged after its automated checks went green and its manual desktop
+checks passed; - the repository now lives at
+`MakeBoldSolutions/ArrowSpark` with `main` as its default branch; - Spec
+008, **Large Zoomable Puzzle Canvas**, is in progress on
+`008-spec-large-zoomable-canvas`: specified, planned, tasked, and through
+the checklist, analyze, and critic gates, but with no implementation task
+executed yet; - the following puzzle-design work is expected to explore
+**Gordian Knot Experiments** (Spec 009), followed by a Web playtest build
+(Spec 010). See [13-roadmap-008-010.md](13-roadmap-008-010.md).
 
 The project has therefore moved through three phases:
 
@@ -311,7 +314,7 @@ Spec 006 and the playtesting/design discussion.
 
 **Phase 3 --- Establish the contract and remove artificial
 constraints.**\
-Spec 007 and proposed Spec 008.
+Spec 007 (complete) and Spec 008 (in progress).
 
 The eventual goal is not simply "more levels."
 
