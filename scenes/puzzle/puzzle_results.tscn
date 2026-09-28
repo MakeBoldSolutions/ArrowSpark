@@ -49,6 +49,12 @@ layout_mode = 2
 horizontal_alignment = 1
 text = "Mistakes: 0"
 
+[node name="OpenMoveAssistsLabel" type="Label" parent="CenterContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 1
+text = "Open Move Assists: 0"
+
 [node name="ScoreLabel" type="Label" parent="CenterContainer/VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
@@ -60,6 +66,18 @@ unique_name_in_owner = true
 layout_mode = 2
 horizontal_alignment = 1
 text = "Accuracy: 0.0%"
+
+[node name="SessionComparisonLabel" type="Label" parent="CenterContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 1
+text = "New session best: 0"
+
+[node name="OverallSessionScoreLabel" type="Label" parent="CenterContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 1
+text = "Overall Session Score: 0"
 
 [node name="ButtonRow" type="HBoxContainer" parent="CenterContainer/VBoxContainer"]
 layout_mode = 2

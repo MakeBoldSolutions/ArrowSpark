@@ -106,8 +106,32 @@ func _initialize() -> void:
 	Config.load_config_file()
 	check(Config.get_config("Session", "value") == 99, "settings persist after reset and reload")
 	_test_no_reset_on_puzzle_entry()
+	_test_puzzle_scoreboard_session_only()
 	print("REGRESSION_FAILURES=", failures)
 	quit(1 if failures else 0)
+
+## PuzzleScoreboard's session-best/overall-score bookkeeping
+## must never reach the save file, and a freshly started process must begin
+## with no remembered scores at all.
+func _test_puzzle_scoreboard_session_only() -> void:
+	check(PuzzleScoreboard.get_overall_score() == 0,
+		"a freshly started process begins with a zero overall session score")
+	check(PuzzleScoreboard.get_best(PuzzleCatalog.id_at(0)) == null,
+		"a freshly started process begins with no session-best entries")
+
+	var save_path := GlobalState.SAVE_STATE_PATH
+	var save_bytes_before: PackedByteArray = FileAccess.get_file_as_bytes(save_path) if FileAccess.file_exists(save_path) else PackedByteArray()
+
+	PuzzleScoreboard.record_attempt(PuzzleCatalog.id_at(0),
+		{"total_arrows": 8, "mistakes": 0, "open_move_assists": 0, "score": 8, "accuracy": 1.0})
+	PuzzleScoreboard.record_attempt(PuzzleCatalog.id_at(1),
+		{"total_arrows": 6, "mistakes": 1, "open_move_assists": 1, "score": 0, "accuracy": 0.8})
+	check(PuzzleScoreboard.get_overall_score() == 8,
+		"recording completed attempts updates the in-memory overall session score (sum of stored bests)")
+
+	var save_bytes_after: PackedByteArray = FileAccess.get_file_as_bytes(save_path) if FileAccess.file_exists(save_path) else PackedByteArray()
+	check(save_bytes_after == save_bytes_before,
+		"recording PuzzleScoreboard attempts never writes to the save file (user://global_state.tres)")
 
 ## Opening the puzzle from Play/New Game MUST NOT reset or save existing
 ## progress, or disturb keyboard/gamepad remaps. Guards against a future

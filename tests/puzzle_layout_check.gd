@@ -24,6 +24,100 @@ func check(condition: bool, description: String) -> void:
 		failures += 1
 		push_error("FAIL: " + description)
 
+## Session-best independent test: exercises the real controller -> PuzzleScoreboard ->
+## Results wiring end-to-end (established/improved/tied/not_improved and the overall score).
+## Uses Open Move assist count (never a puzzle-specific "known blocked cell")
+## to make each attempt's score deterministically better/worse/tied, so this
+## check works against any catalog id without assuming its geometry. Must
+## run before any other check in this file completes PuzzleCatalog.id_at(0),
+## since the "established" (first-ever completion) outcome can only be
+## observed once per puzzle id per process.
+func _check_session_best_and_overall_score_progression() -> void:
+	# Runs before any other check has sized the root viewport; without a real
+	# size here, PuzzleBoard's cell_extent stays 0 and ArrowView._layout_valid
+	# stays false, so departure animations can never progress/complete.
+	get_root().size = Vector2i(1280, 720)
+	await process_frame
+	var id := PuzzleCatalog.id_at(0)
+	PuzzleSession.set_current_id(id)
+	check(PuzzleScoreboard.get_best(id) == null,
+		"this puzzle has no session-best entry before its first completion in this process")
+	var baseline_overall: int = PuzzleScoreboard.get_overall_score()
+
+	# First completion, imperfect (one assist), so a later perfect replay can
+	# genuinely improve it -- a perfect run already scores the maximum
+	# possible, so it could never itself be "improved" upon afterward.
+	var puzzle_a: Control = await _complete_via_real_scene_with_assists(id, 1)
+	var established_score: int = puzzle_a._state.get_results()["score"]
+	check(puzzle_a.get_node("%PuzzleResults").get_node("%SessionComparisonLabel").text ==
+		"New session best: %d" % established_score,
+		"the first completion this session establishes the session best")
+	check(PuzzleScoreboard.get_overall_score() == baseline_overall + established_score,
+		"the overall session score increases by the newly-established best")
+	check(puzzle_a.get_node("%PuzzleResults").get_node("%OverallSessionScoreLabel").text ==
+		"Overall Session Score: %d" % PuzzleScoreboard.get_overall_score(),
+		"the Results screen displays the correct overall session score after establishing")
+	puzzle_a.queue_free()
+	await process_frame
+
+	# Worse replay (two assists): session best and overall score unchanged.
+	var puzzle_b: Control = await _complete_via_real_scene_with_assists(id, 2)
+	var worse_score: int = puzzle_b._state.get_results()["score"]
+	check(worse_score < established_score, "the two-assist replay genuinely scores lower than the one-assist baseline")
+	check(puzzle_b.get_node("%PuzzleResults").get_node("%SessionComparisonLabel").text == "Session best unchanged",
+		"a worse replay is reported as not improving the session best")
+	check(PuzzleScoreboard.get_overall_score() == baseline_overall + established_score,
+		"a worse replay never lowers the overall session score")
+	puzzle_b.queue_free()
+	await process_frame
+
+	# Tied replay (one assist again, same score as established): unchanged.
+	var puzzle_c: Control = await _complete_via_real_scene_with_assists(id, 1)
+	var tied_score: int = puzzle_c._state.get_results()["score"]
+	check(tied_score == established_score, "repeating the same assist count reproduces the same score")
+	check(puzzle_c.get_node("%PuzzleResults").get_node("%SessionComparisonLabel").text ==
+		"Matched session best: %d" % tied_score,
+		"a tied replay is reported as matching, not improving, the session best")
+	check(PuzzleScoreboard.get_overall_score() == baseline_overall + established_score,
+		"a tied replay never changes the overall session score")
+	puzzle_c.queue_free()
+	await process_frame
+
+	# Better replay (perfect, zero assists): session best replaced, overall
+	# score increases by exactly the improvement.
+	var puzzle_d: Control = await _complete_via_real_scene_with_assists(id, 0)
+	var perfect_score: int = puzzle_d._state.get_results()["score"]
+	check(perfect_score > established_score, "the perfect replay genuinely scores higher than the one-assist baseline")
+	check(puzzle_d.get_node("%PuzzleResults").get_node("%SessionComparisonLabel").text ==
+		"Session best improved to %d" % perfect_score,
+		"a better replay is reported as improving the session best")
+	check(PuzzleScoreboard.get_overall_score() == baseline_overall + perfect_score,
+		"the overall session score increases by exactly the improvement (%d -> %d)" % [established_score, perfect_score])
+	puzzle_d.queue_free()
+	await process_frame
+	PuzzleSession.set_current_id(PuzzleCatalog.id_at(0))
+
+## Instantiates a fresh real puzzle scene for the given catalog id, triggers
+## assist_count Open Move requests (0 is valid: a perfect run), then plays
+## the puzzle's own clear order to completion. Returns the completed scene
+## instance so the caller can inspect its state/Results panel directly.
+func _complete_via_real_scene_with_assists(id: String, assist_count: int) -> Control:
+	PuzzleSession.set_current_id(id)
+	var packed: PackedScene = load("res://scenes/puzzle/arrow_puzzle.tscn")
+	var puzzle: Control = packed.instantiate()
+	get_root().add_child(puzzle)
+	await process_frame
+
+	var board = puzzle.get_node("%PuzzleBoard")
+	var open_move_button: Button = puzzle.get_node("%OpenMoveButton")
+	for i in range(assist_count):
+		open_move_button.emit_signal("pressed")
+	var clear_order := _clear_order_for(board.definition)
+	for head in clear_order:
+		board.cell_clicked.emit(head)
+	await _await_departures_complete(puzzle, _WORST_CASE_DEPARTURE_SECONDS)
+	return puzzle
+
 func _check_layout_at_size(puzzle, window_size: Vector2i) -> void:
 	get_root().size = window_size
 	# Let the container tree settle after the resize before reading rects.
@@ -294,6 +388,134 @@ func _check_all_catalog_puzzles_play_through_real_scene() -> void:
 		await process_frame
 	PuzzleSession.set_current_id(PuzzleCatalog.id_at(0))
 
+## Results independent test: after completing a puzzle with a mix of mistakes and
+## Open Move uses, the Results screen displays total arrows, mistakes,
+## open-move assists, score and accuracy as five distinct values consistent
+## with PuzzleState.get_results(). Reuses "multi_bend"'s known-blocked tail
+## cell (3, 2) (see _check_fresh_instance_starts_clean_and_rapid_tail_clicks
+## above) to induce mistakes reliably, rather than assuming a specific cell
+## is blocked on the default catalog entry.
+func _check_results_screen_shows_open_move_assists() -> void:
+	PuzzleSession.set_current_id("multi_bend")
+	var packed: PackedScene = load("res://scenes/puzzle/arrow_puzzle.tscn")
+	var puzzle: Control = packed.instantiate()
+	get_root().add_child(puzzle)
+	await process_frame
+
+	var board = puzzle.get_node("%PuzzleBoard")
+	var open_move_button: Button = puzzle.get_node("%OpenMoveButton")
+	var results = puzzle.get_node("%PuzzleResults")
+
+	board.cell_clicked.emit(Vector2i(3, 2)) # blocked tail cell: a reliable mistake
+	board.cell_clicked.emit(Vector2i(3, 2)) # a second mistake
+	open_move_button.emit_signal("pressed") # one Open Move assist
+
+	var clear_order := _clear_order_for(board.definition)
+	for head in clear_order:
+		board.cell_clicked.emit(head)
+	await _await_departures_complete(puzzle, _WORST_CASE_DEPARTURE_SECONDS)
+	check(results.visible, "results appear once every queued departure clears")
+
+	var expected: Dictionary = puzzle._state.get_results()
+	check(expected["mistakes"] == 2, "the attempt recorded exactly the two induced mistakes")
+	check(expected["open_move_assists"] == 1, "the attempt recorded exactly the one Open Move assist")
+
+	var total_label: Label = results.get_node("%TotalLabel")
+	var mistakes_label: Label = results.get_node("%MistakesLabel")
+	var assists_label: Label = results.get_node("%OpenMoveAssistsLabel")
+	var score_label: Label = results.get_node("%ScoreLabel")
+	var accuracy_label: Label = results.get_node("%AccuracyLabel")
+	check(total_label.text == "Total Arrows: %d" % expected["total_arrows"],
+		"Results screen shows the correct total arrows")
+	check(mistakes_label.text == "Mistakes: %d" % expected["mistakes"],
+		"Results screen shows the correct mistakes")
+	check(assists_label.text == "Open Move Assists: %d" % expected["open_move_assists"],
+		"Results screen shows the open-move-assist count as a value distinct from mistakes")
+	check(score_label.text == "Score: %d" % expected["score"],
+		"Results screen shows the correct score, reflecting both mistakes and assists")
+	check(accuracy_label.text == "Accuracy: %s" % PuzzleResultsFormat.format_accuracy_percent(expected["accuracy"]),
+		"Results screen shows the correct accuracy, unaffected by the Open Move assist")
+
+	puzzle.queue_free()
+	await process_frame
+	PuzzleSession.set_current_id(PuzzleCatalog.id_at(0))
+
+## Open Move independent test: triggering Show Me an Open Move while an earlier
+## removal's departure animation is still visually in flight responds
+## immediately against the current logical state, with no suppression or
+## queuing tied to the in-flight animation.
+func _check_open_move_during_in_flight_departure() -> void:
+	var packed: PackedScene = load("res://scenes/puzzle/arrow_puzzle.tscn")
+	var puzzle: Control = packed.instantiate()
+	get_root().add_child(puzzle)
+	await process_frame
+
+	var board = puzzle.get_node("%PuzzleBoard")
+	var open_move_button: Button = puzzle.get_node("%OpenMoveButton")
+	var clear_order := _clear_order_for(board.definition)
+
+	board.cell_clicked.emit(clear_order[0])
+	check(board._departing_views.size() > 0,
+		"an in-flight departure exists immediately after the first clear-order removal")
+
+	var expected_head = puzzle._state.find_open_move()
+	check(expected_head != null,
+		"the puzzle's current logical state (post-removal) still has a legal arrow to identify")
+	open_move_button.emit_signal("pressed")
+	check(board._suggested_head == expected_head,
+		"Show Me an Open Move responds immediately against the current logical state while a departure is still in flight, matching find_open_move()'s result -- no suppression or queuing")
+
+	await _await_departures_complete(puzzle, _WORST_CASE_DEPARTURE_SECONDS)
+	puzzle.queue_free()
+	await process_frame
+
+## Open Move independent test: the Open Move control is reachable via
+## keyboard/gamepad focus navigation, not only by mouse -- constitution
+## Principle III. Godot's Button/BaseButton already guarantees that any
+## visible, enabled, FOCUS_ALL-focused button activates from the built-in
+## ui_accept action (keyboard Enter/Space, gamepad face button) -- engine
+## behavior this project consumes but does not implement or risk breaking.
+## What this project's own wiring can break, and what this check verifies
+## deterministically, is: (1) the control is actually in the focus-eligible
+## state a keyboard/gamepad user depends on, and (2) its "pressed" signal is
+## actually connected to the real Open Move handler, so activating it by any
+## input method reaches PuzzleState.request_open_move() and shows a
+## suggestion. Simulating literal InputEventKey/InputEventJoypadButton
+## delivery through the headless GUI input pipeline was tried and found
+## nondeterministic run-to-run in this environment (no rendered display
+## backs the event/frame timing here) -- the same class of headless
+## limitation already documented for OS pointer eligibility elsewhere in
+## .knowledge/architecture/arrow-puzzle.md. Literal hardware key/gamepad
+## activation is exercised by quickstart.md's manual desktop smoke test.
+func _check_open_move_keyboard_and_gamepad_reachable() -> void:
+	var packed: PackedScene = load("res://scenes/puzzle/arrow_puzzle.tscn")
+	var puzzle: Control = packed.instantiate()
+	get_root().add_child(puzzle)
+	await process_frame
+
+	var board = puzzle.get_node("%PuzzleBoard")
+	var open_move_button: Button = puzzle.get_node("%OpenMoveButton")
+	check(open_move_button.visible and not open_move_button.disabled
+			and open_move_button.focus_mode == Control.FOCUS_ALL,
+		"the Open Move control is visible, enabled and keyboard/gamepad focusable")
+
+	open_move_button.grab_focus()
+	await process_frame
+	check(get_root().gui_get_focus_owner() == open_move_button,
+		"the Open Move control can actually receive keyboard/gamepad focus")
+	check(open_move_button.get_signal_connection_list("pressed").size() > 0,
+		"the Open Move control's pressed signal is connected to a handler (Godot activates it from ui_accept on any input device once focused)")
+
+	var assists_before: int = puzzle._state.open_move_assists
+	open_move_button.emit_signal("pressed")
+	check(board._suggested_head != null,
+		"activating the focused Open Move control (as ui_accept would, from keyboard or gamepad) identifies a legal arrow")
+	check(puzzle._state.open_move_assists == assists_before + 1,
+		"activating it counts as exactly one valid Open Move request")
+
+	puzzle.queue_free()
+	await process_frame
+
 ## US2 independent test: Level Select lists every catalog puzzle in
 ## deterministic order with distinguishing identity, none locked/hidden, and
 ## opens with keyboard/gamepad focus already placed on the first entry
@@ -411,11 +633,48 @@ func _check_replay_restart_and_next_puzzle() -> void:
 
 	PuzzleSession.set_current_id(PuzzleCatalog.id_at(0))
 
+## Replay independent test: a replay begins a completely fresh attempt
+## -- mistakes, open_move_assists and score all reset to zero -- regardless
+## of how non-trivial the prior attempt's values were. Reuses "multi_bend"'s
+## known-blocked tail cell to induce a real mistake before completing, plus
+## one Open Move assist, so the prior attempt is genuinely non-fresh before
+## reloading.
+func _check_replay_resets_open_move_fields() -> void:
+	PuzzleSession.set_current_id("multi_bend")
+	change_scene_to_packed(load("res://scenes/puzzle/arrow_puzzle.tscn"))
+	await process_frame
+	await process_frame
+	var puzzle = current_scene
+	var board = puzzle.get_node("%PuzzleBoard")
+	var open_move_button: Button = puzzle.get_node("%OpenMoveButton")
+
+	board.cell_clicked.emit(Vector2i(3, 2)) # a real mistake
+	open_move_button.emit_signal("pressed") # a real Open Move assist
+	var clear_order := _clear_order_for(board.definition)
+	for head in clear_order:
+		board.cell_clicked.emit(head)
+	await _await_departures_complete(puzzle, _WORST_CASE_DEPARTURE_SECONDS)
+	check(puzzle._state.mistakes > 0 and puzzle._state.open_move_assists > 0,
+		"the attempt about to be replayed genuinely has nonzero mistakes and assists")
+
+	puzzle._on_results_replay_requested()
+	await process_frame
+	await process_frame
+	var reloaded = current_scene
+	check(reloaded != puzzle, "Replay constructs a fresh scene instance")
+	check(reloaded._state.mistakes == 0, "the replayed attempt's mistake count resets to zero")
+	check(reloaded._state.open_move_assists == 0, "the replayed attempt's open_move_assists resets to zero")
+	check(reloaded._state.get_results()["score"] == reloaded._state.total_arrows,
+		"the replayed attempt's score reflects a completely fresh start, not the prior attempt's penalties")
+
+	PuzzleSession.set_current_id(PuzzleCatalog.id_at(0))
+
 func _initialize() -> void:
 	check(PuzzleFeedback.BLOCKED_CUE_DURATION_SECONDS <= PuzzleFeedback.BLOCKED_CUE_DURATION_CAP_SECONDS,
 		"the coded blocked-feedback cue duration constant does not exceed its coded 0.3-second cap")
 
 	await _check_multi_cell_board_bounds()
+	await _check_session_best_and_overall_score_progression()
 
 	var packed: PackedScene = load("res://scenes/puzzle/arrow_puzzle.tscn")
 	var puzzle: Control = packed.instantiate()
@@ -430,8 +689,12 @@ func _initialize() -> void:
 	await _check_setup_replacement_disposes_departures()
 	await _check_fresh_instance_starts_clean_and_rapid_tail_clicks()
 	await _check_all_catalog_puzzles_play_through_real_scene()
+	await _check_open_move_during_in_flight_departure()
+	await _check_open_move_keyboard_and_gamepad_reachable()
+	await _check_results_screen_shows_open_move_assists()
 	await _check_level_select_menu()
 	await _check_replay_restart_and_next_puzzle()
+	await _check_replay_resets_open_move_fields()
 
 	puzzle.queue_free()
 	print("PUZZLE_LAYOUT_FAILURES=", failures)

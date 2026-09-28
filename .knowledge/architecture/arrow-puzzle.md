@@ -11,6 +11,7 @@ appliesTo:
   - scripts/puzzle/puzzle_catalog.gd
   - scripts/puzzle/puzzle_analyzer.gd
   - scripts/puzzle_session.gd
+  - scripts/puzzle_scoreboard.gd
   - scripts/presentation/arrow_departure_geometry.gd
   - scenes/puzzle/arrow_puzzle.tscn
   - scenes/puzzle/arrow_puzzle.gd
@@ -24,6 +25,9 @@ appliesTo:
   - tests/puzzle_regression.gd
   - tests/puzzle_catalog_check.gd
   - tests/puzzle_analyzer_check.gd
+  - tests/puzzle_scoreboard_check.gd
+  - tests/save_input_regression.gd
+  - tests/run_regressions.py
   - tests/puzzle_structural_report.gd
   - tests/run_puzzle_regressions.py
   - tests/run_puzzle_structural_report.py
@@ -104,8 +108,31 @@ carries no meaning at all. Invariants: `total_arrows = remaining +
 successful_removals` and `total_taps = successful_removals + mistakes` hold
 at every step, counting arrows, never cells.
 
-`get_results()` returns `score = max(total_arrows - mistakes, 0)` and
-`accuracy = successful_removals / total_taps` (0.0 at zero taps).
+`PuzzleState` also holds `open_move_assists` (int, defaults 0) alongside
+`mistakes`. `find_open_move()` returns one currently-legal active head,
+chosen deterministically in the same (y, x)-ascending order
+`PuzzleSolver.analyze()` walks, or `null` only if no active arrow remains; it
+is a pure query reusing `_is_head_blocked` directly, never a second rules
+engine, and it is callable at any time — including while a departure
+animation from an earlier removal is still visually in progress, since it
+only reads state the presentation layer never delays. `request_open_move()`
+is the one player-facing "Show Me an Open Move" entry point: once `completed`
+is already true it is a no-op returning `null` with `open_move_assists`
+unchanged (mirroring `select_arrow()`'s own completed guard); otherwise it
+increments `open_move_assists` by exactly one — every valid request counts
+once, even a repeat before the shown arrow is played — then returns
+`find_open_move()`'s result. It never touches `total_taps`, `mistakes`, or
+`successful_removals`, so an Open Move request can never affect accuracy; the
+player's subsequent selection of the identified arrow is counted for accuracy
+exactly like any other selection, whether it succeeds or is blocked.
+
+`get_results()` returns `score = max(total_arrows - (mistakes +
+open_move_assists * 5), 0)` and `accuracy = successful_removals / total_taps`
+(0.0 at zero taps), plus `open_move_assists` itself alongside `total_arrows`
+and `mistakes` in the returned dictionary. A perfect attempt (zero mistakes,
+zero assists) always scores `total_arrows`; reaching the zero floor after
+heavy mistake/assist use is accepted product behavior (see
+`.knowledge/product/gameplay-contract.md`), never a blocked/limited attempt.
 `PuzzleResultsFormat.format_accuracy_percent()` (puzzle_results_format.gd)
 renders that ratio as a one-decimal percentage, rounding an exact tie half
 away from zero (e.g. 6.25% -> "6.3%").
@@ -199,7 +226,19 @@ the same definition are deterministic; `analyze()` never mutates its input
 definition or a separately live attempt built from it; and forcing either of
 two simultaneously-legal arrows first on a genuine branching state still
 reaches a complete, mistake-free solution either way (the order-independence
-property the no-backtracking design depends on); and exact metric values for
+property the no-backtracking design depends on). Order-independence is
+further checked at every branching state a witness actually passes through
+(not only a puzzle's opening move): for the shipped `create_fixed()` board
+here, and for all fourteen `PuzzleCatalog` entries in
+tests/puzzle_catalog_check.gd, forcing each *other* currently-legal
+alternative next instead of the witness's own choice still reaches a
+complete, mistake-free solution from there — the automated, catalog-wide
+proof that "every unfinished state reached through legal play has a legal
+move" (see `.knowledge/product/gameplay-contract.md`) holds without
+enumerating the full reachable-state space, per the monotonicity exchange
+property above. A long run of blocked selections (extending the existing
+100-consecutive-blocked case) still allows the whole board to complete
+afterward with the earlier mistake count unaffected. And exact metric values for
 a single arrow (`active=legal=1, forced=1`), two independent arrows
 (`active=legal=3, branching=1, forced=1`), and a two-arrow cycle
 (`active=2, legal=0, no_move=1`), each also checked for the
@@ -254,11 +293,109 @@ independence, every one of the fourteen entries structurally valid and
 solver-confirmed solvable with a replayed zero-mistake witness, no
 difficulty-labeled title wording, each of the six experimental
 entries confirmed against its exact `PuzzleAnalyzer`-derived threshold (see
-below), `PuzzleSession` default/set/advance/has-next behavior including the
+below), the catalog-wide branching order-independence check (every one of
+the fourteen entries' witness, at every branching state it passes through,
+still completes when any other legal alternative is forced instead — see the
+Rule Layer's Solvability Analysis section above), `PuzzleSession` default/set/advance/has-next behavior including the
 last-entry no-op and the invalid-id fallback), run via the same
 `run_puzzle_regressions.py` launcher in the same bare isolated temp project
 as tests/puzzle_regression.gd (PuzzleCatalog depends only on
 PuzzleDefinition); requires `PUZZLE_CATALOG_FAILURES=0`.
+
+## Open Move Assistance and Session Scoring
+
+See `.knowledge/product/gameplay-contract.md` for the behavioral contract
+this section implements: mistakes cost score not play, the session is the
+sole gameplay-memory boundary, and replay exists to improve a puzzle's
+session-best, never to recover from failure.
+
+`PuzzleScoreboard` (scripts/puzzle_scoreboard.gd) is a session-lifetime,
+in-memory-only `RefCounted` class holding one private `static var
+_best_results` (`puzzle_id -> Completed Attempt Result Dictionary`, the
+exact shape `PuzzleState.get_results()` returns) — the same static-var,
+process-lifetime precedent `PuzzleSession`/`GameVisualStyle` already
+establish. It is a deliberate sibling to `PuzzleSession`, never a merge with
+it: `PuzzleSession` owns *which puzzle is currently selected*; `PuzzleScoreboard`
+owns *how well each puzzle has been played this session*. Neither reads the
+other's state, and neither reads or writes `GlobalState`, `GameState`,
+`LevelState`, or `user://global_state.tres`; both are reset only by a fresh
+engine process.
+
+`record_attempt(puzzle_id, result)` records one completed attempt against
+that puzzle's session-best and returns exactly one of `"established"` (no
+prior best existed), `"improved"` (strictly greater score), `"tied"` (equal
+score), or `"not_improved"` (lower score); only `"established"`/`"improved"`
+replace the stored dictionary, so a worse or tied replay can never lower a
+puzzle's session-best. It asserts `result` carries the five expected keys and
+that `score` is a nonnegative int no greater than `total_arrows` — a
+contract shape/range sanity check only, never a re-derivation of whether the
+attempt is actually completed or a recomputation of the score formula;
+`PuzzleState` remains the sole scoring/completion authority.
+`get_best(puzzle_id)` returns the stored dictionary or `null` if that puzzle
+has not been completed this session. `get_overall_score()` sums `["score"]`
+across every stored session-best, so a puzzle never completed contributes
+nothing, and improving one puzzle's best raises the sum by exactly the
+improvement.
+
+`PuzzleState` gained `open_move_assists` (an `int` counter alongside
+`mistakes`), `find_open_move()` (a pure query returning the (y, x)-ascending-first
+currently-legal head, or `null` if none remains — reusing `_is_head_blocked`
+directly, never a second rules engine), and `request_open_move()` (the
+player-facing "Show Me an Open Move" entry point: a no-op once `completed`
+is already true, mirroring `select_arrow()`'s own completed guard;
+otherwise increments `open_move_assists` by exactly one per valid request —
+including a repeat before the shown arrow is played — then returns
+`find_open_move()`'s result). Neither method touches `total_taps`,
+`mistakes`, or `successful_removals`, so an Open Move request can never
+affect accuracy. `get_results()` now computes `score = max(total_arrows -
+(mistakes + open_move_assists * 5), 0)` and includes `open_move_assists`
+alongside the existing fields.
+
+In the scene, `arrow_puzzle.gd`'s `_show_results()` calls
+`PuzzleScoreboard.record_attempt(PuzzleSession.get_current_id(),
+_state.get_results())` exactly once per completed attempt, then passes its
+outcome string and `PuzzleScoreboard.get_overall_score()` into
+`puzzle_results.gd`'s `show_results()`. `puzzle_results.gd` renders two
+additional short lines — a session-best comparison (`%SessionComparisonLabel`:
+"New session best: N" / "Session best improved to N" / "Matched session
+best: N" / "Session best unchanged") and `%OverallSessionScoreLabel`
+("Overall Session Score: N") — alongside the existing four metric labels,
+kept to one line each rather than a progression dashboard. The panel only
+displays what it is given; it never calls `PuzzleScoreboard` itself, keeping
+the "display component never mutates state" boundary intact.
+
+The player-facing "Show Me an Open Move" control is `%OpenMoveButton`, an
+ordinary focusable `Button` in the existing HUD row (`HUDMargin`) — not a
+bespoke input-map action — so it inherits the addon's existing
+keyboard/gamepad focus navigation for free. Its handler
+(`_on_open_move_button_pressed()`) calls `_state.request_open_move()` and,
+on a non-null result, passes the head to `PuzzleBoard.suggest_open_move(head)`;
+it is never gated on `_pending_departures`, so the assist always reads the
+puzzle's current logical state even while an earlier removal's departure
+animation is still visually in flight elsewhere on the board (see Feedback
+precedence and departures below for the "suggested" presentation tier this
+introduces).
+
+Source of truth: tests/puzzle_scoreboard_check.gd (established/improved/
+tied/not_improved outcomes; overall-score summation including a
+never-completed puzzle contributing nothing; the full result shape preserved
+in the stored best, not score alone; independence from `PuzzleSession`),
+tests/puzzle_regression.gd (`find_open_move()`/`request_open_move()`
+determinism and forced-state cases, independent mistake/assist counters, a
+100%-accuracy-with-nonzero-assists case, the post-completion no-op guard, and
+the revised `get_results()` formula across representative mistake/assist
+combinations including the zero-floor case), tests/puzzle_layout_check.gd
+(the in-flight-departure case; keyboard/gamepad focus-reachability of
+`%OpenMoveButton`; a real-scene Results-screen check of all five metric
+values; the end-to-end controller -> `PuzzleScoreboard` -> Results wiring
+across established/improved/tied/not_improved outcomes and the overall
+score; a real replay resetting `mistakes`/`open_move_assists`/`score` to
+zero), and tests/save_input_regression.gd (`PuzzleScoreboard` never reads or
+writes `GlobalState`/`GameState`/the save file, and a freshly started
+process begins with zero session-best entries and a zero overall score), run
+via the same `run_puzzle_regressions.py`/`run_regressions.py` launchers;
+requires `PUZZLE_SCOREBOARD_FAILURES=0` and `REGRESSION_FAILURES=0`
+respectively alongside the existing markers.
 
 ## Structural Analysis (PuzzleAnalyzer)
 
@@ -447,7 +584,7 @@ puzzle it is hidden, while Replay, Level Select (via Main Menu) and Main
 Menu remain available. `show_results()` also takes the completed puzzle's
 id, rendering a `%PuzzleLabel` identity line from the same
 `PuzzleCatalog`/`PuzzleSession` pair the controller used for that attempt,
-alongside the unchanged total-arrows/mistakes/score/accuracy metrics.
+alongside the total-arrows/mistakes/open-move-assists/score/accuracy metrics.
 Switching puzzles via Replay, pause-menu Restart, Next Puzzle, or Level
 Select all go through a full scene reconstruction, so any prior attempt's
 departing views/callbacks are disposed exactly as `setup()` replacement
@@ -474,7 +611,17 @@ board's active view count matches the definition's arrow count, the HUD
 puzzle label matches the catalog title, and the same solver-derived
 zero-mistake witness clears through the real scene with unchanged
 scoring/mistakes/accuracy — proving engine-generality end-to-end, not only
-via the pure `puzzle_catalog_check.gd` solver gate), run via the same
+via the pure `puzzle_catalog_check.gd` solver gate; that triggering Show Me
+an Open Move while an earlier removal's departure is still visually in
+flight responds immediately against the current logical state (matching
+`find_open_move()`), never suppressed or queued by the in-flight animation;
+and that the Open Move control is visible, enabled, keyboard/gamepad
+focusable, actually receives focus, and has its `pressed` signal genuinely
+wired to the real handler — literal simulated hardware key/gamepad event
+delivery through the headless GUI pipeline was found nondeterministic in
+this environment and is intentionally not asserted here; it remains a manual
+desktop smoke-test concern, the same class of limitation already noted below
+for OS pointer eligibility), run via the same
 `run_puzzle_regressions.py` launcher against the real project with
 APPDATA/XDG_DATA_HOME redirected so no player save data is touched;
 requires `PUZZLE_LAYOUT_FAILURES=0`. A puzzle-specific check resolves its
@@ -545,13 +692,31 @@ established by direct headless events.
 
 ## Feedback precedence and departures
 
-ArrowView orders presentation as departing > blocked > hover > normal.
-Blocked presses cancel both existing writers, set the entire arrow to
+ArrowView orders presentation as departing > blocked > suggested > hover >
+normal. Blocked presses cancel both existing writers, set the entire arrow to
 critical #A8321A, and restart a 1.00 -> 1.10 -> 1.00 pulse over 150ms.
 Hover eligibility can change during red feedback without recoloring it.
 Completion restores unit scale and immediately assigns ember if eligible,
-otherwise ink; there is no extra hover-duration delay. No input lock or
+otherwise ink, and resumes any still-active suggested pulse first if one was
+in progress; there is no extra hover-duration delay. No input lock or
 persistent disabled appearance is introduced.
+
+`set_suggested(true)` (the "Show Me an Open Move" indicator) starts the same
+1.00 -> 1.10 -> 1.00 scale ratio blocked feedback uses, in the same ember
+`#C6620C` accent hover already uses — no new palette entry — but looping
+continuously rather than firing once, so the identified arrow stays
+noticeable with no mouse hover present (the control is keyboard/gamepad
+reachable). While suggested, a mere hover neither recolors nor stops the
+pulse (suggested outranks hover in the precedence order above), though
+`_hovered` is still tracked so hover's own color/tween resumes correctly once
+the suggestion clears. `PuzzleBoard.suggest_open_move(head)` is presentation
+routing only — it never decides which arrow is legal; the controller passes
+it the head `PuzzleState.request_open_move()` already returned.
+`PuzzleBoard.clear_suggestion()` is called on every accepted selection
+(played or blocked) and on a fresh `setup()`, so a stale suggestion never
+outlives the board state it was shown against; a repeated request before the
+shown arrow is played simply re-suggests (clearing then re-showing) rather
+than stacking two indicators.
 
 Departure first marks terminal state, kills color/effect tweens, resets
 scale/modulation/visibility and ink synchronously, then feeds the whole
@@ -598,9 +763,13 @@ covers the pure route/clearance math in isolation (see
 
 GameVisualStyle supplies the light background and local Layout/HUD and
 PuzzleResults themes. Numeric labels use bundled Inter Tight 600 tabular
-figures; the existing score uses success green. Four result fields, Replay,
-Main Menu and focus behavior remain unchanged. No root/global theme reaches
-inherited pause/options screens. Source of truth:
-tests/puzzle_presentation_check.gd checks theme scope, fonts, result text,
-focus styles and content bounds at both supported desktop sizes. Shared
-roles and font/license evidence are in .knowledge/architecture/game-visual-system.md.
+figures; the existing score uses success green. `puzzle_results.gd`'s
+`show_results()` displays five result fields: total arrows, mistakes, open
+move assists (`%OpenMoveAssistsLabel`, alongside mistakes rather than folded
+into it — see the Open Move Assistance and Session Scoring section below),
+score and accuracy; plus Replay, Main Menu and focus behavior, all unchanged
+in mechanism. No root/global theme reaches inherited pause/options screens.
+Source of truth: tests/puzzle_presentation_check.gd checks theme scope,
+fonts, all five result fields' text and content bounds at both supported
+desktop sizes, and focus styles. Shared roles and font/license evidence are
+in .knowledge/architecture/game-visual-system.md.

@@ -9,6 +9,7 @@ extends Control
 @onready var _remaining_label: Label = %RemainingLabel
 @onready var _mistakes_label: Label = %MistakesLabel
 @onready var _puzzle_label: Label = %PuzzleLabel
+@onready var _open_move_button: Button = %OpenMoveButton
 @onready var _results: Control = %PuzzleResults
 @onready var _pause_menu_controller: Node = %PauseMenuController
 
@@ -22,12 +23,14 @@ func _ready() -> void:
 	_remaining_label.theme_type_variation = &"NumericText"
 	_mistakes_label.theme_type_variation = &"NumericText"
 	_puzzle_label.theme_type_variation = &"SupportingText"
+	_open_move_button.theme_type_variation = &"SecondaryButton"
 	_results.replay_requested.connect(_on_results_replay_requested)
 	_results.main_menu_requested.connect(_on_results_main_menu_requested)
 	_results.next_puzzle_requested.connect(_on_results_next_puzzle_requested)
 	_board.cell_clicked.connect(_on_cell_clicked)
 	_board.hover_cell_changed.connect(_on_hover_cell_changed)
 	_board.departure_finished.connect(_on_departure_finished)
+	_open_move_button.pressed.connect(_on_open_move_button_pressed)
 	_start_new_attempt()
 
 func _start_new_attempt() -> void:
@@ -62,6 +65,7 @@ func _on_cell_clicked(cell: Vector2i) -> void:
 			pass
 		PuzzleState.SelectOutcome.BLOCKED:
 			_update_hud()
+			_board.clear_suggestion()
 			_board.play_blocked(head)
 		PuzzleState.SelectOutcome.REMOVED:
 			_update_hud()
@@ -69,6 +73,17 @@ func _on_cell_clicked(cell: Vector2i) -> void:
 			if _state.completed:
 				_awaiting_completion = true
 			_board.play_removed(head)
+
+## "Show Me an Open Move": identifies one currently legal arrow via the
+## rules authority itself (never a duplicated legal-move check), and never
+## removes it -- the player must still select it. Always reads the current
+## logical state regardless of any in-flight departure animation elsewhere
+## in the scene (the rules authority already reflects a removal the instant
+## it happens), so it is deliberately never gated on _pending_departures.
+func _on_open_move_button_pressed() -> void:
+	var head = _state.request_open_move()
+	if head != null:
+		_board.suggest_open_move(head)
 
 func _on_departure_finished() -> void:
 	_pending_departures -= 1
@@ -78,7 +93,11 @@ func _on_departure_finished() -> void:
 func _show_results() -> void:
 	_board.clear_hover()
 	_pause_menu_controller.set_process_unhandled_input(false)
-	_results.show_results(_state.get_results(), PuzzleSession.get_current_id(), PuzzleSession.has_next())
+	var results: Dictionary = _state.get_results()
+	var puzzle_id: String = PuzzleSession.get_current_id()
+	var comparison: String = PuzzleScoreboard.record_attempt(puzzle_id, results)
+	_results.show_results(results, puzzle_id, PuzzleSession.has_next(),
+		comparison, PuzzleScoreboard.get_overall_score())
 
 ## Replay reloads this scene so the identical board starts as a fully fresh
 ## attempt: a new PuzzleState, cleared views/tweens and no stale callbacks

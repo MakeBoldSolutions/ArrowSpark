@@ -16,6 +16,7 @@ var _cell_size: Vector2 = Vector2.ZERO
 var _origin: Vector2 = Vector2.ZERO
 var _hovered_head: Variant = null
 var _last_hover_cell := Vector2i(-1, -1)
+var _suggested_head: Variant = null
 
 func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
@@ -67,8 +68,28 @@ func set_hovered_head(head: Variant) -> void:
 	if head != null:
 		_views[head].set_hovered(true)
 
+## "Show Me an Open Move" identification, presentation-only: the controller
+## resolves which head to show via PuzzleState.request_open_move(); this
+## board only renders it, never decides which arrow is legal. Superseding an
+## existing suggestion (a repeated request) clears the prior one first.
+func suggest_open_move(head: Vector2i) -> void:
+	if not _views.has(head):
+		return
+	clear_suggestion()
+	_suggested_head = head
+	_views[head].set_suggested(true)
+
+## Clears any active suggestion indicator. Called on any accepted selection
+## (played or blocked) and on a fresh setup(), so a stale suggestion never
+## outlives the board state it was shown against.
+func clear_suggestion() -> void:
+	if _suggested_head != null and _views.has(_suggested_head):
+		_views[_suggested_head].set_suggested(false)
+	_suggested_head = null
+
 func setup(new_definition: PuzzleDefinition) -> void:
 	clear_hover()
+	clear_suggestion()
 	for view in _views.values():
 		view.queue_free()
 	_views.clear()
@@ -163,6 +184,7 @@ func play_removed(head: Vector2i) -> void:
 		return
 	if head == _hovered_head:
 		clear_hover()
+	clear_suggestion()
 	_views.erase(head)
 	_departing_views[head] = view
 	view.reparent(_departure_clip, false)

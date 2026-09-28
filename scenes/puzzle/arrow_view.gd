@@ -17,8 +17,10 @@ var _body: Line2D
 var _head: Polygon2D
 var _hovered: bool = false
 var _blocked_active: bool = false
+var _suggested: bool = false
 var _departing: bool = false
 var _hover_tween: Tween
+var _suggested_tween: Tween
 
 var _geometry: ArrowDepartureGeometry
 var _departure_distance: float = 0.0
@@ -51,13 +53,51 @@ func set_hovered(hovered: bool) -> void:
 	if _departing or _hovered == hovered:
 		return
 	_hovered = hovered
-	if _blocked_active:
+	if _blocked_active or _suggested:
 		return
 	if _hover_tween:
 		_hover_tween.kill()
 	var target := GameVisualStyle.ARROW_HOVER if hovered else GameVisualStyle.ARROW_NORMAL
 	_hover_tween = create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	_hover_tween.tween_method(_set_visual_color, _body.default_color, target, GameVisualStyle.HOVER_DURATION)
+
+## "Show Me an Open Move" indicator: a looping pulse (the same scale ratio
+## blocked feedback uses, in the ember hover accent, never a new palette
+## entry) so the identified arrow is noticeable even with no mouse hover
+## present (e.g. triggered via keyboard/gamepad). Precedence:
+## departing > blocked > suggested > hover > normal -- blocked feedback
+## always wins while active, and a mere hover never recolors over an active
+## suggestion (though set_hovered() still tracks _hovered for when the
+## suggestion later clears).
+func set_suggested(suggested: bool) -> void:
+	if _departing or _suggested == suggested:
+		return
+	_suggested = suggested
+	if _blocked_active:
+		return
+	if suggested:
+		_start_suggested_pulse()
+	else:
+		_stop_suggested_pulse()
+
+func _start_suggested_pulse() -> void:
+	if _hover_tween:
+		_hover_tween.kill()
+	if _suggested_tween:
+		_suggested_tween.kill()
+	_set_visual_color(GameVisualStyle.ARROW_HOVER)
+	pivot_offset = size / 2.0
+	scale = Vector2.ONE
+	var half_duration: float = PuzzleFeedback.BLOCKED_CUE_DURATION_SECONDS
+	_suggested_tween = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT).set_loops()
+	_suggested_tween.tween_property(self, "scale", Vector2.ONE * GameVisualStyle.BLOCKED_SCALE, half_duration)
+	_suggested_tween.tween_property(self, "scale", Vector2.ONE, half_duration)
+
+func _stop_suggested_pulse() -> void:
+	if _suggested_tween:
+		_suggested_tween.kill()
+	scale = Vector2.ONE
+	_set_visual_color(GameVisualStyle.ARROW_HOVER if _hovered else GameVisualStyle.ARROW_NORMAL)
 
 ## head_offset and cell_offsets are in cell units relative to this view's own
 ## top-left corner (the shape's bounding-box origin), independent of pixel
@@ -119,6 +159,8 @@ func play_blocked_feedback() -> void:
 		return
 	if _hover_tween:
 		_hover_tween.kill()
+	if _suggested_tween:
+		_suggested_tween.kill()
 	if _tween:
 		_tween.kill()
 	_blocked_active = true
@@ -136,7 +178,10 @@ func _finish_blocked_feedback() -> void:
 		return
 	_blocked_active = false
 	scale = Vector2.ONE
-	_set_visual_color(GameVisualStyle.ARROW_HOVER if _hovered else GameVisualStyle.ARROW_NORMAL)
+	if _suggested:
+		_start_suggested_pulse()
+	else:
+		_set_visual_color(GameVisualStyle.ARROW_HOVER if _hovered else GameVisualStyle.ARROW_NORMAL)
 
 ## Builds this view's stationary tail-to-head route (in its own local cell
 ## units, relative to its own bounding-box origin) plus the synthetic shaft
@@ -165,8 +210,11 @@ func start_departure(head_cell: Vector2i, grid_size: Vector2i) -> void:
 	_departing = true
 	_hovered = false
 	_blocked_active = false
+	_suggested = false
 	if _hover_tween:
 		_hover_tween.kill()
+	if _suggested_tween:
+		_suggested_tween.kill()
 	if _tween:
 		_tween.kill()
 	scale = Vector2.ONE
