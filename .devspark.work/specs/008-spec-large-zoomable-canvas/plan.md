@@ -36,7 +36,7 @@ Check inverse mapping, focus/input cancellation, head reveal at board edges, zer
 
 ## Summary
 
-Implement bounded zoom [fit scale, max(192, fit scale)], 1.2x steps, 16-pixel fit margins, and a 64-pixel working scale. Manual views retain focal center/scale on resize; fit views refit. Mouse zoom anchors at pointer; buttons and focused keyboard/gamepad actions anchor at center. Pan is middle drag or primary drag in explicit Pan mode, plus focused WASD/left-stick movement. Open Move reveals a padded target head at a minimum 48-pixel cell scale before its existing pulse.
+Implement bounded zoom [fit scale, max(192, fit scale)] in pixels per cell, 1.2x steps, 16-pixel fit margins, and a 64-pixel working scale. Manual views retain focal center/scale on resize; fit views refit. Mouse zoom anchors at pointer; buttons and focused keyboard/gamepad actions anchor at center. Pan is middle drag or primary drag in explicit Pan mode, plus focused WASD/left-stick movement. Open Move reveals a padded target head at a minimum 48-pixel cell scale before its existing pulse.
 
 ## Technical Context
 
