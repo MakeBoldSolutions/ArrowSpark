@@ -1,6 +1,9 @@
 ---
 classification: full-spec
 risk_level: high
+risk_profile: customer-facing
+archetype: game
+change_type: brownfield
 status: Draft
 target_workflow: specify-full
 required_artifacts: spec, plan, tasks

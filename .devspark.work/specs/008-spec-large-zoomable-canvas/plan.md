@@ -44,7 +44,7 @@ Implement bounded zoom [fit scale, max(192, fit scale)] in pixels per cell, 1.2x
 **Primary Dependencies**: Existing Godot Control/CanvasItem and Maaack's Game Template; no new dependency.
 **Storage**: N/A
 **Testing**: Isolated headless rule/geometry/scene suites, new pure-transform and canvas interaction checks, saved-input regressions, rendered desktop smoke and measured navigation capture.
-**Target Platform**: Desktop; primary validation workstation Windows. Godot on PATH currently reports 4.7.2; target 4.4 validation must be recorded separately.
+**Target Platform**: Desktop; primary validation workstation Windows. Godot on PATH currently reports 4.7.2; a Godot 4.4 executable is a precondition (tasks T001); 4.7.2 runs are supplementary.
 **Project Type**: Godot desktop puzzle game.
 **Performance Goals**: Warm 10-second large-fixture capture: handler p95 <=2 ms, frame p95 <=33.3 ms, no navigation-attributable stall >=100 ms; recorded machine/build only.
 **Constraints**: Presentation-only camera state; configurable input preserved; no whole-board reconstruction per navigation event; immediate logical removal and asynchronous full-board departure clearance.

@@ -28,13 +28,13 @@ setup configures all views once at canonical 64-pixel extent. Active views paren
 
 | Context | Action | Default |
 |---|---|---|
-| Eligible board under pointer | Zoom | Wheel up/down, pointer anchor |
+| Eligible board under pointer | Zoom | Wheel up/down, pointer anchor; step scaled by event.factor, clamped per event |
 | Select mode | Select arrow | Primary press, one request per physical press |
 | Eligible board | Pan | Middle drag; suppress simultaneous primary |
 | Pan toggle on | Pan | Primary drag; primary never selects |
 | Board focus | Pan camera | Existing move_* WASD / left stick, 600 screen px/s |
-| Board focus | Zoom in | canvas_zoom_in: Equal / right shoulder |
-| Board focus | Zoom out | canvas_zoom_out: Minus / left shoulder |
+| Board focus | Zoom in | canvas_zoom_in: Equal (and numpad plus) / right shoulder |
+| Board focus | Zoom out | canvas_zoom_out: Minus (and numpad minus) / left shoulder |
 | Board focus | Fit | canvas_fit: F / gamepad Y |
 | Toolbar focus | Zoom/Fit/Pan toggle | Existing UI navigation and accept |
 
