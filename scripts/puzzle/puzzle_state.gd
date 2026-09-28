@@ -9,6 +9,7 @@ var total_arrows: int
 var successful_removals: int = 0
 var mistakes: int = 0
 var total_taps: int = 0
+var open_move_assists: int = 0
 var completed: bool = false
 
 var _definition: PuzzleDefinition
@@ -74,6 +75,35 @@ func select_arrow(cell: Vector2i) -> SelectOutcome:
 		completed = true
 	return SelectOutcome.REMOVED
 
+## Returns one currently-legal arrow's head, chosen deterministically among
+## active arrows in (y, x)-ascending order (the same tie-break
+## PuzzleSolver.analyze() walks), or null only if no active arrow remains.
+## Pure query: never mutates state, never removes an arrow. This is the
+## single, shared legal-move determination "Show Me an Open Move" relies on
+## -- it reuses _is_head_blocked directly rather than a second rules engine.
+func find_open_move() -> Variant:
+	var active_heads: Array = _active_arrows.keys()
+	active_heads.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
+		return a.y < b.y or (a.y == b.y and a.x < b.x)
+	)
+	for head in active_heads:
+		if not _is_head_blocked(head):
+			return head
+	return null
+
+## Records one valid "Show Me an Open Move" request: once completed is
+## already true, this is a no-op that returns null and leaves
+## open_move_assists unchanged (mirrors select_arrow()'s own completed
+## guard). Otherwise increments open_move_assists by exactly one -- every
+## valid request counts once, even a repeat before the shown arrow is played
+## -- then returns find_open_move()'s result. Never touches total_taps,
+## mistakes, or successful_removals, so it can never affect accuracy.
+func request_open_move() -> Variant:
+	if completed:
+		return null
+	open_move_assists += 1
+	return find_open_move()
+
 ## Read-only copy for views/tests; callers cannot mutate rule state through it.
 func get_snapshot() -> Dictionary:
 	return {
@@ -83,19 +113,23 @@ func get_snapshot() -> Dictionary:
 		"successful_removals": successful_removals,
 		"mistakes": mistakes,
 		"total_taps": total_taps,
+		"open_move_assists": open_move_assists,
 		"completed": completed,
 	}
 
 ## Score/accuracy for the completed attempt. Accuracy is the raw float
-## ratio; only the displayed percentage is rounded, by the caller.
+## ratio; only the displayed percentage is rounded, by the caller. An Open
+## Move assist costs five times a mistake's penalty; a perfect attempt (zero
+## mistakes, zero assists) always scores total_arrows.
 func get_results() -> Dictionary:
-	var score: int = max(total_arrows - mistakes, 0)
+	var score: int = max(total_arrows - (mistakes + open_move_assists * 5), 0)
 	var accuracy: float = 0.0
 	if total_taps > 0:
 		accuracy = float(successful_removals) / float(total_taps)
 	return {
 		"total_arrows": total_arrows,
 		"mistakes": mistakes,
+		"open_move_assists": open_move_assists,
 		"score": score,
 		"accuracy": accuracy,
 	}

@@ -144,6 +144,88 @@ func _check_experimental_puzzle_properties() -> void:
 	check(composed.board.total_cells >= 49, "composed_shaped: the board has at least 49 cells (7x7)")
 	check(composed.dependency_graph.edge_count >= 1, "composed_shaped: the shape contains at least one genuine dependency edge")
 
+## The (y, x)-ascending-first legal head among a live state's still-active
+## arrows, or null if none is legal. Calls only get_snapshot()/is_blocked() --
+## the real rule authority -- never a duplicated blocking check.
+func _first_legal_head(state: PuzzleState) -> Variant:
+	var active_heads: Array = state.get_snapshot()["active_arrows"].keys()
+	active_heads.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
+		return a.y < b.y or (a.y == b.y and a.x < b.x)
+	)
+	for head in active_heads:
+		if not state.is_blocked(head):
+			return head
+	return null
+
+## Every currently-legal head of a live state, (y, x)-ascending.
+func _legal_heads(state: PuzzleState) -> Array:
+	var active_heads: Array = state.get_snapshot()["active_arrows"].keys()
+	active_heads.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
+		return a.y < b.y or (a.y == b.y and a.x < b.x)
+	)
+	var legal: Array = []
+	for head in active_heads:
+		if not state.is_blocked(head):
+			legal.append(head)
+	return legal
+
+## Drives a live state to completion greedily, calling only select_arrow() --
+## the real rule authority. Returns true iff it reaches a complete,
+## mistake-free clearance; false if it gets stuck first.
+func _greedy_complete(state: PuzzleState) -> bool:
+	while not state.completed:
+		var head = _first_legal_head(state)
+		if head == null:
+			return false
+		if state.select_arrow(head) != PuzzleState.SelectOutcome.REMOVED:
+			return false
+	return true
+
+## Order independence: at every branching state PuzzleSolver's own witness passes
+## through for this definition, force each *other* currently-legal
+## alternative next (instead of the witness's own choice) and confirm the
+## resulting state still greedily completes. This is the monotonicity
+## exchange property -- "any currently legal arrow is safe to take" -- and it
+## is what makes "every unfinished state reached through legal play has a
+## legal move" hold without enumerating the full reachable-state space (see
+## tests/puzzle_regression.gd's identical helper).
+func _check_order_independence_at_every_branch(definition: PuzzleDefinition, label: String) -> void:
+	var result: Dictionary = PuzzleSolver.analyze(definition)
+	check(result.solvable, "%s is solver-confirmed solvable (prerequisite for its branch check)" % label)
+	if not result.solvable:
+		return
+	var witness: Array = result.witness
+	var prefix: Array = []
+	var live_state := PuzzleState.new(definition)
+	for step_index in range(witness.size()):
+		var chosen_head: Vector2i = witness[step_index]
+		var legal_here: Array = _legal_heads(live_state)
+		if legal_here.size() > 1:
+			for alt_head in legal_here:
+				if alt_head == chosen_head:
+					continue
+				var branch_state := PuzzleState.new(definition)
+				for prefix_head in prefix:
+					branch_state.select_arrow(prefix_head)
+				var branch_outcome: PuzzleState.SelectOutcome = branch_state.select_arrow(alt_head)
+				check(branch_outcome == PuzzleState.SelectOutcome.REMOVED,
+					"%s: forcing alternative legal head %s instead of the witness's %s at step %d is itself legal" %
+					[label, alt_head, chosen_head, step_index])
+				check(_greedy_complete(branch_state),
+					"%s: forcing alternative legal head %s instead of the witness's %s at step %d still reaches a complete, mistake-free solution" %
+					[label, alt_head, chosen_head, step_index])
+		live_state.select_arrow(chosen_head)
+		prefix.append(chosen_head)
+
+## Runs the branch check above across every one of the fourteen catalog
+## entries, giving the "always a legal move" invariant catalog-wide
+## coverage rather than the single hand-built board tests/puzzle_regression.gd
+## already covers.
+func _check_catalog_wide_order_independence() -> void:
+	for i in range(PuzzleCatalog.count()):
+		var id := PuzzleCatalog.id_at(i)
+		_check_order_independence_at_every_branch(PuzzleCatalog.get_definition(id), "catalog entry '%s'" % id)
+
 func _check_puzzle_session_defaults_and_navigation() -> void:
 	check(PuzzleSession.get_current_id() == PuzzleCatalog.id_at(0),
 		"PuzzleSession defaults to the first catalog entry when unset")
@@ -171,6 +253,7 @@ func _initialize() -> void:
 	_check_fresh_and_isolated_definitions()
 	_check_no_difficulty_labels()
 	_check_experimental_puzzle_properties()
+	_check_catalog_wide_order_independence()
 	_check_puzzle_session_defaults_and_navigation()
 	print("PUZZLE_CATALOG_FAILURES=", failures)
 	quit(1 if failures else 0)

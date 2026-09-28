@@ -1,6 +1,6 @@
 """Run headless Godot checks for the arrow puzzle without touching player data.
 
-Five independent checks run:
+Six independent checks run:
 1. Pure rule regressions (tests/puzzle_regression.gd) against an isolated,
    unique temporary project containing only the puzzle core scripts. No
    scenes, addons or autoloads are needed since PuzzleState/PuzzleDefinition
@@ -17,12 +17,17 @@ Five independent checks run:
    style-ratio constants as constructor arguments rather than referencing
    GameVisualStyle directly, so this suite needs no font/resource assets and
    keeps the same pure-script isolation as the rule regressions above.
-4. A scene-based HUD/board layout and feedback-duration check
+4. Pure PuzzleScoreboard unit checks (tests/puzzle_scoreboard_check.gd)
+   against the same bare temporary project as (1)/(2): PuzzleScoreboard
+   operates purely on plain result Dictionaries with no PuzzleState/
+   PuzzleDefinition dependency of its own, so it is safe to add to the same
+   isolation project.
+5. A scene-based HUD/board layout and feedback-duration check
    (tests/puzzle_layout_check.gd) against the real project (so the full
    scene tree and addon autoloads are available), with the platform
    application-data root redirected to an isolated temporary directory so no
    player save/settings data is read or written.
-5. Interaction, fonts and animation presentation checks after a real-project
+6. Interaction, fonts and animation presentation checks after a real-project
    import, sharing the layout suite's isolated user-data root.
 """
 
@@ -56,14 +61,17 @@ def run_rule_regressions(godot: str, repo: Path) -> None:
                 root / f"{script}.gd",
             )
         shutil.copyfile(repo / "scripts/puzzle_session.gd", root / "puzzle_session.gd")
+        shutil.copyfile(repo / "scripts/puzzle_scoreboard.gd", root / "puzzle_scoreboard.gd")
         shutil.copyfile(repo / "tests/puzzle_regression.gd", root / "puzzle_regression.gd")
         shutil.copyfile(repo / "tests/puzzle_catalog_check.gd", root / "puzzle_catalog_check.gd")
         shutil.copyfile(repo / "tests/puzzle_analyzer_check.gd", root / "puzzle_analyzer_check.gd")
+        shutil.copyfile(repo / "tests/puzzle_scoreboard_check.gd", root / "puzzle_scoreboard_check.gd")
         for flags, marker in (
             (("--editor", "--quit"), None),
             (("--script", "puzzle_regression.gd"), "PUZZLE_FAILURES=0"),
             (("--script", "puzzle_analyzer_check.gd"), "PUZZLE_ANALYZER_FAILURES=0"),
             (("--script", "puzzle_catalog_check.gd"), "PUZZLE_CATALOG_FAILURES=0"),
+            (("--script", "puzzle_scoreboard_check.gd"), "PUZZLE_SCOREBOARD_FAILURES=0"),
         ):
             command = [godot, "--headless", "--path", str(root), *flags]
             print("Running:", " ".join(command), flush=True)

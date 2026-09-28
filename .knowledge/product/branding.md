@@ -1,6 +1,6 @@
 ---
 id: product-branding
-type: product
+type: authoritative-reference
 title: Product Identity and Branding Hierarchy
 appliesTo:
   - project.godot

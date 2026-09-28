@@ -288,8 +288,11 @@ func _check_theme(puzzle: Control) -> void:
 	check(GameVisualStyle.UI_FONT.get_font_name() == "Inter Tight" and GameVisualStyle.UI_FONT.variation_opentype.get("wght") == 600.0, "UI uses bundled Inter Tight 600")
 	check(GameVisualStyle.SUPPORTING_FONT.variation_opentype.get("wght") == 400.0, "supporting role uses weight 400")
 	var results: Control = puzzle.get_node("%PuzzleResults")
-	results.show_results({"total_arrows": 8, "mistakes": 3, "score": 5, "accuracy": 8.0 / 11.0}, PuzzleCatalog.id_at(0), false)
+	results.show_results({"total_arrows": 8, "mistakes": 3, "open_move_assists": 1, "score": 5, "accuracy": 8.0 / 11.0}, PuzzleCatalog.id_at(0), false, "established", 5)
 	check(results.get_node("%AccuracyLabel").text == "Accuracy: 72.7%" and results.get_node("%ScoreLabel").text == "Score: 5", "results retain numeric behavior")
+	check(results.get_node("%OpenMoveAssistsLabel").text == "Open Move Assists: 1", "results display the open-move-assist count as its own value")
+	check(results.get_node("%SessionComparisonLabel").text == "New session best: 5", "results display the session-best comparison outcome")
+	check(results.get_node("%OverallSessionScoreLabel").text == "Overall Session Score: 5", "results display the overall session score")
 	check(results.get_node("%ScoreLabel").get_theme_color("font_color") == GameVisualStyle.GAME_SUCCESS, "existing score supplies success cue")
 	var replay: Button = results.get_node("%ReplayButton")
 	check(replay.has_focus(), "results preserve Replay focus")
@@ -299,7 +302,7 @@ func _check_theme(puzzle: Control) -> void:
 		root.size = dimensions
 		await process_frame
 		await process_frame
-		for node in [puzzle.get_node("%RemainingLabel"), puzzle.get_node("%MistakesLabel"), results.get_node("%TotalLabel"), results.get_node("%MistakesLabel"), results.get_node("%ScoreLabel"), results.get_node("%AccuracyLabel"), replay, results.get_node("%MainMenuButton")]:
+		for node in [puzzle.get_node("%RemainingLabel"), puzzle.get_node("%MistakesLabel"), results.get_node("%TotalLabel"), results.get_node("%MistakesLabel"), results.get_node("%OpenMoveAssistsLabel"), results.get_node("%ScoreLabel"), results.get_node("%AccuracyLabel"), results.get_node("%SessionComparisonLabel"), results.get_node("%OverallSessionScoreLabel"), replay, results.get_node("%MainMenuButton")]:
 			check(node.size.x >= node.get_minimum_size().x and node.size.y >= node.get_minimum_size().y, "text/control fits minimum at %s" % dimensions)
 			check(Rect2(Vector2.ZERO, Vector2(dimensions)).encloses(node.get_global_rect()), "required content stays onscreen at %s" % dimensions)
 			check(node.get_theme_font_size("font_size") >= 16, "text stays readable without shrinking with cells")

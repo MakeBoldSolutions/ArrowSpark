@@ -66,6 +66,11 @@ size_flags_horizontal = 3
 horizontal_alignment = 2
 text = "1. Simple Introduction"
 
+[node name="OpenMoveButton" type="Button" parent="Layout/HUDMargin/HUD"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Show Me an Open Move"
+
 [node name="BoardArea" type="Control" parent="Layout"]
 layout_mode = 2
 size_flags_vertical = 3

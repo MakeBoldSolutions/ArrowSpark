@@ -298,6 +298,14 @@ func _test_unlimited_blocked_selections() -> void:
 	check(state.mistakes == 100, "mistakes remain exactly 100 after B is finally cleared")
 	check(state.successful_removals == 2, "two successful removals recorded (A, then B)")
 
+	# A long run of mistakes never limits how much further play can happen:
+	# finish clearing every remaining arrow after the 100-mistake run above.
+	for cell in WITNESS_ORDER:
+		if state.get_arrow_head(cell) != null:
+			state.select_arrow(cell)
+	check(state.completed, "the whole board still completes normally after a long run of mistakes")
+	check(state.mistakes == 100, "the mistake count from before the completing moves is unaffected by finishing the board")
+
 func _test_blocked_feedback_duration_constant() -> void:
 	check(PuzzleFeedback.BLOCKED_CUE_DURATION_SECONDS <= PuzzleFeedback.BLOCKED_CUE_DURATION_CAP_SECONDS,
 		"the coded blocked-feedback cue duration constant does not exceed its coded 0.3-second cap")
@@ -332,6 +340,45 @@ func _test_results_arithmetic_and_rounding() -> void:
 		check(formatted == case["percent"],
 			"accuracy display '%s' matches expected '%s' for %d mistakes" % [formatted, case["percent"], case["mistakes"]])
 
+func _complete_with_mistakes_and_assists(mistake_count: int, assist_count: int) -> PuzzleState:
+	var state := _new_state()
+	for i in range(mistake_count):
+		state.select_arrow(Vector2i(2, 0)) # B stays blocked by A until A departs in WITNESS_ORDER
+	for i in range(assist_count):
+		state.request_open_move() # never removes an arrow or affects mistakes/total_taps
+	for cell in WITNESS_ORDER:
+		state.select_arrow(cell)
+	return state
+
+## Score = max(total_arrows - (mistakes + open_move_assists * 5), 0),
+## and open_move_assists is exposed in get_results() alongside the existing
+## fields. Covers the zero-mistake/zero-assist perfect case (score equals
+## total_arrows), assists alone driving the score to its zero floor, and a
+## mixed mistakes+assists case.
+func _test_results_arithmetic_with_open_move_assists() -> void:
+	var cases := [
+		{"mistakes": 0, "assists": 0, "score": 8},
+		{"mistakes": 0, "assists": 1, "score": 3},
+		{"mistakes": 0, "assists": 2, "score": 0}, # assists alone reach the zero floor
+		{"mistakes": 1, "assists": 1, "score": 2},
+		{"mistakes": 3, "assists": 1, "score": 0},
+	]
+	for case in cases:
+		var state := _complete_with_mistakes_and_assists(case["mistakes"], case["assists"])
+		check(state.completed, "state completes for %d mistakes / %d assists" % [case["mistakes"], case["assists"]])
+		var results := state.get_results()
+		check(results["mistakes"] == case["mistakes"],
+			"recorded mistakes match for %d mistakes / %d assists" % [case["mistakes"], case["assists"]])
+		check(results["open_move_assists"] == case["assists"],
+			"recorded open_move_assists match for %d mistakes / %d assists" % [case["mistakes"], case["assists"]])
+		check(results["score"] == case["score"],
+			"score matches max(total_arrows - (mistakes + assists*5), 0) = %d for %d mistakes / %d assists" %
+			[case["score"], case["mistakes"], case["assists"]])
+	var perfect := _complete_with_mistakes_and_assists(0, 0)
+	var perfect_results := perfect.get_results()
+	check(perfect_results["score"] == perfect.total_arrows,
+		"a zero-mistake, zero-assist attempt always scores the puzzle's full total_arrows")
+
 func _test_zero_tap_accuracy() -> void:
 	var state := _new_state()
 	var results := state.get_results()
@@ -359,6 +406,74 @@ func _test_fresh_state_reset_via_replay() -> void:
 	check(not fresh.completed, "a fresh state is not completed")
 	check(played.mistakes == 1 and played.successful_removals == 1,
 		"the prior attempt's counters are independent of the fresh Replay state")
+
+# --- Show Me an Open Move ----------------------------------------------------
+
+func _test_open_move_deterministic_repeat_and_forced_state() -> void:
+	# Deterministic repeat, no intervening move, on the shipped board.
+	var state := _new_state()
+	var first_find = state.find_open_move()
+	check(first_find == Vector2i(0, 0),
+		"find_open_move() on the fresh shipped board returns A, the (y,x)-ascending-first legal head")
+	check(state.find_open_move() == first_find,
+		"repeated find_open_move() with no intervening move returns the same arrow (deterministic)")
+
+	var first_request = state.request_open_move()
+	check(first_request == first_find, "request_open_move() returns the same head find_open_move() would")
+	check(state.open_move_assists == 1, "the first valid request increments open_move_assists to 1")
+	var second_request = state.request_open_move()
+	check(second_request == first_request,
+		"a repeated request before playing the shown arrow identifies the same arrow again")
+	check(state.open_move_assists == 2,
+		"each repeated valid request increments open_move_assists independently, even for the same arrow")
+	check(state.mistakes == 0 and state.total_taps == 0, "Open Move requests never affect mistakes or total_taps")
+
+	# Forced state: exactly one legal arrow (B's head blocks A; A's own ray is
+	# clear, so only B is legal until it departs).
+	var d := PuzzleDefinition.Direction
+	var forced_definition := PuzzleDefinition.new(2, 2, {Vector2i(0, 0): d.RIGHT, Vector2i(1, 0): d.DOWN})
+	var forced_state := PuzzleState.new(forced_definition)
+	check(forced_state.is_blocked(Vector2i(0, 0)) and not forced_state.is_blocked(Vector2i(1, 0)),
+		"the forced-state fixture has exactly one legal arrow")
+	check(forced_state.find_open_move() == Vector2i(1, 0),
+		"find_open_move() identifies the sole legal arrow in a forced state")
+	check(forced_state.request_open_move() == Vector2i(1, 0),
+		"request_open_move() identifies the same sole legal arrow")
+	check(forced_state.open_move_assists == 1, "a forced-state request still counts as one valid assist")
+
+func _test_open_move_independent_counters_and_perfect_accuracy_with_assists() -> void:
+	# Independent counters: a mistake never affects open_move_assists, and an
+	# assist request never affects mistakes.
+	var state := _new_state()
+	check(state.select_arrow(Vector2i(2, 0)) == PuzzleState.SelectOutcome.BLOCKED,
+		"B is blocked while A remains active")
+	check(state.mistakes == 1 and state.open_move_assists == 0, "a mistake does not affect open_move_assists")
+	state.request_open_move()
+	check(state.mistakes == 1 and state.open_move_assists == 1,
+		"an Open Move request does not affect mistakes; the two counters remain independent")
+
+	# 100% accuracy alongside a nonzero assist count: use request_open_move()
+	# to discover and play every move, so every tap succeeds and no move is
+	# ever a mistake.
+	var perfect_state := _new_state()
+	while not perfect_state.completed:
+		var head = perfect_state.request_open_move()
+		check(head != null, "request_open_move() always identifies a legal arrow until the board clears")
+		check(perfect_state.select_arrow(head) == PuzzleState.SelectOutcome.REMOVED,
+			"playing the Open Move-identified arrow always succeeds")
+	var results := perfect_state.get_results()
+	check(results["accuracy"] == 1.0, "playing only Open Move-identified arrows yields 100% accuracy")
+	check(results["open_move_assists"] == perfect_state.total_arrows,
+		"one assist was used per arrow here, so open_move_assists equals total_arrows")
+	check(results["open_move_assists"] > 0, "the assist count is nonzero alongside 100% accuracy")
+
+func _test_open_move_completed_state_guard() -> void:
+	var state := _complete_with_mistakes(0)
+	var assists_before := state.open_move_assists
+	check(state.find_open_move() == null, "find_open_move() returns null once the attempt is completed")
+	check(state.request_open_move() == null, "request_open_move() returns null once the attempt is completed")
+	check(state.open_move_assists == assists_before,
+		"a request after completion never increments open_move_assists (mirrors select_arrow()'s completed guard)")
 
 # --- User Story 3: Prove the Puzzle Is Solvable Before It Ships -------------
 
@@ -454,6 +569,86 @@ func _test_solver_order_independence_on_branching_state() -> void:
 	check(start_with_y.select_arrow(Vector2i(0, 0)) == PuzzleState.SelectOutcome.REMOVED, "X then completes the board")
 	check(start_with_y.completed and start_with_y.mistakes == 0, "forcing Y before X still reaches a complete, mistake-free solution")
 
+## The (y, x)-ascending-first legal head among a live state's still-active
+## arrows, or null if none is legal. Calls only get_snapshot()/is_blocked() --
+## the real rule authority -- never a duplicated blocking check.
+func _first_legal_head(state: PuzzleState) -> Variant:
+	var active_heads: Array = state.get_snapshot()["active_arrows"].keys()
+	active_heads.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
+		return a.y < b.y or (a.y == b.y and a.x < b.x)
+	)
+	for head in active_heads:
+		if not state.is_blocked(head):
+			return head
+	return null
+
+## Every currently-legal head of a live state, (y, x)-ascending.
+func _legal_heads(state: PuzzleState) -> Array:
+	var active_heads: Array = state.get_snapshot()["active_arrows"].keys()
+	active_heads.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
+		return a.y < b.y or (a.y == b.y and a.x < b.x)
+	)
+	var legal: Array = []
+	for head in active_heads:
+		if not state.is_blocked(head):
+			legal.append(head)
+	return legal
+
+## Drives a live state to completion greedily (same deterministic
+## (y, x)-ascending-first strategy PuzzleSolver.analyze() uses), calling only
+## select_arrow() -- the real rule authority. Returns true iff it reaches a
+## complete, mistake-free clearance; false if it gets stuck first.
+func _greedy_complete(state: PuzzleState) -> bool:
+	while not state.completed:
+		var head = _first_legal_head(state)
+		if head == null:
+			return false
+		if state.select_arrow(head) != PuzzleState.SelectOutcome.REMOVED:
+			return false
+	return true
+
+## Extends order-independence beyond the puzzle's very first state: walks
+## PuzzleSolver's own witness for definition, and at every branching state
+## the witness passes through (more than one legal head available), replays
+## the same prefix on a fresh state, forces each *other* legal alternative
+## next instead of the witness's own choice, then greedily completes from
+## there. Confirms the monotonicity exchange property -- "any currently
+## legal arrow is safe to take" -- holds at every branch actually visited by
+## the witness, not only at the puzzle's opening move. Bounded: one greedy
+## completion per alternative per branching state along the one witness
+## walk, never a full reachable-state enumeration (see .knowledge/architecture/arrow-puzzle.md's
+## Solvability Analysis for the rationale).
+func _check_order_independence_at_every_branch(definition: PuzzleDefinition, label: String) -> void:
+	var result: Dictionary = PuzzleSolver.analyze(definition)
+	check(result.solvable, "%s is solver-confirmed solvable (prerequisite for its branch check)" % label)
+	if not result.solvable:
+		return
+	var witness: Array = result.witness
+	var prefix: Array = []
+	var live_state := PuzzleState.new(definition)
+	for step_index in range(witness.size()):
+		var chosen_head: Vector2i = witness[step_index]
+		var legal_here: Array = _legal_heads(live_state)
+		if legal_here.size() > 1:
+			for alt_head in legal_here:
+				if alt_head == chosen_head:
+					continue
+				var branch_state := PuzzleState.new(definition)
+				for prefix_head in prefix:
+					branch_state.select_arrow(prefix_head)
+				var branch_outcome: PuzzleState.SelectOutcome = branch_state.select_arrow(alt_head)
+				check(branch_outcome == PuzzleState.SelectOutcome.REMOVED,
+					"%s: forcing alternative legal head %s instead of the witness's %s at step %d is itself legal" %
+					[label, alt_head, chosen_head, step_index])
+				check(_greedy_complete(branch_state),
+					"%s: forcing alternative legal head %s instead of the witness's %s at step %d still reaches a complete, mistake-free solution" %
+					[label, alt_head, chosen_head, step_index])
+		live_state.select_arrow(chosen_head)
+		prefix.append(chosen_head)
+
+func _test_order_independence_at_every_branch_shipped_board() -> void:
+	_check_order_independence_at_every_branch(PuzzleDefinition.create_fixed(), "the shipped create_fixed() board")
+
 # --- User Story 4: Retain Structural Counts for Future Difficulty Work ------
 
 const DIFFICULTY_LABEL_KEYS: Array[String] = ["difficulty", "difficulty_score", "difficulty_level", "level", "easy_medium_hard"]
@@ -546,9 +741,13 @@ func _initialize() -> void:
 	_test_unlimited_blocked_selections()
 	_test_blocked_feedback_duration_constant()
 	_test_results_arithmetic_and_rounding()
+	_test_results_arithmetic_with_open_move_assists()
 	_test_zero_tap_accuracy()
 	_test_completed_state_ignores_further_selections()
 	_test_fresh_state_reset_via_replay()
+	_test_open_move_deterministic_repeat_and_forced_state()
+	_test_open_move_independent_counters_and_perfect_accuracy_with_assists()
+	_test_open_move_completed_state_guard()
 	_test_solver_shipped_witness()
 	_test_solver_invalid_input()
 	_test_solver_two_arrow_cycle_is_unsolvable()
@@ -556,6 +755,7 @@ func _initialize() -> void:
 	_test_solver_deterministic_repeated_calls()
 	_test_solver_does_not_mutate_input_or_live_attempt()
 	_test_solver_order_independence_on_branching_state()
+	_test_order_independence_at_every_branch_shipped_board()
 	_test_solver_metrics_single_arrow()
 	_test_solver_metrics_two_independent_arrows()
 	_test_solver_metrics_two_arrow_cycle()
