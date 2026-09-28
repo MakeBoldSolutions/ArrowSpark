@@ -15,11 +15,7 @@ participants:
 **Input**: Design documents from `/.devspark.work/specs/[###-feature-name]/`
 **Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, contracts/
 
-**Verification**: Constitution-mandated checks are required. For ArrowGame gameplay
-changes, include Godot validation and affected-gameplay smoke-test tasks, including
-input/navigation and save/settings checks when affected. Record results and outstanding
-checks. Add focused automated tests where useful; they are not required for every function.
-The optional test sections below concern additional automated tests, not mandatory verification.
+**Tests**: The examples below include test tasks. Tests are OPTIONAL - only include them if explicitly requested in the feature specification.
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 

@@ -612,8 +612,7 @@ function Get-KnowledgeInfo {
         }
     }
 
-    $engine = Join-Path $RepoRoot 'scripts/build_knowledge_index.py'
-    if (-not (Test-Path $engine)) { $engine = Join-Path $RepoRoot '.devspark/scripts/build_knowledge_index.py' }
+    $engine = Resolve-KnowledgeEngine -RepoRoot $RepoRoot
     $python = Get-Command python3 -ErrorAction SilentlyContinue
     if (-not $python) { $python = Get-Command python -ErrorAction SilentlyContinue }
     if ((Test-Path $engine) -and $python) {

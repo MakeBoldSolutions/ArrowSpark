@@ -19,11 +19,16 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from build_knowledge_index import (  # noqa: E402
+    CanonicalizationError,
+    ObjectClaimError,
     _drift,
     _git_last_commit_date,
     build_coverage_report,
     build_index,
+    enumerate_claim_states,
+    normalize_search_text,
     parse_frontmatter,
+    rotate_claim,
 )
 
 STOPWORDS = {
@@ -36,6 +41,20 @@ TEXT_EXTENSIONS = {
 }
 TEST_PATH_RE = re.compile(r"(?i)(^|/)(tests?|__tests__|spec)(/|$)|(_test\.|\.test\.|_spec\.|\.spec\.)")
 GLOB_CHARS = re.compile(r"[*?\[]")
+WORD_BOUNDARY_RE = re.compile(r"[^a-z0-9]+")
+# Deterministic retrieval weights, strongest signal first. A keyword scores once per evidence
+# class per query term, so relevance comes from *where* a term appears, never from how often or
+# how many fields of the same class repeat it (ten matching headings score like one). Identical
+# for every agent.
+WEIGHT_EXACT = 100  # the whole query is this node's id or title
+WEIGHT_ALIAS_PHRASE = 14  # a declared alias appears verbatim in the query
+WEIGHT_ID = 12
+WEIGHT_TITLE = 10
+WEIGHT_ALIAS = 8
+WEIGHT_HEADING = 6
+WEIGHT_METADATA = 3  # path, appliesTo, source_of_truth
+WEIGHT_BODY = 1
+MAX_EVIDENCE_HEADINGS = 3
 EXCLUDED_DIRS = {
     ".git", ".devspark.work", ".archive", ".devspark", "node_modules", "__pycache__",
     ".venv", "venv", "dist", "build", "bin", "obj",
@@ -62,28 +81,161 @@ def tokenize(topic: str) -> list[str]:
 def index_is_fresh(repo: Path, index: dict[str, Any]) -> bool:
     output = repo / ".knowledge/index.json"
     coverage_output = repo / ".knowledge/ontology/coverage.json"
-    problems = [_drift(output, index)]
-    if index.get("entities"):
-        problems.append(_drift(coverage_output, build_coverage_report(index)))
+    problems = [
+        _drift(output, index),
+        _drift(coverage_output, build_coverage_report(index)),
+    ]
     return not any(problems)
 
 
 def node_haystack(node: dict[str, Any]) -> str:
     parts = [str(node.get("id", "")), str(node.get("title", "")), str(node.get("path", ""))]
-    parts.extend(node.get("appliesTo", []) or [])
-    parts.extend(node.get("source_of_truth", []) or [])
+    parts.extend(str(item) for item in node.get("appliesTo", []) or [])
+    parts.extend(_source_path(item) for item in node.get("source_of_truth", []) or [])
     return " ".join(parts).lower()
 
 
-def score(haystack: str, keywords: list[str]) -> int:
-    return sum(1 for kw in keywords if kw in haystack)
+def keyword_hits(haystack: str, keywords: list[str]) -> list[str]:
+    """Keywords present in a field. Presence, never occurrence count -- a long document must not
+    outrank a precise one by repeating a term."""
+    return [kw for kw in keywords if kw in haystack]
 
 
-def match_knowledge_nodes(index: dict[str, Any], keywords: list[str], limit: int) -> list[dict[str, Any]]:
-    scored = [(score(node_haystack(node), keywords), node) for node in index.get("nodes", [])]
-    scored = [pair for pair in scored if pair[0] > 0]
-    scored.sort(key=lambda pair: (-pair[0], pair[1]["id"]))
-    return [node for _, node in scored[:limit]]
+def _source_path(claim: Any) -> str:
+    return str(claim.get("path", "")) if isinstance(claim, dict) else str(claim)
+
+
+def _normalize_phrase(text: str) -> str:
+    return WORD_BOUNDARY_RE.sub(" ", text.lower()).strip()
+
+
+def score_node(
+    node: dict[str, Any], keywords: list[str], topic: str = "", body_text: str = ""
+) -> tuple[int, list[str]]:
+    """Deterministic weighted relevance for one knowledge node, with its own match evidence.
+
+    Field precedence is fixed and model-independent: exact id/title, then aliases, headings,
+    source/path metadata, and finally body content. See WEIGHT_* above. Each evidence class
+    contributes its weight at most once per query term: a term repeated across ten headings, or
+    across ten `source_of_truth` entries, scores exactly like one -- evidence richness improves
+    `matched_on` explainability, it never multiplies relevance.
+    """
+    score = 0
+    matched_on: list[str] = []
+    node_id = str(node.get("id", ""))
+    title = str(node.get("title", ""))
+    normalized_topic = _normalize_phrase(topic)
+
+    if normalized_topic and normalized_topic in {
+        _normalize_phrase(node_id),
+        _normalize_phrase(title),
+    }:
+        score += WEIGHT_EXACT
+        matched_on.append(f"exact: {title or node_id}")
+
+    for label, value, weight in (
+        ("id", node_id, WEIGHT_ID),
+        ("title", title, WEIGHT_TITLE),
+    ):
+        hits = keyword_hits(value.lower(), keywords)
+        if hits:
+            score += weight * len(hits)
+            matched_on.append(f"{label}: {value}")
+
+    alias_phrase_matched = False
+    alias_term_hits: set[str] = set()
+    for alias in node.get("aliases", []) or []:
+        alias_text = str(alias)
+        if normalized_topic and _normalize_phrase(alias_text) in normalized_topic:
+            alias_phrase_matched = True
+            matched_on.append(f"alias: {alias_text}")
+            continue
+        hits = keyword_hits(alias_text.lower(), keywords)
+        if hits:
+            alias_term_hits.update(hits)
+            matched_on.append(f"alias: {alias_text}")
+    if alias_phrase_matched:
+        score += WEIGHT_ALIAS_PHRASE
+    if alias_term_hits:
+        score += WEIGHT_ALIAS * len(alias_term_hits)
+
+    heading_term_hits: set[str] = set()
+    heading_evidence_count = 0
+    for heading in node.get("headings", []) or []:
+        hits = keyword_hits(str(heading).lower(), keywords)
+        if not hits:
+            continue
+        heading_term_hits.update(hits)
+        if heading_evidence_count < MAX_EVIDENCE_HEADINGS:
+            matched_on.append(f"heading: {heading}")
+        heading_evidence_count += 1
+    if heading_term_hits:
+        score += WEIGHT_HEADING * len(heading_term_hits)
+
+    metadata_values = [("path", str(node.get("path", "")))]
+    metadata_values += [("appliesTo", str(item)) for item in node.get("appliesTo", []) or []]
+    metadata_values += [
+        ("source_of_truth", _source_path(item)) for item in node.get("source_of_truth", []) or []
+    ]
+    metadata_term_hits: set[str] = set()
+    for label, value in metadata_values:
+        hits = keyword_hits(value.lower(), keywords)
+        if hits:
+            metadata_term_hits.update(hits)
+            matched_on.append(f"{label}: {value}")
+    if metadata_term_hits:
+        score += WEIGHT_METADATA * len(metadata_term_hits)
+
+    body_hits = sorted(set(keyword_hits(body_text, keywords)))
+    if body_hits:
+        score += WEIGHT_BODY * len(body_hits)
+        matched_on.append(f"body: {', '.join(body_hits)}")
+
+    return score, matched_on
+
+
+def load_body_text(repo: Path, nodes: list[dict[str, Any]]) -> dict[str, str]:
+    """Normalized body text for every indexed document, rebuilt from the Markdown on each run.
+
+    Reading the corpus costs well under a second, while committing the same text would inflate
+    `index.json` roughly tenfold and dirty it on every documentation edit. The files on disk stay
+    the single source of truth, so this can never go stale.
+    """
+    texts: dict[str, str] = {}
+    for node in nodes:
+        path = repo / str(node.get("path", ""))
+        if not path.is_file():
+            continue
+        try:
+            _, body = parse_frontmatter(path)
+        except Exception:
+            # A malformed document is the index build's problem to report, not retrieval's.
+            continue
+        texts[str(node.get("id", ""))] = normalize_search_text(body)
+    return texts
+
+
+def match_knowledge_nodes(
+    index: dict[str, Any],
+    keywords: list[str],
+    limit: int,
+    topic: str = "",
+    body_text: dict[str, str] | None = None,
+) -> list[dict[str, Any]]:
+    body_text = body_text or {}
+    scored: list[dict[str, Any]] = []
+    for node in index.get("nodes", []):
+        node_score, matched_on = score_node(
+            node, keywords, topic, body_text.get(str(node.get("id", "")), "")
+        )
+        if node_score <= 0:
+            continue
+        entry = dict(node)
+        entry["score"] = node_score
+        entry["matched_on"] = matched_on
+        scored.append(entry)
+    scored.sort(key=lambda entry: (-entry["score"], entry["id"]))
+    return scored[:limit]
 
 
 def match_entities(index: dict[str, Any], keywords: list[str], limit: int) -> list[dict[str, Any]]:
@@ -93,7 +245,7 @@ def match_entities(index: dict[str, Any], keywords: list[str], limit: int) -> li
             [str(entity.get("id", "")), str(entity.get("owner", "")), str(entity.get("path", ""))]
             + [str(r) for r in entity.get("relations", []) or []]
         ).lower()
-        entity_score = score(haystack, keywords)
+        entity_score = len(keyword_hits(haystack, keywords))
         if entity_score > 0:
             scored.append((entity_score, entity))
     scored.sort(key=lambda pair: (-pair[0], pair[1]["id"]))
@@ -110,6 +262,30 @@ def _source_exists(repo: Path, source: str) -> bool:
     return (repo / source).exists()
 
 
+def _claim_states_for_node(repo: Path, node: dict[str, Any]) -> tuple[list[dict[str, Any]], str | None]:
+    """Return (claim_states, error) for a matched node's own object-form source claims, if any.
+
+    Re-reads the document's own frontmatter directly (rather than the flattened index entry) since
+    an object claim's `digest`/`baseline`/`profile` fields aren't part of the index's node shape.
+    """
+    node_path = node.get("path")
+    if not node_path:
+        return [], None
+    doc_path = repo / node_path
+    if not doc_path.is_file():
+        return [], None
+    try:
+        metadata, _ = parse_frontmatter(doc_path)
+    except (OSError, ValueError):
+        return [], None
+    if not any(isinstance(item, dict) for item in metadata.get("source_of_truth") or []):
+        return [], None
+    try:
+        return enumerate_claim_states(repo, doc_path, metadata), None
+    except (CanonicalizationError, ObjectClaimError) as exc:
+        return [], str(exc)
+
+
 def enrich_node(repo: Path, node: dict[str, Any], entity_lookup: dict[str, dict[str, Any]]) -> dict[str, Any]:
     entry = dict(node)
     sources = node.get("source_of_truth") or node.get("appliesTo") or []
@@ -121,6 +297,10 @@ def enrich_node(repo: Path, node: dict[str, Any], entity_lookup: dict[str, dict[
         }
         for source in sources
     ]
+    claim_states, claim_error = _claim_states_for_node(repo, node)
+    entry["claim_states"] = claim_states
+    if claim_error:
+        entry["claim_states_error"] = claim_error
     if node.get("type") == "governance-decision":
         metadata, _ = parse_frontmatter(repo / node["path"])
         constrains = [str(c) for c in (metadata.get("constrains") or [])]
@@ -180,9 +360,38 @@ def main() -> int:
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--match-limit", type=int, default=8)
     parser.add_argument("--hit-limit", type=int, default=40)
+    parser.add_argument(
+        "--rotate-claim",
+        metavar="DOC_PATH",
+        help=(
+            "Apply a confirmed baseline rotation for one source claim in DOC_PATH (repo-relative). "
+            "Requires --claim-path and --claim-profile. Never call this without first showing the "
+            "claim's diff (via a topic match's claim_states) and getting explicit human confirmation."
+        ),
+    )
+    parser.add_argument("--claim-path", metavar="PATH")
+    parser.add_argument("--claim-profile", metavar="PROFILE")
+    parser.add_argument("--claim-region", metavar="REGION")
     args, _ = parser.parse_known_args()
 
     repo = repository_root()
+
+    if args.rotate_claim:
+        if not args.claim_path or not args.claim_profile:
+            print(
+                json.dumps({"ERROR": "--rotate-claim requires --claim-path and --claim-profile"}),
+            )
+            return 2
+        try:
+            result = rotate_claim(
+                repo, repo / args.rotate_claim, args.claim_path, args.claim_profile, args.claim_region
+            )
+        except (CanonicalizationError, ObjectClaimError, OSError) as exc:
+            print(json.dumps({"ERROR": str(exc)}))
+            return 2
+        print(json.dumps(result, separators=(",", ":")))
+        return 0
+
     topic = " ".join(args.topic).strip()
     keywords = tokenize(topic)
     try:
@@ -197,7 +406,11 @@ def main() -> int:
 
     fresh = index_is_fresh(repo, index)
     entity_lookup = {entity["id"]: entity for entity in index.get("entities", [])}
-    matched_nodes = [enrich_node(repo, node, entity_lookup) for node in match_knowledge_nodes(index, keywords, args.match_limit)]
+    body_text = load_body_text(repo, index.get("nodes", []))
+    matched_nodes = [
+        enrich_node(repo, node, entity_lookup)
+        for node in match_knowledge_nodes(index, keywords, args.match_limit, topic, body_text)
+    ]
     matched_entities = match_entities(index, keywords, args.match_limit)
     code_hits = grep_code_hits(repo, keywords, args.hit_limit)
 

@@ -240,11 +240,8 @@ function Get-GateArtifacts {
 function Get-KnowledgeConsistency {
     param([string]$RepoRoot)
 
-    $engine = Join-Path $RepoRoot 'scripts/build_knowledge_index.py'
-    if (-not (Test-Path $engine)) {
-        $engine = Join-Path $RepoRoot '.devspark/scripts/build_knowledge_index.py'
-    }
-    if (-not (Test-Path $engine)) {
+    $engine = Resolve-KnowledgeEngine -RepoRoot $RepoRoot
+    if (-not $engine) {
         return [PSCustomObject]@{ index_fresh = $null; gap_summary = 'build_knowledge_index.py not found' }
     }
 

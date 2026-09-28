@@ -9,7 +9,7 @@
   "properties": {
     "id": {
       "type": "string",
-      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+      "pattern": "^[a-z0-9]+(?:[-_][a-z0-9]+)*$",
       "description": "Must match the parent folder name under .knowledge/entities/."
     },
     "type": {
@@ -24,12 +24,15 @@
     },
     "relations": {
       "type": "array",
+      "description": "Typed edges to other entities. Accepts either authored spelling: {object, predicate} or {to, rel}.",
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["to", "rel"],
+        "anyOf": [{ "required": ["object"] }, { "required": ["to"] }],
         "properties": {
-          "to": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+          "object": { "type": "string", "pattern": "^[a-z0-9]+(?:[-_][a-z0-9]+)*$" },
+          "to": { "type": "string", "pattern": "^[a-z0-9]+(?:[-_][a-z0-9]+)*$" },
+          "predicate": { "type": "string", "minLength": 1 },
           "rel": { "type": "string", "minLength": 1 }
         }
       }

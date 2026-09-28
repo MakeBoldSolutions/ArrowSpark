@@ -41,12 +41,15 @@ $scriptStart = Get-Date
 # Delegate to the single branch-creation choke point. Branch Safety is confirmed
 # by the caller (for example, /devspark.specify) before this script runs, so -Yes avoids a double-prompt
 # for a decision the developer already made.
-$newBranchArgs = @('-Type', 'spec', '-Json', '-Yes')
-if ($ShortName) { $newBranchArgs += @('-ShortName', $ShortName) }
-if ($Number -gt 0) { $newBranchArgs += @('-Number', $Number) }
-if ($FeatureDescription) { $newBranchArgs += $FeatureDescription }
+# Splat a hashtable, not an array: array splatting binds positionally, and
+# new-branch.ps1 sets PositionalBinding=$false, so every token would be
+# swallowed by its ValueFromRemainingArguments -Description parameter.
+$newBranchParams = @{ Type = 'spec'; Json = $true; Yes = $true }
+if ($ShortName) { $newBranchParams['ShortName'] = $ShortName }
+if ($Number -gt 0) { $newBranchParams['Number'] = $Number }
+if ($FeatureDescription) { $newBranchParams['Description'] = $FeatureDescription }
 
-$newBranchOutput = & "$PSScriptRoot/new-branch.ps1" @newBranchArgs
+$newBranchOutput = & "$PSScriptRoot/new-branch.ps1" @newBranchParams
 $exitCode = $LASTEXITCODE
 if ($exitCode -ne 0) {
     Write-Error ($newBranchOutput -join "`n")

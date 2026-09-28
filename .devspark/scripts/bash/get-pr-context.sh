@@ -329,11 +329,7 @@ main() {
     local unmapped_files_json="[]"
     local unmapped_files_available="false"
     local knowledge_engine=""
-    if [[ -f "$REPO_ROOT/scripts/build_knowledge_index.py" ]]; then
-        knowledge_engine="$REPO_ROOT/scripts/build_knowledge_index.py"
-    elif [[ -f "$REPO_ROOT/.devspark/scripts/build_knowledge_index.py" ]]; then
-        knowledge_engine="$REPO_ROOT/.devspark/scripts/build_knowledge_index.py"
-    fi
+    knowledge_engine=$(resolve_knowledge_engine "$REPO_ROOT")
     if [[ -n "$knowledge_engine" && "$files_changed_total" -gt 0 ]]; then
         mapfile -t _changed_file_args < <(echo "$files_changed_json" | jq -r '.[]')
         # An unresolved interpreter must be reported rather than silently reducing this signal

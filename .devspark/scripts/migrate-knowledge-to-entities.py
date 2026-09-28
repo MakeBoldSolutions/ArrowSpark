@@ -34,6 +34,14 @@ def _slug(name: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
 
 
+def stable_path_sort_key(path: Path) -> str:
+    """OS-independent, case-sensitive sort key -- see build_knowledge_index.py's canonical
+    definition. Sorting `Path` objects directly is platform-flavor-dependent and would make the
+    planned move order (and therefore this tool's persisted plan output) vary by host OS.
+    """
+    return path.as_posix()
+
+
 def parse_frontmatter(path: Path) -> tuple[dict[str, Any], str]:
     text = path.read_text(encoding="utf-8-sig")
     if not text.startswith("---\n"):
@@ -53,7 +61,7 @@ def plan_moves(root: Path) -> list[dict[str, str]]:
         directory = root / source_dir
         if not directory.exists():
             continue
-        for path in sorted(directory.glob("*.md")):
+        for path in sorted(directory.glob("*.md"), key=stable_path_sort_key):
             metadata, _ = parse_frontmatter(path)
             entity_id = str(metadata.get("id") or _slug(path.stem))
             layer = TYPE_TO_LAYER.get(str(metadata.get("type", "")), "architecture")

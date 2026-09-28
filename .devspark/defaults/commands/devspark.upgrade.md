@@ -227,6 +227,21 @@ A raw line-diff cannot tell an intentionally customized override from one that w
 
 Any hit means the override was copied from an old stock file. Recommend diffing it against the current `.devspark/` stock file and rebuilding the override on top of current stock. This is the class of rot that caused a stale `create-new-feature` override to crash in the field.
 
+#### Legacy repo-root `build_knowledge_index.py` (framework-owned split-brain)
+
+Before the `.devspark/` framework root existed, `build_knowledge_index.py` lived directly at the repository's own `scripts/build_knowledge_index.py`. That path is no longer part of any current install target — the manifest installs it only to `.devspark/scripts/build_knowledge_index.py`, which is the sole engine every command (`/devspark.explain`, `site-audit`, `release`, CI checks) resolves to. If both a repo-root and a `.devspark/scripts/` copy exist, they can drift apart silently — a real defect fixed in 7.5.1.
+
+Check for `scripts/build_knowledge_index.py` at the repository root. If absent, nothing to do. If present, verify the two copies with
+`scripts/knowledge-integrity.py --verify-sync scripts/build_knowledge_index.py .devspark/scripts/build_knowledge_index.py`
+(installed-repo path: `.devspark/scripts/knowledge-integrity.py`) rather than eyeballing a diff — this is the same
+hash-equality check `check_engine_divergence` uses internally, so the upgrade flow and the ongoing `site-audit --scope=knowledge`
+check (`KNOW7`) agree on what "identical" means:
+
+- **Identical**: it is a redundant, framework-owned leftover. Delete it and report the removal.
+- **Different**: treat it as possibly user-customized — never delete it silently. Report the diff and ask the repository owner whether to retire it in favor of `.devspark/scripts/build_knowledge_index.py` or keep it deliberately as a project override.
+
+Either way, confirm no CI workflow or project script in the repository still invokes the root copy — every caller must point at `.devspark/scripts/build_knowledge_index.py`. After any deletion or reconciliation in this step, **re-run `--verify-sync`** (or, if the root copy was deleted, confirm it is now absent) before reporting success — do not claim the split-brain is resolved on the strength of the edit alone.
+
 #### New stock commands without an agent shim
 
 After refreshing `.devspark/`, cross-check every stock command in `.devspark/defaults/commands/devspark.*.md` against the agent's shim directory (e.g. `.github/agents/devspark.*.agent.md`). Report:

@@ -62,6 +62,17 @@
           "description": "When false, /devspark.specify never offers a work-item review."
         }
       }
+    },
+    "knowledge_drift": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Optional content-claim drift detection settings. Absent entirely by default; presence never changes legacy stale_entities/--fail-on-stale behavior.",
+      "properties": {
+        "enforcement": {
+          "type": "string",
+          "description": "Sole enforcement opt-in. Only the exact value 'pinned-claims' enables pinned-unverified/drift semantics. Any other present value (including a typo or non-string) is a hard runtime configuration error (exit 2, zero findings) -- the generator never treats a malformed value as opt-out. Absent key keeps legacy behavior indefinitely."
+        }
+      }
     }
   }
 }

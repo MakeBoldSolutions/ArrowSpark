@@ -13,18 +13,23 @@ required for an existing repo to keep working.
 from __future__ import annotations
 
 import argparse
+import ast
+import difflib
 import fnmatch
+import hashlib
+import io
 import json
 import os
 import re
 import subprocess
 import sys
+import tempfile
+import tokenize
 from datetime import UTC, date, datetime
-from pathlib import Path
+from pathlib import Path, PurePath
 from typing import Any
 
 import yaml
-
 ALLOWED_TYPES = {
     "authoritative-reference",
     "engineering-pattern",
@@ -37,6 +42,22 @@ ALLOWED_TYPES = {
     "entity-layer",
 }
 ALLOWED_LAYERS = {"architecture", "business", "integration", "operations", "pattern", "plan"}
+# Coverage counts only layers every entity is expected to carry. `pattern` and `plan` are authored
+# when they apply, so counting them as gaps makes `fully_covered` unreachable rather than honest.
+AUXILIARY_LAYERS = {"pattern", "plan"}
+# Discovery projection: a document's own headings and aliases are indexed so a query can find it
+# by the concepts it explains, not only by its id/title/path/source mapping. Normalized body text
+# is deliberately NOT stored here -- it is rebuilt on demand by the retrieval path, because
+# committing it grows the index roughly tenfold and re-churns it on every documentation edit.
+MAX_INDEXED_HEADINGS = 100
+HEADING_RE = re.compile(r"^\s{0,3}(#{1,6})\s+(.+?)\s*#*\s*$")
+FENCE_RE = re.compile(r"^\s{0,3}(`{3,}|~{3,})")
+FENCE_LINE_RE = re.compile(r"^\s{0,3}(?:`{3,}|~{3,}).*$", re.MULTILINE)
+HTML_COMMENT_RE = re.compile(r"<!--.*?-->", re.DOTALL)
+MD_LINK_RE = re.compile(r"!?\[([^\]]*)\]\([^)]*\)")
+MD_BULLET_RE = re.compile(r"^\s*(?:[-+*]|\d+\.)\s+", re.MULTILINE)
+MD_NOISE_RE = re.compile(r"[*_`>|#~\[\]()]")
+WHITESPACE_RE = re.compile(r"\s+")
 PROHIBITED_KEYS = {
     "status",
     "lifecycle",
@@ -83,6 +104,306 @@ FORBIDDEN_REFERENCE_PREFIXES = (
 
 def _is_forbidden_reference(item: str) -> bool:
     return any(item.startswith(prefix) for prefix in FORBIDDEN_REFERENCE_PREFIXES)
+
+
+# --- Knowledge drift detection: canonicalization, content addressing, object claims ---------
+#
+# Additive to the legacy string source_of_truth model above: a source_of_truth item may now be
+# either a legacy path string (unchanged existing staleness semantics) or an object claim
+# {path, digest, baseline, profile, region} compared against a retained, content-addressed
+# baseline under .knowledge/evidence/source-baselines/.
+
+SUPPORTED_COMPARISON_PROFILES = {"python-token-v1", "exact-text-v1", "binary-v1"}
+_DIGEST_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
+
+# Token kinds that never indicate a behavioral change under python-token-v1 -- comments and pure
+# layout/whitespace tokens. Anything else (including string/number literal changes) is significant.
+_PYTHON_TRIVIA_TOKEN_TYPES = frozenset(
+    {
+        tokenize.COMMENT,
+        tokenize.NL,
+        tokenize.NEWLINE,
+        tokenize.ENCODING,
+        tokenize.INDENT,
+        tokenize.DEDENT,
+        tokenize.ENDMARKER,
+    }
+)
+
+# Per-run cache: canonicalization is pure given (path content, profile, region) for the duration
+# of a single invocation, so repeated claims against the same tuple never re-read or re-tokenize.
+# Reset explicitly between test runs / CLI invocations via reset_canonicalization_cache().
+_CANONICALIZATION_CACHE: dict[tuple[str, str, str | None], tuple[bytes, bool]] = {}
+
+
+class CanonicalizationError(Exception):
+    """Raised when a comparison profile cannot produce trustworthy canonical bytes for a path.
+
+    Callers must never publish a finding when this is raised -- fail the whole run instead.
+    """
+
+
+class ObjectClaimError(ValueError):
+    """Raised when a document's object-form source claim or verification record is malformed."""
+
+
+def reset_canonicalization_cache() -> None:
+    """Clear the per-run canonicalization cache. Call once per CLI invocation and between tests."""
+    _CANONICALIZATION_CACHE.clear()
+
+
+def compute_digest(canonical_bytes: bytes) -> str:
+    """Return the `sha256:<64-hex>` content address for already-canonicalized bytes."""
+    return "sha256:" + hashlib.sha256(canonical_bytes).hexdigest()
+
+
+def baseline_address(digest: str) -> str:
+    """Return the content-addressed baseline path derived from a `sha256:<64-hex>` digest."""
+    if not _DIGEST_RE.match(digest):
+        raise CanonicalizationError(f"unsupported or malformed digest '{digest}'")
+    hex_digest = digest.split(":", 1)[1]
+    return f".knowledge/evidence/source-baselines/sha256/{hex_digest[:2]}/{hex_digest}.baseline"
+
+
+def _exact_text_bytes(path: Path) -> bytes:
+    raw = path.read_bytes()
+    try:
+        text = raw.decode("utf-8")
+    except UnicodeDecodeError as exc:
+        raise CanonicalizationError(f"{path}: not valid UTF-8 text for exact-text-v1") from exc
+    # Line-ending identity: CRLF/LF-only differences never indicate drift under exact-text-v1.
+    return text.replace("\r\n", "\n").replace("\r", "\n").encode("utf-8")
+
+
+def _binary_bytes(path: Path) -> bytes:
+    return path.read_bytes()
+
+
+def _python_region_source(text: str, region: str | None) -> tuple[str, bool]:
+    """Return (source_segment, widened). widened=True means `region` was requested but could not
+    be resolved, so the whole file was substituted and callers must emit a widening advisory."""
+    if region is None:
+        return text, False
+    try:
+        tree = ast.parse(text)
+    except SyntaxError:
+        return text, True
+    for node in ast.walk(tree):
+        if getattr(node, "name", None) == region and isinstance(
+            node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef
+        ):
+            segment = ast.get_source_segment(text, node)
+            if segment is not None:
+                return segment, False
+    return text, True
+
+
+def _python_token_canonical_bytes(path: Path, region: str | None) -> tuple[bytes, bool]:
+    raw = path.read_bytes()
+    try:
+        text = raw.decode("utf-8")
+    except UnicodeDecodeError as exc:
+        raise CanonicalizationError(f"{path}: not valid UTF-8 text for python-token-v1") from exc
+    source, widened = _python_region_source(text, region)
+    try:
+        tokens = list(tokenize.generate_tokens(io.StringIO(source).readline))
+    except (tokenize.TokenError, IndentationError, SyntaxError) as exc:
+        raise CanonicalizationError(
+            f"{path}: python-token-v1 could not tokenize {region or 'the whole file'}"
+        ) from exc
+    significant = [tok for tok in tokens if tok.type not in _PYTHON_TRIVIA_TOKEN_TYPES]
+    canonical_text = "\x1f".join(f"{tok.type}:{tok.string}" for tok in significant)
+    return canonical_text.encode("utf-8"), widened
+
+
+def canonicalize_source(path: Path, profile: str, region: str | None = None) -> tuple[bytes, bool]:
+    """Return (canonical_bytes, region_widened) for `path` under the named comparison `profile`.
+
+    Falls back conservatively to exact-text-v1 whenever `python-token-v1` cannot deterministically
+    prove a difference non-behavioral (non-Python file, decode failure, or a tokenize/parse
+    failure) -- this never silently suppresses an otherwise-detectable difference. An unrecognized
+    profile name is a hard `CanonicalizationError`, not a silent fallback.
+    """
+    cache_key = (str(path), profile, region)
+    cached = _CANONICALIZATION_CACHE.get(cache_key)
+    if cached is not None:
+        return cached
+
+    if profile == "binary-v1":
+        result = (_binary_bytes(path), False)
+    elif profile == "exact-text-v1":
+        result = (_exact_text_bytes(path), False)
+    elif profile == "python-token-v1":
+        if path.suffix == ".py":
+            try:
+                result = _python_token_canonical_bytes(path, region)
+            except CanonicalizationError:
+                result = (_exact_text_bytes(path), False)
+        else:
+            result = (_exact_text_bytes(path), False)
+    else:
+        raise CanonicalizationError(f"{path}: unknown comparison profile '{profile}'")
+
+    _CANONICALIZATION_CACHE[cache_key] = result
+    return result
+
+
+def run_self_test(root: Path) -> list[str]:
+    """Validate the installed positive, negative, and invalid-input controls."""
+    controls_root = root / "templates" / "knowledge-drift" / "self-test"
+    manifest_path = controls_root / "claims.yaml"
+    if not manifest_path.is_file():
+        return [
+            "self-test controls are missing: install templates/knowledge-drift/self-test/"
+        ]
+    try:
+        manifest = yaml.safe_load(manifest_path.read_text(encoding="utf-8")) or {}
+        controls = manifest["controls"]
+    except OSError:
+        return [
+            "self-test manifest cannot be read; restore templates/knowledge-drift/self-test/ "
+            "and retry"
+        ]
+    except (KeyError, TypeError, yaml.YAMLError):
+        return [
+            "self-test manifest is malformed; restore templates/knowledge-drift/self-test/ "
+            "from the installed framework and retry"
+        ]
+
+    errors: list[str] = []
+    for control in controls:
+        if not isinstance(control, dict):
+            errors.append(
+                "self-test manifest contains a malformed control; restore the installed "
+                "self-test controls and retry"
+            )
+            continue
+        name = control.get("name", "unnamed")
+        try:
+            source = controls_root / control["source"]
+            baseline = controls_root / control["baseline"]
+            current, _ = canonicalize_source(source, control["profile"])
+            expected, _ = canonicalize_source(baseline, control["profile"])
+            actual = "drifted" if current != expected else "unchanged"
+            if control.get("expected") == "error":
+                errors.append(f"self-test control '{name}' did not reject invalid canonicalization")
+                continue
+            if actual != control["expected"]:
+                errors.append(
+                    f"self-test control '{name}' returned {actual}; expected {control['expected']}"
+                )
+        except subprocess.TimeoutExpired:
+            errors.append(
+                f"self-test control '{name}' timed out; restore the installed tooling or "
+                "retry in a healthy environment"
+            )
+        except subprocess.SubprocessError:
+            errors.append(
+                f"self-test control '{name}' tooling failed; restore the installed tooling "
+                "or retry in a healthy environment"
+            )
+        except OSError:
+            errors.append(
+                f"self-test control '{name}' cannot read its source or baseline; restore the "
+                "installed self-test controls and retry"
+            )
+        except CanonicalizationError:
+            if control.get("expected") == "error":
+                continue
+            errors.append(
+                f"self-test control '{name}' cannot canonicalize its input; correct the "
+                "comparison profile or restore the installed control and retry"
+            )
+        except KeyError:
+            if control.get("expected") == "error":
+                continue
+            errors.append(
+                f"self-test control '{name}' is malformed; restore the installed self-test "
+                "controls and retry"
+            )
+    return errors
+
+
+def detection_report(mode: str, status: str, errors: list[str] | None = None) -> dict[str, Any]:
+    """Build the versioned fail-closed report envelope without source content."""
+    return {
+        "schema_version": "1",
+        "mode": mode,
+        "status": status,
+        "summary": {},
+        "findings": [],
+        "advisories": [],
+        "errors": errors or [],
+    }
+
+
+def write_report_atomically(path: Path, payload: dict[str, Any]) -> None:
+    """Replace a machine report only after the complete payload is ready."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    handle, temporary_name = tempfile.mkstemp(prefix=f".{path.name}.", dir=path.parent)
+    try:
+        with os.fdopen(handle, "w", encoding="utf-8") as stream:
+            json.dump(payload, stream, indent=2, ensure_ascii=False)
+            stream.write("\n")
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary_name, path)
+    except OSError:
+        try:
+            os.unlink(temporary_name)
+        except OSError:
+            pass
+        raise
+
+
+def validate_source_claims(path: Path, metadata: dict[str, Any]) -> None:
+    """Validate additive object-form source_of_truth claims and the verification record.
+
+    Purely additive: legacy string items are untouched and remain valid on their own. Raises
+    `ObjectClaimError` (a `ValueError`) with an actionable message; never silently drops, coerces,
+    or reinterprets a malformed claim.
+    """
+    items = metadata.get("source_of_truth") or []
+    seen_tuples: set[tuple[str, str, str | None]] = set()
+    for item in items:
+        if isinstance(item, str):
+            continue
+        if not isinstance(item, dict):
+            raise ObjectClaimError(
+                f"{path}: source_of_truth item must be a string or object, got {type(item).__name__}"
+            )
+        claim_path = item.get("path")
+        digest = item.get("digest")
+        baseline = item.get("baseline")
+        profile = item.get("profile")
+        region = item.get("region")
+        for field_name, value in (
+            ("path", claim_path),
+            ("digest", digest),
+            ("baseline", baseline),
+            ("profile", profile),
+        ):
+            if not isinstance(value, str) or not value:
+                raise ObjectClaimError(f"{path}: object source claim missing required field '{field_name}'")
+        if _is_forbidden_reference(claim_path):
+            raise ObjectClaimError(f"{path}: source claim path '{claim_path}' targets a planning/archive location")
+        if not _DIGEST_RE.match(digest):
+            raise ObjectClaimError(f"{path}: source claim digest '{digest}' is not a valid sha256:<64-hex> address")
+        if baseline_address(digest) != baseline:
+            raise ObjectClaimError(f"{path}: source claim baseline '{baseline}' does not match digest '{digest}'")
+        tuple_key = (claim_path, profile, region)
+        if tuple_key in seen_tuples:
+            raise ObjectClaimError(f"{path}: duplicate source claim (path, profile, region) = {tuple_key}")
+        seen_tuples.add(tuple_key)
+
+    verification = metadata.get("verification")
+    if verification is not None:
+        state = verification.get("state")
+        confirmed_on = verification.get("confirmed_on")
+        if state == "verified" and not confirmed_on:
+            raise ObjectClaimError(f"{path}: verification.state 'verified' requires 'confirmed_on'")
+        if state == "pinned-unverified" and confirmed_on:
+            raise ObjectClaimError(f"{path}: verification.state 'pinned-unverified' must not set 'confirmed_on'")
 
 
 DEFAULT_MAPPINGS = (
@@ -159,6 +480,85 @@ def validate_current(path: Path, metadata: dict[str, Any], body: str) -> None:
     # "status": "superseded" field value, or a still-present-but-unread legacy field).
 
 
+def extract_headings(body: str) -> list[str]:
+    """ATX headings outside fenced code blocks, in document order, case-insensitively deduped."""
+    headings: list[str] = []
+    seen: set[str] = set()
+    fence: str | None = None
+    for line in body.splitlines():
+        fence_match = FENCE_RE.match(line)
+        if fence_match:
+            marker = fence_match.group(1)[0]
+            if fence is None:
+                fence = marker
+            elif fence == marker:
+                fence = None
+            continue
+        if fence is not None:
+            continue
+        match = HEADING_RE.match(line)
+        if not match:
+            continue
+        text = match.group(2).strip()
+        key = text.lower()
+        if not text or key in seen:
+            continue
+        seen.add(key)
+        headings.append(text)
+        if len(headings) >= MAX_INDEXED_HEADINGS:
+            break
+    return headings
+
+
+def normalize_search_text(body: str) -> str:
+    """Lowercased, markdown-stripped body text for deterministic content retrieval.
+
+    Derived data only -- the Markdown file stays authoritative. Frontmatter is never included:
+    callers pass the body `parse_frontmatter` returned.
+    """
+    text = HTML_COMMENT_RE.sub(" ", body)
+    text = MD_LINK_RE.sub(r"\1 ", text)
+    text = FENCE_LINE_RE.sub(" ", text)
+    text = MD_BULLET_RE.sub(" ", text)
+    text = MD_NOISE_RE.sub(" ", text)
+    return WHITESPACE_RE.sub(" ", text).strip().lower()
+
+
+def validate_aliases(path: Path, metadata: dict[str, Any]) -> list[str]:
+    """Optional discovery-only vocabulary. Never taxonomy, identity, or behavioral truth."""
+    raw = metadata.get("aliases")
+    if raw is None:
+        return []
+    if not isinstance(raw, list) or not all(isinstance(item, str) for item in raw):
+        raise ValueError(f"{path}: aliases must be an array of strings")
+    aliases: list[str] = []
+    seen: set[str] = set()
+    for item in raw:
+        alias = item.strip()
+        if not alias:
+            raise ValueError(f"{path}: aliases entries must be non-empty")
+        if alias.lower() in seen:
+            continue
+        seen.add(alias.lower())
+        aliases.append(alias)
+    return aliases
+
+
+def search_fields(path: Path, metadata: dict[str, Any], body: str) -> dict[str, Any]:
+    """Additive discovery projection of a knowledge document.
+
+    Nothing here changes what a document *is* -- only how a query can reach it.
+    """
+    fields: dict[str, Any] = {}
+    aliases = validate_aliases(path, metadata)
+    if aliases:
+        fields["aliases"] = aliases
+    headings = extract_headings(body)
+    if headings:
+        fields["headings"] = headings
+    return fields
+
+
 def _git_last_commit_date(root: Path, relative_path: str) -> str | None:
     try:
         result = subprocess.run(
@@ -188,8 +588,11 @@ def validate_entity_layer_doc(
     if layer not in ALLOWED_LAYERS:
         raise ValueError(f"{path}: layer must be one of {sorted(ALLOWED_LAYERS)}")
     sources = metadata.get("source_of_truth")
-    if not isinstance(sources, list) or not sources or not all(isinstance(s, str) for s in sources):
-        raise ValueError(f"{path}: source_of_truth must be a non-empty array of paths")
+    if not isinstance(sources, list) or not sources or not all(
+        isinstance(s, str) or isinstance(s, dict) for s in sources
+    ):
+        raise ValueError(f"{path}: source_of_truth must be a non-empty array of paths or object claims")
+    validate_source_claims(path, metadata)
     last_verified = metadata.get("last_verified")
     if not last_verified:
         raise ValueError(f"{path}: last_verified is required for entity-layer docs")
@@ -198,6 +601,15 @@ def validate_entity_layer_doc(
     except ValueError as exc:
         raise ValueError(f"{path}: last_verified must be an ISO date (YYYY-MM-DD)") from exc
     for source in sources:
+        if isinstance(source, dict):
+            # Object claims are verified by content digest, not commit-date staleness -- see
+            # validate_source_claims above for shape/tuple-uniqueness validation.
+            source_path = source["path"]
+            if _is_forbidden_reference(source_path):
+                raise ValueError(f"{path}: source_of_truth cannot target .devspark.work/ or .archive/: {source_path}")
+            if not (root / source_path).exists():
+                raise ValueError(f"{path}: source_of_truth path does not exist: {source_path}")
+            continue
         if _is_forbidden_reference(source):
             raise ValueError(f"{path}: source_of_truth cannot target .devspark.work/ or .archive/: {source}")
         if not (root / source).exists():
@@ -254,6 +666,21 @@ def validate_decision_doc(path: Path, metadata: dict[str, Any], entity_ids: set[
     return [str(c) for c in constrains]
 
 
+def stable_path_sort_key(path: PurePath) -> str:
+    """Return an OS-independent, case-sensitive sort key for a repository path.
+
+    `Path`/`PurePath` comparison is platform-flavor-dependent -- `PureWindowsPath` normalizes
+    case for ordering, `PurePosixPath` does not -- so sorting `Path` objects directly (rather
+    than this key) produces a different, non-deterministic node/edge order in generated
+    `.knowledge` artifacts depending on which OS ran the generator, causing false drift failures
+    when one OS's artifact is checked against another's. This key compares plain, slash-
+    normalized strings instead, which sort identically on every supported OS. Deliberately not
+    lowercased: DevSpark preserves repository path identity rather than imposing Windows
+    case-folding semantics everywhere.
+    """
+    return path.as_posix()
+
+
 def build_entities(
     root: Path,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, str]]]:
@@ -270,7 +697,7 @@ def build_entities(
     stale_findings: list[dict[str, str]] = []
     if not entities_root.exists():
         return entity_nodes, layer_nodes, stale_findings
-    for entity_dir in sorted(p for p in entities_root.iterdir() if p.is_dir()):
+    for entity_dir in sorted((p for p in entities_root.iterdir() if p.is_dir()), key=stable_path_sort_key):
         node_file = entity_dir / "_entity.yaml"
         if not node_file.exists():
             raise ValueError(f"{entity_dir}: missing required _entity.yaml")
@@ -283,7 +710,7 @@ def build_entities(
         }
         present_layers: set[str] = set()
 
-        for doc_path in sorted(entity_dir.glob("*.md")):
+        for doc_path in sorted(entity_dir.glob("*.md"), key=stable_path_sort_key):
             relative = doc_path.relative_to(root).as_posix()
             metadata, body = parse_frontmatter(doc_path)
             validate_current(doc_path, metadata, body)
@@ -301,10 +728,11 @@ def build_entities(
                     "title": str(metadata.get("title") or node_id),
                     "source_of_truth": metadata["source_of_truth"],
                     "last_verified": str(metadata["last_verified"]),
+                    **search_fields(doc_path, metadata, body),
                 }
             )
 
-        missing_layers = sorted(ALLOWED_LAYERS - present_layers - overrides)
+        missing_layers = sorted(ALLOWED_LAYERS - AUXILIARY_LAYERS - present_layers - overrides)
         entity_nodes.append(
             {
                 "id": entity_id,
@@ -320,6 +748,21 @@ def build_entities(
         )
 
     return entity_nodes, layer_nodes, stale_findings
+
+
+def relation_target(relation: Any) -> str:
+    """Entity id a relation points at, accepting either authored spelling.
+
+    `object:`/`predicate:` and `to:`/`rel:` are both in the wild; rejecting either would strand
+    an existing corpus on an older generator.
+    """
+    if not isinstance(relation, dict):
+        return ""
+    return str(relation.get("object") or relation.get("to") or "")
+
+
+def relation_predicate(relation: dict[str, Any]) -> str:
+    return str(relation.get("predicate") or relation.get("rel") or "relates-to")
 
 
 def generated_at(explicit: str | None = None) -> str:
@@ -343,7 +786,7 @@ def build_index(root: Path, timestamp: str | None = None) -> dict[str, Any]:
     decision_constrains: dict[str, list[str]] = {}
 
     if knowledge_root.exists():
-        for path in sorted(knowledge_root.rglob("*.md")):
+        for path in sorted(knowledge_root.rglob("*.md"), key=stable_path_sort_key):
             relative = path.relative_to(root).as_posix()
             if relative in {".knowledge/index.md", ".knowledge/README.md"}:
                 continue
@@ -374,6 +817,7 @@ def build_index(root: Path, timestamp: str | None = None) -> dict[str, Any]:
                 node["appliesTo"] = applies_to
             if node_type == "governance-decision":
                 decision_constrains[node_id] = validate_decision_doc(path, metadata, set(entity_by_id))
+            node.update(search_fields(path, metadata, body))
             nodes.append(node)
             for target in (metadata.get("links") or {}).get("references", []):
                 edges.append({"from": node_id, "to": str(target), "rel": "references"})
@@ -391,15 +835,19 @@ def build_index(root: Path, timestamp: str | None = None) -> dict[str, Any]:
     path_by_id = {node["id"]: node["path"] for node in nodes}
     for entity in entity_nodes:
         for relation in entity["relations"]:
-            if not isinstance(relation, dict) or not relation.get("to"):
+            target = relation_target(relation)
+            if not target:
                 raise ValueError(
-                    f".knowledge/entities/{entity['id']}/_entity.yaml: every relation requires a 'to' entity id"
+                    f".knowledge/entities/{entity['id']}/_entity.yaml: every relation requires an "
+                    f"'object' (or 'to') entity id"
                 )
-            target = str(relation["to"])
             if target not in entity_by_id:
                 raise ValueError(
                     f".knowledge/entities/{entity['id']}/_entity.yaml: relation targets unknown entity '{target}'"
                 )
+            edges.append(
+                {"from": entity["id"], "to": target, "rel": relation_predicate(relation)}
+            )
     dangling_references = [
         {"from": edge["from"], "to": edge["to"], "path": path_by_id.get(edge["from"], edge["from"])}
         for edge in edges
@@ -422,6 +870,7 @@ def build_index(root: Path, timestamp: str | None = None) -> dict[str, Any]:
                     f".knowledge/entities/{entity_id}/_entity.yaml: constrained_by references "
                     f"'{decision_id}', which does not list '{entity_id}' in its constrains"
                 )
+            edges.append({"from": decision_id, "to": entity_id, "rel": "constrains"})
 
     return {
         "generated": {"by": "build-knowledge-index", "at": generated_at(timestamp)},
@@ -490,12 +939,569 @@ def find_unmapped_files(index: dict[str, Any], changed_files: list[str]) -> list
         for node in index.get("nodes", [])
         for key in ("appliesTo", "source_of_truth")
         for pattern in node.get(key) or []
+        if isinstance(pattern, str)  # object-form source claims are matched by drift detection, not glob
     ]
     return [
         changed_file
         for changed_file in changed_files
         if not any(_pattern_covers(pattern, changed_file) for pattern in patterns)
     ]
+
+
+# --- Knowledge drift detection: document scan, scope resolution, evaluation, migration ------
+
+
+class EnforcementConfigError(ValueError):
+    """Raised when `.devspark.work/devspark.json`'s `knowledge_drift.enforcement` is malformed."""
+
+
+class RoutineScopeError(ValueError):
+    """Raised when `--base`/`--head` cannot be resolved into a complete, validated change set."""
+
+
+def _load_repo_config(root: Path) -> dict[str, Any]:
+    path = root / ".devspark.work" / "devspark.json"
+    if not path.is_file():
+        return {}
+    try:
+        config = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise EnforcementConfigError(f"{path}: cannot read repository configuration ({exc})") from exc
+    return config if isinstance(config, dict) else {}
+
+
+def enforcement_mode(root: Path) -> str | None:
+    """Return `"pinned-claims"` when explicitly opted in, or `None` when the key is absent.
+
+    A present key with any other value is a hard configuration error -- never treated as opt-out.
+    """
+    config = _load_repo_config(root)
+    section = config.get("knowledge_drift")
+    if section is None:
+        return None
+    if not isinstance(section, dict) or "enforcement" not in section:
+        return None
+    value = section["enforcement"]
+    if value == "pinned-claims":
+        return "pinned-claims"
+    raise EnforcementConfigError(
+        f"knowledge_drift.enforcement is set to {value!r}; the only valid value is "
+        "'pinned-claims'. Remove the key to keep legacy behavior, or fix the value."
+    )
+
+
+def iter_source_claim_documents(root: Path) -> list[tuple[Path, dict[str, Any]]]:
+    """Return every `.knowledge/**/*.md` document whose frontmatter declares `source_of_truth`."""
+    knowledge_root = root / ".knowledge"
+    documents: list[tuple[Path, dict[str, Any]]] = []
+    if not knowledge_root.exists():
+        return documents
+    for path in sorted(knowledge_root.rglob("*.md"), key=stable_path_sort_key):
+        relative = path.relative_to(root).as_posix()
+        if relative in {".knowledge/index.md", ".knowledge/README.md"}:
+            continue
+        metadata, _ = parse_frontmatter(path)
+        if metadata.get("source_of_truth"):
+            validate_source_claims(path, metadata)
+            for claim in metadata["source_of_truth"]:
+                if isinstance(claim, dict):
+                    source_path = root / claim["path"]
+                    if not source_path.is_file():
+                        raise ObjectClaimError(
+                            f"{path}: source claim '{claim['path']}' must name an existing regular file"
+                        )
+            documents.append((path, metadata))
+    return documents
+
+
+def resolve_routine_scope(root: Path, base: str, head: str) -> set[str]:
+    """Return the complete add/delete/rename path set for `base...head`, or raise `RoutineScopeError`.
+
+    Uses the merge base of the two explicit refs (never inferred) and a three-dot comparison, per
+    data-model.md's Routine Scope contract. `base` is not required to be a direct ancestor of `head`.
+    """
+    for ref in (base, head):
+        result = run_git(root, ["rev-parse", "--verify", f"{ref}^{{commit}}"])
+        if result.returncode != 0:
+            raise RoutineScopeError(f"'{ref}' does not resolve to an available commit object")
+
+    merge_base_result = run_git(root, ["merge-base", base, head])
+    if merge_base_result.returncode != 0 or not merge_base_result.stdout.strip():
+        raise RoutineScopeError(f"no merge base exists between '{base}' and '{head}'")
+
+    shallow_result = run_git(root, ["rev-parse", "--is-shallow-repository"])
+    if shallow_result.returncode == 0 and shallow_result.stdout.strip() == "true":
+        boundary_result = run_git(root, ["rev-list", "--boundary", f"{base}...{head}"])
+        if boundary_result.returncode != 0:
+            raise RoutineScopeError(
+                f"could not validate complete history between '{base}' and '{head}' "
+                f"({boundary_result.stderr.strip() or 'git rev-list failed'})"
+            )
+        if any(line.startswith("-") for line in boundary_result.stdout.splitlines()):
+            raise RoutineScopeError(
+                f"history between '{base}' and '{head}' is truncated; fetch complete history before retrying"
+            )
+
+    diff_result = run_git(
+        root,
+        ["diff", "--find-renames=50%", "--name-status", f"{base}...{head}"],
+    )
+    if diff_result.returncode != 0:
+        raise RoutineScopeError(
+            f"could not compute the change set between '{base}' and '{head}' "
+            f"({diff_result.stderr.strip() or 'git diff failed'})"
+        )
+
+    changed: set[str] = set()
+    for line in diff_result.stdout.splitlines():
+        if not line.strip():
+            continue
+        parts = line.split("\t")
+        status = parts[0]
+        if status.startswith("R") or status.startswith("C"):
+            changed.update(parts[1:3])
+        else:
+            changed.update(parts[1:2])
+    return changed
+
+
+def run_git(root: Path, args: list[str], timeout: int = 30) -> subprocess.CompletedProcess[str]:
+    try:
+        return subprocess.run(
+            ["git", *args],
+            cwd=root,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+        )
+    except (subprocess.SubprocessError, OSError) as exc:
+        raise RoutineScopeError(f"git invocation failed: {exc}") from exc
+
+
+def _default_profile_for(path: Path) -> str:
+    if path.suffix == ".py":
+        return "python-token-v1"
+    try:
+        path.read_bytes().decode("utf-8")
+    except UnicodeDecodeError:
+        return "binary-v1"
+    return "exact-text-v1"
+
+
+def evaluate_document(
+    root: Path, metadata: dict[str, Any]
+) -> tuple[str, list[dict[str, Any]], bool, int]:
+    """Return (status, changed_claims, region_widened, object_claim_count) for one document.
+
+    status is one of: verified-current, drifted, pinned-unverified, unpinned. Raises
+    `CanonicalizationError`/`OSError` when any claimed source cannot be trusted -- callers must
+    treat that as a whole-run error, never a partial finding.
+    """
+    items = metadata.get("source_of_truth") or []
+    object_claims = [item for item in items if isinstance(item, dict)]
+    if not object_claims:
+        return "unpinned", [], False, 0
+
+    changed_claims: list[dict[str, Any]] = []
+    region_widened = False
+    for claim in object_claims:
+        source_path = root / claim["path"]
+        if not source_path.is_file():
+            raise CanonicalizationError(f"{claim['path']}: claimed source no longer exists")
+        canonical_bytes, widened = canonicalize_source(source_path, claim["profile"], claim.get("region"))
+        region_widened = region_widened or widened
+        current_digest = compute_digest(canonical_bytes)
+        if current_digest != claim["digest"]:
+            changed_claims.append(
+                {
+                    "path": claim["path"],
+                    "profile": claim["profile"],
+                    "region": claim.get("region"),
+                    "digest_before": claim["digest"],
+                    "digest_after": current_digest,
+                }
+            )
+
+    verification = metadata.get("verification") or {}
+    is_verified = verification.get("state") == "verified"
+    if changed_claims:
+        status = "drifted" if is_verified else "pinned-unverified"
+    else:
+        status = "verified-current" if is_verified else "pinned-unverified"
+    return status, changed_claims, region_widened, len(object_claims)
+
+
+# --- Explain-workflow claim rotation: retained-baseline diff display and confirmed re-verify --
+
+def _binary_diff_ranges(before: bytes, after: bytes) -> list[dict[str, int]]:
+    """Return deterministic changed-offset/length ranges between two byte streams."""
+    matcher = difflib.SequenceMatcher(a=before, b=after, autojunk=False)
+    ranges = []
+    for tag, i1, i2, j1, j2 in matcher.get_opcodes():
+        if tag == "equal":
+            continue
+        ranges.append(
+            {
+                "op": tag,
+                "before_offset": i1,
+                "before_length": i2 - i1,
+                "after_offset": j1,
+                "after_length": j2 - j1,
+            }
+        )
+    return ranges
+
+
+def diff_canonical_bytes(before: bytes, after: bytes, profile: str) -> dict[str, Any]:
+    """Return a deterministic diff of two canonical byte streams for human confirmation.
+
+    `binary-v1` (and anything that fails UTF-8 decoding) reports changed-offset/length ranges;
+    everything else reports a deterministic unified diff. Token-canonical text (python-token-v1)
+    uses `\\x1f` between tokens rather than newlines, so it is split into one line per token for a
+    readable diff instead of one undifferentiated line.
+    """
+    if profile == "binary-v1":
+        return {"kind": "binary", "ranges": _binary_diff_ranges(before, after)}
+    try:
+        before_text = before.decode("utf-8")
+        after_text = after.decode("utf-8")
+    except UnicodeDecodeError:
+        return {"kind": "binary", "ranges": _binary_diff_ranges(before, after)}
+    before_lines = before_text.replace("\x1f", "\n").splitlines(keepends=True)
+    after_lines = after_text.replace("\x1f", "\n").splitlines(keepends=True)
+    unified = list(
+        difflib.unified_diff(before_lines, after_lines, fromfile="baseline", tofile="current", lineterm="")
+    )
+    return {"kind": "text", "unified_diff": unified}
+
+
+def enumerate_claim_states(root: Path, doc_path: Path, metadata: dict[str, Any]) -> list[dict[str, Any]]:
+    """Return one entry per object-form source claim in `metadata`, read-only.
+
+    Enumerates every claim (not only the first) so a document with multiple source claims can be
+    confirmed one at a time. Raises `CanonicalizationError` if any claimed source or its retained
+    baseline cannot be trusted -- callers must treat that as a whole-document error, never a
+    partial listing.
+    """
+    verification = metadata.get("verification") or {}
+    is_verified = verification.get("state") == "verified"
+    entries: list[dict[str, Any]] = []
+    for claim in metadata.get("source_of_truth") or []:
+        if not isinstance(claim, dict):
+            continue
+        source_path = root / claim["path"]
+        if not source_path.is_file():
+            raise CanonicalizationError(f"{claim['path']}: claimed source no longer exists")
+        baseline_path = root / claim["baseline"]
+        if not baseline_path.is_file():
+            raise CanonicalizationError(f"{claim['baseline']}: retained baseline is missing")
+        baseline_bytes = baseline_path.read_bytes()
+        if compute_digest(baseline_bytes) != claim["digest"]:
+            raise CanonicalizationError(f"{claim['baseline']}: retained baseline does not match its recorded digest")
+
+        canonical_bytes, region_widened = canonicalize_source(source_path, claim["profile"], claim.get("region"))
+        current_digest = compute_digest(canonical_bytes)
+        changed = current_digest != claim["digest"]
+        if changed:
+            status = "drifted" if is_verified else "pinned-unverified"
+        else:
+            status = "verified-current" if is_verified else "pinned-unverified"
+        entries.append(
+            {
+                "document": doc_path.relative_to(root).as_posix(),
+                "path": claim["path"],
+                "profile": claim["profile"],
+                "region": claim.get("region"),
+                "digest_before": claim["digest"],
+                "digest_after": current_digest,
+                "status": status,
+                "region_widened": region_widened,
+                "diff": diff_canonical_bytes(baseline_bytes, canonical_bytes, claim["profile"]) if changed else None,
+            }
+        )
+    return entries
+
+
+def rotate_claim(root: Path, doc_path: Path, claim_path: str, profile: str, region: str | None = None) -> dict[str, Any]:
+    """Apply a confirmed rotation transaction for exactly one source claim.
+
+    Callers MUST already have displayed the diff from `enumerate_claim_states` and obtained
+    explicit human confirmation -- this function performs no confirmation itself. Writes/dedupes
+    the new baseline, atomically replaces only the targeted claim plus the document's verification
+    record (`state: verified`, `confirmed_on: <today>`), then prunes only baselines no claim
+    references. A failure before the document write leaves the claim unchanged; a failure during
+    the document write restores the document's original bytes.
+    """
+    metadata, _ = parse_frontmatter(doc_path)
+    items = metadata.get("source_of_truth") or []
+    target_index = None
+    for index, item in enumerate(items):
+        if (
+            isinstance(item, dict)
+            and item.get("path") == claim_path
+            and item.get("profile") == profile
+            and item.get("region") == region
+        ):
+            target_index = index
+            break
+    if target_index is None:
+        raise ObjectClaimError(
+            f"{doc_path}: no source claim (path={claim_path}, profile={profile}, region={region})"
+        )
+
+    claim = items[target_index]
+    source_path = root / claim["path"]
+    if not source_path.is_file():
+        raise CanonicalizationError(f"{claim['path']}: claimed source no longer exists")
+    baseline_path = root / claim["baseline"]
+    if not baseline_path.is_file():
+        raise CanonicalizationError(f"{claim['baseline']}: retained baseline is missing")
+    if compute_digest(baseline_path.read_bytes()) != claim["digest"]:
+        raise CanonicalizationError(f"{claim['baseline']}: retained baseline does not match its recorded digest")
+
+    canonical_bytes, region_widened = canonicalize_source(source_path, profile, region)
+    new_digest = compute_digest(canonical_bytes)
+    new_baseline_relpath = baseline_address(new_digest)
+    new_baseline_path = root / new_baseline_relpath
+
+    if not new_baseline_path.exists():
+        new_baseline_path.parent.mkdir(parents=True, exist_ok=True)
+        handle, temp_name = tempfile.mkstemp(prefix=f".{new_baseline_path.name}.", dir=new_baseline_path.parent)
+        try:
+            with os.fdopen(handle, "wb") as stream:
+                stream.write(canonical_bytes)
+                stream.flush()
+                os.fsync(stream.fileno())
+            os.replace(temp_name, new_baseline_path)
+        except OSError:
+            try:
+                os.unlink(temp_name)
+            except OSError:
+                pass
+            raise
+
+    updated_items = list(items)
+    updated_items[target_index] = {**claim, "digest": new_digest, "baseline": new_baseline_relpath}
+    metadata["source_of_truth"] = updated_items
+    metadata["verification"] = {"state": "verified", "confirmed_on": date.today().isoformat()}
+
+    original_bytes = doc_path.read_bytes()
+    text = doc_path.read_text(encoding="utf-8-sig")
+    normalized = text.replace("\r\n", "\n")
+    _, _, remainder = normalized.split("---\n", 2)
+    new_frontmatter = yaml.safe_dump(metadata, sort_keys=False, allow_unicode=True)
+    new_bytes = f"---\n{new_frontmatter}---\n{remainder}".encode("utf-8")
+    try:
+        doc_path.write_bytes(new_bytes)
+    except OSError:
+        doc_path.write_bytes(original_bytes)
+        raise
+
+    prune_result = prune_unreferenced_baselines(root, write=True)
+    return {
+        "document": doc_path.relative_to(root).as_posix(),
+        "path": claim_path,
+        "profile": profile,
+        "region": region,
+        "digest_before": claim["digest"],
+        "digest_after": new_digest,
+        "baseline": new_baseline_relpath,
+        "region_widened": region_widened,
+        "pruned": prune_result["pruned"],
+    }
+
+
+def run_drift_detection(
+    root: Path,
+    *,
+    mode: str,
+    changed_paths: set[str] | None,
+    breadth_guidance: int | None,
+    enforcement: str | None,
+) -> dict[str, Any]:
+    """Evaluate every in-scope document's source claims and return a complete report payload.
+
+    Never emits a partial finding: any evaluation error aborts the whole run with `status: error`
+    and zero findings, per the fail-closed contract.
+    """
+    summary = {"verified-current": 0, "drifted": 0, "pinned-unverified": 0, "unpinned": 0}
+    findings: list[dict[str, Any]] = []
+    advisories: list[dict[str, Any]] = []
+
+    for path, metadata in iter_source_claim_documents(root):
+        relative = path.relative_to(root).as_posix()
+        object_claims = [item for item in (metadata.get("source_of_truth") or []) if isinstance(item, dict)]
+        if mode == "routine" and changed_paths is not None:
+            if not any(claim["path"] in changed_paths for claim in object_claims):
+                continue
+
+        status, changed_claims, region_widened, claim_count = evaluate_document(root, metadata)
+        summary[status] = summary.get(status, 0) + 1
+
+        if status == "drifted":
+            findings.append({"document": relative, "source_claims": changed_claims})
+        elif status == "pinned-unverified" and claim_count:
+            advisories.append({"type": "pinned-unverified", "document": relative})
+        elif status == "unpinned" and enforcement == "pinned-claims" and metadata.get("source_of_truth"):
+            advisories.append({"type": "unpinned-authoring-error", "document": relative})
+
+        if region_widened:
+            advisories.append({"type": "region-widened", "document": relative})
+        if breadth_guidance and claim_count > breadth_guidance:
+            advisories.append({"type": "breadth", "document": relative, "count": claim_count})
+
+    report = detection_report(mode, "findings" if findings else "ok")
+    report["summary"] = summary
+    report["findings"] = findings
+    report["advisories"] = advisories
+    return report
+
+
+def migrate_source_claims(root: Path, *, write: bool) -> dict[str, Any]:
+    """Preview (default) or apply (`write=True`) the legacy-string-to-object-claim migration.
+
+    Validates and stages the full corpus before touching any document -- a single unreadable or
+    directory source aborts the whole migration with no partial document updates.
+    """
+    plan: list[dict[str, Any]] = []
+    staged: list[tuple[Path, str, str, bytes]] = []
+    for path, metadata in iter_source_claim_documents(root):
+        legacy_items = [item for item in (metadata.get("source_of_truth") or []) if isinstance(item, str)]
+        if not legacy_items:
+            continue
+        document_plan = {"document": path.relative_to(root).as_posix(), "claims": []}
+        for legacy_path in legacy_items:
+            source_path = root / legacy_path
+            if source_path.is_dir():
+                raise ObjectClaimError(f"{legacy_path}: cannot migrate a directory claim")
+            if not source_path.is_file():
+                raise ObjectClaimError(f"{legacy_path}: claimed source does not exist")
+            profile = _default_profile_for(source_path)
+            canonical_bytes, _ = canonicalize_source(source_path, profile)
+            digest = compute_digest(canonical_bytes)
+            baseline = baseline_address(digest)
+            document_plan["claims"].append(
+                {"path": legacy_path, "profile": profile, "digest": digest, "baseline": baseline}
+            )
+            staged.append((root / baseline, digest, baseline, canonical_bytes))
+        plan.append(document_plan)
+
+    if not write:
+        return {"write": False, "documents": plan}
+
+    for baseline_path, _digest, _baseline, canonical_bytes in staged:
+        if baseline_path.exists():
+            continue
+        baseline_path.parent.mkdir(parents=True, exist_ok=True)
+        handle, temp_name = tempfile.mkstemp(prefix=f".{baseline_path.name}.", dir=baseline_path.parent)
+        with os.fdopen(handle, "wb") as stream:
+            stream.write(canonical_bytes)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temp_name, baseline_path)
+
+    # Compute every document's new frontmatter text up front, then write them all atomically. If
+    # any single write fails partway through, restore the documents already replaced from the
+    # original bytes captured here -- a partial migration must never leave a mixed-state corpus.
+    claims_by_document = {entry["document"]: entry["claims"] for entry in plan}
+    rewrites: list[tuple[Path, bytes, bytes]] = []  # (path, original_bytes, new_bytes)
+    for path, metadata in iter_source_claim_documents(root):
+        relative = path.relative_to(root).as_posix()
+        new_claims = claims_by_document.get(relative)
+        if not new_claims:
+            continue
+        claims_by_path = {claim["path"]: claim for claim in new_claims}
+        items = metadata.get("source_of_truth") or []
+        updated_items = [
+            claims_by_path[item] if isinstance(item, str) and item in claims_by_path else item
+            for item in items
+        ]
+        metadata["source_of_truth"] = updated_items
+        metadata["verification"] = {"state": "pinned-unverified"}
+        original_bytes = path.read_bytes()
+        text = path.read_text(encoding="utf-8-sig")
+        normalized = text.replace("\r\n", "\n")
+        _, _, remainder = normalized.split("---\n", 2)
+        new_frontmatter = yaml.safe_dump(metadata, sort_keys=False, allow_unicode=True)
+        new_bytes = f"---\n{new_frontmatter}---\n{remainder}".encode("utf-8")
+        rewrites.append((path, original_bytes, new_bytes))
+
+    originals_by_path = {path: original_bytes for path, original_bytes, _new_bytes in rewrites}
+    written: list[Path] = []
+    try:
+        for path, _original_bytes, new_bytes in rewrites:
+            path.write_bytes(new_bytes)
+            written.append(path)
+    except OSError:
+        for path in written:
+            path.write_bytes(originals_by_path[path])
+        raise
+
+    return {"write": True, "documents": plan}
+
+
+def scan_referenced_baselines(root: Path) -> set[str]:
+    """Return every baseline path (repo-relative, POSIX) any document's object claim still cites.
+
+    A baseline under `.knowledge/evidence/source-baselines/` is safe to remove only when no
+    document's `source_of_truth` object claim references it -- content addressing means a single
+    baseline file may legitimately be shared by more than one claim (identical canonical bytes),
+    so this is a set of referenced addresses, not a one-to-one map.
+    """
+    referenced: set[str] = set()
+    for _path, metadata in iter_source_claim_documents(root):
+        for item in metadata.get("source_of_truth") or []:
+            if isinstance(item, dict) and item.get("baseline"):
+                referenced.add(item["baseline"])
+    return referenced
+
+
+def prune_unreferenced_baselines(root: Path, *, write: bool) -> dict[str, Any]:
+    """Preview (default) or delete (`write=True`) baselines no document's object claim references.
+
+    Scans the complete corpus of `source_of_truth` object claims before removing anything --
+    a baseline is pruned only when it is provably unreferenced, never based on a partial scan.
+    """
+    evidence_root = root / ".knowledge" / "evidence" / "source-baselines"
+    if not evidence_root.exists():
+        return {"write": write, "pruned": [], "kept": []}
+
+    referenced = scan_referenced_baselines(root)
+    pruned: list[str] = []
+    kept: list[str] = []
+    for baseline_path in sorted(evidence_root.rglob("*.baseline"), key=stable_path_sort_key):
+        relative = baseline_path.relative_to(root).as_posix()
+        if relative in referenced:
+            kept.append(relative)
+            continue
+        pruned.append(relative)
+        if write:
+            baseline_path.unlink()
+
+    return {"write": write, "pruned": pruned, "kept": kept}
+
+
+def currency_report(root: Path, *, currency_days: int) -> dict[str, Any]:
+    """Advisory-only report of `verified` documents whose `confirmed_on` exceeds `currency_days`."""
+    stale: list[dict[str, Any]] = []
+    today = datetime.now(UTC).date()
+    for path, metadata in iter_source_claim_documents(root):
+        verification = metadata.get("verification") or {}
+        if verification.get("state") != "verified":
+            continue
+        confirmed_on = verification.get("confirmed_on")
+        if not confirmed_on:
+            continue
+        age_days = (today - date.fromisoformat(str(confirmed_on))).days
+        if age_days > currency_days:
+            stale.append(
+                {
+                    "document": path.relative_to(root).as_posix(),
+                    "confirmed_on": str(confirmed_on),
+                    "age_days": age_days,
+                }
+            )
+    return {"schema_version": "1", "currency_days": currency_days, "stale": stale}
 
 
 def main() -> int:
@@ -526,8 +1532,167 @@ def main() -> int:
         metavar="PATH",
         help="Print (as a JSON array) the subset of given paths matching no node's appliesTo pattern; never writes files.",
     )
+    parser.add_argument("--detect-drift", action="store_true")
+    scope = parser.add_mutually_exclusive_group()
+    scope.add_argument("--full-inventory", action="store_true")
+    scope.add_argument("--base")
+    parser.add_argument("--head")
+    parser.add_argument("--report-output")
+    parser.add_argument("--breadth-guidance", type=int)
+    parser.add_argument("--migrate-source-claims", action="store_true")
+    parser.add_argument(
+        "--prune-baselines",
+        action="store_true",
+        help="Preview (default) or delete (--write) baselines no document's object claim references.",
+    )
+    parser.add_argument("--write", action="store_true")
+    parser.add_argument("--currency-report", action="store_true")
+    parser.add_argument("--currency-days", type=int, default=90)
+    parser.add_argument(
+        "--explain-claim",
+        metavar="DOC_PATH",
+        help="Enumerate every source claim in DOC_PATH (repo-relative) with its status and diff; never writes.",
+    )
+    parser.add_argument(
+        "--rotate-claim",
+        metavar="DOC_PATH",
+        help="Apply a confirmed rotation for one claim in DOC_PATH; requires --claim-path and --claim-profile.",
+    )
+    parser.add_argument("--claim-path", metavar="PATH")
+    parser.add_argument("--claim-profile", metavar="PROFILE")
+    parser.add_argument("--claim-region", metavar="REGION")
     args = parser.parse_args()
     root = Path(args.repo_root).resolve()
+
+    if args.breadth_guidance is not None and args.breadth_guidance <= 0:
+        print("--breadth-guidance must be a positive integer", file=sys.stderr)
+        return 2
+
+    if args.migrate_source_claims:
+        try:
+            result = migrate_source_claims(root, write=args.write)
+        except (ObjectClaimError, OSError) as exc:
+            print(f"migration failed, no document was updated: {exc}", file=sys.stderr)
+            return 2
+        print(json.dumps(result, indent=2))
+        return 0
+
+    if args.prune_baselines:
+        try:
+            result = prune_unreferenced_baselines(root, write=args.write)
+        except OSError as exc:
+            print(f"baseline prune failed: {exc}", file=sys.stderr)
+            return 2
+        print(json.dumps(result, indent=2))
+        return 0
+
+    if args.explain_claim:
+        doc_path = (root / args.explain_claim).resolve()
+        try:
+            metadata, _ = parse_frontmatter(doc_path)
+            entries = enumerate_claim_states(root, doc_path, metadata)
+        except (CanonicalizationError, ObjectClaimError, OSError, ValueError) as exc:
+            print(f"claim enumeration failed: {exc}", file=sys.stderr)
+            return 2
+        print(json.dumps(entries, indent=2))
+        return 0
+
+    if args.rotate_claim:
+        if not args.claim_path or not args.claim_profile:
+            print("--rotate-claim requires --claim-path and --claim-profile", file=sys.stderr)
+            return 2
+        doc_path = (root / args.rotate_claim).resolve()
+        try:
+            result = rotate_claim(root, doc_path, args.claim_path, args.claim_profile, args.claim_region)
+        except (CanonicalizationError, ObjectClaimError, OSError) as exc:
+            print(f"claim rotation failed, document was not changed: {exc}", file=sys.stderr)
+            return 2
+        print(json.dumps(result, indent=2))
+        return 0
+
+    if args.currency_report:
+        if args.currency_days <= 0:
+            print("--currency-days must be a positive integer", file=sys.stderr)
+            return 2
+        report = currency_report(root, currency_days=args.currency_days)
+        if args.report_output:
+            try:
+                write_report_atomically(Path(args.report_output).resolve(), report)
+            except OSError as exc:
+                print(f"report write failed: {exc}", file=sys.stderr)
+                return 2
+        print(json.dumps(report, indent=2))
+        return 0
+
+    if args.detect_drift:
+        report_path = Path(args.report_output).resolve() if args.report_output else None
+        mode = "full-inventory" if args.full_inventory else "routine"
+        if bool(args.base) != bool(args.head) and not args.full_inventory:
+            errors = ["routine drift detection requires both --base and --head"]
+        elif not args.full_inventory and not (args.base and args.head):
+            errors = ["drift detection requires --full-inventory or both --base and --head"]
+        else:
+            reset_canonicalization_cache()
+            errors = run_self_test(root)
+
+        changed_paths: set[str] | None = None
+        enforcement: str | None = None
+        if not errors:
+            try:
+                enforcement = enforcement_mode(root)
+            except EnforcementConfigError as exc:
+                errors = [str(exc)]
+            if not errors and mode == "routine":
+                try:
+                    changed_paths = resolve_routine_scope(root, args.base, args.head)
+                except RoutineScopeError as exc:
+                    errors = [str(exc)]
+
+        if errors:
+            if report_path:
+                try:
+                    write_report_atomically(report_path, detection_report(mode, "error", errors))
+                except OSError as exc:
+                    print(f"report write failed: {exc}", file=sys.stderr)
+            for error in errors:
+                print(error, file=sys.stderr)
+            return 2
+
+        try:
+            report = run_drift_detection(
+                root,
+                mode=mode,
+                changed_paths=changed_paths,
+                breadth_guidance=args.breadth_guidance,
+                enforcement=enforcement,
+            )
+        except (CanonicalizationError, ObjectClaimError, OSError) as exc:
+            report = detection_report(mode, "error", [str(exc)])
+            if report_path:
+                try:
+                    write_report_atomically(report_path, report)
+                except OSError as write_exc:
+                    print(f"report write failed: {write_exc}", file=sys.stderr)
+            print(str(exc), file=sys.stderr)
+            return 2
+
+        if report_path:
+            try:
+                write_report_atomically(report_path, report)
+            except OSError as exc:
+                print(f"report write failed: {exc}", file=sys.stderr)
+                return 2
+
+        summary = report["summary"]
+        pinned_count = summary.get("pinned-unverified", 0)
+        pinned_items = [a["document"] for a in report["advisories"] if a["type"] == "pinned-unverified"]
+        suffix = f"; {pinned_count} pinned-unverified {pinned_items}" if pinned_count else ""
+        if report["findings"]:
+            print(f"Knowledge drift detection found {len(report['findings'])} finding(s){suffix}", file=sys.stderr)
+            return 1
+        print(f"Knowledge drift detection passed: 0 findings{suffix}")
+        return 0
+
     index = build_index(root, args.generated_at)
     stale_entities = index.get("stale_entities", [])
     output = Path(args.output) if args.output else root / ".knowledge/index.json"
@@ -554,9 +1719,10 @@ def main() -> int:
             )
 
     if args.check:
-        problems = [_drift(output, index)]
-        if index["entities"]:
-            problems.append(_drift(coverage_output, build_coverage_report(index, args.generated_at)))
+        problems = [
+            _drift(output, index),
+            _drift(coverage_output, build_coverage_report(index, args.generated_at)),
+        ]
         problems = [p for p in problems if p]
         if problems:
             for problem in problems:
@@ -570,19 +1736,22 @@ def main() -> int:
 
     payload = json.dumps(index, indent=2, ensure_ascii=False) + "\n"
     if args.stdout:
+        # Indexed body text carries whatever the docs contain; a cp1252 console must not decide
+        # whether the index can be emitted.
+        if hasattr(sys.stdout, "reconfigure"):
+            sys.stdout.reconfigure(encoding="utf-8")
         print(payload, end="")
     else:
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_text(payload, encoding="utf-8")
 
-    if index["entities"]:
+    # Written on every run, including the zero-entity case -- otherwise removing the final entity
+    # leaves the previous report in place as apparent current truth.
+    if not args.stdout:  # --stdout emits only the index, matching legacy behavior
         coverage = build_coverage_report(index, args.generated_at)
         coverage_payload = json.dumps(coverage, indent=2, ensure_ascii=False) + "\n"
-        if args.stdout:
-            pass  # --stdout emits only the index, matching legacy behavior
-        else:
-            coverage_output.parent.mkdir(parents=True, exist_ok=True)
-            coverage_output.write_text(coverage_payload, encoding="utf-8")
+        coverage_output.parent.mkdir(parents=True, exist_ok=True)
+        coverage_output.write_text(coverage_payload, encoding="utf-8")
     return 1 if (args.fail_on_stale and stale_entities) else 0
 
 

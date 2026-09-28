@@ -173,10 +173,14 @@ confirmed every entry *resolves*; this asks whether the resolved set is *complet
 touches — an entity referenced in spec.md's requirements or data-model.md with no corresponding
 `context_resolved` entry, a `governance/decisions/` doc whose `constrains` list names an entity this
 delta changes but that decision was never resolved, or a relation one hop away from a resolved
-entity that looks directly relevant. Flag gaps as a finding (severity per §5); an empty section on a
-delta that clearly touches existing knowledge is itself a finding. This is the natural place to ask
-"what did design time miss" — escalation past one hop during `/devspark.implement` on this same
-feature is a signal this check should have caught the gap here.
+entity that looks directly relevant. When useful, re-run Context Projection (`/devspark.context-projection --seed <id>`)
+against the same seeds `/devspark.plan` used, purely as a diagnostic cross-check — its candidate
+list is a hint for this judgment call, not a second authoritative source; do not treat an omitted
+candidate as an automatic finding, only an *obviously relevant* omission is. Flag gaps as a finding
+(severity per §5); an empty section on a delta that clearly touches existing knowledge is itself a
+finding. This is the natural place to ask "what did design time miss" — escalation past one hop
+during `/devspark.implement` on this same feature is a signal this check should have caught the gap
+here.
 
 ### 6. Risk Category Registry (archetype-gated)
 

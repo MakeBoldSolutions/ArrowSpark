@@ -1,7 +1,7 @@
 {
   "generated": {
     "by": "build-knowledge-index",
-    "at": "2026-09-28T02:13:09Z"
+    "at": "2026-09-28T12:54:35Z"
   },
   "roots": [
     {
@@ -65,6 +65,19 @@
         "tests/puzzle_presentation_check.gd",
         "tests/arrow_departure_visual_check.gd",
         "tests/scene_loader_stub.gd"
+      ],
+      "headings": [
+        "Arrow Puzzle Rules, Presentation and Menu Integration",
+        "Rule Layer (Core Boundary)",
+        "Solvability Analysis",
+        "Puzzle Catalog and Session-Scoped Selection",
+        "Open Move Assistance and Session Scoring",
+        "Structural Analysis (PuzzleAnalyzer)",
+        "Presentation Layer",
+        "Menu Integration and the No-Reset Guarantee",
+        "Whole-arrow hover",
+        "Feedback precedence and departures",
+        "Gameplay theme boundary"
       ]
     },
     {
@@ -81,6 +94,14 @@
         "tests/puzzle_presentation_check.gd",
         "tests/arrow_departure_geometry_check.gd",
         "tests/arrow_departure_visual_check.gd"
+      ],
+      "headings": [
+        "Game Visual System",
+        "Whole-arrow hover",
+        "Feedback precedence and departures",
+        "Typography and local theme",
+        "Semantic palette",
+        "Spacing, shape and motion vocabulary"
       ]
     },
     {
@@ -102,6 +123,16 @@
         "scenes/menus/main_menu/main_menu.tscn",
         "scenes/menus/main_menu/main_menu_with_animations.gd",
         "scenes/menus/main_menu/puzzle_select_menu.gd"
+      ],
+      "headings": [
+        "Save Progression and Input Settings",
+        "Ownership and Startup",
+        "Save Recovery",
+        "Input Restoration",
+        "Unreadable Settings",
+        "Session-Only Puzzle Entry vs. Preserved Legacy Storage",
+        "Level Select",
+        "Validation and Limits"
       ]
     },
     {
@@ -116,6 +147,19 @@
         "resources/**",
         "assets/**",
         "addons/**"
+      ],
+      "headings": [
+        "ArrowGame Constitution",
+        "Core Principles",
+        "I. Simple, Maintainable Code",
+        "II. Prefer Project-Level Template Customization",
+        "III. Accessible, Configurable Controls",
+        "IV. Responsive Gameplay",
+        "V. Practical Gameplay Verification",
+        "VI. Preserve Saved Progress and Settings",
+        "Technology",
+        "Development Workflow",
+        "Governance"
       ]
     },
     {
@@ -128,6 +172,10 @@
         "ATTRIBUTION.md",
         "scenes/menus/main_menu/main_menu_with_animations.tscn",
         "scenes/credits/credits.tscn"
+      ],
+      "headings": [
+        "Product Identity and Branding Hierarchy",
+        "Presentation principle"
       ]
     },
     {
@@ -140,6 +188,13 @@
         "scripts/puzzle_scoreboard.gd",
         "scenes/puzzle/puzzle_results.gd",
         "scenes/puzzle/puzzle_results.tscn"
+      ],
+      "headings": [
+        "ArrowSpark Core Gameplay Contract",
+        "Mistakes cost score, not play",
+        "If you cannot see an open move, ArrowSpark can show you one",
+        "The session is the current gameplay-memory boundary",
+        "Replay is for improving a level's score, not recovering from failure"
       ]
     }
   ],

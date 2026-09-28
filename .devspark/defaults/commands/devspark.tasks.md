@@ -128,11 +128,7 @@ The tasks.md should be immediately executable - each task must be specific enoug
 
 **CRITICAL**: Tasks MUST be organized by user story to enable independent implementation and testing.
 
-**Constitution-mandated verification is required**: For ArrowGame gameplay changes,
-generate Godot validation and affected-gameplay smoke-test tasks, including input and
-save/settings checks when affected. Record results and outstanding checks. Generate
-focused automated tests where useful or requested; they are not required for every
-function. Optional automated tests never waive required verification.
+**Tests are OPTIONAL**: Only generate test tasks if explicitly requested in the feature specification or if user requests TDD approach.
 
 ### Checklist Format (REQUIRED)
 

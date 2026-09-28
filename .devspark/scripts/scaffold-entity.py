@@ -154,7 +154,8 @@ def main() -> int:
     if args.write:
         write_draft(repo_root, draft, args.force)
         print(f"Wrote {len(draft['files'])} file(s) under {draft['entity_dir']}/")
-        print("Review each draft, then run scripts/build_knowledge_index.py --repo-root . to validate.")
+        engine = Path(__file__).resolve().parent / "build_knowledge_index.py"
+        print(f"Review each draft, then run {engine} --repo-root . to validate.")
         return 0
 
     if args.json:

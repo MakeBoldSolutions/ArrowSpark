@@ -111,6 +111,9 @@ Load and obey the shared preamble contract at `/.devspark/templates/command-prea
    - Preserve manual additions between markers
 
 4. **Context Resolution** — traverse `.knowledge/` (entities, layer docs, `governance/decisions/`) starting from the entities this delta touches:
+   - Seed the traversal from lexically discovered current-knowledge (the same matching `/devspark.explain` uses for `MATCHED_KNOWLEDGE`/`MATCHED_ENTITIES`) for the entities/paths this delta touches.
+   - Run Context Projection (`.devspark/scripts/bash/context-projection.sh --seed <id> [--seed <id> ...] --max-hops 2 --json` / `.devspark/scripts/powershell/context-projection.ps1 --seed <id> [--seed <id> ...] --max-hops 2 -Json`, one `--seed` per lexical hit) to deterministically expand those seeds across accepted `.knowledge` relationships (entity `relations[]`, `constrains`/`constrained_by`, `links.references`) — never a second lexical/semantic search, never an unaccepted `/devspark.discover-knowledge` finding.
+   - Evaluate every returned candidate for relevance to this delta; you are not required to include every candidate, but you MUST preserve the projection's provenance (seed, relation, hop distance) for whichever candidates you do keep, distinct from any purely-lexical (hop 0) seeds.
    - Budget: 2–3 hops, or until traversal stops finding new relevant entities/relations/decisions. This is generous by design — design time is where retrieval complexity gets worked out so `/devspark.implement` never has to.
    - Record each resolved item in `plan.md`'s `## Context Resolution` section as `context_resolved:` (entity/decision id, relation or path traversed, hop count). Omit items that don't inform the delta — this is a pinned working set, not an index dump.
    - This list is read, not re-derived, by `/devspark.analyze` (validity) and `/devspark.critic` (sufficiency), and consumed as already-resolved by `/devspark.implement`.

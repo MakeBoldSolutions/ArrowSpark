@@ -319,11 +319,8 @@ if (-not $IncludeAllFiles -and $filesChangedTotal -gt $FileSampleLimit) {
 # Compute which changed files match no .knowledge/ appliesTo pattern (PRD5 hint, non-blocking)
 $unmappedFiles = @()
 $unmappedFilesAvailable = $false
-$knowledgeEngine = Join-Path $repoRoot 'scripts/build_knowledge_index.py'
-if (-not (Test-Path $knowledgeEngine)) {
-    $knowledgeEngine = Join-Path $repoRoot '.devspark/scripts/build_knowledge_index.py'
-}
-if ((Test-Path $knowledgeEngine) -and $filesChangedTotal -gt 0) {
+$knowledgeEngine = Resolve-KnowledgeEngine -RepoRoot $repoRoot
+if ($knowledgeEngine -and $filesChangedTotal -gt 0) {
     # Windows installs commonly expose only `python`, so an unresolved interpreter must be
     # reported rather than silently reducing this signal to "nothing unmapped".
     $python = Get-Command python3 -ErrorAction SilentlyContinue

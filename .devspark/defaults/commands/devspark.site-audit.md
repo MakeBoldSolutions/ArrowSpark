@@ -221,6 +221,21 @@ written there; neither is audit evidence.
     module boundaries), flag a central, behavior-bearing module with **no** corresponding flat doc
     or entity anywhere under `.knowledge/` as a coverage gap (`KNOW6`, MEDIUM) — evidence this exists
     is required, never a guess; do not fabricate an entity to close the gap, only report it.
+13. **Knowledge integrity validation** (DevSpark 7.6) — run
+    `scripts/knowledge-integrity.py --repo-root . --json` (installed-repo path:
+    `.devspark/scripts/knowledge-integrity.py`, or the corresponding
+    `scripts/{bash,powershell}/knowledge-integrity.{sh,ps1}` wrapper) rather than reimplementing
+    its checks inline. Fold its structured findings into this report by category:
+    `engine-divergence` and `generated-artifact-drift` are `KNOW7` (HIGH — two disagreeing
+    definitions of `.knowledge` truth, or a stale generated artifact, make every other knowledge
+    finding in this audit unreliable until resolved), `unreachable-knowledge-root` is `KNOW8`
+    (HIGH — a `.knowledge/` directory the canonical index never covers means content sitting
+    there is invisible to every command that resolves context through the index), and
+    `schema-tooling-contradiction` is `KNOW9` (MEDIUM — the taxonomy registry declares a
+    `nodeType` the engine does not recognize). A non-zero exit from `knowledge-integrity.py`
+    means at least one hard-failure finding was reported; surface its findings verbatim (subject,
+    summary, evidence) rather than re-deriving them, since the checks are already source-of-truth
+    for engine-divergence and root-reachability signals.
 
 ### 6. Constitution Compliance Audit
 

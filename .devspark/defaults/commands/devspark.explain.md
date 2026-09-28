@@ -91,6 +91,10 @@ finding_ids[], applied, trace_saved, trace_path}` where `resolution` is one of `
      - `KNOW4` — a matched `governance-decision`'s `constrains` has an entity whose
        `constrained_by_reciprocal` is false, or a matched entity's `constrained_by` doesn't
        resolve to a real decision.
+     - Retained-baseline claims — a matched node's `claim_states[]` (present whenever the node's
+       `source_of_truth` uses the object form with a pinned `digest`/`baseline`) reports each
+       claim's own `status`: `verified-current`, `drifted`, or `pinned-unverified`. Treat `drifted`
+       or `pinned-unverified` the same as `KNOW2`/`KNOW3` for finding purposes.
    - **No match, or a matched entity has `missing_layers` covering this topic** → this is a
      KNOW6-equivalent gap. Use `CANDIDATE_CODE_HITS` plus direct code reading to draft the missing
      content — an entity/layer doc per `.knowledge/tooling/developer-guide.md`'s "Adding a new
@@ -107,37 +111,57 @@ finding_ids[], applied, trace_saved, trace_path}` where `resolution` is one of `
      from durable code and tests, and MUST remove or correct stale claims. After explicit confirmation,
      write the knowledge document and rebuild the index; never put a spec, plan, task, quickfix,
      `.devspark.work/`, or `.archive/` reference into durable knowledge.
-4. Compose `## Answer` from steps 1–3's evidence — cite `path:line` for every nontrivial claim, do
+4. **Retained-baseline confirmation**: for each matched node with a non-empty `claim_states[]`
+   (step 3's Retained-baseline claims bullet), handle every entry whose `status` is `drifted` or
+   `pinned-unverified` one claim at a time — never batch-confirm multiple claims with one prompt:
+   - Show the claim's `diff` exactly as returned (a `unified_diff` for text/token profiles, or the
+     `ranges` list for `binary-v1`) — this is the only evidence the human sees before confirming,
+     so never summarize or paraphrase it away.
+   - Ask one explicit confirmation per claim: "Rotate this claim's baseline to the current content
+     of `<path>`? [Y/n]" (or, for a never-before-verified `pinned-unverified` claim with no drift,
+     "Confirm the pinned content of `<path>` is correct as-is? [Y/n]").
+   - Yes → run
+     `python3 scripts/explain-context.py --rotate-claim <doc_path> --claim-path <path> --claim-profile <profile> [--claim-region <region>]`
+     (the doc path and every `--claim-*` value come verbatim from the matched node's `path` and the
+     confirmed claim entry — never guess or reconstruct them), then re-run step 1 once so the
+     Answer/Findings below reflect the newly verified state.
+   - No → leave the claim's status unresolved (`resolution: proposal-pending`); do not call
+     `--rotate-claim` and do not otherwise edit the document's `source_of_truth`/`verification`.
+   - Never call `--rotate-claim` without having just shown that exact claim's diff and received an
+     explicit yes in this same turn.
+5. Compose `## Answer` from steps 1–4's evidence — cite `path:line` for every nontrivial claim, do
    not restate the Findings mechanics here.
-5. Compose `## Findings` (see Dual-Audience Contract above for the collapse-when-clean rule).
-6. If any finding has a concrete remediation (a corrected doc body, a bumped `last_verified`, or a
+6. Compose `## Findings` (see Dual-Audience Contract above for the collapse-when-clean rule).
+7. If any finding has a concrete remediation (a corrected doc body, a bumped `last_verified`, or a
   brand-new doc's full content, including corrected durable references where needed) **and**
   `--dry-run` was not passed: show the full proposed
    file content/diff, then ask one explicit confirmation. When a remediation exists, combine it
-   with the trace-save prompt (step 8) into one question: "Apply fix and save trace? [Y/n]".
+   with the trace-save prompt (step 9) into one question: "Apply fix and save trace? [Y/n]".
    - Yes → write the file(s), run `python3 scripts/build_knowledge_index.py --repo-root .` to
      regenerate `index.json`/`coverage.json`, and re-verify the specific finding now resolves
      before reporting success.
    - No → leave as a proposal only (`resolution: proposal-pending`); do not write anything.
-7. If `--dry-run` was passed, or there was no remediation to apply, skip straight to step 8's
+8. If `--dry-run` was passed, or there was no remediation to apply, skip straight to step 9's
    trace-save question on its own ("Save trace for the record? [Y/n]") — never silently skip it,
    but `--dry-run` still means "never write," so under `--dry-run` do not ask either; report
    `trace_saved: false` unconditionally.
-8. Ask (or reuse the combined step-6 prompt) whether to save this trace to
+9. Ask (or reuse the combined step-7 prompt) whether to save this trace to
    `.devspark.work/explain/<topic-slug>-<date>.md` (never under `.knowledge/`
    — this is a work product, not durable truth). Default recommendation is yes.
    Write only on explicit confirmation; the saved file contains the same Answer/Findings/Agent
    Summary shown inline. Saved traces are ordinary `.devspark.work/` artifacts and are swept by
    `/devspark.release`'s normal retention rules like any other work product.
-9. Emit `## Agent Summary` per the Dual-Audience Contract.
-10. Preamble §6 next-step footer, choosing among the handoffs declared above based on what this
+10. Emit `## Agent Summary` per the Dual-Audience Contract.
+11. Preamble §6 next-step footer, choosing among the handoffs declared above based on what this
     run found (repo-wide follow-up, unrelated stale content noticed, or genuinely missing code).
 
 ## Constraints
 
 - Never invents a `source_of_truth` path or test citation without evidence from
   `CANDIDATE_CODE_HITS` or direct code reading — same rule as site-audit's KNOW6.
-- Never writes a knowledge file or a trace report without the explicit confirmation in steps 6–8.
+- Never writes a knowledge file or a trace report without the explicit confirmation in steps 7–9.
+- Never rotates a retained-baseline claim (`--rotate-claim`) without first showing that exact
+  claim's diff and receiving an explicit confirmation in the same turn (step 4).
 - Always checks `last_verified`/path existence even when the matched content "looks right" —
   confidence is not evidence.
 - Reuses `scripts/build_knowledge_index.py` for all frontmatter/git-log/index logic; never

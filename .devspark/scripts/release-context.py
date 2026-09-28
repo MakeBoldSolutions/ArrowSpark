@@ -41,6 +41,14 @@ def relative(repo: Path, path: Path) -> str:
     return path.relative_to(repo).as_posix()
 
 
+def stable_path_sort_key(path: Path) -> str:
+    """OS-independent, case-sensitive sort key -- see build_knowledge_index.py's canonical
+    definition. Sorting `Path` objects directly is platform-flavor-dependent and would change
+    this bundle's concatenation order (and therefore its content) depending on host OS.
+    """
+    return path.as_posix()
+
+
 def source_version(repo: Path) -> str:
     pyproject = repo / "pyproject.toml"
     if not pyproject.is_file():
@@ -89,7 +97,7 @@ def bundle_text(path: Path) -> str:
     if path.is_file():
         sources = [path]
     else:
-        sources = sorted(p for p in path.rglob("*.md") if p.is_file())
+        sources = sorted((p for p in path.rglob("*.md") if p.is_file()), key=stable_path_sort_key)
     chunks: list[str] = []
     for source in sources:
         try:
@@ -138,8 +146,8 @@ def knowledge_index_current(repo: Path, knowledge_files: list[Path], index: Path
     """Prefer the index builder's own staleness check; fall back to modification times only when
     the builder is unavailable, since timestamps cannot see a semantically stale index."""
     for candidate in (
-        repo / "scripts" / "build_knowledge_index.py",
         repo / ".devspark" / "scripts" / "build_knowledge_index.py",
+        repo / "scripts" / "build_knowledge_index.py",
     ):
         if not candidate.is_file():
             continue

@@ -163,8 +163,7 @@ if [[ "$SCOPE" == "full" || "$SCOPE" == "knowledge" || "$SCOPE" == "evidence" ]]
         KNOWLEDGE_COVERAGE_PRESENT=false
         [[ -f "$KNOWLEDGE_ROOT/ontology/coverage.json" ]] && KNOWLEDGE_COVERAGE_PRESENT=true
 
-        KNOWLEDGE_ENGINE="$REPO_ROOT/scripts/build_knowledge_index.py"
-        [[ -f "$KNOWLEDGE_ENGINE" ]] || KNOWLEDGE_ENGINE="$REPO_ROOT/.devspark/scripts/build_knowledge_index.py"
+        KNOWLEDGE_ENGINE=$(resolve_knowledge_engine "$REPO_ROOT")
         PYTHON_BIN=$(command -v python3 || command -v python || true)
         if [[ -f "$KNOWLEDGE_ENGINE" && -n "$PYTHON_BIN" ]]; then
             if "$PYTHON_BIN" "$KNOWLEDGE_ENGINE" --repo-root "$REPO_ROOT" --check >/dev/null 2>&1; then

@@ -111,8 +111,13 @@ For single quotes in args like "I'm reviewing", use escape syntax: e.g 'I'\''m r
 
 Classify the PR only by changed durable paths and risk. Identify production code, tests,
 `.knowledge/`, infrastructure, generated files, and temporary `.devspark.work/`
-artifacts. Temporary planning files must not be included in the PR; flag escaped work products as a
-scope finding, but never use their presence or absence to adjust trust.
+artifacts. A PR's own `.devspark.work/` planning bundle (the spec/plan/tasks/gates for the feature
+this PR delivers) is expected to ride in the diff — `command-preamble-contract.md` §0 documents
+that the bundle stays live under `.devspark.work/` through merge and is archived only later, by
+`/devspark.release`. Do not flag that as a scope finding, and never use its presence or absence to
+adjust trust. Only flag `.devspark.work/` content that is genuinely unrelated to this PR's own
+feature (e.g. an unrelated bundle's files caught up by an errant `git add`, or files whose
+`spec_path`/feature id doesn't match this PR's source branch) as a scope finding.
 
 ### 2. Load Constitution
 

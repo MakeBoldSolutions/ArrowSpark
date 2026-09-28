@@ -302,11 +302,8 @@ collect_gate_acknowledgements_json() {
 
 collect_knowledge_json() {
     local repo_root="$1" engine check_output check_exit gap_summary
-    if [[ -f "$repo_root/scripts/build_knowledge_index.py" ]]; then
-        engine="$repo_root/scripts/build_knowledge_index.py"
-    elif [[ -f "$repo_root/.devspark/scripts/build_knowledge_index.py" ]]; then
-        engine="$repo_root/.devspark/scripts/build_knowledge_index.py"
-    else
+    engine=$(resolve_knowledge_engine "$repo_root")
+    if [[ -z "$engine" ]]; then
         jq -n '{index_fresh: null, gap_summary: "build_knowledge_index.py not found"}'
         return 0
     fi
