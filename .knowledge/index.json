@@ -1,7 +1,7 @@
 {
   "generated": {
     "by": "build-knowledge-index",
-    "at": "2026-09-28T18:12:07Z"
+    "at": "2026-09-28T22:17:44Z"
   },
   "roots": [
     {
@@ -153,7 +153,7 @@
       "id": "arrowgame-constitution",
       "type": "governance",
       "path": ".knowledge/governance/constitution.md",
-      "title": "ArrowGame Constitution",
+      "title": "ArrowSpark Constitution",
       "appliesTo": [
         "project.godot",
         "scripts/**",
@@ -163,7 +163,7 @@
         "addons/**"
       ],
       "headings": [
-        "ArrowGame Constitution",
+        "ArrowSpark Constitution",
         "Core Principles",
         "I. Simple, Maintainable Code",
         "II. Prefer Project-Level Template Customization",
@@ -183,6 +183,8 @@
       "title": "Product Identity and Branding Hierarchy",
       "appliesTo": [
         "project.godot",
+        "README.md",
+        "CLAUDE.md",
         "ATTRIBUTION.md",
         "scenes/menus/main_menu/main_menu_with_animations.tscn",
         "scenes/credits/credits.tscn"

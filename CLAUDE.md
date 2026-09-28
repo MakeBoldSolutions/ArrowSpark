@@ -1,4 +1,4 @@
-# ArrowGame Development Guidelines
+# ArrowSpark Development Guidelines
 
 <!-- BSW.DevSpark — © 2026 Baylor Scott & White Health. Source: https://bsw-devspark.bswhive.com -->
 

@@ -1,7 +1,7 @@
 ---
 id: arrowgame-constitution
 type: governance
-title: ArrowGame Constitution
+title: ArrowSpark Constitution
 appliesTo:
   - project.godot
   - scripts/**
@@ -10,6 +10,15 @@ appliesTo:
   - assets/**
   - addons/**
 ---
+
+<!--
+Sync Impact Report
+Version: 2.0.0 -> 2.0.1
+Rationale: title-only rename from "ArrowGame" to "ArrowSpark" to match the
+project's actual name (project.godot config/name, ATTRIBUTION.md,
+.knowledge/product/branding.md); no principle text changed.
+Sync validation: none required; non-semantic clarification only.
+-->
 
 <!--
 Sync Impact Report
@@ -36,7 +45,7 @@ Applied Amendments: none; direct formalization of user-confirmed discovery decis
 Follow-up TODOs: none. Performance budgets and CI requirements intentionally deferred.
 -->
 
-# ArrowGame Constitution
+# ArrowSpark Constitution
 
 ## Core Principles
 
@@ -125,4 +134,4 @@ reasoned exception; MUST rules require compliance with their stated alternatives
 
 No recurring review schedule, automated CI gate, or test coverage threshold is mandated.
 
-**Version**: 2.0.0 | **Ratified**: 2026-09-26 | **Last Amended**: 2026-09-26
+**Version**: 2.0.1 | **Ratified**: 2026-09-26 | **Last Amended**: 2026-09-28

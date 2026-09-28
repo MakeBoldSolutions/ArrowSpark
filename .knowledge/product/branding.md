@@ -4,6 +4,8 @@ type: authoritative-reference
 title: Product Identity and Branding Hierarchy
 appliesTo:
   - project.godot
+  - README.md
+  - CLAUDE.md
   - ATTRIBUTION.md
   - scenes/menus/main_menu/main_menu_with_animations.tscn
   - scenes/credits/credits.tscn
