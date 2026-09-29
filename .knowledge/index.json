@@ -1,7 +1,7 @@
 {
   "generated": {
     "by": "build-knowledge-index",
-    "at": "2026-09-28T22:17:44Z"
+    "at": "2026-09-29T12:37:04Z"
   },
   "roots": [
     {
@@ -78,6 +78,7 @@
         "Puzzle Catalog and Session-Scoped Selection",
         "Open Move Assistance and Session Scoring",
         "Structural Analysis (PuzzleAnalyzer)",
+        "Puzzle-design vocabulary (provisional)",
         "Presentation Layer",
         "Canvas Navigation",
         "Menu Integration and the No-Reset Guarantee",
@@ -211,6 +212,36 @@
         "If you cannot see an open move, ArrowSpark can show you one",
         "The session is the current gameplay-memory boundary",
         "Replay is for improving a level's score, not recovering from failure"
+      ]
+    },
+    {
+      "id": "gordian-knot-experiments",
+      "type": "authoritative-reference",
+      "path": ".knowledge/reference/gordian-knot-experiments.md",
+      "title": "Gordian Knot Experiments",
+      "appliesTo": [
+        "scripts/puzzle/puzzle_catalog.gd",
+        "tests/puzzle_catalog_check.gd",
+        "tests/puzzle_structural_report.gd",
+        "tests/run_puzzle_structural_report.py"
+      ],
+      "headings": [
+        "Gordian Knot Experiments",
+        "Long Geometry (`knot_long_geometry`)",
+        "Measurements",
+        "Observed in this session",
+        "Interpretation",
+        "Interwoven Paths (`knot_interwoven_paths`)",
+        "Dense Core (`knot_dense_core`)",
+        "Distinct Regions (`knot_regions`)",
+        "Single Release (`knot_single_release`)",
+        "Boundary Knot (`knot_boundary`)",
+        "Cross-experiment synthesis",
+        "Design vocabulary",
+        "Findings by topic",
+        "Objective measures versus experience",
+        "Contradictions and limits",
+        "Transition"
       ]
     }
   ],

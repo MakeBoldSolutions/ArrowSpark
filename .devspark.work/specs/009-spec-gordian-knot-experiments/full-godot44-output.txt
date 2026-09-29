@@ -1,0 +1,170 @@
+Running: C:\Users\markh\AppData\Local\Temp\ArrowGame-Godot-4.4.1\bin\Godot_v4.4.1-stable_win64_console.exe --headless --path C:\Users\markh\AppData\Local\Temp\arrowgame-regression-lg1cyyqo --editor --quit
+Godot Engine v4.4.1.stable.official.49a5bc7b6 - https://godotengine.org
+
+first_scan_filesystem: begin: Project initialization steps: 5
+	first_scan_filesystem: step 0: Scanning file structure...
+	first_scan_filesystem: step 1: Loading global class names...
+	first_scan_filesystem: step 2: Verifying GDExtensions...
+	first_scan_filesystem: step 3: Creating autoload scripts...
+	first_scan_filesystem: step 4: Initializing plugins...
+	first_scan_filesystem: step 5: Starting file scan...
+first_scan_filesystem: end
+update_scripts_classes: begin: Registering global classes... steps: 14
+	update_scripts_classes: step 0: PuzzleCatalog
+	update_scripts_classes: step 1: PuzzleDefinition
+	update_scripts_classes: step 2: GameState
+	update_scripts_classes: step 3: LevelState
+	update_scripts_classes: step 4: PuzzleScoreboard
+	update_scripts_classes: step 5: PuzzleSession
+	update_scripts_classes: step 6: AppSettings
+	update_scripts_classes: step 7: Config
+	update_scripts_classes: step 8: GlobalState
+	update_scripts_classes: step 9: GlobalStateData
+	update_scripts_classes: step 10: MainMenu
+	update_scripts_classes: step 11: 
+	update_scripts_classes: step 12: 
+	update_scripts_classes: step 13: 
+update_scripts_classes: end
+update_script_paths_documentation: begin: Updating scripts documentation steps: 14
+	update_script_paths_documentation: step 0: puzzle_catalog.gd
+	update_script_paths_documentation: step 1: puzzle_definition.gd
+	update_script_paths_documentation: step 2: game_state.gd
+	update_script_paths_documentation: step 3: level_state.gd
+	update_script_paths_documentation: step 4: puzzle_scoreboard.gd
+	update_script_paths_documentation: step 5: puzzle_session.gd
+	update_script_paths_documentation: step 6: app_settings.gd
+	update_script_paths_documentation: step 7: config.gd
+	update_script_paths_documentation: step 8: global_state.gd
+	update_script_paths_documentation: step 9: global_state_data.gd
+	update_script_paths_documentation: step 10: main_menu.gd
+	update_script_paths_documentation: step 11: main_menu_with_animations.gd
+	update_script_paths_documentation: step 12: regression.gd
+	update_script_paths_documentation: step 13: scene_loader_stub.gd
+update_script_paths_documentation: end
+loading_editor_layout: begin: Loading editor steps: 5
+	loading_editor_layout: step 0: Loading editor layout...
+loading_editor_layout: end
+
+
+Running: C:\Users\markh\AppData\Local\Temp\ArrowGame-Godot-4.4.1\bin\Godot_v4.4.1-stable_win64_console.exe --headless --path C:\Users\markh\AppData\Local\Temp\arrowgame-regression-lg1cyyqo --script regression.gd
+Godot Engine v4.4.1.stable.official.49a5bc7b6 - https://godotengine.org
+
+TEST_USER_DIR=C:/Users/markh/AppData/Local/Temp/arrowgame-regression-lg1cyyqo/userdata/Godot/app_userdata/ArrowGameRegression-5bb5a6a6a369448ab1abe4af2416bf4a
+PASS: missing save initializes normally
+PASS: valid state saves
+PASS: valid state survives reload
+PASS: corrupt save blocks writes
+PASS: ordinary save cannot bypass recovery
+PASS: corrupt original remains intact
+PASS: explicit reset succeeds after backup
+PASS: reset preserves exact original bytes
+PASS: reset re-enables saving
+PASS: wrong resource type blocks saving
+PASS: incompatible original remains intact
+PASS: incompatible save can be explicitly reset
+PASS: backup collision retains both originals
+PASS: backup failure cancels reset
+PASS: backup failure keeps write protection
+PASS: backup failure preserves original
+PASS: write errors reach caller
+PASS: saved keyboard remap restored from disk
+PASS: unchanged gamepad binding restored from disk
+PASS: complete mapping restored
+PASS: old keyboard binding removed
+PASS: repeated restoration does not duplicate bindings
+PASS: reset restores keyboard and gamepad defaults
+PASS: corrupt settings block writes
+PASS: partially parsed settings discarded
+PASS: temporary settings remain usable
+PASS: direct settings save stays blocked
+PASS: all settings mutation paths preserve original
+PASS: settings backup failure cancels reset
+PASS: settings backup failure preserves original
+PASS: explicit settings reset succeeds
+PASS: settings backup preserves exact bytes
+PASS: settings reset enables writes
+PASS: settings persist after reset and reload
+PASS: a keyboard/gamepad remap is seeded and active before puzzle entry
+PASS: new_game() does not disturb a seeded keyboard/gamepad remap
+PASS: new_game() does not call GameState.start_game() (times_played unchanged)
+PASS: new_game() does not call GlobalState.reset() (max_level_reached unchanged)
+PASS: new_game() does not call GlobalState.reset() (existing level_states preserved)
+PASS: new_game() still opens the puzzle via SceneLoader.load_scene
+PASS: load_game_scene() does not call GameState.start_game() (times_played unchanged)
+PASS: load_game_scene() does not disturb a seeded keyboard/gamepad remap
+PASS: selecting a Level Select entry sets PuzzleSession to that catalog id
+PASS: selecting a Level Select entry still opens the puzzle via SceneLoader.load_scene
+PASS: selecting a Level Select entry does not call GameState.start_game() (times_played unchanged)
+PASS: selecting a Level Select entry does not call GlobalState.reset() (max_level_reached unchanged)
+PASS: selecting a Level Select entry does not disturb a seeded keyboard/gamepad remap
+PASS: new_game() resets PuzzleSession to catalog position 0 regardless of a prior Level Select selection
+PASS: a freshly started process begins with a zero overall session score
+PASS: a freshly started process begins with no session-best entries
+PASS: recording completed attempts updates the in-memory overall session score (sum of stored bests)
+PASS: recording PuzzleScoreboard attempts never writes to the save file (user://global_state.tres)
+PASS: canvas_zoom_in is a custom action the inherited remap list shows
+PASS: canvas_zoom_out is a custom action the inherited remap list shows
+PASS: canvas_fit is a custom action the inherited remap list shows
+PASS: move_up keeps its original keyboard and left-stick bindings
+PASS: move_down keeps its original keyboard and left-stick bindings
+PASS: move_left keeps its original keyboard and left-stick bindings
+PASS: move_right keeps its original keyboard and left-stick bindings
+PASS: canvas_zoom_in has both keyboard and gamepad defaults
+PASS: a remapped zoom key is restored from disk
+PASS: the unchanged gamepad zoom binding is restored with it
+PASS: the replaced zoom key is gone
+PASS: the full zoom mapping is restored without duplicates
+PASS: a remapped gamepad fit button is restored from disk
+PASS: the keyboard fit binding survives a gamepad-only remap
+PASS: reset to defaults restores the zoom keyboard and gamepad bindings
+PASS: reset to defaults restores the fit bindings
+PASS: the inherited remap list shows every custom action by default
+PASS: /scenes/menus/options_menu/input/input_options_menu.tscn does not hide custom actions from the remap list
+PASS: /scenes/menus/options_menu/input/input_extras_menu.tscn does not hide custom actions from the remap list
+PASS: /scenes/menus/options_menu/input/input_options_menu_with_mouse_sensitivity.tscn does not hide custom actions from the remap list
+PASS: no viewport, camera, zoom-level or pan-mode field appears in saved settings
+REGRESSION_FAILURES=0
+
+ERROR: user://global_state.tres:1 - Parse Error: Expected '['.
+   at: _printerr (scene/resources/resource_format_text.cpp:39)
+ERROR: Failed loading resource: user://global_state.tres. Make sure resources have been imported by opening the project in the editor at least once.
+   at: _load (core/io/resource_loader.cpp:343)
+ERROR: Error loading resource: 'user://global_state.tres'.
+   at: load (core/core_bind.cpp:76)
+ERROR: Save could not be loaded. Original preserved; saving disabled until explicit reset.
+   at: push_error (core/variant/variant_utility.cpp:1098)
+ERROR: Save could not be loaded. Original preserved; saving disabled until explicit reset.
+   at: push_error (core/variant/variant_utility.cpp:1098)
+ERROR: user://global_state.tres:1 - Parse Error: Expected '['.
+   at: _printerr (scene/resources/resource_format_text.cpp:39)
+ERROR: Failed loading resource: user://global_state.tres. Make sure resources have been imported by opening the project in the editor at least once.
+   at: _load (core/io/resource_loader.cpp:343)
+ERROR: Error loading resource: 'user://global_state.tres'.
+   at: load (core/core_bind.cpp:76)
+ERROR: Save could not be loaded. Original preserved; saving disabled until explicit reset.
+   at: push_error (core/variant/variant_utility.cpp:1098)
+ERROR: Failed to open 'C:/Users/markh/AppData/Local/Temp/arrowgame-regression-lg1cyyqo/userdata/Godot/app_userdata/ArrowGameRegression-5bb5a6a6a369448ab1abe4af2416bf4a/global_state.tres.recovery.2'.
+   at: copy (core/io/dir_access.cpp:425)
+ERROR: Could not back up unreadable save; reset canceled: Can't open file
+   at: push_error (core/variant/variant_utility.cpp:1098)
+ERROR: Cannot save file 'user://global_state.tres'.
+   at: save (scene/resources/resource_format_text.cpp:1719)
+ERROR: Failed to save progress: Can't open
+   at: push_error (core/variant/variant_utility.cpp:1098)
+ERROR: ConfigFile parse error at user://config.cfg:2: Unexpected identifier 'INVALID_SENTINEL'.
+   at: _parse (core/io/config_file.cpp:303)
+ERROR: Settings could not be loaded. Original preserved; settings writes disabled.
+   at: push_error (core/variant/variant_utility.cpp:1098)
+ERROR: Failed to open 'C:/Users/markh/AppData/Local/Temp/arrowgame-regression-lg1cyyqo/userdata/Godot/app_userdata/ArrowGameRegression-5bb5a6a6a369448ab1abe4af2416bf4a/config.cfg.recovery'.
+   at: copy (core/io/dir_access.cpp:425)
+ERROR: Settings backup failed; reset canceled: Can't open file
+   at: push_error (core/variant/variant_utility.cpp:1098)
+ERROR: Cannot save file 'user://global_state.tres'.
+   at: save (scene/resources/resource_format_text.cpp:1719)
+ERROR: Failed to save progress: Can't open
+   at: push_error (core/variant/variant_utility.cpp:1098)
+ERROR: Cannot save file 'user://global_state.tres'.
+   at: save (scene/resources/resource_format_text.cpp:1719)
+ERROR: Failed to save progress: Can't open
+   at: push_error (core/variant/variant_utility.cpp:1098)
+

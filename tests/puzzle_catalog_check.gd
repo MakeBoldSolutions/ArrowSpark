@@ -14,13 +14,13 @@ func check(condition: bool, description: String) -> void:
 		failures += 1
 		push_error("FAIL: " + description)
 
-## FR-014: every catalog entry is enumerated without loading any
+## every catalog entry is enumerated without loading any
 ## presentation scene, and must be a unique-id, structurally valid,
 ## solver-confirmed-solvable, zero-mistake-witness entry, or the whole gate
 ## fails loudly rather than skipping the malformed one.
 func _check_full_catalog_solvable() -> void:
 	var count := PuzzleCatalog.count()
-	check(count == 15, "the catalog contains exactly 15 entries (8 baseline + 6 experimental + 1 large-canvas validation)")
+	check(count == 21, "the catalog contains 15 existing puzzles and six new geometric experiments")
 
 	var seen_ids: Dictionary = {}
 	for i in range(count):
@@ -65,6 +65,28 @@ const ORIGINAL_ENTRIES: Array[Dictionary] = [
 	{"id": "composed_shaped", "size": Vector2i(7, 7), "arrows": 25, "sha": "5d07cb0bf5051824525c1ad1aecf92e25d7519ca8df7df366801251c84a19fce"},
 ]
 
+const KNOT_ENTRIES: Array[Dictionary] = [
+	{"id": "knot_long_geometry", "size": Vector2i(32, 24), "arrows": 8},
+	{"id": "knot_interwoven_paths", "size": Vector2i(32, 24), "arrows": 8},
+	{"id": "knot_dense_core", "size": Vector2i(36, 28), "arrows": 16},
+	{"id": "knot_regions", "size": Vector2i(48, 32), "arrows": 13},
+	{"id": "knot_single_release", "size": Vector2i(40, 30), "arrows": 8},
+	{"id": "knot_boundary", "size": Vector2i(48, 36), "arrows": 28},
+]
+
+func _check_knot_entries() -> void:
+	for offset in range(KNOT_ENTRIES.size()):
+		var expected: Dictionary = KNOT_ENTRIES[offset]
+		var id: String = expected["id"]
+		check(PuzzleCatalog.id_at(15 + offset) == id, "new experiment '%s' follows the original catalog" % id)
+		var definition: PuzzleDefinition = PuzzleCatalog.get_definition(id)
+		check(Vector2i(definition.width, definition.height) == expected["size"],
+			"new experiment '%s' retains its authored canvas" % id)
+		check(definition.arrows.size() == expected["arrows"],
+			"new experiment '%s' retains its authored arrow count" % id)
+	check(PuzzleCatalog.id_at(PuzzleCatalog.count() - 1) == "knot_boundary",
+		"the boundary experiment is the final catalog entry")
+
 ## Order-independent text of a definition: dimensions, then every head in
 ## (y, x) order with its direction and ordered tail cells.
 func _fingerprint(definition: PuzzleDefinition) -> String:
@@ -94,18 +116,22 @@ func _check_original_entries_unchanged() -> void:
 		check(_fingerprint(definition).sha256_text() == expected["sha"],
 			"original entry '%s' keeps its exact arrow and tail content" % id)
 
-## The appended large-canvas fixture: a plainly titled, player-visible final
+## The original large-canvas fixture: a plainly titled, player-visible
 ## entry (puzzle 15) that is larger than a typical window at a comfortable
 ## arrow size, authored rather than generated, and solver-validated like every
 ## other entry.
+const CANVAS_VALIDATION_SHA := "ccce768282c82848b925f672268842c8523a23a6d16cf612f8ae3083349bed9d"
+
 func _check_canvas_validation_fixture() -> void:
 	var id := "canvas_validation"
-	check(PuzzleCatalog.index_of(id) == PuzzleCatalog.count() - 1 and PuzzleCatalog.index_of(id) == 14,
-		"canvas_validation is the fifteenth and final catalog entry")
+	check(PuzzleCatalog.index_of(id) == 14,
+		"canvas_validation remains the fifteenth catalog entry")
 	check(PuzzleCatalog.get_title(id) == "Large Canvas Validation", "canvas_validation carries its plain title")
 	var definition: PuzzleDefinition = PuzzleCatalog.get_definition(id)
 	check(definition.width == 40 and definition.height == 30, "canvas_validation is a 40x30 board")
 	check(definition.arrows.size() == 52, "canvas_validation has exactly fifty-two arrows")
+	check(_fingerprint(definition).sha256_text() == CANVAS_VALIDATION_SHA,
+		"canvas_validation retains its exact authored content")
 
 	var directions: Dictionary = {}
 	var long_bent := 0
@@ -150,7 +176,7 @@ func _has_tail_caused_dependency(definition: PuzzleDefinition) -> bool:
 				return true
 	return false
 
-## FR-002: identity (stable id) is independent of array position, title, or
+## identity (stable id) is independent of array position, title, or
 ## any filesystem path — ordering and identity are separate concepts.
 func _check_id_independent_of_position() -> void:
 	var ids := PuzzleCatalog.ids()
@@ -165,7 +191,7 @@ func _check_id_independent_of_position() -> void:
 	check(PuzzleCatalog.get_definition("no_such_id") == null, "get_definition for an unknown id returns null")
 	check(PuzzleCatalog.get_title("no_such_id") == "", "get_title for an unknown id returns an empty string")
 
-## FR-015: obtaining a definition is safe for a fresh attempt — playing or
+## obtaining a definition is safe for a fresh attempt — playing or
 ## mutating one attempt's runtime state must not corrupt the catalog
 ## definition, a subsequent attempt at the same puzzle, or any other
 ## puzzle's definition. Repeated requests for the same id are deterministic.
@@ -188,7 +214,7 @@ func _check_fresh_and_isolated_definitions() -> void:
 	check(other_definition.arrows.keys() != first.arrows.keys() or other_id == id,
 		"a different catalog id's definition is independent of the first")
 
-## FR-005: the eight puzzles provide meaningfully different structures, and
+## the eight puzzles provide meaningfully different structures, and
 ## none carries a difficulty label anywhere in the catalog's public surface.
 const DIFFICULTY_LABEL_KEYS: Array[String] = ["difficulty", "difficulty_score", "difficulty_level", "level", "easy_medium_hard"]
 
@@ -322,7 +348,7 @@ func _check_order_independence_at_every_branch(definition: PuzzleDefinition, lab
 		live_state.select_arrow(chosen_head)
 		prefix.append(chosen_head)
 
-## Runs the branch check above across every one of the fifteen catalog
+## Runs the branch check above across every catalog
 ## entries, giving the "always a legal move" invariant catalog-wide
 ## coverage rather than the single hand-built board tests/puzzle_regression.gd
 ## already covers.
@@ -336,8 +362,9 @@ func _check_next_from_fourteenth_reaches_canvas_validation() -> void:
 	check(PuzzleSession.has_next(), "the fourteenth puzzle offers a next entry")
 	check(PuzzleSession.advance_to_next(), "advancing from the fourteenth puzzle succeeds")
 	check(PuzzleSession.get_current_id() == "canvas_validation", "Next from puzzle 14 reaches canvas_validation")
-	check(not PuzzleSession.has_next(), "canvas_validation, as the last entry, offers no next puzzle")
-	check(not PuzzleSession.advance_to_next(), "advancing past the last entry is a no-op")
+	check(PuzzleSession.has_next(), "canvas_validation offers the first new experiment next")
+	check(PuzzleSession.advance_to_next(), "advancing from canvas_validation succeeds")
+	check(PuzzleSession.get_current_id() == "knot_long_geometry", "Next reaches the first new experiment")
 	PuzzleSession.set_current_id("")
 
 func _check_puzzle_session_defaults_and_navigation() -> void:
@@ -365,6 +392,7 @@ func _initialize() -> void:
 	_check_full_catalog_solvable()
 	_check_original_entries_unchanged()
 	_check_canvas_validation_fixture()
+	_check_knot_entries()
 	_check_id_independent_of_position()
 	_check_fresh_and_isolated_definitions()
 	_check_no_difficulty_labels()

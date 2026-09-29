@@ -1,8 +1,9 @@
 class_name PuzzleCatalog
 extends RefCounted
-## Static registry of the fifteen authored puzzles: the original eight
-## baseline puzzles, six experimental puzzles, each deliberately
-## combining structural features the baseline eight never do (see
+## Static registry of twenty-one authored puzzles: the original eight
+## baseline puzzles, six earlier structural experiments, the large-canvas
+## validation puzzle, and six geometric-entanglement experiments. Earlier experiments deliberately
+## combine structural features the baseline eight never do (see
 ## PuzzleAnalyzer), and one large-canvas validation board that is larger
 ## than a typical window at a comfortable arrow size. Never instantiated; every member is static. Each entry
 ## pairs a stable id (independent of array position, title, or any filesystem
@@ -33,6 +34,12 @@ static func _ensure_entries() -> void:
 		{"id": "long_range_blocker", "title": "Long-Range Blocker", "build": Callable(PuzzleCatalog, "_build_long_range_blocker")},
 		{"id": "composed_shaped", "title": "Composed / Shaped", "build": Callable(PuzzleCatalog, "_build_composed_shaped")},
 		{"id": "canvas_validation", "title": "Large Canvas Validation", "build": Callable(PuzzleCatalog, "_build_canvas_validation")},
+		{"id": "knot_long_geometry", "title": "Long Geometry", "build": Callable(PuzzleCatalog, "_build_knot_long_geometry")},
+		{"id": "knot_interwoven_paths", "title": "Interwoven Paths", "build": Callable(PuzzleCatalog, "_build_knot_interwoven_paths")},
+		{"id": "knot_dense_core", "title": "Dense Core", "build": Callable(PuzzleCatalog, "_build_knot_dense_core")},
+		{"id": "knot_regions", "title": "Distinct Regions", "build": Callable(PuzzleCatalog, "_build_knot_regions")},
+		{"id": "knot_single_release", "title": "Single Release", "build": Callable(PuzzleCatalog, "_build_knot_single_release")},
+		{"id": "knot_boundary", "title": "Boundary Knot", "build": Callable(PuzzleCatalog, "_build_knot_boundary")},
 	]
 
 static func count() -> int:
@@ -386,3 +393,168 @@ static func _build_canvas_validation() -> PuzzleDefinition:
 		arrows[shape[0]] = shape[1]
 		tails[shape[0]] = _tail_along(vertices)
 	return PuzzleDefinition.new(40, 30, arrows, tails)
+
+## Long bent paths test whether a long removal is satisfying without visual interweaving.
+static func _build_knot_long_geometry() -> PuzzleDefinition:
+	var d := PuzzleDefinition.Direction
+	var shapes := [
+		[Vector2i(4, 2), d.UP, [Vector2i(4, 2), Vector2i(4, 18), Vector2i(14, 18), Vector2i(14, 6)]],
+		[Vector2i(27, 21), d.DOWN, [Vector2i(27, 21), Vector2i(27, 5), Vector2i(18, 5), Vector2i(18, 15)]],
+		[Vector2i(8, 0), d.UP, [Vector2i(8, 0), Vector2i(8, 12), Vector2i(12, 12), Vector2i(12, 16)]],
+		[Vector2i(25, 23), d.DOWN, [Vector2i(25, 23), Vector2i(25, 10), Vector2i(21, 10), Vector2i(21, 20)]],
+		[Vector2i(4, 0), d.UP, [Vector2i(4, 0)]],
+		[Vector2i(27, 23), d.DOWN, [Vector2i(27, 23)]],
+		[Vector2i(3, 10), d.LEFT, [Vector2i(3, 10)]],
+		[Vector2i(28, 15), d.RIGHT, [Vector2i(28, 15)]],
+	]
+	var arrows := {}
+	var tails := {}
+	for shape in shapes:
+		var vertices: Array[Vector2i] = []
+		vertices.assign(shape[2])
+		arrows[shape[0]] = shape[1]
+		tails[shape[0]] = _tail_along(vertices)
+	return PuzzleDefinition.new(32, 24, arrows, tails)
+
+## Disjoint winding paths test whether following nearby intertwined routes increases tracing demand.
+static func _build_knot_interwoven_paths() -> PuzzleDefinition:
+	var d := PuzzleDefinition.Direction
+	var shapes := [
+		[Vector2i(3, 2), d.UP, [Vector2i(3, 2), Vector2i(3, 19), Vector2i(12, 19), Vector2i(12, 9), Vector2i(9, 9), Vector2i(9, 14)]],
+		[Vector2i(16, 22), d.DOWN, [Vector2i(16, 22), Vector2i(16, 4), Vector2i(6, 4), Vector2i(6, 10), Vector2i(8, 10)]],
+		[Vector2i(28, 3), d.UP, [Vector2i(28, 3), Vector2i(28, 21), Vector2i(20, 21), Vector2i(20, 7), Vector2i(24, 7), Vector2i(24, 13)]],
+		[Vector2i(3, 0), d.UP, [Vector2i(3, 0)]],
+		[Vector2i(16, 23), d.DOWN, [Vector2i(16, 23)]],
+		[Vector2i(28, 0), d.UP, [Vector2i(28, 0)]],
+		[Vector2i(0, 10), d.RIGHT, [Vector2i(0, 10)]],
+		[Vector2i(31, 12), d.LEFT, [Vector2i(31, 12)]],
+	]
+	var arrows := {}
+	var tails := {}
+	for shape in shapes:
+		var vertices: Array[Vector2i] = []
+		vertices.assign(shape[2])
+		arrows[shape[0]] = shape[1]
+		tails[shape[0]] = _tail_along(vertices)
+	return PuzzleDefinition.new(32, 24, arrows, tails)
+
+## Concentrated adjacent bent ribbons test tracing under a dense central knot.
+static func _build_knot_dense_core() -> PuzzleDefinition:
+	var d := PuzzleDefinition.Direction
+	var shapes := [
+		[Vector2i(10, 8), d.UP, [Vector2i(10, 8), Vector2i(10, 16), Vector2i(11, 16), Vector2i(11, 12)]],
+		[Vector2i(12, 8), d.UP, [Vector2i(12, 8), Vector2i(12, 16), Vector2i(13, 16), Vector2i(13, 12)]],
+		[Vector2i(14, 8), d.UP, [Vector2i(14, 8), Vector2i(14, 16), Vector2i(15, 16), Vector2i(15, 12)]],
+		[Vector2i(16, 8), d.UP, [Vector2i(16, 8), Vector2i(16, 16), Vector2i(17, 16), Vector2i(17, 12)]],
+		[Vector2i(18, 8), d.UP, [Vector2i(18, 8), Vector2i(18, 16), Vector2i(19, 16), Vector2i(19, 12)]],
+		[Vector2i(20, 8), d.UP, [Vector2i(20, 8), Vector2i(20, 16), Vector2i(21, 16), Vector2i(21, 12)]],
+		[Vector2i(22, 8), d.UP, [Vector2i(22, 8), Vector2i(22, 16), Vector2i(23, 16), Vector2i(23, 12)]],
+		[Vector2i(24, 8), d.UP, [Vector2i(24, 8), Vector2i(24, 16), Vector2i(25, 16), Vector2i(25, 12)]],
+		[Vector2i(10, 6), d.UP, [Vector2i(10, 6)]],
+		[Vector2i(14, 6), d.UP, [Vector2i(14, 6)]],
+		[Vector2i(18, 6), d.UP, [Vector2i(18, 6)]],
+		[Vector2i(22, 6), d.UP, [Vector2i(22, 6)]],
+		[Vector2i(13, 18), d.LEFT, [Vector2i(13, 18)]],
+		[Vector2i(17, 18), d.LEFT, [Vector2i(17, 18)]],
+		[Vector2i(21, 18), d.LEFT, [Vector2i(21, 18)]],
+		[Vector2i(25, 18), d.LEFT, [Vector2i(25, 18)]],
+	]
+	var arrows := {}
+	var tails := {}
+	for shape in shapes:
+		var vertices: Array[Vector2i] = []
+		vertices.assign(shape[2])
+		arrows[shape[0]] = shape[1]
+		tails[shape[0]] = _tail_along(vertices)
+	return PuzzleDefinition.new(36, 28, arrows, tails)
+
+## Widely separated local groups test whether region boundaries make a large board approachable.
+static func _build_knot_regions() -> PuzzleDefinition:
+	var d := PuzzleDefinition.Direction
+	var shapes := [
+		[Vector2i(3, 2), d.UP, [Vector2i(3, 2), Vector2i(3, 12), Vector2i(12, 12), Vector2i(12, 5)]],
+		[Vector2i(4, 8), d.LEFT, [Vector2i(4, 8)]],
+		[Vector2i(8, 0), d.UP, [Vector2i(8, 0)]],
+		[Vector2i(29, 2), d.UP, [Vector2i(29, 2), Vector2i(29, 12), Vector2i(39, 12), Vector2i(39, 4)]],
+		[Vector2i(30, 8), d.LEFT, [Vector2i(30, 8)]],
+		[Vector2i(34, 0), d.UP, [Vector2i(34, 0)]],
+		[Vector2i(5, 29), d.DOWN, [Vector2i(5, 29), Vector2i(5, 19), Vector2i(15, 19), Vector2i(15, 26)]],
+		[Vector2i(12, 23), d.RIGHT, [Vector2i(12, 23)]],
+		[Vector2i(9, 31), d.DOWN, [Vector2i(9, 31)]],
+		[Vector2i(30, 29), d.DOWN, [Vector2i(30, 29), Vector2i(30, 19), Vector2i(42, 19), Vector2i(42, 26)]],
+		[Vector2i(39, 23), d.RIGHT, [Vector2i(39, 23)]],
+		[Vector2i(34, 31), d.DOWN, [Vector2i(34, 31)]],
+		[Vector2i(0, 9), d.RIGHT, [Vector2i(0, 9)]],
+	]
+	var arrows := {}
+	var tails := {}
+	for shape in shapes:
+		var vertices: Array[Vector2i] = []
+		vertices.assign(shape[2])
+		arrows[shape[0]] = shape[1]
+		tails[shape[0]] = _tail_along(vertices)
+	return PuzzleDefinition.new(48, 32, arrows, tails)
+
+## One long path holds several arrows back, testing the visual payoff of its departure.
+static func _build_knot_single_release() -> PuzzleDefinition:
+	var d := PuzzleDefinition.Direction
+	var shapes := [
+		[Vector2i(2, 20), d.LEFT, [Vector2i(2, 20), Vector2i(20, 20), Vector2i(20, 4), Vector2i(35, 4), Vector2i(35, 25), Vector2i(5, 25)]],
+		[Vector2i(0, 20), d.LEFT, [Vector2i(0, 20)]],
+		[Vector2i(1, 20), d.LEFT, [Vector2i(1, 20)]],
+		[Vector2i(24, 8), d.UP, [Vector2i(24, 8)]],
+		[Vector2i(25, 15), d.RIGHT, [Vector2i(25, 15)]],
+		[Vector2i(8, 22), d.DOWN, [Vector2i(8, 22)]],
+		[Vector2i(14, 28), d.DOWN, [Vector2i(14, 28)]],
+		[Vector2i(0, 29), d.RIGHT, [Vector2i(0, 29)]],
+	]
+	var arrows := {}
+	var tails := {}
+	for shape in shapes:
+		var vertices: Array[Vector2i] = []
+		vertices.assign(shape[2])
+		arrows[shape[0]] = shape[1]
+		tails[shape[0]] = _tail_along(vertices)
+	return PuzzleDefinition.new(40, 30, arrows, tails)
+
+## Repeated winding bands intentionally test when geometric busy-ness becomes tedious.
+static func _build_knot_boundary() -> PuzzleDefinition:
+	var d := PuzzleDefinition.Direction
+	var shapes := [
+		[Vector2i(3, 2), d.UP, [Vector2i(3, 2), Vector2i(3, 7), Vector2i(20, 7), Vector2i(20, 3)]],
+		[Vector2i(25, 2), d.UP, [Vector2i(25, 2), Vector2i(25, 7), Vector2i(43, 7), Vector2i(43, 3)]],
+		[Vector2i(5, 10), d.UP, [Vector2i(5, 10), Vector2i(5, 15), Vector2i(22, 15), Vector2i(22, 11)]],
+		[Vector2i(27, 10), d.UP, [Vector2i(27, 10), Vector2i(27, 15), Vector2i(45, 15), Vector2i(45, 11)]],
+		[Vector2i(3, 18), d.UP, [Vector2i(3, 18), Vector2i(3, 23), Vector2i(20, 23), Vector2i(20, 19)]],
+		[Vector2i(25, 18), d.UP, [Vector2i(25, 18), Vector2i(25, 23), Vector2i(43, 23), Vector2i(43, 19)]],
+		[Vector2i(5, 26), d.UP, [Vector2i(5, 26), Vector2i(5, 31), Vector2i(22, 31), Vector2i(22, 27)]],
+		[Vector2i(27, 26), d.UP, [Vector2i(27, 26), Vector2i(27, 31), Vector2i(45, 31), Vector2i(45, 27)]],
+		[Vector2i(3, 0), d.UP, [Vector2i(3, 0)]],
+		[Vector2i(25, 0), d.UP, [Vector2i(25, 0)]],
+		[Vector2i(5, 8), d.UP, [Vector2i(5, 8)]],
+		[Vector2i(27, 8), d.UP, [Vector2i(27, 8)]],
+		[Vector2i(3, 16), d.UP, [Vector2i(3, 16)]],
+		[Vector2i(25, 16), d.UP, [Vector2i(25, 16)]],
+		[Vector2i(5, 24), d.UP, [Vector2i(5, 24)]],
+		[Vector2i(27, 24), d.UP, [Vector2i(27, 24)]],
+		[Vector2i(0, 4), d.RIGHT, [Vector2i(0, 4)]],
+		[Vector2i(47, 12), d.LEFT, [Vector2i(47, 12)]],
+		[Vector2i(0, 20), d.RIGHT, [Vector2i(0, 20)]],
+		[Vector2i(47, 28), d.LEFT, [Vector2i(47, 28)]],
+		[Vector2i(22, 8), d.RIGHT, [Vector2i(22, 8), Vector2i(6, 8), Vector2i(6, 9), Vector2i(23, 9)]],
+		[Vector2i(45, 8), d.RIGHT, [Vector2i(45, 8), Vector2i(29, 8), Vector2i(29, 9), Vector2i(46, 9)]],
+		[Vector2i(23, 16), d.RIGHT, [Vector2i(23, 16), Vector2i(7, 16), Vector2i(7, 17), Vector2i(24, 17)]],
+		[Vector2i(45, 16), d.RIGHT, [Vector2i(45, 16), Vector2i(30, 16), Vector2i(30, 17), Vector2i(46, 17)]],
+		[Vector2i(22, 24), d.RIGHT, [Vector2i(22, 24), Vector2i(6, 24), Vector2i(6, 25), Vector2i(23, 25)]],
+		[Vector2i(45, 24), d.RIGHT, [Vector2i(45, 24), Vector2i(29, 24), Vector2i(29, 25), Vector2i(46, 25)]],
+		[Vector2i(23, 32), d.RIGHT, [Vector2i(23, 32), Vector2i(7, 32), Vector2i(7, 33), Vector2i(24, 33)]],
+		[Vector2i(45, 32), d.RIGHT, [Vector2i(45, 32), Vector2i(30, 32), Vector2i(30, 33), Vector2i(46, 33)]],
+	]
+	var arrows := {}
+	var tails := {}
+	for shape in shapes:
+		var vertices: Array[Vector2i] = []
+		vertices.assign(shape[2])
+		arrows[shape[0]] = shape[1]
+		tails[shape[0]] = _tail_along(vertices)
+	return PuzzleDefinition.new(48, 36, arrows, tails)

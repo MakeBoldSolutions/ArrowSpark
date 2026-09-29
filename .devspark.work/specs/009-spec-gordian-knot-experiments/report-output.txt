@@ -1,0 +1,225 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[intro] Simple Introduction
+  status: valid=true solvable=true
+  board: 4x4  density=0.38  arrows=6 occupied=6
+  geometry: single=6 multi=0 bends_total=0 max_bends=0 max_length=1 avg_length=1.00
+  legal: initial=6/6 (1.00) forced=1 branching=5 longest_forced_run=1
+  legal_choice_sequence: 6,5,4,3,2,1
+  dependency: edges=0 depth=0 max_in_degree=0 components=6
+  cascade: max_unlock_fan_out=0 unlock_sequence: 0,0,0,0,0,0
+  blocker_distance: max=0 avg=0.00
+  witness_xy: 0,0;1,0;3,0;0,3;2,3;3,3
+[first_bend] First Bend
+  status: valid=true solvable=true
+  board: 4x3  density=0.50  arrows=4 occupied=6
+  geometry: single=3 multi=1 bends_total=1 max_bends=1 max_length=3 avg_length=1.50
+  legal: initial=4/4 (1.00) forced=1 branching=3 longest_forced_run=1
+  legal_choice_sequence: 4,3,2,1
+  dependency: edges=0 depth=0 max_in_degree=0 components=4
+  cascade: max_unlock_fan_out=0 unlock_sequence: 0,0,0,0
+  blocker_distance: max=0 avg=0.00
+  witness_xy: 3,0;1,1;0,2;3,2
+[multi_bend] Multiple Bends
+  status: valid=true solvable=true
+  board: 5x5  density=0.32  arrows=4 occupied=8
+  geometry: single=3 multi=1 bends_total=3 max_bends=3 max_length=5 avg_length=2.00
+  legal: initial=3/4 (0.75) forced=2 branching=2 longest_forced_run=2
+  legal_choice_sequence: 3,2,1,1
+  dependency: edges=1 depth=1 max_in_degree=1 components=3
+  cascade: max_unlock_fan_out=1 unlock_sequence: 0,0,1,0
+  blocker_distance: max=3 avg=3.00
+  witness_xy: 0,0;4,0;0,4;3,4
+[dependency_chain] Dependency Chain
+  status: valid=true solvable=true
+  board: 5x3  density=0.20  arrows=3 occupied=3
+  geometry: single=3 multi=0 bends_total=0 max_bends=0 max_length=1 avg_length=1.00
+  legal: initial=1/3 (0.33) forced=3 branching=0 longest_forced_run=3
+  legal_choice_sequence: 1,1,1
+  dependency: edges=2 depth=2 max_in_degree=1 components=1
+  cascade: max_unlock_fan_out=1 unlock_sequence: 1,1,0
+  blocker_distance: max=2 avg=1.50
+  witness_xy: 2,0;2,1;0,1
+[forced_sequence] Forced Sequence
+  status: valid=true solvable=true
+  board: 5x2  density=0.50  arrows=5 occupied=5
+  geometry: single=5 multi=0 bends_total=0 max_bends=0 max_length=1 avg_length=1.00
+  legal: initial=1/5 (0.20) forced=5 branching=0 longest_forced_run=5
+  legal_choice_sequence: 1,1,1,1,1
+  dependency: edges=10 depth=4 max_in_degree=4 components=1
+  cascade: max_unlock_fan_out=1 unlock_sequence: 1,1,1,1,0
+  blocker_distance: max=4 avg=2.00
+  witness_xy: 0,1;1,1;2,1;3,1;4,1
+[multiple_choices] Multiple Choices
+  status: valid=true solvable=true
+  board: 4x4  density=0.25  arrows=4 occupied=4
+  geometry: single=4 multi=0 bends_total=0 max_bends=0 max_length=1 avg_length=1.00
+  legal: initial=3/4 (0.75) forced=1 branching=3 longest_forced_run=1
+  legal_choice_sequence: 3,2,2,1
+  dependency: edges=1 depth=1 max_in_degree=1 components=3
+  cascade: max_unlock_fan_out=1 unlock_sequence: 0,1,0,0
+  blocker_distance: max=3 avg=3.00
+  witness_xy: 0,0;3,0;0,3;3,3
+[dense_board] Dense Board
+  status: valid=true solvable=true
+  board: 6x6  density=0.28  arrows=10 occupied=10
+  geometry: single=10 multi=0 bends_total=0 max_bends=0 max_length=1 avg_length=1.00
+  legal: initial=9/10 (0.90) forced=1 branching=9 longest_forced_run=1
+  legal_choice_sequence: 9,8,7,6,5,4,4,3,2,1
+  dependency: edges=2 depth=1 max_in_degree=2 components=8
+  cascade: max_unlock_fan_out=1 unlock_sequence: 0,0,0,0,0,1,0,0,0,0
+  blocker_distance: max=3 avg=2.00
+  witness_xy: 0,0;2,0;5,0;0,2;3,3;5,3;2,3;0,5;3,5;5,5
+[subtle_blockers] Subtle Blockers
+  status: valid=true solvable=true
+  board: 5x5  density=0.28  arrows=4 occupied=7
+  geometry: single=3 multi=1 bends_total=1 max_bends=1 max_length=4 avg_length=1.75
+  legal: initial=3/4 (0.75) forced=2 branching=2 longest_forced_run=2
+  legal_choice_sequence: 3,2,1,1
+  dependency: edges=1 depth=1 max_in_degree=1 components=3
+  cascade: max_unlock_fan_out=1 unlock_sequence: 0,0,1,0
+  blocker_distance: max=2 avg=2.00
+  witness_xy: 0,0;4,0;1,4;0,2
+[nested_chain] Nested Chain
+  status: valid=true solvable=true
+  board: 5x5  density=0.16  arrows=4 occupied=4
+  geometry: single=4 multi=0 bends_total=0 max_bends=0 max_length=1 avg_length=1.00
+  legal: initial=1/4 (0.25) forced=4 branching=0 longest_forced_run=4
+  legal_choice_sequence: 1,1,1,1
+  dependency: edges=3 depth=3 max_in_degree=1 components=1
+  cascade: max_unlock_fan_out=1 unlock_sequence: 1,1,1,0
+  blocker_distance: max=4 avg=2.67
+  witness_xy: 4,0;4,1;0,1;0,4
+[cascade_key_arrow] Cascade / Key Arrow
+  status: valid=true solvable=true
+  board: 5x5  density=0.24  arrows=4 occupied=6
+  geometry: single=3 multi=1 bends_total=1 max_bends=1 max_length=3 avg_length=1.50
+  legal: initial=1/4 (0.25) forced=2 branching=2 longest_forced_run=1
+  legal_choice_sequence: 1,3,2,1
+  dependency: edges=3 depth=1 max_in_degree=1 components=1
+  cascade: max_unlock_fan_out=3 unlock_sequence: 3,0,0,0
+  blocker_distance: max=2 avg=1.67
+  witness_xy: 2,2;0,1;1,4;2,4
+[dense_unravel] Dense Unravel
+  status: valid=true solvable=true
+  board: 6x6  density=0.67  arrows=24 occupied=24
+  geometry: single=24 multi=0 bends_total=0 max_bends=0 max_length=1 avg_length=1.00
+  legal: initial=6/24 (0.25) forced=1 branching=23 longest_forced_run=1
+  legal_choice_sequence: 6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,5,4,3,2,1
+  dependency: edges=36 depth=3 max_in_degree=3 components=6
+  cascade: max_unlock_fan_out=1 unlock_sequence: 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0
+  blocker_distance: max=3 avg=1.67
+  witness_xy: 0,0;1,0;2,0;3,0;4,0;5,0;0,1;1,1;2,1;3,1;4,1;5,1;0,2;1,2;2,2;3,2;4,2;5,2;0,3;1,3;2,3;3,3;4,3;5,3
+[bent_network] Bent Network
+  status: valid=true solvable=true
+  board: 6x4  density=0.33  arrows=4 occupied=8
+  geometry: single=2 multi=2 bends_total=2 max_bends=1 max_length=3 avg_length=2.00
+  legal: initial=2/4 (0.50) forced=2 branching=2 longest_forced_run=2
+  legal_choice_sequence: 2,2,1,1
+  dependency: edges=2 depth=1 max_in_degree=1 components=2
+  cascade: max_unlock_fan_out=1 unlock_sequence: 1,0,1,0
+  blocker_distance: max=2 avg=2.00
+  witness_xy: 1,0;2,1;4,3;3,2
+[long_range_blocker] Long-Range Blocker
+  status: valid=true solvable=true
+  board: 8x2  density=0.19  arrows=2 occupied=3
+  geometry: single=1 multi=1 bends_total=0 max_bends=0 max_length=2 avg_length=1.50
+  legal: initial=1/2 (0.50) forced=2 branching=0 longest_forced_run=2
+  legal_choice_sequence: 1,1
+  dependency: edges=1 depth=1 max_in_degree=1 components=1
+  cascade: max_unlock_fan_out=1 unlock_sequence: 1,0
+  blocker_distance: max=7 avg=7.00
+  witness_xy: 7,1;0,0
+[composed_shaped] Composed / Shaped
+  status: valid=true solvable=true
+  board: 7x7  density=0.51  arrows=25 occupied=25
+  geometry: single=25 multi=0 bends_total=0 max_bends=0 max_length=1 avg_length=1.00
+  legal: initial=7/25 (0.28) forced=1 branching=24 longest_forced_run=1
+  legal_choice_sequence: 7,7,7,7,7,7,7,7,7,7,6,6,6,6,6,6,5,4,4,4,4,3,2,2,1
+  dependency: edges=47 depth=6 max_in_degree=6 components=7
+  cascade: max_unlock_fan_out=1 unlock_sequence: 1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,0,0,1,1,1,0,0,1,0,0
+  blocker_distance: max=6 avg=2.21
+  witness_xy: 3,0;2,1;3,1;4,1;1,2;2,2;3,2;4,2;5,2;0,3;1,3;2,3;3,3;4,3;5,3;6,3;1,4;2,4;3,4;4,4;5,4;2,5;3,5;4,5;3,6
+[canvas_validation] Large Canvas Validation
+  status: valid=true solvable=true
+  board: 40x30  density=0.87  arrows=52 occupied=1048
+  geometry: single=0 multi=52 bends_total=159 max_bends=6 max_length=43 avg_length=20.15
+  legal: initial=4/52 (0.08) forced=22 branching=30 longest_forced_run=5
+  legal_choice_sequence: 4,3,3,2,2,1,2,1,1,2,1,3,3,2,1,1,1,1,1,2,2,1,2,1,1,1,1,1,3,3,4,3,2,2,1,2,1,5,4,3,4,3,2,1,2,1,1,1,2,2,2,1
+  dependency: edges=230 depth=25 max_in_degree=15 components=1
+  cascade: max_unlock_fan_out=5 unlock_sequence: 0,1,0,1,0,2,0,1,2,0,3,1,0,0,1,1,1,1,2,1,0,2,0,1,1,1,1,3,1,2,0,0,1,0,2,0,5,0,0,2,0,0,0,2,0,1,1,2,1,1,0,0
+  blocker_distance: max=30 avg=9.19
+  witness_xy: 4,1;5,1;6,2;0,6;6,16;0,28;3,27;4,29;10,29;17,19;10,27;14,23;15,13;10,24;11,24;10,18;0,22;1,20;3,8;6,3;13,5;1,13;10,11;5,15;8,21;7,1;16,1;17,4;18,13;37,1;36,1;35,3;21,20;20,11;19,22;19,12;22,15;30,10;32,12;25,17;32,17;24,18;23,20;25,24;31,24;29,25;38,25;38,19;28,8;30,8;38,13;36,21
+[knot_long_geometry] Long Geometry
+  status: valid=true solvable=true
+  board: 32x24  density=0.17  arrows=8 occupied=128
+  geometry: single=4 multi=4 bends_total=8 max_bends=2 max_length=39 avg_length=16.00
+  legal: initial=6/8 (0.75) forced=2 branching=6 longest_forced_run=2
+  legal_choice_sequence: 6,6,5,4,3,2,1,1
+  dependency: edges=2 depth=1 max_in_degree=1 components=6
+  cascade: max_unlock_fan_out=1 unlock_sequence: 1,0,0,0,0,0,1,0
+  blocker_distance: max=2 avg=2.00
+  witness_xy: 4,0;8,0;4,2;3,10;28,15;25,23;27,23;27,21
+[knot_interwoven_paths] Interwoven Paths
+  status: valid=true solvable=true
+  board: 32x24  density=0.18  arrows=8 occupied=138
+  geometry: single=5 multi=3 bends_total=11 max_bends=4 max_length=51 avg_length=17.25
+  legal: initial=3/8 (0.38) forced=3 branching=5 longest_forced_run=2
+  legal_choice_sequence: 3,3,3,2,1,1,2,1
+  dependency: edges=9 depth=2 max_in_degree=3 components=1
+  cascade: max_unlock_fan_out=2 unlock_sequence: 1,1,0,0,1,2,0,0
+  blocker_distance: max=20 avg=8.00
+  witness_xy: 3,0;28,0;3,2;28,3;16,23;16,22;0,10;31,12
+[knot_dense_core] Dense Core
+  status: valid=true solvable=true
+  board: 36x28  density=0.12  arrows=16 occupied=120
+  geometry: single=8 multi=8 bends_total=16 max_bends=2 max_length=14 avg_length=7.50
+  legal: initial=9/16 (0.56) forced=4 branching=12 longest_forced_run=4
+  legal_choice_sequence: 9,9,9,9,9,8,7,6,5,4,3,2,1,1,1,1
+  dependency: edges=10 depth=3 max_in_degree=3 components=9
+  cascade: max_unlock_fan_out=1 unlock_sequence: 1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,0
+  blocker_distance: max=12 avg=4.80
+  witness_xy: 10,6;14,6;18,6;22,6;10,8;12,8;14,8;16,8;18,8;20,8;22,8;24,8;13,18;17,18;21,18;25,18
+[knot_regions] Distinct Regions
+  status: valid=true solvable=true
+  board: 48x32  density=0.08  arrows=13 occupied=123
+  geometry: single=9 multi=4 bends_total=8 max_bends=2 max_length=30 avg_length=9.46
+  legal: initial=8/13 (0.62) forced=1 branching=12 longest_forced_run=1
+  legal_choice_sequence: 8,7,6,6,6,6,5,4,3,3,3,2,1
+  dependency: edges=10 depth=2 max_in_degree=3 components=6
+  cascade: max_unlock_fan_out=1 unlock_sequence: 0,0,1,1,1,0,0,0,1,1,0,0,0
+  blocker_distance: max=29 avg=12.90
+  witness_xy: 8,0;34,0;3,2;29,2;4,8;30,8;0,9;5,29;30,29;39,23;12,23;9,31;34,31
+[knot_single_release] Single Release
+  status: valid=true solvable=true
+  board: 40x30  density=0.09  arrows=8 occupied=108
+  geometry: single=7 multi=1 bends_total=4 max_bends=4 max_length=101 avg_length=13.50
+  legal: initial=3/8 (0.38) forced=1 branching=7 longest_forced_run=1
+  legal_choice_sequence: 3,3,3,5,4,3,2,1
+  dependency: edges=6 depth=3 max_in_degree=2 components=3
+  cascade: max_unlock_fan_out=3 unlock_sequence: 1,1,3,0,0,0,0,0
+  blocker_distance: max=10 avg=3.50
+  witness_xy: 0,20;1,20;2,20;24,8;25,15;8,22;14,28;0,29
+[knot_boundary] Boundary Knot
+  status: valid=true solvable=true
+  board: 48x36  density=0.29  arrows=28 occupied=508
+  geometry: single=12 multi=16 bends_total=32 max_bends=2 max_length=35 avg_length=18.14
+  legal: initial=6/28 (0.21) forced=2 branching=26 longest_forced_run=2
+  legal_choice_sequence: 6,6,6,7,9,8,8,8,8,7,6,6,5,5,5,5,4,4,5,4,4,4,4,3,2,2,1,1
+  dependency: edges=51 depth=6 max_in_degree=5 components=2
+  cascade: max_unlock_fan_out=3 unlock_sequence: 1,1,2,3,0,1,1,1,0,0,1,0,1,1,1,0,1,2,0,1,1,1,0,0,1,0,1,0
+  blocker_distance: max=25 avg=9.22
+  witness_xy: 3,0;25,0;3,2;25,2;0,4;5,8;27,8;45,8;22,8;5,10;27,10;47,12;3,16;25,16;45,16;23,16;3,18;25,18;0,20;5,24;27,24;45,24;22,24;5,26;27,26;47,28;45,32;23,32
+=== Catalog Comparison ===
+deepest dependency chain: canvas_validation (depth=25)
+fewest initial legal arrows: dependency_chain (1/3)
+widest branching: dense_board (9)
+largest cascade: canvas_validation (max_unlock_fan_out=5)
+longest forced run: forced_sequence (5)
+highest density: canvas_validation (0.87)
+most bends: canvas_validation (159)
+longest blocker distance: canvas_validation (30)
+largest board: knot_boundary (48x36, 1728 cells)
+
+
+STDERR

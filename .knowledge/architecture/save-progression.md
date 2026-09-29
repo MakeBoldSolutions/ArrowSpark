@@ -135,7 +135,7 @@ the inherited `_open_sub_menu()` mechanism does not do this itself (see
 .knowledge/architecture/arrow-puzzle.md's Puzzle Catalog and
 Session-Scoped Selection section, and the sub-menu open/close mechanics
 below). The entry list sits in a vertically scrolling, focus-following
-`ScrollContainer` (horizontal scrolling disabled) so all fifteen entries stay
+`ScrollContainer` (horizontal scrolling disabled) so all twenty-one entries stay
 reachable and fully visible when focused at 960x540, 800x800 and 1280x720; the
 list is centered when it fits. Source of truth: tests/puzzle_layout_check.gd (listing/ordering,
 initial focus placement, non-first-selection loading the correct puzzle),
