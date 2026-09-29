@@ -235,7 +235,7 @@ reaches a complete, mistake-free solution either way (the order-independence
 property the no-backtracking design depends on). Order-independence is
 further checked at every branching state a witness actually passes through
 (not only a puzzle's opening move): for the shipped `create_fixed()` board
-here, and for all fifteen `PuzzleCatalog` entries in
+here, and for all twenty-one `PuzzleCatalog` entries in
 tests/puzzle_catalog_check.gd, forcing each *other* currently-legal
 alternative next instead of the witness's own choice still reaches a
 complete, mistake-free solution from there — the automated, catalog-wide
@@ -257,15 +257,16 @@ and `PUZZLE_FAILURES=0`.
 
 `PuzzleCatalog` (scripts/puzzle/puzzle_catalog.gd) is a static-registry
 `RefCounted` class, never instantiated, sitting between the domain
-(`PuzzleDefinition`) and presentation. It holds an ordered array of fifteen
+(`PuzzleDefinition`) and presentation. It holds an ordered array of twenty-one
 entries (`{id, title, build}`) — the original eight baseline puzzles, six
 experimental puzzles (`nested_chain`, `cascade_key_arrow`,
 `dense_unravel`, `bent_network`, `long_range_blocker`, `composed_shaped`),
 each deliberately authored to combine structural features (dependency depth,
 cascade fan-out, density, bent-tail dependencies, long-range blocking,
-macro-scale composition) the baseline eight never did in combination, and one
-large-canvas validation board (`canvas_validation`, titled "Large Canvas
-Validation") — each
+macro-scale composition) the baseline eight never did in combination, one large-canvas validation board (`canvas_validation`, titled "Large Canvas
+Validation"), and six newer geometric experiments (`knot_long_geometry`,
+`knot_interwoven_paths`, `knot_dense_core`, `knot_regions`,
+`knot_single_release`, `knot_boundary`) — each
 `build` a zero-argument static function
 constructing a fresh `PuzzleDefinition` exactly like `create_fixed()`'s own
 literal-construction style. `count()`, `id_at(index)`, `title_at(index)`,
@@ -279,7 +280,7 @@ never share mutable substructure, the same isolation guarantee
 `create_fixed()` already had. `PuzzleDefinition` itself gained no
 catalog/progression fields; it remains anonymous structural data.
 
-`canvas_validation` is a plainly titled, player-visible final entry (puzzle 15,
+`canvas_validation` is a plainly titled, player-visible entry (puzzle 15,
 reached by Next after puzzle 14, listed in Level Select and counted in the
 session score like any other). It is an authored 40x30 board packed with fifty-two arrows (about 87% of
 the cells occupied): almost every arrow is long and bent (most 22-43 cells,
@@ -291,9 +292,13 @@ from orthogonal path vertices expanded deterministically by
 `PuzzleCatalog._tail_along`; it was found once by a seeded offline search that
 kept every step solvable and is not generated at runtime. It exists to
 exercise large-board navigation, off-screen assistance and long departures;
-its difficulty is deliberately untuned. The original fourteen entries' ids,
-order, dimensions and exact arrow/tail content are pinned by a fingerprint
-check so later catalog additions cannot silently change them.
+its difficulty is deliberately untuned. The original fourteen entries' ids, order, dimensions and exact arrow/tail
+content are pinned by fingerprints, as is the complete `canvas_validation`
+geometry. The six geometric experiments follow it in the same registry.
+They retain authored 32x24 to 48x36 canvases; their purpose and actual
+structural measurements are documented in
+`.knowledge/reference/gordian-knot-experiments.md`. They reuse the same
+solver, assistance, scoring and session-only selection behavior.
 
 `PuzzleSession` (scripts/puzzle_session.gd) is a process-lifetime,
 in-memory-only `RefCounted` class holding a single private `static var
@@ -313,16 +318,16 @@ running process, not to any node or scene.
 Source of truth: tests/puzzle_catalog_check.gd (unique/valid stable ids
 independent of position, deterministic `id_at`/`index_of`/`ids` ordering,
 fresh-and-isolated `get_definition` per call including cross-id
-independence, every one of the fifteen entries structurally valid and
+independence, every one of the twenty-one entries structurally valid and
 solver-confirmed solvable with a replayed zero-mistake witness, the original
 fourteen entries' ids, order, dimensions and content unchanged, the
 `canvas_validation` fixture's dimensions/arrow count/bent long arrows/four
 directions/tail dependency/top-left open move/corner regions, `Next` from
-puzzle 14 reaching it and the last-entry `Next` absence, no
+puzzle 14 reaching it and the continuation into the six new entries and last-entry `Next` absence, no
 difficulty-labeled title wording, each of the six experimental
 entries confirmed against its exact `PuzzleAnalyzer`-derived threshold (see
 below), the catalog-wide branching order-independence check (every one of
-the fifteen entries' witness, at every branching state it passes through,
+the twenty-one entries' witness, at every branching state it passes through,
 still completes when any other legal alternative is forced instead — see the
 Rule Layer's Solvability Analysis section above), `PuzzleSession` default/set/advance/has-next behavior including the
 last-entry no-op and the invalid-id fallback), run via the same
@@ -517,12 +522,44 @@ A separate, deliberately **non-gating** developer report
 (tests/puzzle_structural_report.gd, run via
 tests/run_puzzle_structural_report.py in the same bare-isolated-project
 pattern) enumerates the full catalog through `PuzzleAnalyzer` and prints a
-deterministic per-puzzle block plus a fixed nine-question Catalog Comparison
-section (deepest chain, fewest initial legal arrows, widest branching,
+deterministic per-puzzle block: validity and solvability, board size, occupied
+cells and density, arrow counts, mean/maximum length and bends, legal-choice
+sequence, dependency/unlock measures, blocker distance and the complete
+ordered `(x,y)` solver witness. A fixed nine-question Catalog Comparison
+section remains (deepest chain, fewest initial legal arrows, widest branching,
 largest cascade, longest forced run, highest density, most bends, longest
-blocker distance, largest board). It carries no `check()`/failure counter and
-no `PUZZLE_*_FAILURES=0` marker — it reports facts, never a pass/fail
-judgment or a composite score.
+blocker distance, largest board). The report's process exit only means it ran;
+structural validity and solver witness replay are enforced by the catalog
+regression gate. It carries no `check()`/failure counter and no
+`PUZZLE_*_FAILURES=0` marker — it reports facts, never a pass/fail judgment
+or a composite score. The objective facts for the six newer geometric
+experiments and the human play evidence are kept separately in
+`.knowledge/reference/gordian-knot-experiments.md`.
+
+### Puzzle-design vocabulary (provisional)
+
+These terms come from one aggregate author play session and are design
+hypotheses, not gameplay rules, analyzer metrics or validated laws. Nothing in
+the rule layer, `PuzzleAnalyzer` or scoring encodes them, and structural
+metrics remain diagnostics that do not measure gameplay quality.
+
+- **Meaningful Density**: density from substantial arrow geometry (long paths,
+  bends, interweaving, tail-based dependencies) rather than many trivial or
+  single-cell arrows.
+- **Neighborhood**: a recognizable area where meaningful local progress can be
+  made. **Cross-Neighborhood Dependency**: finishing one area depends on
+  geometry associated with another. **Bridge Arrow**: a substantial arrow that
+  connects otherwise recognizable neighborhoods.
+- **Insight Chain**: a short sequence of upcoming consequences that becomes
+  understandable together after a discovery.
+- **Discovery Beat**: uncertainty, investigation, discovery, insight chain,
+  execution, visible payoff, changed board, renewed uncertainty. A good level
+  likely contains several.
+
+Blocker distance is descriptive: a long blocker relationship matters only when
+finding it requires meaningful tracing. The evidence and its limits are in
+`.knowledge/reference/gordian-knot-experiments.md`. The open design question is
+composing these ingredients into one excellent level, not generating levels.
 
 ## Presentation Layer
 
@@ -646,7 +683,7 @@ in-flight departure so no stale completion reaches a replaced attempt; a
 post-completion selection being ignored; a freshly instantiated scene
 starting clean; 20 rapid repeated selections on a blocked tail cell counting
 exactly once each without disturbing the attempt; the blocked-cue duration
-cap; and, for every one of the fifteen `PuzzleCatalog` entries in turn: the
+cap; and, for every one of the twenty-one `PuzzleCatalog` entries in turn: the
 board's active view count matches the definition's arrow count, the HUD
 puzzle label matches the catalog title, and the same solver-derived
 zero-mistake witness clears through the real scene with unchanged

@@ -17,10 +17,12 @@ func _print_entry(id: String, title: String, r: Dictionary) -> void:
 	var blocker: Dictionary = r.blocker_distance
 
 	print("[", id, "] ", title)
-	print("  board: ", board.width, "x", board.height, "  density=", _fmt2(board.density), "  arrows=", board.arrow_count)
+	print("  status: valid=", r.valid, " solvable=", r.solvable)
+	print("  board: ", board.width, "x", board.height, "  density=", _fmt2(board.density), "  arrows=", board.arrow_count,
+		" occupied=", board.occupied_cell_count)
 	print("  geometry: single=", geometry.single_cell_count, " multi=", geometry.multi_cell_count,
 		" bends_total=", geometry.total_bends, " max_bends=", geometry.max_bends_on_one_arrow,
-		" max_length=", geometry.max_length)
+		" max_length=", geometry.max_length, " avg_length=", _fmt2(geometry.average_length))
 	print("  legal: initial=", legal.initial_legal_count, "/", board.arrow_count,
 		" (", _fmt2(legal.initial_legal_ratio), ") forced=", legal.forced_state_count,
 		" branching=", legal.branching_state_count, " longest_forced_run=", legal.longest_forced_run)
@@ -30,6 +32,7 @@ func _print_entry(id: String, title: String, r: Dictionary) -> void:
 	print("  cascade: max_unlock_fan_out=", g.max_unlock_fan_out, " unlock_sequence: ",
 		",".join((r.unlock_sequence as Array).map(func(x): return str(x))))
 	print("  blocker_distance: max=", blocker.max_distance, " avg=", _fmt2(blocker.average_distance))
+	print("  witness_xy: ", ";".join((r.witness as Array).map(func(head): return "%d,%d" % [head.x, head.y])))
 
 func _winner(entries: Array, value_fn: Callable, higher_is_better: bool = true) -> Dictionary:
 	var best_id: String = ""

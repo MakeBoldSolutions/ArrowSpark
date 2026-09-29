@@ -1102,7 +1102,7 @@ func _check_fresh_views_per_attempt_and_no_persistence() -> void:
 			and not settings_text.contains("pan_mode") and not settings_text.contains("cell_pixels"),
 		"no viewport field is persisted in settings")
 
-# --- Level Select with the appended fifteenth entry --------------------------------
+# --- Level Select with the full catalog --------------------------------
 
 func _apply_window(window: Vector2i) -> void:
 	for attempt in range(3):
@@ -1123,7 +1123,7 @@ func _check_level_select_reaches_every_entry_at_supported_windows() -> void:
 		await process_frame
 		var list: VBoxContainer = menu.level_select_scene.get_node("%PuzzleListContainer")
 		var scroll: ScrollContainer = menu.level_select_scene.get_node("%ScrollContainer")
-		check(list.get_child_count() == 15, "Level Select lists all fifteen entries at %s" % [window])
+		check(list.get_child_count() == PuzzleCatalog.count(), "Level Select lists the full catalog at %s" % [window])
 		check(scroll.follow_focus and scroll.horizontal_scroll_mode == ScrollContainer.SCROLL_MODE_DISABLED,
 			"Level Select scrolls vertically and follows keyboard/gamepad focus at %s" % [window])
 		var all_reachable := true
@@ -1139,6 +1139,33 @@ func _check_level_select_reaches_every_entry_at_supported_windows() -> void:
 		menu.queue_free()
 		await process_frame
 	await _apply_window(Vector2i(1280, 720))
+
+func _check_new_experiments_navigate_and_select() -> void:
+	var windows := [Vector2i(960, 540), Vector2i(800, 800), Vector2i(1280, 720)]
+	for offset in range(6):
+		var id := PuzzleCatalog.id_at(15 + offset)
+		var puzzle := await _spawn(id, windows[offset % windows.size()])
+		var board := _board(puzzle)
+		var definition := board.definition
+		board.fit_puzzle()
+		var viewport := Rect2(Vector2.ZERO, board.size)
+		check(viewport.encloses(_rect_of(board, Vector2i.ZERO)) 			and viewport.encloses(_rect_of(board, Vector2i(definition.width - 1, definition.height - 1))),
+			"experiment '%s' fits its full authored canvas" % id)
+		var witness: Array = PuzzleSolver.analyze(definition).witness
+		check(witness.size() == definition.arrows.size(), "experiment '%s' has a complete witness" % id)
+		if witness.is_empty():
+			await _dispose(puzzle)
+			continue
+		var first: Vector2i = witness[0]
+		var before := _snapshot(puzzle)
+		_working_view_at(board, Vector2(first) + Vector2(0.5, 0.5))
+		check(viewport.has_point(_cell_center(board, first)) 			and board.view_transform.cell_at(_cell_center(board, first)) == first,
+			"experiment '%s' keeps a zoomed legal head selectable" % id)
+		check(_snapshot(puzzle) == before, "experiment '%s' navigation does not change rule state" % id)
+		_click_at(board, _cell_center(board, first))
+		check(puzzle._state.remaining() == definition.arrows.size() - 1 			and puzzle._state.mistakes == 0,
+			"experiment '%s' accepts a transformed legal selection" % id)
+		await _dispose(puzzle)
 
 # --- Runner -------------------------------------------------------------------
 
@@ -1170,6 +1197,7 @@ func _initialize() -> void:
 	await _check_results_barrier_and_navigation_gating()
 	await _check_fresh_views_per_attempt_and_no_persistence()
 	await _check_level_select_reaches_every_entry_at_supported_windows()
+	await _check_new_experiments_navigate_and_select()
 	PuzzleSession.set_current_id(PuzzleCatalog.id_at(0))
 	print("PUZZLE_CANVAS_FAILURES=", failures)
 	quit(1 if failures else 0)
