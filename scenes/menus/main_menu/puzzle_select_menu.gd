@@ -22,9 +22,7 @@ func _on_entry_pressed(id: String) -> void:
 	puzzle_selected.emit(id)
 
 ## The inherited _open_sub_menu()/_close_sub_menu() show/hide mechanism does
-## not itself grab focus into a newly opened sub-menu (verified by
-## /devspark.critic, critic-001; Options/Credits share the same latent gap,
-## but carry no keyboard/gamepad MUST requirement). Explicitly grab focus
+## not itself grab focus into a newly opened sub-menu. Explicitly grab focus
 ## onto the first entry whenever this menu becomes visible, mirroring
 ## puzzle_results.gd's existing _replay_button.grab_focus() convention.
 func _notification(what: int) -> void:

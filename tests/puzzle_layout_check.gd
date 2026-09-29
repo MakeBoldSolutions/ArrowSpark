@@ -542,10 +542,10 @@ func _check_open_move_keyboard_and_gamepad_reachable() -> void:
 	puzzle.queue_free()
 	await process_frame
 
-## US2 independent test: Level Select lists every catalog puzzle in
+## Level Select lists every catalog puzzle in
 ## deterministic order with distinguishing identity, none locked/hidden, and
 ## opens with keyboard/gamepad focus already placed on the first entry
-## (critic-001: the inherited _open_sub_menu mechanism does not grab focus
+## (the inherited _open_sub_menu mechanism does not grab focus
 ## by itself). Selecting a non-first entry is exercised at the
 ## PuzzleSession/PuzzleCatalog level (matching what the real handler does)
 ## rather than through the live SceneLoader, so this real-project check

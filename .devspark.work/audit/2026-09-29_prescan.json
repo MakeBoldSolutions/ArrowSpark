@@ -1,0 +1,228 @@
+{
+  "files": {
+    "tests": [
+      "tests/puzzle_canvas_visual_check.gd.uid",
+      "tests/arrow_departure_geometry_check.gd",
+      "tests/puzzle_canvas_visual_check.gd",
+      "tests/puzzle_canvas_check.gd.uid",
+      "tests/puzzle_canvas_check.gd",
+      "tests/puzzle_analyzer_check.gd.uid",
+      "tests/puzzle_analyzer_check.gd",
+      "tests/arrow_departure_visual_check.gd.uid",
+      "tests/arrow_departure_visual_check.gd",
+      "tests/arrow_departure_geometry_check.gd.uid",
+      "tests/puzzle_scoreboard_check.gd.uid",
+      "tests/puzzle_scoreboard_check.gd",
+      "tests/puzzle_regression.gd.uid",
+      "tests/puzzle_regression.gd",
+      "tests/puzzle_presentation_check.gd.uid",
+      "tests/puzzle_presentation_check.gd",
+      "tests/puzzle_layout_check.gd.uid",
+      "tests/puzzle_layout_check.gd",
+      "tests/puzzle_catalog_check.gd.uid",
+      "tests/puzzle_catalog_check.gd",
+      "tests/README.md",
+      "tests/puzzle_viewport_transform_check.gd.uid",
+      "tests/puzzle_viewport_transform_check.gd",
+      "tests/puzzle_structural_report.gd.uid",
+      "tests/puzzle_structural_report.gd"
+    ],
+    "build": ".github/workflows/godot-regression-tests.yml",
+    "source": [
+      ".devspark/scripts/scaffold-entity.py",
+      ".devspark/scripts/release-context.py",
+      ".devspark/scripts/migrate-knowledge-to-entities.py",
+      ".devspark/scripts/knowledge_findings.py",
+      ".devspark/scripts/knowledge-integrity.py",
+      ".devspark/scripts/knowledge-benchmark.py",
+      ".devspark/scripts/generate-knowledge-index.py",
+      ".devspark/scripts/explain-context.py",
+      ".devspark/scripts/discover-knowledge.py",
+      ".devspark/scripts/context-projection.py",
+      ".devspark/scripts/build_knowledge_index.py",
+      ".devspark/templates/knowledge-drift/self-test/sources/known-changed.py",
+      ".devspark/templates/knowledge-drift/self-test/sources/known-unchanged.py"
+    ],
+    "documentation": [
+      "LICENSE.txt",
+      "CLAUDE.md",
+      "ATTRIBUTION.md",
+      "README.md",
+      "assets/godot_engine_logo/LICENSE.txt",
+      ".codex/prompts/devspark.workitem-review.md",
+      ".codex/prompts/devspark.workitem-create.md",
+      ".codex/prompts/devspark.verify.md",
+      ".codex/prompts/devspark.validate-registry.md",
+      ".codex/prompts/devspark.upgrade.md",
+      ".codex/prompts/devspark.update-pr.md",
+      ".codex/prompts/devspark.taskstoissues.md",
+      ".codex/prompts/devspark.tasks.md",
+      ".codex/prompts/devspark.specify.md",
+      ".codex/prompts/devspark.site-audit.md",
+      ".codex/prompts/devspark.repo-story.md",
+      ".codex/prompts/devspark.release.md",
+      ".codex/prompts/devspark.quickfix.md",
+      ".codex/prompts/devspark.pr-review.md",
+      ".codex/prompts/devspark.plan.md",
+      ".codex/prompts/devspark.personalize.md",
+      ".codex/prompts/devspark.next.md",
+      ".codex/prompts/devspark.migrate-registry.md",
+      ".codex/prompts/devspark.migrate-knowledge-entities.md",
+      ".codex/prompts/devspark.list-applications.md"
+    ],
+    "config": [
+      "override.cfg",
+      "agents-registry.json",
+      ".devspark/templates/devspark-config.schema.json",
+      ".devspark/templates/agents-registry.schema.json",
+      ".devspark/templates/vscode-settings.json",
+      ".knowledge/index.json",
+      "addons/maaacks_game_template/plugin.cfg",
+      ".knowledge/ontology/coverage.json",
+      ".github/FUNDING.yml",
+      "addons/maaacks_game_template/installer/override.cfg",
+      ".devspark/templates/devspark-registry.schema.json",
+      ".devspark/templates/schemas/taxonomy-registry.schema.json",
+      ".devspark/templates/schemas/okf-knowledge-document.schema.json",
+      ".devspark/templates/schemas/knowledge-node.schema.json",
+      ".devspark/templates/schemas/entity-node.schema.json",
+      ".devspark/templates/knowledge-drift/self-test/claims.yaml"
+    ],
+    "counts": {
+      "tests": 32,
+      "build": 1,
+      "source": 13,
+      "documentation": 209,
+      "config": 16,
+      "scripts": 61
+    },
+    "scripts": [
+      "run-app.ps1",
+      ".devspark/scripts/powershell/workitem.ps1",
+      ".devspark/scripts/powershell/validate-knowledge-coverage.ps1",
+      ".devspark/scripts/powershell/update-agent-context.ps1",
+      ".devspark/scripts/powershell/site-audit.ps1",
+      ".devspark/scripts/powershell/setup-plan.ps1",
+      ".devspark/scripts/powershell/repo-story-context.ps1",
+      ".devspark/scripts/powershell/release-history-context.ps1",
+      ".devspark/scripts/powershell/release-context.ps1",
+      ".devspark/scripts/powershell/quickfix-context.ps1",
+      ".devspark/scripts/powershell/platform.ps1",
+      ".devspark/scripts/powershell/next-context.ps1",
+      ".devspark/scripts/powershell/new-branch.ps1",
+      ".devspark/scripts/powershell/knowledge-integrity.ps1",
+      ".devspark/scripts/powershell/knowledge-benchmark.ps1",
+      ".devspark/scripts/powershell/get-pr-context.ps1",
+      ".devspark/scripts/powershell/generate-knowledge-index.ps1",
+      ".devspark/scripts/powershell/generate-atomic-shims.ps1",
+      ".devspark/scripts/powershell/explain-context.ps1",
+      ".devspark/scripts/powershell/evolution-context.ps1",
+      ".devspark/scripts/powershell/discover-knowledge.ps1",
+      ".devspark/scripts/powershell/create-pr.ps1",
+      ".devspark/scripts/powershell/create-new-feature.ps1",
+      ".devspark/scripts/powershell/context-projection.ps1",
+      ".devspark/scripts/powershell/common.ps1"
+    ]
+  },
+  "constitution": {
+    "path": ".knowledge/governance/constitution.md",
+    "exists": true,
+    "version": "2.0.1",
+    "principles": [
+      "I. Simple, Maintainable Code",
+      "II. Prefer Project-Level Template Customization",
+      "III. Accessible, Configurable Controls",
+      "IV. Responsive Gameplay",
+      "V. Practical Gameplay Verification",
+      "VI. Preserve Saved Progress and Settings"
+    ]
+  },
+  "patterns": {
+    "quality": {
+      "long_functions": [],
+      "todo_comments_total": 1,
+      "todo_comments": {
+        "type": "TODO",
+        "line": 69,
+        "file": ".devspark/scripts/scaffold-entity.py",
+        "text": "describe current behavior here, grounded in source_of_truth "
+      },
+      "deep_nesting": []
+    },
+    "security": {
+      "hardcoded_secrets": null,
+      "hardcoded_secrets_total": 0,
+      "insecure_patterns": null,
+      "insecure_patterns_total": 0
+    },
+    "unused": {
+      "potential_dead_code": []
+    }
+  },
+  "devspark": {
+    "installed_version": "7.7.1",
+    "installed_date": "2026-09-28",
+    "stamp_exists": true,
+    "method": "codex-quickstart"
+  },
+  "scope": "full",
+  "timestamp": "2026-09-29T09:19:06Z",
+  "metrics": {
+    "large_files_total": 2,
+    "avg_lines_per_file": 333.7,
+    "max_lines": 1552,
+    "files_by_extension": {
+      ".py": 13
+    },
+    "total_lines": 4338,
+    "large_files": [
+      {
+        "file": ".devspark/scripts/discover-knowledge.py",
+        "lines": 973
+      },
+      {
+        "file": ".devspark/scripts/build_knowledge_index.py",
+        "lines": 1552
+      }
+    ],
+    "lines_by_extension": {
+      ".py": 4338
+    },
+    "max_lines_file": ".devspark/scripts/build_knowledge_index.py",
+    "total_files": 13
+  },
+  "pre_scan_limits": {
+    "include_full_inventory": false,
+    "sample_limit": 25,
+    "large_file_limit": 20,
+    "pattern_sample_limit": 25
+  },
+  "knowledge": {
+    "dangling_references": 0,
+    "index_present": true,
+    "counts": {
+      "entities": 0,
+      "documents": 7
+    },
+    "present": true,
+    "coverage_present": true,
+    "index_current": true,
+    "coverage_gaps": []
+  },
+  "audit_dir": ".devspark.work/audit",
+  "repo_root": "C:/GitHub/MakeBoldSolutions/ArrowGame",
+  "packages": {
+    "manifest": null,
+    "lockfile": null,
+    "manager": null,
+    "dependencies": {
+      "dev": [],
+      "direct": []
+    },
+    "analysis": {
+      "vulnerable": [],
+      "unused": [],
+      "outdated": []
+    }
+  }
+}
