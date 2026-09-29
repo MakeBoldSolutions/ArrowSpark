@@ -266,6 +266,6 @@ No contradictions were recorded between the session conclusions themselves. The 
 
 ### Transition
 
-Specs 006 and 009 taught us about individual ingredients: geometry, density, dependencies, blocker distance, long arrows, bends, regions, interweaving, releases, readability and excessive complexity. Knowing the properties of the tools is not the same as knowing how to compose them into an excellent level.
+The structural and geometric puzzle experiments taught us about individual ingredients: geometry, density, dependencies, blocker distance, long arrows, bends, regions, interweaving, releases, readability and excessive complexity. Knowing the properties of the tools is not the same as knowing how to compose them into an excellent level.
 
 The next problem is not how to generate ArrowSpark levels automatically. It is whether we can intentionally compose what we have learned into one level that delivers a compelling sequence of discovery, understanding, execution, release and renewed discovery.
