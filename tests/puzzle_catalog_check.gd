@@ -20,7 +20,7 @@ func check(condition: bool, description: String) -> void:
 ## fails loudly rather than skipping the malformed one.
 func _check_full_catalog_solvable() -> void:
 	var count := PuzzleCatalog.count()
-	check(count == 21, "the catalog contains 15 existing puzzles and six new geometric experiments")
+	check(count == 22, "the catalog contains 21 existing puzzles and the Reference Knot")
 
 	var seen_ids: Dictionary = {}
 	for i in range(count):
@@ -84,8 +84,46 @@ func _check_knot_entries() -> void:
 			"new experiment '%s' retains its authored canvas" % id)
 		check(definition.arrows.size() == expected["arrows"],
 			"new experiment '%s' retains its authored arrow count" % id)
-	check(PuzzleCatalog.id_at(PuzzleCatalog.count() - 1) == "knot_boundary",
-		"the boundary experiment is the final catalog entry")
+	var lab_ids := PuzzleCatalog.ids_in_group(PuzzleCatalog.GROUP_PUZZLE_LAB)
+	check(lab_ids[lab_ids.size() - 1] == "knot_boundary",
+		"the boundary experiment is the last Puzzle Lab entry")
+	check(PuzzleCatalog.id_at(PuzzleCatalog.count() - 1) == "reference_knot",
+		"the Reference Knot is the last catalog entry")
+
+## Every entry belongs to exactly one valid group, groups keep their planned
+## sizes, and the group queries never wrap, cross groups or fail on unknown ids.
+func _check_groups() -> void:
+	var group_ids := PuzzleCatalog.group_ids()
+	check(group_ids == (["arrowspark_levels", "foundations", "puzzle_lab"] as Array[String]),
+		"groups are presented in the planned order")
+	var total := 0
+	for group_id in group_ids:
+		check(not PuzzleCatalog.group_title(group_id).is_empty(), "group '%s' has a display title" % group_id)
+		total += PuzzleCatalog.ids_in_group(group_id).size()
+	check(total == PuzzleCatalog.count(), "group membership covers every catalog entry exactly once")
+	check(PuzzleCatalog.ids_in_group("foundations").size() == 8, "Foundations has 8 entries")
+	check(PuzzleCatalog.ids_in_group("puzzle_lab").size() == 13, "Puzzle Lab has 13 entries")
+	check(PuzzleCatalog.ids_in_group("arrowspark_levels").size() == 1, "ArrowSpark Levels has 1 entry")
+	for i in range(PuzzleCatalog.count()):
+		var id := PuzzleCatalog.id_at(i)
+		check(group_ids.has(PuzzleCatalog.group_of(id)), "entry '%s' has a valid group" % id)
+	check(PuzzleCatalog.group_of("canvas_validation") == "puzzle_lab", "canvas_validation is in Puzzle Lab")
+	check(PuzzleCatalog.group_of("reference_knot") == "arrowspark_levels", "reference_knot is in ArrowSpark Levels")
+
+	check(PuzzleCatalog.group_position("intro") == 1, "intro is first in Foundations")
+	check(PuzzleCatalog.group_position("subtle_blockers") == 8, "subtle_blockers is eighth in Foundations")
+	check(PuzzleCatalog.group_position("nested_chain") == 1, "nested_chain is first in Puzzle Lab")
+	check(PuzzleCatalog.group_position("knot_boundary") == 13, "knot_boundary is thirteenth in Puzzle Lab")
+	check(PuzzleCatalog.group_position("reference_knot") == 1, "reference_knot is first in ArrowSpark Levels")
+	check(PuzzleCatalog.next_in_group("intro") == "first_bend", "next_in_group advances within a group")
+	check(PuzzleCatalog.next_in_group("subtle_blockers") == "", "next_in_group ends at the last Foundations entry")
+	check(PuzzleCatalog.next_in_group("knot_boundary") == "", "next_in_group ends at the last Puzzle Lab entry")
+	check(PuzzleCatalog.next_in_group("reference_knot") == "", "next_in_group ends at the last ArrowSpark Levels entry")
+	check(PuzzleCatalog.group_of("no_such_id") == "", "group_of an unknown id is empty")
+	check(PuzzleCatalog.group_position("no_such_id") == 0, "group_position of an unknown id is 0")
+	check(PuzzleCatalog.next_in_group("no_such_id") == "", "next_in_group of an unknown id is empty")
+	check(PuzzleCatalog.group_title("no_such_group") == "", "group_title of an unknown group is empty")
+	check(PuzzleCatalog.ids_in_group("no_such_group").is_empty(), "ids_in_group of an unknown group is empty")
 
 ## Order-independent text of a definition: dimensions, then every head in
 ## (y, x) order with its direction and ordered tail cells.
@@ -357,6 +395,24 @@ func _check_catalog_wide_order_independence() -> void:
 		var id := PuzzleCatalog.id_at(i)
 		_check_order_independence_at_every_branch(PuzzleCatalog.get_definition(id), "catalog entry '%s'" % id)
 
+## Next Puzzle is scoped to the current puzzle's own group: each group's last
+## entry has no next, never crossing into another group and never wrapping.
+func _check_group_scoped_progression() -> void:
+	for group_id in PuzzleCatalog.group_ids():
+		var members := PuzzleCatalog.ids_in_group(group_id)
+		for i in range(members.size() - 1):
+			PuzzleSession.set_current_id(members[i])
+			check(PuzzleSession.has_next() and PuzzleSession.advance_to_next(),
+				"'%s' advances within %s" % [members[i], group_id])
+			check(PuzzleSession.get_current_id() == members[i + 1],
+				"'%s' advances to the next entry of its own group" % members[i])
+		var last: String = members.back()
+		PuzzleSession.set_current_id(last)
+		check(not PuzzleSession.has_next(), "'%s' ends %s with no next entry" % [last, group_id])
+		check(not PuzzleSession.advance_to_next(), "advancing from '%s' at its group's end is a no-op" % last)
+		check(PuzzleSession.get_current_id() == last, "the current id is unchanged at the end of %s" % group_id)
+	PuzzleSession.set_current_id("")
+
 func _check_next_from_fourteenth_reaches_canvas_validation() -> void:
 	PuzzleSession.set_current_id(PuzzleCatalog.id_at(13))
 	check(PuzzleSession.has_next(), "the fourteenth puzzle offers a next entry")
@@ -393,12 +449,14 @@ func _initialize() -> void:
 	_check_original_entries_unchanged()
 	_check_canvas_validation_fixture()
 	_check_knot_entries()
+	_check_groups()
 	_check_id_independent_of_position()
 	_check_fresh_and_isolated_definitions()
 	_check_no_difficulty_labels()
 	_check_experimental_puzzle_properties()
 	_check_catalog_wide_order_independence()
 	_check_next_from_fourteenth_reaches_canvas_validation()
+	_check_group_scoped_progression()
 	_check_puzzle_session_defaults_and_navigation()
 	print("PUZZLE_CATALOG_FAILURES=", failures)
 	quit(1 if failures else 0)

@@ -9,9 +9,10 @@ Nine independent checks run, in execution order:
    dependency graphs, witness walks, determinism and non-mutation.
 3. Pure catalog/session regressions (tests/puzzle_catalog_check.gd) against
    the same bare project, including scripts/puzzle/puzzle_catalog.gd and
-   scripts/puzzle_session.gd. Checks all 21 catalog entries: eight baseline
-   puzzles, six structural experiments, one large-canvas fixture and six
-   Gordian Knot experiments; preserves the original 14-entry fingerprint
+   scripts/puzzle_session.gd. Checks all 22 catalog entries: eight baseline
+   puzzles, six structural experiments, one large-canvas fixture, six
+   Gordian Knot experiments and the Reference Knot, plus the three purpose
+   groups (Foundations, Puzzle Lab, ArrowSpark Levels) and their queries; preserves the original 14-entry fingerprint
    baseline and checks session selection and advancement.
 4. Pure scoreboard checks (tests/puzzle_scoreboard_check.gd) against the
    same bare project. PuzzleScoreboard operates on result Dictionaries
