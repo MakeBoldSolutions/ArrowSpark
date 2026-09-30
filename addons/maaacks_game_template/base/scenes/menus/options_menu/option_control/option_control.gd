@@ -133,7 +133,7 @@ func _set(property : StringName, value : Variant) -> bool:
 		return true
 	return false
 
-func _get_property_list():
+func _get_property_list() -> Array[Dictionary]:
 	return [
 		{ "name": "value", "type": property_type, "usage": PROPERTY_USAGE_NONE},
 		{ "name": "default_value", "type": property_type}
