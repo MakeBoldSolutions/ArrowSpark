@@ -1,0 +1,737 @@
+{
+  "generated_at": "2026-09-30T12:59:03.9460578+00:00",
+  "audit_parameters": {
+    "months": 12,
+    "scope": "full",
+    "compare_baseline": "2025-09",
+    "since_date": "2025-09-30",
+    "start_month": "2025-09",
+    "end_month": "2026-09"
+  },
+  "repo": {
+    "name": "ArrowGame",
+    "root": "C:/GitHub/MakeBoldSolutions/ArrowGame",
+    "remote_origin": "https://github.com/MakeBoldSolutions/ArrowSpark.git",
+    "default_branch": "main"
+  },
+  "summary": {
+    "total_commits": 70,
+    "total_commits_in_window": 70,
+    "total_contributors": 2,
+    "total_tags": 0,
+    "history_span_days": 3
+  },
+  "timeline": {
+    "first_commit": {
+      "sha": "e228500c67b2c0e85cbea72a13e633e79c5480dd",
+      "date": "2026-09-26T10:41:03-05:00",
+      "role": "Lead Architect",
+      "subject": "Initial project from Godot game template"
+    },
+    "latest_commit": {
+      "sha": "dd82a9b0968f742787c50954efa16ebf7c5414f5",
+      "date": "2026-09-29T21:07:47-05:00",
+      "role": "Lead Architect",
+      "subject": "feat: update requirements and clarifications for the ArrowSpark Reference Puzzle"
+    },
+    "commits_by_year": {
+      "2026": 70
+    },
+    "commits_by_month": {
+      "2026-09": 70
+    }
+  },
+  "contributors": {
+    "top": [
+      {
+        "role": "Lead Architect",
+        "commits": 69
+      },
+      {
+        "role": "Developer A",
+        "commits": 1
+      }
+    ],
+    "all_count": 2,
+    "monthly_by_role": {
+      "2026-09": {
+        "Lead Architect": 69,
+        "Developer A": 1
+      }
+    }
+  },
+  "contributor_census": {
+    "role_assignments": [
+      {
+        "role": "Lead Architect",
+        "commits": 69
+      },
+      {
+        "role": "Developer A",
+        "commits": 1
+      }
+    ]
+  },
+  "volume_metrics": {
+    "total_commits": 70,
+    "monthly_commit_distribution": {
+      "2026-09": 70
+    },
+    "merged_pr_count": 3,
+    "file_types_top": [
+      {
+        "extension": "md",
+        "touched_files": 674
+      },
+      {
+        "extension": "gd",
+        "touched_files": 209
+      },
+      {
+        "extension": "png",
+        "touched_files": 145
+      },
+      {
+        "extension": "uid",
+        "touched_files": 138
+      },
+      {
+        "extension": "tscn",
+        "touched_files": 127
+      },
+      {
+        "extension": "import",
+        "touched_files": 39
+      },
+      {
+        "extension": "json",
+        "touched_files": 37
+      },
+      {
+        "extension": "ps1",
+        "touched_files": 36
+      },
+      {
+        "extension": "py",
+        "touched_files": 36
+      },
+      {
+        "extension": "sh",
+        "touched_files": 36
+      },
+      {
+        "extension": "log",
+        "touched_files": 29
+      },
+      {
+        "extension": "txt",
+        "touched_files": 20
+      },
+      {
+        "extension": "tres",
+        "touched_files": 16
+      },
+      {
+        "extension": "yml",
+        "touched_files": 6
+      },
+      {
+        "extension": "pyc",
+        "touched_files": 4
+      },
+      {
+        "extension": "svg",
+        "touched_files": 4
+      },
+      {
+        "extension": "translation",
+        "touched_files": 4
+      },
+      {
+        "extension": "version",
+        "touched_files": 3
+      },
+      {
+        "extension": "baseline",
+        "touched_files": 3
+      },
+      {
+        "extension": "ttf",
+        "touched_files": 3
+      }
+    ],
+    "largest_merges": [
+      {
+        "sha": "8a00239b2fdb2a05ccbbb11a0ac96fab28353914",
+        "subject": "Merge pull request #2 from MakeBoldSolutions/009-spec-gordian-knot-experiments",
+        "files_changed": 56,
+        "additions": 21197,
+        "deletions": 39,
+        "total_lines": 21236
+      },
+      {
+        "sha": "287a5f009cf67773b7e9425ea0c0f4ba45ab5352",
+        "subject": "Merge continuous arrow visuals into master",
+        "files_changed": 121,
+        "additions": 14491,
+        "deletions": 50,
+        "total_lines": 14541
+      },
+      {
+        "sha": "faa45758a24cc6ed278699a471b5944dbefebfea",
+        "subject": "Merge pull request #1 from MakeBoldSolutions/008-spec-large-zoomable-canvas",
+        "files_changed": 96,
+        "additions": 8135,
+        "deletions": 158,
+        "total_lines": 8293
+      },
+      {
+        "sha": "312b0c7d72471912598dc7017c83b3f2f9fe3e7f",
+        "subject": "Merge pull request #3 from MakeBoldSolutions/chore/address-site-audit-2026-09-29",
+        "files_changed": 11,
+        "additions": 7079,
+        "deletions": 68,
+        "total_lines": 7147
+      },
+      {
+        "sha": "7b403ab01e85d8e77ab27ddd96682ecc74f4e005",
+        "subject": "Merge branch '002-spec-multi-arrow-solvability' into master",
+        "files_changed": 131,
+        "additions": 5135,
+        "deletions": 22,
+        "total_lines": 5157
+      },
+      {
+        "sha": "6aaf79d15fd9d82b6ebf83d77244c7bf6834c3d4",
+        "subject": "Merge branch '005-spec-multiple-puzzles'",
+        "files_changed": 57,
+        "additions": 3288,
+        "deletions": 75,
+        "total_lines": 3363
+      },
+      {
+        "sha": "f53469161728569432837c286791f80b655ca0bd",
+        "subject": "Merge 007-spec-open-move-scoring: Open Move assist and session scoring",
+        "files_changed": 55,
+        "additions": 3307,
+        "deletions": 41,
+        "total_lines": 3348
+      },
+      {
+        "sha": "92fba25b4ac4f8bcecbafa54d37649393464f89e",
+        "subject": "Merge branch '004-spec-path-following-departure'",
+        "files_changed": 46,
+        "additions": 2399,
+        "deletions": 88,
+        "total_lines": 2487
+      }
+    ]
+  },
+  "commit_message_metrics": {
+    "conventional_commit_count": 38,
+    "informal_commit_count": 0,
+    "spec_reference_commit_count": 10
+  },
+  "test_metrics": {
+    "test_file_count": 33,
+    "test_related_commit_count": 41
+  },
+  "governance_maturity": {
+    "constitution_path": "C:\\GitHub\\MakeBoldSolutions\\ArrowGame\\.knowledge\\governance\\constitution.md",
+    "constitution_exists": true,
+    "constitution_version": "> 2.0.1",
+    "constitution_amendment_count": 0
+  },
+  "milestones": {
+    "tags": [],
+    "readme_evolution": {
+      "total_readme_commits": 2,
+      "commits": [
+        {
+          "sha": "0ea27a6a376ee95f39d6f3f434508ac8ea2c1c4d",
+          "date": "2026-09-28T17:18:23-05:00",
+          "role": "Lead Architect",
+          "subject": "Rebrand repo-facing docs to ArrowSpark / Make Bold Solutions"
+        },
+        {
+          "sha": "e228500c67b2c0e85cbea72a13e633e79c5480dd",
+          "date": "2026-09-26T10:41:03-05:00",
+          "role": "Lead Architect",
+          "subject": "Initial project from Godot game template"
+        }
+      ]
+    }
+  },
+  "change_patterns": {
+    "subject_type_estimates": {
+      "other": 7,
+      "chore": 1,
+      "docs": 5,
+      "features": 34,
+      "tests": 14,
+      "ci_build": 1,
+      "fixes": 5,
+      "refactor": 3
+    },
+    "hotspots": [
+      {
+        "path": ".knowledge/index.json",
+        "changes": 14
+      },
+      {
+        "path": "tests/puzzle_layout_check.gd",
+        "changes": 9
+      },
+      {
+        "path": "tests/README.md",
+        "changes": 9
+      },
+      {
+        "path": "tests/run_puzzle_regressions.py",
+        "changes": 9
+      },
+      {
+        "path": ".knowledge/architecture/arrow-puzzle.md",
+        "changes": 9
+      },
+      {
+        "path": ".knowledge/architecture/save-progression.md",
+        "changes": 7
+      },
+      {
+        "path": "tests/save_input_regression.gd",
+        "changes": 7
+      },
+      {
+        "path": ".devspark.work/specs/001-spec-first-playable-arrow-puzzle/tasks.md",
+        "changes": 7
+      },
+      {
+        "path": ".devspark.work/specs/002-spec-multi-arrow-solvability/spec.md",
+        "changes": 6
+      },
+      {
+        "path": "scenes/puzzle/arrow_view.gd",
+        "changes": 6
+      },
+      {
+        "path": "scenes/puzzle/puzzle_board.gd",
+        "changes": 6
+      },
+      {
+        "path": "scenes/puzzle/arrow_puzzle.gd",
+        "changes": 6
+      },
+      {
+        "path": ".devspark.work/specs/002-spec-multi-arrow-solvability/tasks.md",
+        "changes": 6
+      },
+      {
+        "path": "tests/run_regressions.py",
+        "changes": 5
+      },
+      {
+        "path": "scenes/puzzle/puzzle_results.gd",
+        "changes": 5
+      },
+      {
+        "path": ".devspark.work/specs/004-spec-path-following-departure/tasks.md",
+        "changes": 5
+      },
+      {
+        "path": "tests/puzzle_presentation_check.gd",
+        "changes": 5
+      },
+      {
+        "path": ".devspark.work/specs/001-spec-first-playable-arrow-puzzle/spec.md",
+        "changes": 5
+      },
+      {
+        "path": "tests/puzzle_catalog_check.gd",
+        "changes": 5
+      },
+      {
+        "path": ".knowledge/ontology/coverage.json",
+        "changes": 5
+      },
+      {
+        "path": "scenes/puzzle/arrow_puzzle.tscn",
+        "changes": 5
+      },
+      {
+        "path": ".devspark.work/specs/008-spec-large-zoomable-canvas/spec.md",
+        "changes": 4
+      },
+      {
+        "path": ".devspark.work/specs/005-spec-multiple-puzzles/spec.md",
+        "changes": 4
+      },
+      {
+        "path": ".devspark.work/specs/008-spec-large-zoomable-canvas/plan.md",
+        "changes": 4
+      },
+      {
+        "path": "scenes/puzzle/puzzle_results.tscn",
+        "changes": 4
+      },
+      {
+        "path": "scripts/puzzle/puzzle_feedback.gd",
+        "changes": 4
+      },
+      {
+        "path": ".devspark.work/specs/001-spec-first-playable-arrow-puzzle/plan.md",
+        "changes": 4
+      },
+      {
+        "path": "CLAUDE.md",
+        "changes": 4
+      },
+      {
+        "path": "tests/puzzle_regression.gd",
+        "changes": 4
+      },
+      {
+        "path": "scenes/menus/main_menu/main_menu_with_animations.tscn",
+        "changes": 4
+      },
+      {
+        "path": ".devspark.work/specs/004-spec-path-following-departure/spec.md",
+        "changes": 4
+      },
+      {
+        "path": ".devspark.work/specs/008-spec-large-zoomable-canvas/tasks.md",
+        "changes": 4
+      },
+      {
+        "path": ".devspark.work/specs/003-spec-continuous-arrow-visuals/spec.md",
+        "changes": 4
+      },
+      {
+        "path": "scripts/puzzle/puzzle_catalog.gd",
+        "changes": 4
+      },
+      {
+        "path": ".knowledge/product/branding.md",
+        "changes": 3
+      },
+      {
+        "path": ".knowledge/architecture/game-visual-system.md",
+        "changes": 3
+      },
+      {
+        "path": ".devspark.work/specs/001-spec-first-playable-arrow-puzzle/gates/critic.md",
+        "changes": 3
+      },
+      {
+        "path": "scenes/menus/main_menu/main_menu_with_animations.gd",
+        "changes": 3
+      },
+      {
+        "path": ".knowledge/governance/constitution.md",
+        "changes": 3
+      },
+      {
+        "path": ".devspark.work/specs/001-spec-first-playable-arrow-puzzle/quickstart.md",
+        "changes": 3
+      },
+      {
+        "path": ".devspark.work/specs/004-spec-path-following-departure/gates/critic.md",
+        "changes": 3
+      },
+      {
+        "path": ".devspark.work/specs/003-spec-continuous-arrow-visuals/tasks.md",
+        "changes": 3
+      },
+      {
+        "path": ".devspark/templates/plan-template.md",
+        "changes": 3
+      },
+      {
+        "path": ".devspark.work/specs/002-spec-multi-arrow-solvability/contracts/puzzle.md",
+        "changes": 3
+      },
+      {
+        "path": "ATTRIBUTION.md",
+        "changes": 3
+      },
+      {
+        "path": ".devspark.work/specs/004-spec-path-following-departure/gates/verification.md",
+        "changes": 3
+      },
+      {
+        "path": "addons/maaacks_game_template/base/scenes/autoloads/app_config.gd",
+        "changes": 3
+      },
+      {
+        "path": ".devspark.work/specs/001-spec-first-playable-arrow-puzzle/gates/analyze.md",
+        "changes": 3
+      },
+      {
+        "path": ".gitignore",
+        "changes": 3
+      },
+      {
+        "path": ".devspark.work/specs/002-spec-multi-arrow-solvability/plan.md",
+        "changes": 3
+      }
+    ]
+  },
+  "technical_signals": {
+    "language_presence": {
+      "python": true,
+      "javascript": false,
+      "typescript": false,
+      "powershell": true,
+      "shell": true,
+      "markdown": true
+    },
+    "has_pyproject_toml": false,
+    "has_package_json": false,
+    "has_dockerfile": false,
+    "has_github_actions": true
+  },
+  "recent": {
+    "commits": [
+      {
+        "sha": "dd82a9b0968f742787c50954efa16ebf7c5414f5",
+        "date": "2026-09-29T21:07:47-05:00",
+        "role": "Lead Architect",
+        "subject": "feat: update requirements and clarifications for the ArrowSpark Reference Puzzle"
+      },
+      {
+        "sha": "e5cc3cbc9cc83f55a8a29b8d539d19914cc96624",
+        "date": "2026-09-29T20:59:47-05:00",
+        "role": "Lead Architect",
+        "subject": "feat: add initial specification and requirements for the ArrowSpark Reference Puzzle"
+      },
+      {
+        "sha": "312b0c7d72471912598dc7017c83b3f2f9fe3e7f",
+        "date": "2026-09-29T20:50:35-05:00",
+        "role": "Lead Architect",
+        "subject": "Merge pull request #3 from MakeBoldSolutions/chore/address-site-audit-2026-09-29"
+      },
+      {
+        "sha": "498e714239f008d6556e1950c4eef49baf4a4fc5",
+        "date": "2026-09-29T20:50:21-05:00",
+        "role": "Lead Architect",
+        "subject": "feat: add pull request review documentation and site audit evidence"
+      },
+      {
+        "sha": "b4864edeae36bef180d6cdc8b5fa0d86cd5c1bf6",
+        "date": "2026-09-29T10:49:40-05:00",
+        "role": "Lead Architect",
+        "subject": "Add regression and structural audit logs for September 29, 2026"
+      },
+      {
+        "sha": "8a00239b2fdb2a05ccbbb11a0ac96fab28353914",
+        "date": "2026-09-29T09:17:06-05:00",
+        "role": "Lead Architect",
+        "subject": "Merge pull request #2 from MakeBoldSolutions/009-spec-gordian-knot-experiments"
+      },
+      {
+        "sha": "1ea93a806323686229f202cb1450f268dd5a16d6",
+        "date": "2026-09-29T09:15:38-05:00",
+        "role": "Lead Architect",
+        "subject": "feat: add detailed PR review documentation for six Gordian Knot puzzles and structural experiments"
+      },
+      {
+        "sha": "973bc9350cf681fd1012f047c4ab86d4e04df985",
+        "date": "2026-09-29T08:38:06-05:00",
+        "role": "Lead Architect",
+        "subject": "fix: clarify the impact of structural and geometric puzzle experiments on level composition"
+      },
+      {
+        "sha": "bd61aa80023508c8a6389cc2a5003e22b00939dc",
+        "date": "2026-09-29T07:50:29-05:00",
+        "role": "Lead Architect",
+        "subject": "feat: add summary documentation for Spec 008 - Large Zoomable Puzzle Canvas and implement run-app script"
+      },
+      {
+        "sha": "c62181768282b6371ae40b0d6a41a89e45ab510d",
+        "date": "2026-09-29T07:37:10-05:00",
+        "role": "Lead Architect",
+        "subject": "Spec 009: add six Gordian Knot experiment puzzles, report tooling and evidence"
+      },
+      {
+        "sha": "0ea27a6a376ee95f39d6f3f434508ac8ea2c1c4d",
+        "date": "2026-09-28T17:18:23-05:00",
+        "role": "Lead Architect",
+        "subject": "Rebrand repo-facing docs to ArrowSpark / Make Bold Solutions"
+      },
+      {
+        "sha": "faa45758a24cc6ed278699a471b5944dbefebfea",
+        "date": "2026-09-28T15:45:23-05:00",
+        "role": "Developer A",
+        "subject": "Merge pull request #1 from MakeBoldSolutions/008-spec-large-zoomable-canvas"
+      },
+      {
+        "sha": "a60c1712f0030a57e9cc03591af29f6b45ccd215",
+        "date": "2026-09-28T14:23:23-05:00",
+        "role": "Lead Architect",
+        "subject": "Add visual and viewport transform tests for puzzle canvas"
+      },
+      {
+        "sha": "924280f936733cf1d6b3bc7d4fd1a76d11e11901",
+        "date": "2026-09-28T11:15:31-05:00",
+        "role": "Lead Architect",
+        "subject": "feat: Update documentation for Spec 008 - Large Zoomable Puzzle Canvas, reflecting current status and implementation details"
+      },
+      {
+        "sha": "b165b1750ab8d3422a710b696a64ea1c69de712b",
+        "date": "2026-09-28T09:40:22-05:00",
+        "role": "Lead Architect",
+        "subject": "Add full specification, analysis, and critique for Open Move scoring feature"
+      },
+      {
+        "sha": "4ea159d8ab564bd554370f6748ab05e2a4c855bf",
+        "date": "2026-09-28T09:38:27-05:00",
+        "role": "Lead Architect",
+        "subject": "feat: Enhance Large Zoomable Puzzle Canvas specifications and tasks for improved clarity and functionality"
+      },
+      {
+        "sha": "4070c6e159a983495f24993210a2428f073cae0c",
+        "date": "2026-09-28T09:29:02-05:00",
+        "role": "Lead Architect",
+        "subject": "feat: Update Large Zoomable Puzzle Canvas specifications and tasks for improved clarity and functionality"
+      },
+      {
+        "sha": "ada2ae24b725cf13b9f5586a7d2f6f15c8b0f6d5",
+        "date": "2026-09-28T09:07:43-05:00",
+        "role": "Lead Architect",
+        "subject": "Add specification and tasks for Large Zoomable Puzzle Canvas feature"
+      },
+      {
+        "sha": "0c35c3979674f10ebb583fdad901171bb42e79a7",
+        "date": "2026-09-28T08:04:03-05:00",
+        "role": "Lead Architect",
+        "subject": "feat: Add knowledge integrity validation script and supporting files"
+      },
+      {
+        "sha": "f53469161728569432837c286791f80b655ca0bd",
+        "date": "2026-09-28T07:42:24-05:00",
+        "role": "Lead Architect",
+        "subject": "Merge 007-spec-open-move-scoring: Open Move assist and session scoring"
+      },
+      {
+        "sha": "0468e54a3101e04c991915003511e75451a6b053",
+        "date": "2026-09-28T07:40:56-05:00",
+        "role": "Lead Architect",
+        "subject": "feat: Update status to complete and verify user stories for Open Move Assistance and Session Scoring"
+      },
+      {
+        "sha": "83062c5c4af9753c720ae114479b1430fbc2b5cd",
+        "date": "2026-09-27T21:18:29-05:00",
+        "role": "Lead Architect",
+        "subject": "feat: Implement Open Move Assistance and Session Scoring"
+      },
+      {
+        "sha": "7edd8e11a1c5fe75ace7b2e5976ea7544e20603e",
+        "date": "2026-09-27T13:36:48-05:00",
+        "role": "Lead Architect",
+        "subject": "docs(spec): add Spec 006 report summarizing implementation and playtest findings"
+      },
+      {
+        "sha": "207bc2e058ed1a74b86e92783e7a2c512127f920",
+        "date": "2026-09-27T13:17:10-05:00",
+        "role": "Lead Architect",
+        "subject": "Add PuzzleAnalyzer tests and structural report"
+      },
+      {
+        "sha": "3bfc26fd28b39a9420b2f94b19e00204c1f578fd",
+        "date": "2026-09-27T11:51:32-05:00",
+        "role": "Lead Architect",
+        "subject": "feat: Add PuzzleAnalyzer and new puzzles for structural analysis"
+      },
+      {
+        "sha": "316d09c62cdc0f42a8301abe6bae2e0b7a75f2c7",
+        "date": "2026-09-27T09:23:42-05:00",
+        "role": "Lead Architect",
+        "subject": "feat(branding): update product identity and branding hierarchy in project files"
+      },
+      {
+        "sha": "6aaf79d15fd9d82b6ebf83d77244c7bf6834c3d4",
+        "date": "2026-09-27T08:50:36-05:00",
+        "role": "Lead Architect",
+        "subject": "Merge branch '005-spec-multiple-puzzles'"
+      },
+      {
+        "sha": "0c8572d8831789059f541a7f85444b0d05914521",
+        "date": "2026-09-27T08:50:29-05:00",
+        "role": "Lead Architect",
+        "subject": "feat(spec): implement Spec 005 — puzzle catalog, session selection, Level Select, Next Puzzle"
+      },
+      {
+        "sha": "e9cf351b837016b71fd768314c5ce72b039bda80",
+        "date": "2026-09-27T08:08:53-05:00",
+        "role": "Lead Architect",
+        "subject": "feat(spec): enhance Level Select with focus handling and clarify HUD puzzle identity"
+      },
+      {
+        "sha": "fe388e9ec42b1b7759583b44e41dddcb6ad6a000",
+        "date": "2026-09-27T01:01:44-05:00",
+        "role": "Lead Architect",
+        "subject": "feat(spec): generate tasks.md for Spec 005 (26 tasks, 3 user stories)"
+      },
+      {
+        "sha": "91635f1ca481d275cd5b2b69b3dc7a930168bec8",
+        "date": "2026-09-27T00:59:21-05:00",
+        "role": "Lead Architect",
+        "subject": "feat(spec): plan Spec 005 — puzzle catalog, session selection, Level Select"
+      },
+      {
+        "sha": "5e47dfe1e5928e60ea6e2c6ce0f170b872c7e0d3",
+        "date": "2026-09-27T00:53:11-05:00",
+        "role": "Lead Architect",
+        "subject": "docs(spec): clarify pause-menu Restart and keyboard/gamepad nav for Spec 005"
+      },
+      {
+        "sha": "7eca51230a2e391552b5cfbccaa06677291c54d1",
+        "date": "2026-09-27T00:47:06-05:00",
+        "role": "Lead Architect",
+        "subject": "feat(spec): add Spec 005 — multiple authored puzzles, session-only selection"
+      },
+      {
+        "sha": "92fba25b4ac4f8bcecbafa54d37649393464f89e",
+        "date": "2026-09-27T00:40:23-05:00",
+        "role": "Lead Architect",
+        "subject": "Merge branch '004-spec-path-following-departure'"
+      },
+      {
+        "sha": "63dd3f5982074505daf4809208b7ae31d73c2381",
+        "date": "2026-09-27T00:40:14-05:00",
+        "role": "Lead Architect",
+        "subject": "chore(spec): close out T025/T026 via user acceptance and mark spec complete"
+      },
+      {
+        "sha": "15db1415b861f159d171cd137af5cb0d88ee1236",
+        "date": "2026-09-27T00:34:18-05:00",
+        "role": "Lead Architect",
+        "subject": "fix(tests): keep the manual visual fixture open and visible"
+      },
+      {
+        "sha": "d136d18af780b5021968385ef66b6428d4cd380e",
+        "date": "2026-09-26T23:03:59-05:00",
+        "role": "Lead Architect",
+        "subject": "feat: Implement path-following arrow departure (US1-US3)"
+      },
+      {
+        "sha": "4a8a28dec0ca363d69806e5e3c6b60da7ab3b05c",
+        "date": "2026-09-26T22:34:01-05:00",
+        "role": "Lead Architect",
+        "subject": "chore(gates): refresh analyze/critic gate reports after spec/tasks revision"
+      },
+      {
+        "sha": "a3bd9ee5ef5f5f44b978f73693c4aba3787ff813",
+        "date": "2026-09-26T22:30:28-05:00",
+        "role": "Lead Architect",
+        "subject": "fix(spec): clarify manual visual acceptance criteria and harden task linkages"
+      },
+      {
+        "sha": "f553ff978e3a6cb05a5533fdd53b445bf810429e",
+        "date": "2026-09-26T22:12:55-05:00",
+        "role": "Lead Architect",
+        "subject": "feat: Implement path-following arrow departure feature"
+      }
+    ]
+  }
+}

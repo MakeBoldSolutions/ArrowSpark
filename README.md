@@ -67,6 +67,9 @@ about independently of presentation.
   for specification, planning, and review; see [`AGENTS.md`](AGENTS.md) and
   [`CLAUDE.md`](CLAUDE.md) for the resolution rules those commands follow, and
   `.knowledge/` for durable architecture and product documentation.
+- **Repo story**: [repo-story-2026-09-30.md](.knowledge/guides/repo-story/repo-story-2026-09-30.md)
+  is an evidence-based narrative of the development history, contributor patterns,
+  and architecture.
 - **Continuous integration**: [`.github/workflows/godot-regression-tests.yml`](.github/workflows/godot-regression-tests.yml)
   runs both launchers on every push and pull request to `main`.
 
