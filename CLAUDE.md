@@ -34,6 +34,10 @@ prefer explicit types where they aid clarity; keep changes small and justify new
 
 ## Recent Changes
 
+- Puzzle catalog now has purpose groups (Foundations, Puzzle Lab, ArrowSpark Levels) driving
+  Level Select sections, group-relative numbering and group-scoped Next Puzzle, plus a
+  hand-composed Reference Knot that Play starts — metadata only, no rule changes.
+
 - Spec 007 (in progress): extends `PuzzleState` with a deterministic Open Move
   lookup/assist counter and a revised score formula, and adds a new
   session-lifetime `PuzzleScoreboard` class for per-puzzle best scores and an
