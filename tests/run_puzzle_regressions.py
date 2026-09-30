@@ -1,41 +1,38 @@
 """Run headless Godot checks for the arrow puzzle without touching player data.
 
-Eight independent checks run:
+Nine independent checks run, in execution order:
 1. Pure rule regressions (tests/puzzle_regression.gd) against an isolated,
-   unique temporary project containing only the puzzle core scripts. No
-   scenes, addons or autoloads are needed since PuzzleState/PuzzleDefinition
-   have no Node, mouse, tween or persistence dependency.
-2. Pure catalog/session regressions (tests/puzzle_catalog_check.gd) against
-   the same bare temporary project as (1), extended with
-   scripts/puzzle/puzzle_catalog.gd and scripts/puzzle_session.gd:
-   PuzzleCatalog depends only on PuzzleDefinition, so it is safe to add
-   directly to the existing pure-rule-isolation project rather than a new
-   temporary project.
-3. Pure route-geometry regressions (tests/arrow_departure_geometry_check.gd)
-   against a second isolated, unique temporary project containing only
-   scripts/presentation/arrow_departure_geometry.gd. The helper takes its
-   style-ratio constants as constructor arguments rather than referencing
-   GameVisualStyle directly, so this suite needs no font/resource assets and
-   keeps the same pure-script isolation as the rule regressions above.
-4. Pure PuzzleScoreboard unit checks (tests/puzzle_scoreboard_check.gd)
-   against the same bare temporary project as (1)/(2): PuzzleScoreboard
-   operates purely on plain result Dictionaries with no PuzzleState/
-   PuzzleDefinition dependency of its own, so it is safe to add to the same
-   isolation project.
-5. Pure viewport-transform regressions (tests/puzzle_viewport_transform_check.gd)
-   against a third isolated, unique temporary project containing only
-   scripts/presentation/puzzle_viewport_transform.gd, which has no rule,
-   scene or asset dependency.
-6. A scene-based HUD/board layout and feedback-duration check
-   (tests/puzzle_layout_check.gd) against the real project (so the full
-   scene tree and addon autoloads are available), with the platform
-   application-data root redirected to an isolated temporary directory so no
-   player save/settings data is read or written.
-7. Integrated canvas navigation, transformed input and lifecycle checks
+   unique temporary project containing the puzzle core scripts. No scenes,
+   addons or autoloads are needed by the RefCounted rule classes.
+2. Pure structural-analysis regressions (tests/puzzle_analyzer_check.gd)
+   against the same bare project: hand-computed fixtures check geometry,
+   dependency graphs, witness walks, determinism and non-mutation.
+3. Pure catalog/session regressions (tests/puzzle_catalog_check.gd) against
+   the same bare project, including scripts/puzzle/puzzle_catalog.gd and
+   scripts/puzzle_session.gd. Checks all 21 catalog entries: eight baseline
+   puzzles, six structural experiments, one large-canvas fixture and six
+   Gordian Knot experiments; preserves the original 14-entry fingerprint
+   baseline and checks session selection and advancement.
+4. Pure scoreboard checks (tests/puzzle_scoreboard_check.gd) against the
+   same bare project. PuzzleScoreboard operates on result Dictionaries
+   independently of PuzzleState, PuzzleDefinition, scenes and fonts.
+5. Pure route-geometry regressions (tests/arrow_departure_geometry_check.gd)
+   against a second isolated project containing only
+   scripts/presentation/arrow_departure_geometry.gd. Style ratios are passed
+   as constructor arguments, so no GameVisualStyle or font assets are needed.
+6. Pure viewport-transform regressions (tests/puzzle_viewport_transform_check.gd)
+   against a third isolated project containing only
+   scripts/presentation/puzzle_viewport_transform.gd, with no rule, scene or
+   asset dependency.
+7. Scene-based HUD/board layout and feedback-duration checks
+   (tests/puzzle_layout_check.gd) against the imported real project, with the
+   application-data root redirected to an isolated temporary directory.
+8. Integrated canvas navigation, transformed input and lifecycle checks
    (tests/puzzle_canvas_check.gd) against the real project and the same
    isolated user-data root.
-8. Interaction, fonts and animation presentation checks after a real-project
-   import, sharing the layout suite's isolated user-data root.
+9. Interaction, fonts and animation presentation checks
+   (tests/puzzle_presentation_check.gd) against the real project, sharing
+   the layout and canvas suites' isolated user-data root.
 """
 
 from pathlib import Path

@@ -33,7 +33,7 @@ replace those interactive checks.
 Run `python tests/run_puzzle_regressions.py` (Python 3 and Godot on PATH), or
 use `python tests/run_puzzle_regressions.py --godot C:/path/to/godot.exe`.
 
-This runs eight independent headless checks:
+This runs nine independent headless checks, in execution order:
 
 1. Pure rule regressions (`tests/puzzle_regression.gd`) against an isolated,
    unique temporary project containing only the puzzle's core scripts
@@ -49,34 +49,8 @@ This runs eight independent headless checks:
    (including the exact 6.25% -> 6.3% tie); zero-tap accuracy; completed-state
    ignoring; and fresh-state Replay reset. Success requires exit code zero and
    `PUZZLE_FAILURES=0`.
-2. Pure catalog/session regressions (`tests/puzzle_catalog_check.gd`) against
-   the same bare temporary project as (1), extended with
-   `scripts/puzzle/puzzle_catalog.gd`, `scripts/puzzle/puzzle_analyzer.gd` and
-   `scripts/puzzle_session.gd` (no scenes, fonts or `GameVisualStyle`
-   dependency — `PuzzleCatalog` depends only on `PuzzleDefinition`). Pins the
-   original 14 entries' ids, order, dimensions and exact arrow/tail content by
-   fingerprint, checks the appended `canvas_validation` fixture (40x30, fifty-two
-   arrows, long bent arrows, all four directions, a tail-caused dependency, a
-   top-left open move, occupied corners) and the Next flow from puzzle 14, and
-   enumerates all 15 authored catalog entries (the original 8, 6 experimental
-   puzzles and the large-canvas fixture) asserting, for each: a unique, non-empty stable id
-   independent of array position; structural validity via
-   `PuzzleDefinition.is_valid()`; solver-confirmed solvability via
-   `PuzzleSolver.analyze()`; the returned witness replays against a fresh
-   `PuzzleState` clearing with zero mistakes; and no difficulty-tier wording in
-   any title. Also asserts each of the six experimental entries meets
-   its own exact `PuzzleAnalyzer`-derived threshold (dependency depth, cascade
-   fan-out, density, bent-tail dependency, blocker distance, board/edge count
-   — see `.knowledge/architecture/arrow-puzzle.md`'s "Structural Analysis"
-   section). Also covers `PuzzleCatalog.ids()/index_of()/get_definition()`
-   independent-copy and unknown-id sentinel behavior, fresh-and-isolated
-   `get_definition()` per call (including cross-id independence), and
-   `PuzzleSession`'s default/set/advance/has-next behavior including the
-   last-entry no-op and the invalid-id fallback. Fails loudly (never partially
-   skips a malformed entry) if any authored puzzle is malformed or unsolvable.
-   Success requires exit code zero and `PUZZLE_CATALOG_FAILURES=0`.
-3. Pure structural-analysis regressions (`tests/puzzle_analyzer_check.gd`)
-   against the same bare temporary project as (1)/(2) (no scenes, fonts or
+2. Pure structural-analysis regressions (`tests/puzzle_analyzer_check.gd`)
+   against the same bare temporary project as (1) (no scenes, fonts or
    `GameVisualStyle` dependency — `PuzzleAnalyzer` depends only on
    `PuzzleDefinition`/`PuzzleState`/`PuzzleSolver`). Fourteen hand-constructed
    synthetic fixtures with hand-computed expected values: an independent pair,
@@ -91,7 +65,40 @@ This runs eight independent headless checks:
    `canvas_validation` catalog fixture (solvable, fifty-two-arrow witness, bent
    arrows counted). Success requires
    exit code zero and `PUZZLE_ANALYZER_FAILURES=0`.
-4. Pure route-geometry regressions (`tests/arrow_departure_geometry_check.gd`)
+3. Pure catalog/session regressions (`tests/puzzle_catalog_check.gd`) against
+   the same bare temporary project as (1), extended with
+   `scripts/puzzle/puzzle_catalog.gd`, `scripts/puzzle/puzzle_analyzer.gd` and
+   `scripts/puzzle_session.gd` (no scenes, fonts or `GameVisualStyle`
+   dependency — `PuzzleCatalog` depends only on `PuzzleDefinition`). Pins the
+   original 14 entries' ids, order, dimensions and exact arrow/tail content by
+   fingerprint, checks the appended `canvas_validation` fixture (40x30, fifty-two
+   arrows, long bent arrows, all four directions, a tail-caused dependency, a
+   top-left open move, occupied corners) and the Next flow from puzzle 14, and
+   enumerates all 21 authored catalog entries (eight baseline puzzles, six
+   structural experiments, one large-canvas fixture and six Gordian Knot
+   experiments) asserting, for each: a unique, non-empty stable id
+   independent of array position; structural validity via
+   `PuzzleDefinition.is_valid()`; solver-confirmed solvability via
+   `PuzzleSolver.analyze()`; the returned witness replays against a fresh
+   `PuzzleState` clearing with zero mistakes; and no difficulty-tier wording in
+   any title. Also asserts each of the six structural experimental entries meets
+   its own exact `PuzzleAnalyzer`-derived threshold (dependency depth, cascade
+   fan-out, density, bent-tail dependency, blocker distance, board/edge count
+   — see `.knowledge/architecture/arrow-puzzle.md`'s "Structural Analysis"
+   section). Also covers `PuzzleCatalog.ids()/index_of()/get_definition()`
+   independent-copy and unknown-id sentinel behavior, fresh-and-isolated
+   `get_definition()` per call (including cross-id independence), and
+   `PuzzleSession`'s default/set/advance/has-next behavior including the
+   last-entry no-op and the invalid-id fallback. Fails loudly (never partially
+   skips a malformed entry) if any authored puzzle is malformed or unsolvable.
+   Success requires exit code zero and `PUZZLE_CATALOG_FAILURES=0`.
+4. Pure scoreboard checks (`tests/puzzle_scoreboard_check.gd`) against the
+   same bare temporary project: first completions establish session bests,
+   higher scores replace them, and tied or lower scores preserve them. Checks
+   also cover stored result fields, overall session score and independent
+   result copies. No scene, font or puzzle-rule dependency is required.
+   Success requires exit code zero and `PUZZLE_SCOREBOARD_FAILURES=0`.
+5. Pure route-geometry regressions (`tests/arrow_departure_geometry_check.gd`)
    against a second isolated, unique temporary project containing only
    `scripts/presentation/arrow_departure_geometry.gd` — no scenes, addons,
    fonts or GameVisualStyle dependency, since the helper takes its style-ratio
@@ -106,7 +113,7 @@ This runs eight independent headless checks:
    clearance in all four directions, and the tail-cap-dominance style-ratio
    guard. Success requires exit code zero and
    `ARROW_DEPARTURE_GEOMETRY_FAILURES=0`.
-5. Pure viewport-transform regressions (`tests/puzzle_viewport_transform_check.gd`)
+6. Pure viewport-transform regressions (`tests/puzzle_viewport_transform_check.gd`)
    against another isolated, unique temporary project containing only
    `scripts/presentation/puzzle_viewport_transform.gd`: fit margins and
    containment, logical/local inverse round trips, cell hit resolution, focal
@@ -114,7 +121,7 @@ This runs eight independent headless checks:
    no-op bounds never leaving fit mode, per-axis pan clamps, fit/manual resize
    policy, invalid/non-finite areas, padded head reveal and the World
    projection. Success requires exit code zero and `PUZZLE_VIEWPORT_FAILURES=0`.
-6. A scene-based HUD/board layout and feedback-duration check
+7. A scene-based HUD/board layout and feedback-duration check
    (`tests/puzzle_layout_check.gd`) against the real project — so the full
    scene/addon dependency graph is available — with `APPDATA`/`XDG_DATA_HOME`
    redirected to an isolated temporary directory so no player save/settings
@@ -124,11 +131,11 @@ This runs eight independent headless checks:
    resize and zero-extent recovery while paused, a combined concurrent-
    departure/pause/resize/resume scenario, setup-replacement disposal of
    in-flight departures, and that the blocked-cue duration constant does not
-   exceed its coded cap. Also covers every one of the 15 `PuzzleCatalog`
+   exceed its coded cap. Also covers every one of the 21 `PuzzleCatalog`
    entries played start-to-finish through the real scene (active view count,
    HUD puzzle label, unchanged scoring for a zero-mistake witness); Level
    Select's listing/ordering/titles, its initial keyboard/gamepad focus
-   placement on the first entry (critic-001), and selecting a non-first entry
+   placement on the first entry, and selecting a non-first entry
    loading that exact puzzle; and, driving the real
    `SceneLoader.reload_current_scene()`/`change_scene_to_packed()` path
    directly, that Replay/pause-menu Restart reload the currently selected
@@ -136,7 +143,7 @@ This runs eight independent headless checks:
    that Next Puzzle advances to the following catalog entry with fresh
    state, and that the last catalog puzzle's results omit `%NextPuzzleButton`.
    Success requires exit code zero and `PUZZLE_LAYOUT_FAILURES=0`.
-7. Integrated canvas checks (`tests/puzzle_canvas_check.gd`) against the real
+8. Integrated canvas checks (`tests/puzzle_canvas_check.gd`) against the real
    project and the same isolated user-data root: fit and layout of the large
    fixture and all original puzzles at 1280x720, 960x540, 800x800 and 1920x1080
    (no overlap, readable without navigation), wheel/middle-drag/button
@@ -151,7 +158,7 @@ This runs eight independent headless checks:
    exactly-once completion, results gating, per-attempt view reset and
    unchanged saved bytes. Success requires exit code zero and
    `PUZZLE_CANVAS_FAILURES=0`.
-8. Real-scene presentation checks (`tests/puzzle_presentation_check.gd`):
+9. Real-scene presentation checks (`tests/puzzle_presentation_check.gd`):
    ordered continuous geometry, cardinal heads, defensive copying, whole-cell
    GUI events, owner hover, interrupted red pulses, immediate normalized
    departures (including duplicate-start guards and exactly-once completion),
@@ -163,11 +170,11 @@ This runs eight independent headless checks:
    explicitly loads `PuzzleDefinition.create_fixed()` into the instantiated
    real scene's board/state (rather than whichever catalog entry
    `PuzzleSession` defaults to), so its exact-cell-position assertions stay
-   independent of the authored catalog content — check 5 above is the
+   independent of the authored catalog content — the layout check above is the
    catalog-generality coverage instead. Requires exit zero and
    `PUZZLE_PRESENTATION_FAILURES=0`.
 
-The launcher imports the real project before both scene checks, sharing one
+The launcher imports the real project before all three scene checks, sharing one
 temporary APPDATA/XDG_DATA_HOME root across import and scene processes. The
 pure-rule copy list remains independent of scenes and fonts. Each real-project
 process has a 180-second timeout (the canvas check alone takes about 35 seconds on an idle workstation and longer under load); missing markers, script errors and nonzero
