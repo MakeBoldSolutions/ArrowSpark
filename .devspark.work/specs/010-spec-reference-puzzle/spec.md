@@ -7,6 +7,9 @@ required_artifacts: spec, plan, tasks
 recommended_next_step: plan
 required_gates: checklist, analyze, critic, verify:end-to-end # end-to-end added: the puzzle must be proven through the real play/results/next-puzzle flow plus human playtest
 route_intent: full-spec
+archetype: game
+risk_profile: internal
+change_type: brownfield
 depends_on: []
 supersedes: []
 participants:
@@ -253,7 +256,7 @@ Everything that worked before still works, including for the new puzzle: Open Mo
 - **SC-003**: In the final playtest, the player names at least one neighborhood that was substantially progressed yet not completable until a dependency from another neighborhood was resolved.
 - **SC-004**: The player can identify and remove at least one bridge arrow and describe it as connecting or holding together separate areas; its removal is recorded as a visible simplification.
 - **SC-005**: The final playtest records no section where the player felt they were following an obvious sequence for too long, no section requiring a full rescan after every move, and no tedious cleanup at the end.
-- **SC-006**: The final playtest answers all fifteen required questions in writing, including the closing question, and the answer supports handing the level to someone else; if not, the spec status stays below Complete.
+- **SC-006**: The final playtest answers all fifteen required questions in writing, including the closing question, and the answer supports handing the level to someone else; if not, the spec status stays below Complete. The tester's prior exposure to this board and earlier candidates is recorded, and a tester who has not played it is preferred; a familiar-tester result is disclosed as a limitation.
 - **SC-007**: The design report contains all fourteen required items, with playtest observations for every serious iteration that was played, and contains zero invented scores or formulas.
 - **SC-008**: 22 of 22 catalog entries (21 existing plus the Reference Puzzle) belong to exactly one group, all existing puzzle ids resolve unchanged, and every entry is reachable from Level Select by keyboard/gamepad and pointer.
 - **SC-009**: A first-time viewer of Level Select can find the mature level's group without guidance, confirmed by at least one person other than the author.
