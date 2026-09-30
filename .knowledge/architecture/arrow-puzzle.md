@@ -499,7 +499,13 @@ which is always finite even when a geometric dependency cycle exists (a
 per-path visited set forbids revisiting a node, so a cycle simply ends that
 branch of the search rather than looping) — ties are broken deterministically
 by the lexicographically smallest head sequence under `PuzzleSolver`'s own
-existing (y, x)-ascending comparator. This is an analysis-only allowance over
+existing (y, x)-ascending comparator. When the graph is acyclic (every solvable
+definition) the chain is computed by dynamic programming in time linear in the
+edge count, returning exactly what the exhaustive simple-path search returns;
+only a graph containing a cycle runs that exhaustive search, which is
+exponential and cannot finish on dense boards. tests/puzzle_analyzer_check.gd
+asserts the two agree on random acyclic graphs and that a dense layered graph
+resolves instantly. This is an analysis-only allowance over
 a *candidate* definition; it never implies solvability or catalog eligibility
 — `PuzzleSolver.analyze(definition).solvable` remains the sole authority on
 completability, and the catalog regression gate remains the sole authority on

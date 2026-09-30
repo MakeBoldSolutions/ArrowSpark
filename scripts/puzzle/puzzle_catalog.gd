@@ -616,16 +616,17 @@ static func _build_knot_boundary() -> PuzzleDefinition:
 		tails[shape[0]] = _tail_along(vertices)
 	return PuzzleDefinition.new(48, 36, arrows, tails)
 
-## Reference Knot: a 46x32 board packed with long bent and straight arrows
-## (about 70% of the cells occupied) so little empty space remains. It grew
-## from a hand-composed skeleton: a north comb of six long parallel arrows held
-## by a row of vertical gates and an east wall, a chain along the top edge that
-## opens the gates, a full-width bridge arrow across the middle held by one bent
-## arrow, and tails along the bottom edge that hold the east wall. Long tails
-## were then added around that skeleton, found once by a seeded search that kept
-## every step solvable; the layout is fixed literal data, not generated at
-## runtime. Sequencing comes only from the ordinary blocking rules; nothing
-## here encodes a solve order.
+## Reference Knot: a 46x32 board packed with bent and straight arrows, over 90%
+## of the cells occupied and the longest over 40 cells, so almost no empty space
+## remains. It grew from a hand-composed skeleton: a north comb of six long
+## parallel arrows held by a row of vertical gates and an east wall, a chain
+## along the top edge that opens the gates, a full-width bridge arrow across the
+## middle held by one bent arrow, and tails along the bottom edge that hold the
+## east wall. Arrows were then added around that skeleton, long ones first and
+## short ones last to fill the gaps, found once by a seeded search that kept
+## every step solvable. The layout is fixed literal data, not generated at
+## runtime. Sequencing comes only from the ordinary blocking rules; nothing here
+## encodes a solve order.
 static func _build_reference_knot() -> PuzzleDefinition:
 	var d := PuzzleDefinition.Direction
 	var shapes := [
@@ -654,40 +655,96 @@ static func _build_reference_knot() -> PuzzleDefinition:
 		[Vector2i(22, 30), d.UP, [Vector2i(22, 30), Vector2i(22, 31), Vector2i(10, 31)]],
 		[Vector2i(34, 30), d.UP, [Vector2i(34, 30), Vector2i(34, 31), Vector2i(30, 31)]],
 		[Vector2i(44, 31), d.LEFT, [Vector2i(44, 31), Vector2i(45, 31), Vector2i(45, 1)]],
-		[Vector2i(21, 7), d.LEFT, [Vector2i(21, 7), Vector2i(23, 7), Vector2i(23, 9), Vector2i(10, 9)]],
-		[Vector2i(0, 3), d.UP, [Vector2i(0, 3), Vector2i(0, 15), Vector2i(5, 15), Vector2i(5, 13), Vector2i(1, 13), Vector2i(1, 14), Vector2i(4, 14)]],
-		[Vector2i(2, 3), d.LEFT, [Vector2i(2, 3), Vector2i(8, 3)]],
-		[Vector2i(23, 24), d.UP, [Vector2i(23, 24), Vector2i(23, 31), Vector2i(29, 31), Vector2i(29, 29), Vector2i(24, 29), Vector2i(24, 19), Vector2i(25, 19), Vector2i(25, 26)]],
-		[Vector2i(10, 19), d.LEFT, [Vector2i(10, 19), Vector2i(14, 19), Vector2i(14, 21), Vector2i(9, 21), Vector2i(9, 20), Vector2i(2, 20), Vector2i(2, 27), Vector2i(3, 27), Vector2i(3, 21), Vector2i(5, 21)]],
-		[Vector2i(18, 16), d.LEFT, [Vector2i(18, 16), Vector2i(26, 16), Vector2i(26, 8), Vector2i(29, 8), Vector2i(29, 1), Vector2i(25, 1), Vector2i(25, 0)]],
-		[Vector2i(39, 24), d.LEFT, [Vector2i(39, 24), Vector2i(43, 24), Vector2i(43, 28)]],
-		[Vector2i(28, 2), d.UP, [Vector2i(28, 2), Vector2i(28, 7), Vector2i(25, 7), Vector2i(25, 15), Vector2i(19, 15), Vector2i(19, 12), Vector2i(15, 12), Vector2i(15, 11), Vector2i(2, 11)]],
-		[Vector2i(36, 19), d.LEFT, [Vector2i(36, 19), Vector2i(44, 19), Vector2i(44, 20), Vector2i(34, 20)]],
-		[Vector2i(31, 29), d.LEFT, [Vector2i(31, 29), Vector2i(37, 29), Vector2i(37, 31), Vector2i(43, 31), Vector2i(43, 30), Vector2i(44, 30)]],
-		[Vector2i(32, 18), d.LEFT, [Vector2i(32, 18), Vector2i(43, 18)]],
-		[Vector2i(21, 26), d.UP, [Vector2i(21, 26), Vector2i(21, 30), Vector2i(14, 30), Vector2i(14, 24), Vector2i(18, 24), Vector2i(18, 29), Vector2i(20, 29), Vector2i(20, 24), Vector2i(19, 24), Vector2i(19, 27)]],
-		[Vector2i(38, 23), d.UP, [Vector2i(38, 23), Vector2i(38, 27), Vector2i(41, 27), Vector2i(41, 25), Vector2i(39, 25), Vector2i(39, 26), Vector2i(40, 26)]],
-		[Vector2i(8, 28), d.DOWN, [Vector2i(8, 28), Vector2i(8, 25), Vector2i(9, 25), Vector2i(9, 28), Vector2i(13, 28), Vector2i(13, 30), Vector2i(9, 30), Vector2i(9, 31)]],
-		[Vector2i(33, 8), d.DOWN, [Vector2i(33, 8), Vector2i(33, 3), Vector2i(31, 3), Vector2i(31, 1), Vector2i(33, 1), Vector2i(33, 2), Vector2i(32, 2)]],
-		[Vector2i(19, 5), d.UP, [Vector2i(19, 5), Vector2i(19, 8), Vector2i(22, 8)]],
-		[Vector2i(27, 6), d.DOWN, [Vector2i(27, 6), Vector2i(27, 2), Vector2i(25, 2), Vector2i(25, 6), Vector2i(26, 6), Vector2i(26, 3)]],
-		[Vector2i(23, 21), d.UP, [Vector2i(23, 21), Vector2i(23, 23), Vector2i(22, 23), Vector2i(22, 29)]],
-		[Vector2i(18, 19), d.UP, [Vector2i(18, 19), Vector2i(18, 21), Vector2i(15, 21), Vector2i(15, 18), Vector2i(8, 18), Vector2i(8, 19), Vector2i(6, 19)]],
-		[Vector2i(1, 24), d.DOWN, [Vector2i(1, 24), Vector2i(1, 17)]],
-		[Vector2i(42, 14), d.UP, [Vector2i(42, 14), Vector2i(42, 16), Vector2i(44, 16), Vector2i(44, 18)]],
-		[Vector2i(32, 7), d.DOWN, [Vector2i(32, 7), Vector2i(32, 4), Vector2i(31, 4), Vector2i(31, 12)]],
-		[Vector2i(37, 10), d.UP, [Vector2i(37, 10), Vector2i(37, 16), Vector2i(41, 16), Vector2i(41, 1)]],
-		[Vector2i(3, 5), d.RIGHT, [Vector2i(3, 5), Vector2i(1, 5), Vector2i(1, 0), Vector2i(9, 0), Vector2i(9, 1), Vector2i(4, 1)]],
-		[Vector2i(35, 26), d.LEFT, [Vector2i(35, 26), Vector2i(37, 26), Vector2i(37, 22), Vector2i(40, 22), Vector2i(40, 23), Vector2i(39, 23)]],
-		[Vector2i(29, 12), d.UP, [Vector2i(29, 12), Vector2i(29, 16), Vector2i(36, 16), Vector2i(36, 14), Vector2i(30, 14), Vector2i(30, 15), Vector2i(34, 15)]],
-		[Vector2i(6, 28), d.LEFT, [Vector2i(6, 28), Vector2i(7, 28), Vector2i(7, 25), Vector2i(5, 25), Vector2i(5, 27), Vector2i(6, 27), Vector2i(6, 26)]],
-		[Vector2i(23, 13), d.UP, [Vector2i(23, 13), Vector2i(23, 14), Vector2i(20, 14), Vector2i(20, 10), Vector2i(22, 10), Vector2i(22, 13), Vector2i(21, 13), Vector2i(21, 11)]],
-		[Vector2i(27, 14), d.DOWN, [Vector2i(27, 14), Vector2i(27, 9), Vector2i(29, 9), Vector2i(29, 11), Vector2i(28, 11), Vector2i(28, 16)]],
-		[Vector2i(18, 0), d.RIGHT, [Vector2i(18, 0), Vector2i(10, 0), Vector2i(10, 1), Vector2i(15, 1), Vector2i(15, 3), Vector2i(23, 3), Vector2i(23, 1), Vector2i(20, 1), Vector2i(20, 2), Vector2i(22, 2)]],
-		[Vector2i(12, 7), d.LEFT, [Vector2i(12, 7), Vector2i(18, 7), Vector2i(18, 8)]],
-		[Vector2i(35, 9), d.UP, [Vector2i(35, 9), Vector2i(35, 12), Vector2i(32, 12), Vector2i(32, 9), Vector2i(34, 9), Vector2i(34, 11), Vector2i(33, 11), Vector2i(33, 10)]],
-		[Vector2i(6, 15), d.LEFT, [Vector2i(6, 15), Vector2i(14, 15), Vector2i(14, 13), Vector2i(6, 13), Vector2i(6, 14), Vector2i(9, 14)]],
-		[Vector2i(38, 3), d.UP, [Vector2i(38, 3), Vector2i(38, 14), Vector2i(40, 14), Vector2i(40, 6), Vector2i(39, 6), Vector2i(39, 1), Vector2i(40, 1), Vector2i(40, 5)]],
+		[Vector2i(25, 16), d.DOWN, [Vector2i(25, 16), Vector2i(25, 5), Vector2i(29, 5), Vector2i(29, 1), Vector2i(25, 1), Vector2i(25, 4), Vector2i(27, 4), Vector2i(27, 2), Vector2i(28, 2), Vector2i(28, 4)]],
+		[Vector2i(12, 29), d.UP, [Vector2i(12, 29), Vector2i(12, 30), Vector2i(6, 30), Vector2i(6, 25), Vector2i(9, 25), Vector2i(9, 27)]],
+		[Vector2i(26, 11), d.UP, [Vector2i(26, 11), Vector2i(26, 16), Vector2i(31, 16), Vector2i(31, 14), Vector2i(27, 14), Vector2i(27, 10), Vector2i(29, 10), Vector2i(29, 6), Vector2i(27, 6), Vector2i(27, 9)]],
+		[Vector2i(8, 5), d.LEFT, [Vector2i(8, 5), Vector2i(22, 5), Vector2i(22, 9), Vector2i(13, 9)]],
+		[Vector2i(44, 12), d.UP, [Vector2i(44, 12), Vector2i(44, 20), Vector2i(32, 20)]],
+		[Vector2i(38, 6), d.UP, [Vector2i(38, 6), Vector2i(38, 15), Vector2i(32, 15), Vector2i(32, 14), Vector2i(34, 14)]],
+		[Vector2i(7, 11), d.RIGHT, [Vector2i(7, 11), Vector2i(0, 11), Vector2i(0, 13), Vector2i(9, 13), Vector2i(9, 16), Vector2i(13, 16), Vector2i(13, 13), Vector2i(11, 13), Vector2i(11, 15), Vector2i(12, 15)]],
+		[Vector2i(10, 3), d.LEFT, [Vector2i(10, 3), Vector2i(23, 3), Vector2i(23, 0), Vector2i(20, 0), Vector2i(20, 2), Vector2i(22, 2), Vector2i(22, 1), Vector2i(21, 1)]],
+		[Vector2i(25, 21), d.DOWN, [Vector2i(25, 21), Vector2i(25, 18), Vector2i(39, 18), Vector2i(39, 19), Vector2i(35, 19)]],
+		[Vector2i(16, 18), d.LEFT, [Vector2i(16, 18), Vector2i(24, 18), Vector2i(24, 25), Vector2i(18, 25)]],
+		[Vector2i(9, 1), d.LEFT, [Vector2i(9, 1), Vector2i(17, 1), Vector2i(17, 0), Vector2i(19, 0), Vector2i(19, 2), Vector2i(15, 2)]],
+		[Vector2i(18, 26), d.RIGHT, [Vector2i(18, 26), Vector2i(14, 26), Vector2i(14, 30), Vector2i(18, 30), Vector2i(18, 27), Vector2i(15, 27), Vector2i(15, 29), Vector2i(17, 29), Vector2i(17, 28), Vector2i(16, 28)]],
+		[Vector2i(36, 11), d.UP, [Vector2i(36, 11), Vector2i(36, 12), Vector2i(37, 12), Vector2i(37, 1), Vector2i(41, 1), Vector2i(41, 3), Vector2i(38, 3), Vector2i(38, 5), Vector2i(41, 5), Vector2i(41, 4), Vector2i(39, 4)]],
+		[Vector2i(0, 24), d.DOWN, [Vector2i(0, 24), Vector2i(0, 21), Vector2i(7, 21), Vector2i(7, 23), Vector2i(1, 23), Vector2i(1, 31), Vector2i(9, 31)]],
+		[Vector2i(35, 3), d.UP, [Vector2i(35, 3), Vector2i(35, 12), Vector2i(31, 12), Vector2i(31, 4), Vector2i(33, 4), Vector2i(33, 11), Vector2i(34, 11), Vector2i(34, 9)]],
+		[Vector2i(24, 27), d.DOWN, [Vector2i(24, 27), Vector2i(24, 26), Vector2i(31, 26), Vector2i(31, 27), Vector2i(41, 27), Vector2i(41, 22), Vector2i(28, 22), Vector2i(28, 25), Vector2i(26, 25)]],
+		[Vector2i(43, 10), d.UP, [Vector2i(43, 10), Vector2i(43, 16), Vector2i(32, 16)]],
+		[Vector2i(37, 23), d.UP, [Vector2i(37, 23), Vector2i(37, 26), Vector2i(32, 26), Vector2i(32, 23), Vector2i(29, 23), Vector2i(29, 25), Vector2i(31, 25), Vector2i(31, 24), Vector2i(30, 24)]],
+		[Vector2i(5, 20), d.LEFT, [Vector2i(5, 20), Vector2i(16, 20), Vector2i(16, 19), Vector2i(18, 19), Vector2i(18, 21), Vector2i(13, 21)]],
+		[Vector2i(0, 7), d.UP, [Vector2i(0, 7), Vector2i(0, 10), Vector2i(1, 10), Vector2i(1, 7), Vector2i(12, 7)]],
+		[Vector2i(0, 1), d.UP, [Vector2i(0, 1), Vector2i(0, 6), Vector2i(1, 6), Vector2i(1, 0), Vector2i(8, 0)]],
+		[Vector2i(29, 31), d.DOWN, [Vector2i(29, 31), Vector2i(29, 29), Vector2i(37, 29), Vector2i(37, 31), Vector2i(43, 31), Vector2i(43, 30), Vector2i(44, 30)]],
+		[Vector2i(22, 12), d.UP, [Vector2i(22, 12), Vector2i(22, 16), Vector2i(14, 16), Vector2i(14, 13), Vector2i(16, 13), Vector2i(16, 10), Vector2i(21, 10), Vector2i(21, 13)]],
+		[Vector2i(41, 8), d.DOWN, [Vector2i(41, 8), Vector2i(41, 6), Vector2i(39, 6), Vector2i(39, 15), Vector2i(40, 15), Vector2i(40, 7)]],
+		[Vector2i(1, 18), d.LEFT, [Vector2i(1, 18), Vector2i(8, 18), Vector2i(8, 19), Vector2i(10, 19), Vector2i(10, 18), Vector2i(14, 18), Vector2i(14, 19), Vector2i(11, 19)]],
+		[Vector2i(7, 15), d.DOWN, [Vector2i(7, 15), Vector2i(7, 14), Vector2i(1, 14), Vector2i(1, 15), Vector2i(6, 15), Vector2i(6, 16), Vector2i(2, 16)]],
+		[Vector2i(23, 20), d.UP, [Vector2i(23, 20), Vector2i(23, 24), Vector2i(11, 24), Vector2i(11, 29), Vector2i(7, 29), Vector2i(7, 28)]],
+		[Vector2i(2, 9), d.LEFT, [Vector2i(2, 9), Vector2i(9, 9)]],
+		[Vector2i(3, 26), d.RIGHT, [Vector2i(3, 26), Vector2i(2, 26), Vector2i(2, 30), Vector2i(5, 30), Vector2i(5, 28), Vector2i(4, 28)]],
+		[Vector2i(18, 14), d.DOWN, [Vector2i(18, 14), Vector2i(18, 11), Vector2i(17, 11), Vector2i(17, 15), Vector2i(15, 15), Vector2i(15, 14), Vector2i(16, 14)]],
+		[Vector2i(32, 3), d.LEFT, [Vector2i(32, 3), Vector2i(33, 3), Vector2i(33, 1), Vector2i(31, 1), Vector2i(31, 2), Vector2i(32, 2)]],
+		[Vector2i(23, 28), d.UP, [Vector2i(23, 28), Vector2i(23, 31), Vector2i(27, 31)]],
+		[Vector2i(27, 24), d.DOWN, [Vector2i(27, 24), Vector2i(27, 20), Vector2i(31, 20)]],
+		[Vector2i(18, 7), d.DOWN, [Vector2i(18, 7), Vector2i(18, 6), Vector2i(15, 6), Vector2i(15, 7), Vector2i(13, 7)]],
+		[Vector2i(13, 28), d.RIGHT, [Vector2i(13, 28), Vector2i(12, 28), Vector2i(12, 25), Vector2i(15, 25)]],
+		[Vector2i(33, 23), d.UP, [Vector2i(33, 23), Vector2i(33, 25), Vector2i(36, 25), Vector2i(36, 23), Vector2i(34, 23), Vector2i(34, 24), Vector2i(35, 24)]],
+		[Vector2i(9, 22), d.LEFT, [Vector2i(9, 22), Vector2i(12, 22), Vector2i(12, 21), Vector2i(9, 21)]],
+		[Vector2i(20, 30), d.DOWN, [Vector2i(20, 30), Vector2i(20, 26), Vector2i(19, 26), Vector2i(19, 28)]],
+		[Vector2i(23, 12), d.UP, [Vector2i(23, 12), Vector2i(23, 16), Vector2i(24, 16), Vector2i(24, 11)]],
+		[Vector2i(43, 1), d.LEFT, [Vector2i(43, 1), Vector2i(44, 1), Vector2i(44, 3), Vector2i(43, 3), Vector2i(43, 9), Vector2i(44, 9), Vector2i(44, 5)]],
+		[Vector2i(43, 28), d.DOWN, [Vector2i(43, 28), Vector2i(43, 22), Vector2i(42, 22), Vector2i(42, 24)]],
+		[Vector2i(39, 26), d.DOWN, [Vector2i(39, 26), Vector2i(39, 23), Vector2i(40, 23), Vector2i(40, 26)]],
+		[Vector2i(43, 18), d.UP, [Vector2i(43, 18), Vector2i(43, 19), Vector2i(40, 19), Vector2i(40, 18), Vector2i(42, 18)]],
+		[Vector2i(36, 3), d.UP, [Vector2i(36, 3), Vector2i(36, 10)]],
+		[Vector2i(22, 26), d.UP, [Vector2i(22, 26), Vector2i(22, 29), Vector2i(21, 29), Vector2i(21, 26)]],
+		[Vector2i(42, 12), d.UP, [Vector2i(42, 12), Vector2i(42, 15), Vector2i(41, 15), Vector2i(41, 11)]],
+		[Vector2i(24, 30), d.DOWN, [Vector2i(24, 30), Vector2i(24, 28), Vector2i(27, 28), Vector2i(27, 27), Vector2i(29, 27)]],
+		[Vector2i(28, 30), d.DOWN, [Vector2i(28, 30), Vector2i(28, 29), Vector2i(25, 29), Vector2i(25, 30), Vector2i(27, 30)]],
+		[Vector2i(32, 11), d.DOWN, [Vector2i(32, 11), Vector2i(32, 5)]],
+		[Vector2i(15, 11), d.RIGHT, [Vector2i(15, 11), Vector2i(11, 11)]],
+		[Vector2i(3, 5), d.LEFT, [Vector2i(3, 5), Vector2i(6, 5)]],
+		[Vector2i(1, 20), d.DOWN, [Vector2i(1, 20), Vector2i(1, 19), Vector2i(5, 19)]],
+		[Vector2i(28, 15), d.LEFT, [Vector2i(28, 15), Vector2i(30, 15)]],
+		[Vector2i(7, 3), d.LEFT, [Vector2i(7, 3), Vector2i(9, 3)]],
+		[Vector2i(22, 21), d.UP, [Vector2i(22, 21), Vector2i(22, 23)]],
+		[Vector2i(36, 31), d.DOWN, [Vector2i(36, 31), Vector2i(36, 30), Vector2i(35, 30)]],
+		[Vector2i(20, 15), d.DOWN, [Vector2i(20, 15), Vector2i(20, 13)]],
+		[Vector2i(26, 6), d.UP, [Vector2i(26, 6), Vector2i(26, 10)]],
+		[Vector2i(29, 13), d.RIGHT, [Vector2i(29, 13), Vector2i(28, 13), Vector2i(28, 11), Vector2i(29, 11), Vector2i(29, 12)]],
+		[Vector2i(8, 27), d.RIGHT, [Vector2i(8, 27), Vector2i(7, 27), Vector2i(7, 26), Vector2i(8, 26)]],
+		[Vector2i(38, 24), d.UP, [Vector2i(38, 24), Vector2i(38, 26)]],
+		[Vector2i(13, 0), d.LEFT, [Vector2i(13, 0), Vector2i(16, 0)]],
+		[Vector2i(3, 22), d.LEFT, [Vector2i(3, 22), Vector2i(6, 22)]],
+		[Vector2i(2, 3), d.LEFT, [Vector2i(2, 3), Vector2i(6, 3)]],
+		[Vector2i(0, 29), d.DOWN, [Vector2i(0, 29), Vector2i(0, 28)]],
+		[Vector2i(36, 1), d.UP, [Vector2i(36, 1), Vector2i(36, 2)]],
+		[Vector2i(1, 22), d.LEFT, [Vector2i(1, 22), Vector2i(2, 22)]],
+		[Vector2i(2, 20), d.LEFT, [Vector2i(2, 20), Vector2i(3, 20)]],
+		[Vector2i(23, 26), d.UP, [Vector2i(23, 26), Vector2i(23, 27)]],
+		[Vector2i(19, 11), d.UP, [Vector2i(19, 11), Vector2i(19, 12)]],
+		[Vector2i(25, 23), d.DOWN, [Vector2i(25, 23), Vector2i(25, 22)]],
+		[Vector2i(20, 19), d.LEFT, [Vector2i(20, 19), Vector2i(21, 19)]],
+		[Vector2i(19, 30), d.DOWN, [Vector2i(19, 30), Vector2i(19, 29)]],
+		[Vector2i(36, 14), d.RIGHT, [Vector2i(36, 14), Vector2i(35, 14)]],
+		[Vector2i(23, 8), d.UP, [Vector2i(23, 8), Vector2i(23, 9)]],
+		[Vector2i(42, 0), d.RIGHT, [Vector2i(42, 0), Vector2i(41, 0)]],
+		[Vector2i(8, 16), d.RIGHT, [Vector2i(8, 16), Vector2i(7, 16)]],
+		[Vector2i(40, 30), d.RIGHT, [Vector2i(40, 30), Vector2i(39, 30)]],
+		[Vector2i(13, 30), d.DOWN, [Vector2i(13, 30), Vector2i(13, 29)]],
+		[Vector2i(37, 13), d.UP, [Vector2i(37, 13), Vector2i(37, 14)]],
+		[Vector2i(21, 15), d.DOWN, [Vector2i(21, 15), Vector2i(21, 14)]],
+		[Vector2i(4, 29), d.RIGHT, [Vector2i(4, 29), Vector2i(3, 29)]],
+		[Vector2i(20, 12), d.DOWN, [Vector2i(20, 12), Vector2i(20, 11)]],
+		[Vector2i(20, 8), d.DOWN, [Vector2i(20, 8), Vector2i(20, 7)]],
+		[Vector2i(6, 19), d.LEFT, [Vector2i(6, 19), Vector2i(7, 19)]],
+		[Vector2i(10, 13), d.UP, [Vector2i(10, 13), Vector2i(10, 14)]],
+		[Vector2i(42, 30), d.RIGHT, [Vector2i(42, 30), Vector2i(41, 30)]],
+		[Vector2i(30, 30), d.LEFT, [Vector2i(30, 30), Vector2i(31, 30)]],
+		[Vector2i(9, 11), d.RIGHT, [Vector2i(9, 11), Vector2i(8, 11)]],
+		[Vector2i(21, 4), d.RIGHT, [Vector2i(21, 4), Vector2i(20, 4)]],
 	]
 	var arrows := {}
 	var tails := {}

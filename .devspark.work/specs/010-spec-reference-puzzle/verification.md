@@ -40,3 +40,33 @@
 - Catalog check wall clock ~35 s against the launcher's 45 s timeout (v1 ~31.5 s). Another increase
   in arrow count will likely need sampled branch checks for this board only.
 - Both regression gates and the editor validation green. Desktop smoke test not yet run.
+
+## Candidate v3 (91.6% occupied)
+
+- 115 arrows, 1348 of 1472 cells occupied (8.4% empty). Valid, solvable, witness replays.
+- Catalog check ~36 s after sampling the branch order-independence check for this board only
+  (every 6th branching state); every other entry keeps the full check. Unsampled it took ~51 s,
+  over the launcher's 45 s per-script limit. This is the sampling the task plan allows.
+- Both regression gates and editor validation green.
+- Stock structural report did not finish on this board before the analyzer fix (timed out at 45 s
+  and at 180 s): the analyzer's longest-dependency-chain search explores simple paths and grows
+  exponentially with edge count (661 edges here; the 59-arrow version with 276 edges finished).
+
+## Analyzer fix (FR-027 amendment)
+
+- `PuzzleAnalyzer._longest_simple_path` now computes the deepest chain by dynamic programming over a
+  topological order when the dependency graph is acyclic, returning the same depth and the same
+  tie-broken chain; a graph with a cycle still uses the original exhaustive search
+  (`_longest_simple_path_search`). No new measurement, score or formula.
+- `tests/puzzle_analyzer_check.gd`: shortcut equals exhaustive search on 200 seeded random acyclic
+  graphs (many ties); cyclic graph keeps the exhaustive result; empty graph; a dense layered graph
+  the exhaustive search could not finish resolves in under a millisecond; `reference_knot` analyzes
+  to completion with a consistent chain. All existing analyzer fixtures (including the cycle and
+  mixed cyclic/acyclic cases) still pass unchanged.
+- Stock structural report now runs the whole catalog in about 3 s. `reference_knot` v3: density 0.92
+  (1348/1472), 115 arrows, single=3, avg length 11.72, max length 43, bends 207 (max 9), initial
+  legal 6/115, forced states 11, branching 104, longest forced run 3, dependency edges 661, depth 33
+  (edges), max in-degree 20, max fan-out 5, blocker distance max 42 avg 11.71.
+- My scratch model independently gave initial legal 6 and 661 edges (matches exactly) and a depth of
+  34 counted in nodes (33 in edges): consistent.
+- Both regression gates and the editor validation green after the fix. Nothing committed.

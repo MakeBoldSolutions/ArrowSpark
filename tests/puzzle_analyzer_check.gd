@@ -394,6 +394,87 @@ func _check_canvas_validation_fixture() -> void:
 		replay.select_arrow(head)
 	check(replay.completed and replay.mistakes == 0, "canvas_validation: the witness clears the board with zero mistakes")
 
+## Builds the (heads, out_neighbors) pair the longest-chain search consumes from
+## an edge list over node indices, placing nodes at shuffled board positions so
+## head ordering is unrelated to dependency ordering.
+func _graph_from_edges(count: int, edges: Array, rng: RandomNumberGenerator) -> Dictionary:
+	var positions: Array = range(count)
+	for i in range(count - 1, 0, -1):
+		var j := rng.randi_range(0, i)
+		var swap = positions[i]
+		positions[i] = positions[j]
+		positions[j] = swap
+	var heads: Array = []
+	var out_neighbors: Dictionary = {}
+	for i in range(count):
+		var head := Vector2i(positions[i], 0)
+		heads.append(head)
+		out_neighbors[head] = []
+	heads.sort_custom(PuzzleAnalyzer._head_less_than)
+	for edge in edges:
+		(out_neighbors[Vector2i(positions[edge[0]], 0)] as Array).append(Vector2i(positions[edge[1]], 0))
+	return {"heads": heads, "out": out_neighbors}
+
+## The linear-time acyclic shortcut must return exactly what the exhaustive
+## simple-path search returns -- same depth, same tie-broken chain -- on random
+## acyclic graphs (many ties), and cyclic graphs must still take the exhaustive
+## path.
+func _check_longest_chain_shortcut_matches_exhaustive_search() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 20260930
+	var mismatches := 0
+	for trial in range(200):
+		var count := rng.randi_range(2, 11)
+		var edges: Array = []
+		for i in range(count):
+			for j in range(i + 1, count):
+				if rng.randf() < 0.35:
+					edges.append([i, j])
+		var graph := _graph_from_edges(count, edges, rng)
+		var fast: Dictionary = PuzzleAnalyzer._longest_simple_path(graph["heads"], graph["out"])
+		var slow: Dictionary = PuzzleAnalyzer._longest_simple_path_search(graph["heads"], graph["out"])
+		if fast["depth"] != slow["depth"] or fast["chain"] != slow["chain"]:
+			mismatches += 1
+	check(mismatches == 0, "acyclic shortcut matches the exhaustive longest-chain search on 200 random graphs")
+
+	var cyclic := _graph_from_edges(4, [[0, 1], [1, 2], [2, 0], [2, 3]], rng)
+	var cyclic_fast: Dictionary = PuzzleAnalyzer._longest_simple_path(cyclic["heads"], cyclic["out"])
+	var cyclic_slow: Dictionary = PuzzleAnalyzer._longest_simple_path_search(cyclic["heads"], cyclic["out"])
+	check(cyclic_fast["depth"] == cyclic_slow["depth"] and cyclic_fast["chain"] == cyclic_slow["chain"],
+		"a graph with a cycle keeps the exhaustive search result")
+
+	var empty: Dictionary = PuzzleAnalyzer._longest_simple_path([], {})
+	check(empty["depth"] == 0 and (empty["chain"] as Array).is_empty(), "an empty graph has depth 0 and no chain")
+
+## A layered graph with every node linked to every node of the next layer has
+## 3^13 simple paths per start -- far more than the exhaustive search can finish
+## -- but its deepest chain is known exactly.
+func _check_dense_layered_graph_resolves() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 7
+	var layers := 14
+	var width := 3
+	var edges: Array = []
+	for layer in range(layers - 1):
+		for a in range(width):
+			for b in range(width):
+				edges.append([layer * width + a, (layer + 1) * width + b])
+	var graph := _graph_from_edges(layers * width, edges, rng)
+	var started := Time.get_ticks_msec()
+	var result: Dictionary = PuzzleAnalyzer._longest_simple_path(graph["heads"], graph["out"])
+	var elapsed := Time.get_ticks_msec() - started
+	check(result["depth"] == layers - 1 and (result["chain"] as Array).size() == layers,
+		"a dense layered graph's deepest chain spans every layer")
+	check(elapsed < 2000, "a dense layered graph resolves in well under two seconds (took %d ms)" % elapsed)
+
+## The densest authored board must analyze to completion with a consistent chain.
+func _check_reference_knot_analyzes() -> void:
+	var result: Dictionary = PuzzleAnalyzer.analyze(PuzzleCatalog.get_definition("reference_knot"))
+	var g: Dictionary = result.dependency_graph
+	check(result.valid and result.solvable, "reference_knot: analyzer reports it valid and solvable")
+	check(g.edge_count > 0 and g.depth >= 1 and (g.longest_chain as Array).size() == g.depth + 1,
+		"reference_knot: the deepest dependency chain is reported consistently with its depth")
+
 func _initialize() -> void:
 	_check_independent_pair()
 	_check_simple_three_arrow_chain()
@@ -410,5 +491,8 @@ func _initialize() -> void:
 	_check_null_definition_precondition()
 	_check_occupancy_grid()
 	_check_canvas_validation_fixture()
+	_check_longest_chain_shortcut_matches_exhaustive_search()
+	_check_dense_layered_graph_resolves()
+	_check_reference_knot_analyzes()
 	print("PUZZLE_ANALYZER_FAILURES=", failures)
 	quit(1 if failures else 0)

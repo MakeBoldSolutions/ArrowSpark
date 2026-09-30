@@ -80,7 +80,7 @@ None. No cross-repo dependencies.
 
 ### Architectural Impact
 
-- One new catalog entry with a stable id; no changes to blocking rules, solver, analyzer, scoring, Open Move or viewport behavior.
+- One new catalog entry with a stable id; no changes to blocking rules, solver, scoring, Open Move or viewport behavior. The analyzer's reported measurements are unchanged; its longest-dependency-chain search was made linear-time for acyclic graphs (see FR-027 amendment) because the exhaustive search could not finish on the dense Reference Puzzle.
 - Catalog gains a purpose-group classification per entry (metadata). Existing ids, titles and definitions are preserved and not duplicated.
 - Level Select presents entries by group; no new persistence and no save-data change.
 - Neighborhood, Discovery Beat, Insight Chain, Major Release are design/analysis vocabulary only and MUST NOT become gameplay state.
@@ -229,7 +229,7 @@ Everything that worked before still works, including for the new puzzle: Open Mo
 - **FR-024**: Stable puzzle ids MUST be preserved and no puzzle definition may be duplicated to place it in a group.
 - **FR-025**: Level Select MUST make the three groups understandable using the simplest approach consistent with the existing menu (for example grouped sections), without a major UI redesign, and MUST remain keyboard/gamepad navigable.
 - **FR-026**: The Reference Puzzle MUST be the first entry designed for and placed in ArrowSpark Levels.
-- **FR-027**: Grouping MUST be metadata only and MUST NOT affect blocking rules, solvability, scoring, Open Move, puzzle state, solver, analyzer or viewport behavior; no separate gameplay engines per group.
+- **FR-027** (amended 2026-09-30): Grouping MUST be metadata only and MUST NOT affect blocking rules, solvability, scoring, Open Move, puzzle state, solver, analyzer or viewport behavior; no separate gameplay engines per group. Amendment: the one permitted analyzer change is computing the existing longest-dependency-chain measurement in linear time for acyclic graphs (identical reported depth and chain, exhaustive search kept for cyclic graphs), because the exhaustive search cannot finish on the dense Reference Puzzle; no new metric, score, formula or gameplay behavior is allowed.
 - **FR-028**: Group presentation and documentation MUST NOT imply a quality ranking; Foundations and Puzzle Lab describe why content exists, and ArrowSpark Levels membership means "designed against the current player-experience standard," not a universal quality score.
 - **FR-029**: The implementation MUST NOT include a content-management system or any generator, builder, difficulty formula or automatic quality scoring.
 - **FR-034** (added after first playtest, 2026-09-30): The play HUD MUST offer a Back control that leaves the puzzle for Level Select without finishing it, records no score, and is keyboard/gamepad focusable.

@@ -3,12 +3,13 @@
 Candidate in the catalog: `reference_knot`. Iteration versions live only in this draft.
 
 ## 1. Structural profile
-Candidate v1 (AI-authored composition, not yet played by a human): 46x32 board, 25 arrows
-(3 single-cell, 22 multi-cell), 349 occupied cells (density 0.24), 15 bends total (max 3 per arrow),
-max length 42, average length 13.96. 6 of 25 arrows legal at the start (0.24), 3 forced states,
-22 branching states, longest forced run 2. Dependency graph: 52 edges, depth 8, max in-degree 7,
-1 component. Largest single unlock fan-out 6 (the final unlock). Blocker distance max 32, average 14.81.
-(Diagnostics only; no quality score.)
+Current candidate v3 (see the iteration table for v1 and v2): 46x32 board, 115 arrows (3 single-cell,
+112 multi-cell), 1348 of 1472 cells occupied (density 0.92), 207 bends (max 9 per arrow), max length 43,
+average length 11.72. 6 of 115 arrows legal at the start, 11 forced states, 104 branching states, longest
+forced run 3. Dependency graph: 661 edges, depth 33, max in-degree 20, 1 component, largest single unlock
+fan-out 5. Blocker distance max 42, average 11.71. (Diagnostics only; no quality score.) The intended
+neighborhood and beat descriptions below were written for the v1 skeleton that v2 and v3 build on, and have
+not been re-derived for the dense board.
 
 ## 2. Intended neighborhoods
 - North comb: six long parallel right-pointing arrows stacked in rows, held by vertical gates.
@@ -46,6 +47,7 @@ wall, then a short collapse. Expected end: at most a few single-cell removals af
 |---|---|---|---|---|
 | v1 | 2026-09-30 | First composition in the catalog. | Start the playtest loop. | Solver-confirmed solvable, witness replays, all regression gates green. First human play: liked it, asked for far less empty space. |
 | v2 | 2026-09-30 | Kept the v1 skeleton and added long bent arrows around it until about 69% of cells were occupied (59 arrows, average length 17.2, up from 25 arrows and 14.0). | The tester's main request was less whitespace, longer arrows. | Solvable, witness replays, all gates green. Structural diagnostics: density 0.69, 7/59 initially legal, dependency depth 18, 276 edges, max fan-out 7. Not yet replayed by a human. |
+| v3 | 2026-09-30 | Packed the board to 91.6% occupied (115 arrows, average length 11.7, longest 43, 3 single-cell) by adding long arrows first and short ones last. | The tester asked for under 10% empty cells. | Solvable, witness replays, all gates green. Stock structural report (after the analyzer fix): density 0.92, 115 arrows, 6 of 115 legal at the start, dependency depth 33, 661 edges, max in-degree 20, max fan-out 5, blocker distance max 42. Not yet played by a human. Average arrow length fell from 17.2 to 11.7, against the tester's preference for longer arrows. |
 
 ## 10. Human observations (unedited)
 
@@ -59,21 +61,36 @@ Requests outside the puzzle (not part of this spec's scope): a back or exit butt
 ### Session template (copy per session)
 - Session date / candidate version / tester / prior familiarity / input method / Open Move use:
 - Smallest on-screen cell size (pixels) and zoom at which arrows were traceable:
-1. First impression of the full board, and where possible starting moves were seen:
-2. Could individual arrows be traced; ambiguous geometry; did zoom, pan or Fit Puzzle help:
-3. Distinct neighborhoods perceived and what made them feel separate:
-4. A neighborhood substantially cleared but not finishable until something elsewhere was resolved:
-5. Where a distant arrow or tail blocked progress, and how it was discovered:
-6. Distinct "aha" moments, each with where it occurred:
-7. A discovery that let the tester anticipate several upcoming removals, and whether they happened:
-8. Points where the tester had to stop and rethink after a chain of removals:
-9. Where choice felt free and where order felt rigid or forced:
-10. An arrow that seemed to hold separate areas together, and what changed visually when it left:
-11. A stretch that felt like an obvious sequence for too long:
-12. A stretch that needed a full-board rescan after every move:
-13. The final portion: satisfying collapse, tedious cleanup or something else; remaining work:
-14. Where it became confusing, frustrating or less engaging; what to change first:
-15. Is this a level you want someone else to play, and why:
+1. What was your first impression of the full board, and where did you see possible starting moves?
+   Answer: 
+2. Could you trace individual arrows throughout play? Describe any ambiguous geometry and whether zoom, pan or Fit Puzzle helped.
+   Answer: 
+3. Which distinct neighborhoods did you perceive, and what made them feel separate?
+   Answer: 
+4. Which neighborhood, if any, could you substantially clear but not finish until you resolved something elsewhere? Describe that dependency.
+   Answer: 
+5. Where did a distant arrow or its tail block your progress, and how did you discover the connection?
+   Answer: 
+6. What distinct "aha" moments did you experience? Describe each and where it occurred, even if there were fewer than three.
+   Answer: 
+7. Which discovery, if any, let you anticipate several upcoming removals, and did those consequences happen as expected?
+   Answer: 
+8. After a chain of removals, where did you have to stop and rethink? Describe each such point, even if there were fewer than two.
+   Answer: 
+9. Where did you feel free to choose among useful moves, and where did the order feel rigid or forced?
+   Answer: 
+10. Which arrow, if any, seemed to connect or hold together separate areas? Describe what changed visually when it departed.
+   Answer: 
+11. Did any stretch feel like following an obvious sequence for too long? Identify it and describe why.
+   Answer: 
+12. Did any stretch require a full-board rescan after every move? Identify it and describe what made progress hard to follow.
+   Answer: 
+13. How did the final portion feel: a satisfying collapse, tedious cleanup, or something else? Describe the remaining work.
+   Answer: 
+14. Where did the experience become confusing, frustrating or less engaging, and what would you most want changed?
+   Answer: 
+15. Is this a level you want someone else to play? Why or why not?
+   Answer: 
 
 ## 11. Intent versus actual
 To be filled from playtests.
