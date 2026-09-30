@@ -25,7 +25,7 @@ participants:
 
 **Feature Branch**: `010-spec-reference-puzzle`
 **Created**: 2026-09-29
-**Status**: Draft <!-- Valid: Draft | In Progress | Complete -->
+**Status**: In Progress <!-- Valid: Draft | In Progress | Complete -->
 **Input**: User description: "Spec 010 — The ArrowSpark Reference Puzzle: craft one deliberately composed knot level that combines the best Spec 006/009 lessons, iterate it through human playtesting, and organize the puzzle catalog into purpose-based groups (Foundations, Puzzle Lab / Experiments, ArrowSpark Levels)."
 
 > **Lifecycle note**: This spec is temporary working state under `.devspark.work/specs/`. It remains there until release archival and MUST NOT be referenced by durable code, tests, or `.knowledge/`.
@@ -232,6 +232,8 @@ Everything that worked before still works, including for the new puzzle: Open Mo
 - **FR-027**: Grouping MUST be metadata only and MUST NOT affect blocking rules, solvability, scoring, Open Move, puzzle state, solver, analyzer or viewport behavior; no separate gameplay engines per group.
 - **FR-028**: Group presentation and documentation MUST NOT imply a quality ranking; Foundations and Puzzle Lab describe why content exists, and ArrowSpark Levels membership means "designed against the current player-experience standard," not a universal quality score.
 - **FR-029**: The implementation MUST NOT include a content-management system or any generator, builder, difficulty formula or automatic quality scoring.
+- **FR-034** (added after first playtest, 2026-09-30): The play HUD MUST offer a Back control that leaves the puzzle for Level Select without finishing it, records no score, and is keyboard/gamepad focusable.
+- **FR-035** (added after first playtest, 2026-09-30): Level Select groups MUST be collapsible (accordion); collapsed entries are hidden from pointer and focus; every group starts expanded; keyboard/gamepad can collapse and expand. Saved progress across sessions is explicitly out of scope here and reserved for a future spec (FR-020 stands).
 - **FR-031**: Next Puzzle MUST advance only within the current group. At the group's final entry, Results MUST offer Level Select instead of Next Puzzle, without crossing groups or wrapping; Replay MUST remain available.
 - **FR-032**: The main-menu Play action MUST start the Reference Puzzle in ArrowSpark Levels directly. All other puzzles MUST remain accessible through Level Select.
 - **FR-033**: Puzzle display numbering in menus and gameplay MUST restart at 1 within each group, following within-group progression order. The Reference Puzzle MUST display as level 1 in ArrowSpark Levels. Display numbering MUST NOT change stable puzzle IDs.
