@@ -212,11 +212,22 @@ func _test_no_reset_on_puzzle_entry() -> void:
 	check(InputMap.action_has_event(remap_action, seeded_remap) and InputMap.action_has_event(remap_action, remap_joy),
 		"selecting a Level Select entry does not disturb a seeded keyboard/gamepad remap")
 
-	# New Game always starts catalog position 0, regardless of the Level
+	# New Game always starts the Reference Knot, regardless of the Level
 	# Select choice above having already changed PuzzleSession this session.
 	menu.new_game()
-	check(PuzzleSession.get_current_id() == PuzzleCatalog.id_at(0),
-		"new_game() resets PuzzleSession to catalog position 0 regardless of a prior Level Select selection")
+	check(PuzzleSession.get_current_id() == "reference_knot",
+		"new_game() starts the Reference Knot regardless of a prior Level Select selection")
+	check(PuzzleCatalog.group_of(PuzzleSession.get_current_id()) == "arrowspark_levels",
+		"the New Game target belongs to the ArrowSpark Levels group")
+
+	# The Level Select request is one-shot, in memory, and touches no progress.
+	check(not PuzzleSession.consume_level_select_request(), "no Level Select request is pending by default")
+	PuzzleSession.request_level_select()
+	check(PuzzleSession.consume_level_select_request(), "a requested Level Select open is consumed once")
+	check(not PuzzleSession.consume_level_select_request(), "a consumed Level Select request does not repeat")
+	var after_request: GameState = GameState.get_game_state()
+	check(after_request.times_played == 5 and after_request.max_level_reached == 3,
+		"the Level Select request does not touch saved progress")
 
 	menu.free()
 
