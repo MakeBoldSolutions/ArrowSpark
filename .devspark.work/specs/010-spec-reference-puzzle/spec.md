@@ -4,7 +4,7 @@ classification: full-spec
 risk_level: medium
 target_workflow: specify-full
 required_artifacts: spec, plan, tasks
-recommended_next_step: clarify
+recommended_next_step: plan
 required_gates: checklist, analyze, critic, verify:end-to-end # end-to-end added: the puzzle must be proven through the real play/results/next-puzzle flow plus human playtest
 route_intent: full-spec
 depends_on: []
@@ -30,6 +30,16 @@ participants:
 ## Product Owner TLDR
 
 Specs 001–009 gave ArrowSpark a working game, a scoring/assist contract, a zoomable large canvas and a toolbox of knot ingredients, but no single level that shows what the game is *supposed* to feel like. This spec delivers exactly one hand-crafted, human-iterated **Reference Puzzle**: a readable knot with several distinct "aha" moments, partly-solvable regions that depend on each other, a few bridge arrows that visibly unwind, and a satisfying collapse instead of tedious cleanup. It also introduces lightweight **level groups** (Foundations, Puzzle Lab, ArrowSpark Levels) so the Reference Puzzle is not lost among 21 research puzzles. The spec is only finished when a human playtester genuinely wants to hand this level to someone else; green automated checks alone do not complete it.
+
+## Clarifications
+
+### Session 2026-09-29
+
+- Q: Where should the large-canvas validation puzzle belong? → A: Puzzle Lab — treat it as an experimental validation board.
+- Q: What should happen at the end of a group? → A: Advance within the group; at its end, offer Level Select instead of Next Puzzle.
+- Q: Where should the main-menu Play button take players? → A: Start the Reference Puzzle in ArrowSpark Levels.
+- Q: How should puzzles be numbered in menus and gameplay? → A: Restart numbering at 1 within each group; stable puzzle IDs remain unchanged.
+- Q: How should the fifteen required playtest questions be defined? → A: Draft fifteen questions from this spec's existing experience goals and acceptance criteria.
 
 ## Rationale Summary
 
@@ -86,6 +96,26 @@ A player opens the ArrowSpark Levels group, starts the Reference Puzzle and sees
 
 **Independent Test**: A human plays the final candidate start to finish and answers the required playtest questions in the design report; automated checks confirm it loads, is solvable and completes through Results.
 
+**Required playtest questionnaire**: The following fifteen questions are derived from this spec's experience goals and acceptance criteria and are the authoritative questionnaire for FR-013 and SC-006. They are not a reconstruction of the unavailable original brief. Record the session date, candidate version, tester, prior familiarity, input method, and any Open Move use alongside the tester's unedited answers. Ask after play so the questions do not reveal the intended discoveries. Missing or negative observations must be recorded honestly, not inferred from the intended design.
+
+1. What was your first impression of the full board, and where did you see possible starting moves?
+2. Could you trace individual arrows throughout play? Describe any ambiguous geometry and whether zoom, pan or Fit Puzzle helped.
+3. Which distinct neighborhoods did you perceive, and what made them feel separate?
+4. Which neighborhood, if any, could you substantially clear but not finish until you resolved something elsewhere? Describe that dependency.
+5. Where did a distant arrow or its tail block your progress, and how did you discover the connection?
+6. What distinct "aha" moments did you experience? Describe each and where it occurred, even if there were fewer than three.
+7. Which discovery, if any, let you anticipate several upcoming removals, and did those consequences happen as expected?
+8. After a chain of removals, where did you have to stop and rethink? Describe each such point, even if there were fewer than two.
+9. Where did you feel free to choose among useful moves, and where did the order feel rigid or forced?
+10. Which arrow, if any, seemed to connect or hold together separate areas? Describe what changed visually when it departed.
+11. Did any stretch feel like following an obvious sequence for too long? Identify it and describe why.
+12. Did any stretch require a full-board rescan after every move? Identify it and describe what made progress hard to follow.
+13. How did the final portion feel: a satisfying collapse, tedious cleanup, or something else? Describe the remaining work.
+14. Where did the experience become confusing, frustrating or less engaging, and what would you most want changed?
+15. Is this a level you want someone else to play? Why or why not?
+
+Questions 1–15 define the required observation categories for meaningful iterations. The final candidate requires an explicit written answer to every question. The separate first-time Level Select observation in SC-009 remains required and must not be inferred from this questionnaire.
+
 **Acceptance Scenarios**:
 
 1. **Given** the Reference Puzzle at 100% remaining, **When** the player views it, **Then** it reads as a knot with several understandable footholds, and the player can trace individual arrows (with zoom/pan/Fit Puzzle available) without being unable to tell which cells belong to which arrow.
@@ -109,6 +139,7 @@ A player or developer opens Level Select and sees puzzles organized by purpose: 
 1. **Given** Level Select, **When** it opens, **Then** the three groups are distinguishable and the Reference Puzzle appears only under ArrowSpark Levels.
 2. **Given** any pre-existing puzzle, **When** selected from its group, **Then** it launches the same definition it did before this spec, with the same stable id.
 3. **Given** keyboard or gamepad navigation, **When** the player moves through groups and entries, **Then** every entry remains reachable and focus behaves consistently with the current menu.
+4. **Given** the main menu, **When** the player chooses Play, **Then** the Reference Puzzle in ArrowSpark Levels starts directly.
 
 ---
 
@@ -138,17 +169,17 @@ Everything that worked before still works, including for the new puzzle: Open Mo
 **Acceptance Scenarios**:
 
 1. **Given** the new puzzle, **When** solved through normal play and via Open Move, **Then** it completes exactly once, reaches Results, scores correctly and updates session-best correctly.
-2. **Given** Results for any puzzle, **When** Replay or Next Puzzle is chosen, **Then** behavior matches the current contract and remains sensible across group boundaries.
+2. **Given** Results for any puzzle, **When** Replay is chosen, **Then** the same puzzle restarts; when another puzzle remains in its group, Next Puzzle starts that entry; at the end of the group, Level Select is offered instead of Next Puzzle.
 
 ---
 
 ### Edge Cases
 
 - A puzzle's group is changed later: ids, definitions and gameplay behavior must be unaffected because grouping is metadata only.
-- Next Puzzle at the end of a group: behavior at group boundaries must be defined and consistent (see Clarifications needed).
+- At the end of any group, including a group containing only the Reference Puzzle, Results MUST offer Level Select instead of Next Puzzle; progression MUST NOT cross into another group or wrap to the group's first entry.
 - The new level's board exceeds the window: zoom/pan/Fit Puzzle must make the geometry readable at a comfortable arrow size without being a workaround for illegible geometry.
 - A candidate iteration validates and solves but fails the human bar: it must not be marked PASS; the spec records why the bar is not yet met and iterates again.
-- Legacy content with no obvious single purpose (for example the large-canvas validation puzzle): its classification must be decided by role and recorded.
+- Legacy content with no obvious single purpose must be classified by role and recorded; the large-canvas validation puzzle belongs to Puzzle Lab as an experimental validation board.
 - Path-following departure of very long or multi-bend arrows in a dense board must still complete and leave the logical removal contract unchanged.
 - A player takes an unintended order of legal moves: the level must remain solvable from every reachable state (existing monotonic contract).
 
@@ -175,7 +206,7 @@ Everything that worked before still works, including for the new puzzle: Open Mo
 
 - **FR-011**: The puzzle MUST be developed through repeated author → validate → measure → play → revise cycles, with important iteration decisions (what felt wrong, what changed, why, what happened) recorded in development documentation.
 - **FR-012**: Each serious candidate MUST be run through the existing analyzer and structural reporting, capturing existing measurements (dimensions, arrow count, occupied cells, occupancy, dependency edges/depth, initial legal moves, forced moves, blocker distance, arrow length and bend characteristics) purely as diagnostics; no quality, fun, difficulty or entanglement score may be created.
-- **FR-013**: Human playtesting MUST be performed and recorded for meaningful iterations using the required observation categories, with no fabricated observations; the final candidate MUST have explicit written answers to all fifteen "most important playtest questions" from the brief.
+- **FR-013**: Human playtesting MUST be performed and recorded for meaningful iterations using the observation categories defined by the required playtest questionnaire in User Story 1, with no fabricated observations; the final candidate MUST have explicit written answers to all fifteen questions, with session context and unedited answers preserved.
 - **FR-014**: The solver witness MUST be used for correctness and diagnostics only; the level MUST NOT be tuned merely to make the witness look attractive.
 - **FR-015**: A durable Reference Puzzle design report MUST document the fourteen required items (structural profile, intended neighborhoods, cross-neighborhood dependencies, bridge arrows, expected discovery beats, insight chains, major releases, intended experience curve, iteration history, human observations, intent-versus-actual differences, useful Spec 006/009 concepts, less useful concepts, remaining weaknesses) and MAY list candidate design principles labeled as level-specific evidence, not universal formulas.
 - **FR-016**: The spec MUST NOT be marked complete unless the final human assessment supports "This is a level I want someone else to play"; if it does not, the report MUST state why and iteration continues.
@@ -191,13 +222,16 @@ Everything that worked before still works, including for the new puzzle: Open Mo
 **Level groups and catalog organization**
 
 - **FR-022**: The catalog MUST assign every entry to exactly one purpose group, at minimum equivalent to Foundations, Puzzle Lab / Experiments and ArrowSpark Levels; final group names are to be settled during planning.
-- **FR-023**: Group membership MUST be decided by reviewing each existing entry's original purpose and current gameplay role, not by puzzle number, and the resulting classification MUST be recorded in the design report.
+- **FR-023**: Group membership MUST be decided by reviewing each existing entry's original purpose and current gameplay role, not by puzzle number, and the resulting classification MUST be recorded in the design report. The large-canvas validation puzzle MUST belong to Puzzle Lab as an experimental validation board.
 - **FR-024**: Stable puzzle ids MUST be preserved and no puzzle definition may be duplicated to place it in a group.
 - **FR-025**: Level Select MUST make the three groups understandable using the simplest approach consistent with the existing menu (for example grouped sections), without a major UI redesign, and MUST remain keyboard/gamepad navigable.
 - **FR-026**: The Reference Puzzle MUST be the first entry designed for and placed in ArrowSpark Levels.
 - **FR-027**: Grouping MUST be metadata only and MUST NOT affect blocking rules, solvability, scoring, Open Move, puzzle state, solver, analyzer or viewport behavior; no separate gameplay engines per group.
 - **FR-028**: Group presentation and documentation MUST NOT imply a quality ranking; Foundations and Puzzle Lab describe why content exists, and ArrowSpark Levels membership means "designed against the current player-experience standard," not a universal quality score.
 - **FR-029**: The implementation MUST NOT include a content-management system or any generator, builder, difficulty formula or automatic quality scoring.
+- **FR-031**: Next Puzzle MUST advance only within the current group. At the group's final entry, Results MUST offer Level Select instead of Next Puzzle, without crossing groups or wrapping; Replay MUST remain available.
+- **FR-032**: The main-menu Play action MUST start the Reference Puzzle in ArrowSpark Levels directly. All other puzzles MUST remain accessible through Level Select.
+- **FR-033**: Puzzle display numbering in menus and gameplay MUST restart at 1 within each group, following within-group progression order. The Reference Puzzle MUST display as level 1 in ArrowSpark Levels. Display numbering MUST NOT change stable puzzle IDs.
 
 **Verification**
 
@@ -230,10 +264,4 @@ Everything that worked before still works, including for the new puzzle: Open Mo
 - The Reference Puzzle lives in the same catalog and authoring style as existing puzzles; the large-canvas viewport (Spec 008) is available for boards larger than the window.
 - The author (Mark) is the primary human playtester; additional playtesters are welcome and SC-009 needs at least one other person.
 - The initial group classification proposed for planning: the eight baseline puzzles → Foundations; the six Spec 006 experiments and the six Spec 009 knot experiments → Puzzle Lab; the Reference Puzzle → ArrowSpark Levels. This is a starting point subject to the review in FR-023.
-- Puzzle display numbering, main-menu start behavior and session-advance ordering follow the existing behavior unless clarified.
-
-## Clarifications Needed
-
-- **Q1**: [NEEDS CLARIFICATION: Which group should the large-canvas validation puzzle belong to — Foundations (it validates the Spec 008 canvas/rendering capability) or Puzzle Lab (it is a research validation board)?]
-- **Q2**: [NEEDS CLARIFICATION: What should "Next Puzzle" do at the end of a group — stop and return to Level Select, continue into the next group, or advance only within the current group? And should the main-menu "Play" entry start at the Reference Puzzle (first ArrowSpark Level) rather than the first Foundations puzzle?]
-- **Q3**: [NEEDS CLARIFICATION: Should puzzle numbering shown in-game ("N. Title") be per-group, global, or dropped for groups other than Foundations?]
+- Puzzle display numbering restarts at 1 within each group without changing stable puzzle IDs. Main-menu Play starts the Reference Puzzle in ArrowSpark Levels. Within-group progression preserves the existing relative catalog order; at the group's end, Results offers Level Select instead of Next Puzzle.
