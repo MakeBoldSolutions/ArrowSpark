@@ -22,6 +22,11 @@ extends Control
 var _state: PuzzleState
 var _pending_departures: int = 0
 var _awaiting_completion: bool = false
+# Developer view readout (F3): on-screen cell size sampled at each removal
+# attempt. In memory only, never saved or sent anywhere; the label is created on
+# first use so normal play carries no extra node.
+var _click_cell_pixels: Array[float] = []
+var _view_readout: Label
 
 func _ready() -> void:
 	$Background.color = GameVisualStyle.GAME_BACKGROUND
@@ -51,6 +56,42 @@ func _ready() -> void:
 	_configure_navigation_focus()
 	_refresh_navigation_help()
 	_start_new_attempt()
+
+## F3 toggles a developer readout of the board's on-screen cell size: the
+## current size, the supported range (Fit Puzzle size to maximum), and the
+## smallest, median and largest size in effect when arrows were clicked this
+## attempt. Reads existing view state only; changes no gameplay or setting.
+func _unhandled_key_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F3:
+		if _view_readout == null:
+			_view_readout = Label.new()
+			_view_readout.theme_type_variation = &"SupportingText"
+			_view_readout.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			_view_readout.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+			_view_readout.grow_vertical = Control.GROW_DIRECTION_BEGIN
+			_view_readout.offset_left = 12.0
+			_view_readout.offset_bottom = -8.0
+			_view_readout.visible = false
+			add_child(_view_readout)
+		_view_readout.visible = not _view_readout.visible
+		get_viewport().set_input_as_handled()
+
+func _process(_delta: float) -> void:
+	if _view_readout != null and _view_readout.visible:
+		_view_readout.text = view_readout_text()
+
+func view_readout_text() -> String:
+	var transform: PuzzleViewportTransform = _board.view_transform
+	var text := "Cell size now: %.1f px (range %.1f-%.1f px, Fit Puzzle %.1f px)" % [
+		transform.cell_pixels, transform.fit_cell_pixels(), transform.max_cell_pixels(), transform.fit_cell_pixels()]
+	if _click_cell_pixels.is_empty():
+		return text + "
+No clicks yet this attempt."
+	var sorted := _click_cell_pixels.duplicate()
+	sorted.sort()
+	return text + "
+At %d clicks: smallest %.1f px, median %.1f px, largest %.1f px" % [
+		sorted.size(), sorted[0], sorted[sorted.size() / 2], sorted[sorted.size() - 1]]
 
 func _notification(what: int) -> void:
 	# Bindings can be remapped in the pause menu's options; refresh the help
@@ -168,6 +209,7 @@ func _on_cell_clicked(cell: Vector2i) -> void:
 	var head = _state.get_arrow_head(cell)
 	if head == null:
 		return
+	_click_cell_pixels.append(_board.view_transform.cell_pixels)
 	var outcome: PuzzleState.SelectOutcome = _state.select_arrow(head)
 	match outcome:
 		PuzzleState.SelectOutcome.IGNORED:
