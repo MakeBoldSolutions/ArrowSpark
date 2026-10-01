@@ -21,4 +21,4 @@ python tests/run_puzzle_structural_report.py --godot <godot>   # non-gating diag
 
 ## Human evidence
 - Playtest sessions per the fifteen-question questionnaire (final candidate: all 15 answered, unedited) recorded in the design report.
-- SC-009: one person other than the author finds the ArrowSpark Levels group in Level Select unaided.
+- SC-009: NOT PERFORMED in this spec; deferred to the next spec (Web Showcase & Playtest). Do not record it as passed. Protocol: `deferred-to-next-spec.md`.

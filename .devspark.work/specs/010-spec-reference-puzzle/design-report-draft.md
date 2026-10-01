@@ -102,7 +102,7 @@ Tester prior exposure: the author, who built and has played earlier candidates (
 - SC-004: largely evidenced. A long far-right arrow held a few zones until the bottom row was resolved; its removal opened about 5 arrows. A "visible simplification" was described as arrows becoming clickable, not as a visual unwinding.
 - SC-005: NOT cleanly met. He reported "maybe a bit" of obvious sequence toward the middle, a few stretches of rescanning (eased with Open Move), and about 5 obvious clicks at the end (no tedious cleanup). He judges this does not invalidate the level.
 - SC-006: all fifteen questions answered and Q15 is a clear yes; familiar-tester limitation disclosed.
-- SC-009: not yet run (outside tester held until now).
+- SC-009: NOT PERFORMED; deferred to the next spec (Web Showcase & Playtest) by owner decision on 2026-10-01 because only one tester is available. Accepted limitation, not a pass. No independent player has validated the experience; the only tester was the designer, who was familiar with earlier versions.
 
 ### Session template (copy per session)
 - Session date / candidate version / tester / prior familiarity / input method / Open Move use:

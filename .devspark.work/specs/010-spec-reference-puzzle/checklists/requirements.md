@@ -35,6 +35,6 @@
 ## Notes
 
 - Domain terms (arrow, catalog, solver, analyzer, Open Move) are product vocabulary of this game, not implementation leakage.
-- Human-playtest criteria (SC-002–SC-006, SC-009) cannot be automated; the spec must not reach Complete without them.
+- Human-playtest criteria (SC-002–SC-006, SC-009) cannot be automated. Amendment 2026-10-01: SC-009 (a person other than the author) was not performed and is deferred to the next spec as an accepted limitation; the others stand on the evidence collected.
 - Clarification completed: large-canvas group, group-end progression, main-menu Play destination, per-group numbering, and the explicit fifteen-question playtest questionnaire.
 - Planning must resolve final group names, report placement, and the remaining catalog classification review. Keep historical iteration records out of current-truth `.knowledge/` nodes in accordance with the shared preamble contract.

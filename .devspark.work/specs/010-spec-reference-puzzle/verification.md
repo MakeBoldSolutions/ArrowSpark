@@ -22,7 +22,7 @@
 ## Not yet run
 
 - Desktop smoke test, keyboard-only and gamepad traversal, frame-time observation (T027).
-- All human gates: T011, T014, T028.
+- Human gates: T011 and T014 are done (see the design-report draft). T028 (SC-009, a person other than the author) was NOT performed and is deferred to the next spec by owner decision on 2026-10-01: accepted limitation, not a pass.
 
 ## Candidate v1 (first real board)
 

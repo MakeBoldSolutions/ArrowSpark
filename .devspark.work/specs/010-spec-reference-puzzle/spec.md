@@ -117,7 +117,7 @@ A player opens the ArrowSpark Levels group, starts the Reference Puzzle and sees
 14. Where did the experience become confusing, frustrating or less engaging, and what would you most want changed?
 15. Is this a level you want someone else to play? Why or why not?
 
-Questions 1–15 define the required observation categories for meaningful iterations. The final candidate requires an explicit written answer to every question. The separate first-time Level Select observation in SC-009 remains required and must not be inferred from this questionnaire.
+Questions 1–15 define the required observation categories for meaningful iterations. The final candidate requires an explicit written answer to every question. The separate first-time Level Select observation in SC-009 must not be inferred from this questionnaire; as amended on 2026-10-01 it was not performed in this spec and is deferred (see SC-009).
 
 **Acceptance Scenarios**:
 
@@ -261,12 +261,12 @@ Everything that worked before still works, including for the new puzzle: Open Mo
 - **SC-006**: The final playtest answers all fifteen required questions in writing, including the closing question, and the answer supports handing the level to someone else; if not, the spec status stays below Complete. The tester's prior exposure to this board and earlier candidates is recorded, and a tester who has not played it is preferred; a familiar-tester result is disclosed as a limitation.
 - **SC-007**: The design report contains all fourteen required items, with playtest observations for every serious iteration that was played, and contains zero invented scores or formulas.
 - **SC-008**: 22 of 22 catalog entries (21 existing plus the Reference Puzzle) belong to exactly one group, all existing puzzle ids resolve unchanged, and every entry is reachable from Level Select by keyboard/gamepad and pointer.
-- **SC-009**: A first-time viewer of Level Select can find the mature level's group without guidance, confirmed by at least one person other than the author.
+- **SC-009**: A first-time viewer of Level Select can find the mature level's group without guidance, confirmed by at least one person other than the author. **Amended 2026-10-01 - NOT PERFORMED in this spec; deferred to the next spec (Web Showcase & Playtest).** The project currently has one active designer/tester. Rather than recruit someone solely to satisfy a development gate, fresh-player validation will be performed when the game is published as a Web Showcase, where multiple genuinely new players can encounter it naturally. This is a documented verification limitation of this spec and MUST NOT be represented as a passing second-person test. No independent player has yet validated the experience; the Reference Puzzle was tested by its designer, who was familiar with earlier versions. The intended protocol is preserved in `deferred-to-next-spec.md`.
 
 ## Assumptions
 
 - The existing analyzer, solver, scoreboard, session and viewport transform provide all the structure and measurement needed; no new metrics are required unless a specific authoring question demands one and it can be clearly defined.
 - The Reference Puzzle lives in the same catalog and authoring style as existing puzzles; the large-canvas viewport (Spec 008) is available for boards larger than the window.
-- The author (Mark) is the primary human playtester; additional playtesters are welcome and SC-009 needs at least one other person.
+- The author (Mark) is the primary human playtester; additional playtesters are welcome and SC-009 originally needed at least one other person; it was deferred on 2026-10-01 (see SC-009), and no one other than the author has played the Reference Puzzle.
 - The initial group classification proposed for planning: the eight baseline puzzles → Foundations; the six structural experiments, the large-canvas validation puzzle (per the clarification) and the six knot experiments (13 in total) → Puzzle Lab; the Reference Puzzle → ArrowSpark Levels. This is a starting point subject to the review in FR-023.
 - Puzzle display numbering restarts at 1 within each group without changing stable puzzle IDs. Main-menu Play starts the Reference Puzzle in ArrowSpark Levels. Within-group progression preserves the existing relative catalog order; at the group's end, Results offers Level Select instead of Next Puzzle.
