@@ -319,11 +319,7 @@ entry buttons, numbered by group position. Every group starts expanded;
 collapsing hides a group's entries so keyboard and gamepad focus skip them. The
 in-game label and results title use the same group-relative number. The play
 HUD has a Back button (first in the Tab order) that leaves the puzzle mid-play
-for Level Select without recording a score or touching progress. F3 toggles a
-developer readout (off by default) of the on-screen cell size, the supported
-range, and the smallest, median and largest size in effect at clicks this
-attempt; it reads existing view state, is held in memory only, and changes no
-gameplay. Play / New
+for Level Select without recording a score or touching progress. Play / New
 Game starts `reference_knot` without resetting progress.
 Source of truth: tests/puzzle_catalog_check.gd (group sizes, membership,
 position and next semantics, group-scoped session progression),

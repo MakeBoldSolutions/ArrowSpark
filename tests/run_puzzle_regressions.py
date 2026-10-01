@@ -80,7 +80,7 @@ def run_rule_regressions(godot: str, repo: Path) -> None:
         ):
             command = [godot, "--headless", "--path", str(root), *flags]
             print("Running:", " ".join(command), flush=True)
-            result = subprocess.run(command, env=env, check=True, timeout=180,
+            result = subprocess.run(command, env=env, check=True, timeout=45,
                                     capture_output=True, text=True)
             print(result.stdout, flush=True)
             print(result.stderr, flush=True)

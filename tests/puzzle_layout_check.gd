@@ -542,54 +542,6 @@ func _check_open_move_keyboard_and_gamepad_reachable() -> void:
 	puzzle.queue_free()
 	await process_frame
 
-func _press_f3() -> void:
-	for pressed in [true, false]:
-		var event := InputEventKey.new()
-		event.keycode = KEY_F3
-		event.physical_keycode = KEY_F3
-		event.pressed = pressed
-		Input.parse_input_event(event)
-		await process_frame
-	await process_frame
-
-## The F3 developer readout reports the on-screen cell size and the sizes in
-## effect at clicks, from existing view state only.
-func _check_view_readout() -> void:
-	PuzzleSession.set_current_id("multi_bend")
-	var puzzle: Control = load("res://scenes/puzzle/arrow_puzzle.tscn").instantiate()
-	get_root().add_child(puzzle)
-	await process_frame
-	await process_frame
-	var before: String = puzzle.view_readout_text()
-	check(before.contains("Cell size now:") and before.contains("No clicks yet"),
-		"the view readout shows the current cell size and no clicks before play")
-	var board = puzzle.get_node("%PuzzleBoard")
-	var head: Vector2i = _clear_order_for(board.definition)[0]
-	board.cell_clicked.emit(head)
-	var after: String = puzzle.view_readout_text()
-	check(after.contains("At 1 clicks") and after.contains("median"),
-		"the view readout reports the cell size in effect at clicks")
-	await _press_f3()
-	var readout: Label = puzzle._view_readout
-	check(readout != null and readout.visible and readout.text.contains("Cell size now:"),
-		"pressing F3 shows the view readout")
-	check(readout != null and readout.is_visible_in_tree() and readout.get_global_rect().size.x > 0.0,
-		"the view readout has an on-screen area")
-
-	# The same key must work once the attempt is finished and Results is showing.
-	await _press_f3()
-	check(not readout.visible, "pressing F3 again hides the view readout")
-	for clear_head in _clear_order_for(board.definition):
-		board.cell_clicked.emit(clear_head)
-	await _await_departures_complete(puzzle, _worst_case_seconds_for(board.definition))
-	check(puzzle.get_node("%PuzzleResults").visible, "the puzzle reached Results before the Results-screen F3 check")
-	await _press_f3()
-	check(readout.visible and readout.text.contains("smallest"),
-		"pressing F3 on the Results screen shows the view readout with the recorded click sizes")
-	puzzle.queue_free()
-	await process_frame
-	PuzzleSession.set_current_id("")
-
 ## Accordion headers collapse and expand their group: collapsed entries are
 ## hidden (so focus skips them), expanding restores them, and other groups are
 ## unaffected.
@@ -903,7 +855,6 @@ func _initialize() -> void:
 	await _check_level_select_request_opens_level_select()
 	await _check_level_select_accordion()
 	await _check_level_select_focus_after_collapse()
-	await _check_view_readout()
 	await _check_back_button()
 	await _check_replay_restart_and_next_puzzle()
 	await _check_replay_resets_open_move_fields()
