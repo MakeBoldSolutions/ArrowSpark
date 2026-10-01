@@ -1,9 +1,9 @@
 ```yaml
 gate: pr-review
-status: warn
-blocking: true
-severity: warning
-summary: "No security or save-data risk and both regression gates are green. Three blocking knowledge/code contradictions (stale statements in the architecture node), one focus-handling bug that leaves keyboard/gamepad focus on a hidden button, and the smoke-test-versus-completion tension with the constitution's verification principle need resolving before merge. The PR is a draft, which is appropriate."
+status: pass
+blocking: false
+severity: info
+summary: "Re-review at 6851baf: the three stale knowledge statements and the hidden-focus defect are fixed (with a regression test) and the F3 readout is removed. Both regression gates and editor validation are green. The remaining findings are an owner-accepted unrun-check limitation, an accepted bounded-sampling tradeoff, accepted PR-history hygiene and a framework improvement; none blocks merge."
 ```
 
 # Pull Request Review: Add level groups, accordion Level Select, Back button and the Reference Knot
@@ -14,8 +14,8 @@ summary: "No security or save-data risk and both regression gates are green. Thr
 - **Source Branch**: 010-spec-reference-puzzle
 - **Target Branch**: main
 - **Review Date**: 2026-10-01 16:14:06 UTC
-- **Last Updated**: 2026-10-01 16:27:17 UTC
-- **Reviewed Commit**: 313d5e636b2dd0083a20ef4b7956fbcb45a44cc1
+- **Last Updated**: 2026-10-01 17:00:00 UTC
+- **Reviewed Commit**: 6851baf
 - **Reviewer**: devspark.pr-review
 - **Constitution Version**: 2.0.1
 
@@ -25,6 +25,7 @@ summary: "No security or save-data risk and both regression gates are green. Thr
 |-----|--------|------|----------|------|--------|-----|-----|--------------|--------|
 | 1 | 313d5e6 | 2026-10-01 | 0 | 2 | 2 | 1 | 1 | `python tests/run_puzzle_regressions.py --godot godot` and `python tests/run_regressions.py --godot godot` | pass (both exit 0, all failure counters 0) |
 | 2 | 4998d18 | 2026-10-01 | 0 | 1 | 1 | 1 | 1 | same two commands | pass (both exit 0, all failure counters 0); open rows are owner-accepted or decided (H-01, M-02), history (L-01) and a referral (CON-01) |
+| 3 | 6851baf | 2026-10-01 | 0 | 0 | 0 | 0 | 0 | same two commands, plus `godot --headless --editor --quit` | pass (both gates exit 0, all failure counters 0, editor validation clean); no open blocking findings; remaining rows are owner-accepted or deferred |
 
 ## PR Summary
 
@@ -44,46 +45,46 @@ summary: "No security or save-data risk and both regression gates are green. Thr
 | Lines removed | −116 |
 | Net lines | +5681 |
 | Code/test lines (scripts, scenes, tests) | +830 −86 |
-| Commit snapshot | `4998d18` |
+| Commit snapshot | `6851baf` |
 
 *Collected from the PR context and `git diff --numstat`.*
 
 ## Executive Summary
 
-- ✅ **Constitution Compliance**: FAIL (6/6 principles checked: 3 pass, 3 partial — I, III and V)
-- 🔄 **Durable Delta Consistency**: FAIL (3 open PRD findings — all stale statements in one knowledge node; no planning-identifier leak found)
+- ✅ **Constitution Compliance**: PASS WITH ACCEPTED LIMITATION (6/6 principles checked: principle V carries an owner-accepted unrun check)
+- 🔄 **Durable Delta Consistency**: PASS (0 open PRD findings; the stale statements were corrected and a sweep found no other stale versions)
 - 🔒 **Security**: 0 issues found
 - 📊 **Code Quality**: 3 recommendations
 - 🧪 **Testing**: PASS (both gates exit 0)
 - 📝 **Documentation**: ADEQUATE apart from the stale statements above
 - 🏛️ **Constitution Improvements**: 1 CON finding
 
-**Overall Assessment**: A well-scoped, well-tested feature whose behavior change is intentional and additive: groups are metadata, the rule core is untouched, and the analyzer change is equivalence-tested. The blockers are documentation truth (three claims in the architecture node no longer match the code), one reproducible focus bug in the new accordion, and the unresolved question of how to treat the manual smoke test the constitution requires.
+**Overall Assessment** (original text; superseded by the re-review summary above): A well-scoped, well-tested feature whose behavior change is intentional and additive: groups are metadata, the rule core is untouched, and the analyzer change is equivalence-tested. The blockers are documentation truth (three claims in the architecture node no longer match the code), one reproducible focus bug in the new accordion, and the unresolved question of how to treat the manual smoke test the constitution requires.
 
-**Approval Recommendation**: ⚠️ REQUEST CHANGES
+**Approval Recommendation**: ✅ APPROVE (this re-review was produced in the same session as the fixes; an independent human review remains advisable)
 *Note: approval depends only on the durable delta, validation evidence, constitution, and unresolved findings.*
 
 ## Action Items
 
 ### Immediate Actions (Blocking — must resolve before merge)
 
-- [x] **PRD1-01** `.knowledge/architecture/arrow-puzzle.md:283` — The node says `canvas_validation` is "puzzle 15, reached by Next after puzzle 14". Level Select and the HUD now number it within its group (7th in Puzzle Lab), and Next only advances inside a group. — **Fix**: rewrite as "the seventh Puzzle Lab entry, reached by Next from `composed_shaped`". — *Fixed in 4998d18: canvas_validation text corrected to the seventh Puzzle Lab entry reached from composed_shaped*
-- [x] **PRD1-02** `.knowledge/architecture/arrow-puzzle.md:753` — The node says "the last catalog puzzle's results omit `%NextPuzzleButton`". The check now plays the last Foundations entry, and a group's final puzzle shows `%LevelSelectButton` instead. — **Fix**: "a group-ending puzzle's results omit Next Puzzle and show Level Select". — *Fixed in 4998d18: group-ending results now described as omitting Next Puzzle and showing Level Select*
-- [x] **PRD1-03** `.knowledge/architecture/arrow-puzzle.md:870` — The node says Level Select stays hidden and is "unreachable from this menu". `main_menu_with_animations.tscn` has `LevelSelectButton` with `visible = true`, and this PR makes Level Select central (Results and Back both return to it). — **Fix**: correct the paragraph; keep the Continue-hidden statement only if it is still true. — *Fixed in 4998d18: Level Select described as visible, with Results and Back returning to it*
-- [x] **H-02** `scenes/menus/main_menu/puzzle_select_menu.gd:71` — Focus is sent to a hidden button after the first group is collapsed (see below). — *Fixed in 4998d18: initial focus goes to the first visible entry or first header; layout check for collapse, close, reopen added*
+- [x] **PRD1-01** `.knowledge/architecture/arrow-puzzle.md:283` — The node says `canvas_validation` is "puzzle 15, reached by Next after puzzle 14". Level Select and the HUD now number it within its group (7th in Puzzle Lab), and Next only advances inside a group. — **Fix**: rewrite as "the seventh Puzzle Lab entry, reached by Next from `composed_shaped`". — *FIXED in 4998d18: canvas_validation described as the seventh Puzzle Lab entry reached from composed_shaped, with group-scoped Next*
+- [x] **PRD1-02** `.knowledge/architecture/arrow-puzzle.md:753` — The node says "the last catalog puzzle's results omit `%NextPuzzleButton`". The check now plays the last Foundations entry, and a group's final puzzle shows `%LevelSelectButton` instead. — **Fix**: "a group-ending puzzle's results omit Next Puzzle and show Level Select". — *FIXED in 4998d18: group-ending results described as omitting Next Puzzle and showing Level Select*
+- [x] **PRD1-03** `.knowledge/architecture/arrow-puzzle.md:870` — The node says Level Select stays hidden and is "unreachable from this menu". `main_menu_with_animations.tscn` has `LevelSelectButton` with `visible = true`, and this PR makes Level Select central (Results and Back both return to it). — **Fix**: correct the paragraph; keep the Continue-hidden statement only if it is still true. — *FIXED in 4998d18: Level Select described as visible, with Results and Back returning to it; Continue stays hidden*
+- [x] **H-02** `scenes/menus/main_menu/puzzle_select_menu.gd:71` — Focus is sent to a hidden button after the first group is collapsed (see below). — *FIXED + REGRESSION in 4998d18: focus goes to the first visible entry or first header; layout check for collapse, close, reopen*
   - **Broken code**: `_first_button.grab_focus()`
   - **Fix**: focus the first visible entry, or the first group's header when its entries are collapsed.
-- [ ] **H-01** — Smoke-test gap versus Principle V (see below). **Fix**: either run the manual smoke test and record the result, or keep completion claims below "Complete" and merge only with an explicit, recorded owner acceptance. — *Owner acceptance recorded 2026-10-01 in the PR; the smoke test is NOT performed and not counted as a pass. Not a fix.*
+- [ ] **H-01** — Smoke-test gap versus Principle V (see below). **Fix**: either run the manual smoke test and record the result, or keep completion claims below "Complete" and merge only with an explicit, recorded owner acceptance. — *OWNER-ACCEPTED LIMITATION (CON-01): manual smoke, physical keyboard/gamepad, live scene changes, frame time, numeric cell size and independent-player testing were NOT observed and are not counted as passed*
 
 ### Recommended Improvements
 
-- [x] **M-01** `tests/puzzle_catalog_check.gd:399` and `tests/run_puzzle_regressions.py:83` — The densest board gets only a sampled order-independence check (every sixth branching state) so the script fits a 45 s timeout. Raising that script's timeout would restore the full check. — *Fixed in 4998d18: full order-independence check restored; launcher timeout raised to 180 s*
-- [ ] **M-02** `scenes/puzzle/arrow_puzzle.gd:79` — The F3 developer readout adds an always-on per-frame `_process`, has never been seen working on a real desktop, and was added only to gather evidence that was not collected. Decide whether to keep it; if kept, call `set_process(false)` until the label is shown. — *Left as is by owner decision 2026-10-01; no change made.*
-- [ ] **L-01** — Three commits in this PR are unrelated to the feature: an addon return-type/UID fix, three series articles, and a conversation timeline file. — *Not addressed: separating the commits would rewrite history. Noted in the PR.*
+- [ ] **M-01** `tests/puzzle_catalog_check.gd:399` and `tests/run_puzzle_regressions.py:83` — The densest board gets only a sampled order-independence check (every sixth branching state) so the script fits a 45 s timeout. Raising that script's timeout would restore the full check. — *ACCEPTED/DEFERRED RECOMMENDATION: the sampling is an intentional bounded verification tradeoff and no defect was found; an earlier timeout increase was reverted in 6851baf*
+- [x] **M-02** `scenes/puzzle/arrow_puzzle.gd:79` — The F3 developer readout adds an always-on per-frame `_process`, has never been seen working on a real desktop, and was added only to gather evidence that was not collected. Decide whether to keep it; if kept, call `set_process(false)` until the label is shown. — *REMOVED in 6851baf: the F3 readout existed only for one-off closeout evidence and had no independent need; code, tests and knowledge removed*
+- [ ] **L-01** — Three commits in this PR are unrelated to the feature: an addon return-type/UID fix, three series articles, and a conversation timeline file. — *ACCEPTED PR-HISTORY HYGIENE: history is not rewritten; no product or maintenance defect from those commits*
 
 ### Constitution Improvements (Non-blocking — feed into `/devspark.evolve-constitution`)
 
-- [ ] **CON-01** — Principle V has no way to record an owner-accepted unrun check; see below. — *Referred to /devspark.evolve-constitution; no constitution change made here.*
+- [ ] **CON-01** — Principle V has no way to record an owner-accepted unrun check; see below. — *DEFERRED TO DEVSPARK IMPROVEMENT: needs a semantic distinction between unresolved verification work and an owner-accepted unrun check; no constitution change in this PR*
 
 ## What's Good
 
@@ -103,35 +104,35 @@ None found.
 
 | ID | Status | Principle | File:Line | Issue | Fix |
 |----|--------|-----------|-----------|-------|-----|
-| H-01 | 🔴 Open | V. Practical Gameplay Verification ("MUST receive … a smoke test of affected gameplay … If a required check cannot be run, disclose that limitation and leave it outstanding rather than claim completion") | `.devspark.work/specs/010-spec-reference-puzzle/spec.md` status and `gates/verify.md` | Menu, pause-adjacent, results and input paths changed. No manual desktop smoke run, physical keyboard traversal or gamepad check was done (automated input-event checks only). The limitation is disclosed and the PR is a draft, which satisfies the "disclose" half. The planning status says Complete and the verify gate says pass, which sits uneasily with "leave it outstanding rather than claim completion". | Run the smoke test (about 15 minutes; the steps are in the working quickstart) and record the result, or keep the claim below Complete and record an explicit owner acceptance with the PR as the place it is stated. |
-| H-02 | 🔴 Open | III. Accessible, Configurable Controls ("Preserve keyboard/gamepad navigation … MUST") | `scenes/menus/main_menu/puzzle_select_menu.gd:71` | Reproduced with a throwaway headless script: collapse the first group, close and reopen Level Select, and `gui_get_focus_owner()` is a hidden button (`visible in tree: false`). A keyboard or gamepad user then has an invisible focus; Enter would activate a hidden entry. | Replace `_first_button.grab_focus()` with a helper that picks the first entry whose `is_visible_in_tree()` is true, falling back to the first group header. Add a layout check for collapse, close, reopen. |
+| H-01 | ➡️ Carried — owner-accepted limitation | V. Practical Gameplay Verification ("MUST receive … a smoke test of affected gameplay … If a required check cannot be run, disclose that limitation and leave it outstanding rather than claim completion") | `.devspark.work/specs/010-spec-reference-puzzle/spec.md` status and `gates/verify.md` | Menu, pause-adjacent, results and input paths changed. No manual desktop smoke run, physical keyboard traversal or gamepad check was done (automated input-event checks only). The limitation is disclosed and the PR is a draft, which satisfies the "disclose" half. The planning status says Complete and the verify gate says pass, which sits uneasily with "leave it outstanding rather than claim completion". | Run the smoke test (about 15 minutes; the steps are in the working quickstart) and record the result, or keep the claim below Complete and record an explicit owner acceptance with the PR as the place it is stated. |
+| H-02 | ✅ Resolved | III. Accessible, Configurable Controls ("Preserve keyboard/gamepad navigation … MUST") | `scenes/menus/main_menu/puzzle_select_menu.gd:71` | Reproduced with a throwaway headless script: collapse the first group, close and reopen Level Select, and `gui_get_focus_owner()` is a hidden button (`visible in tree: false`). A keyboard or gamepad user then has an invisible focus; Enter would activate a hidden entry. | Replace `_first_button.grab_focus()` with a helper that picks the first entry whose `is_visible_in_tree()` is true, falling back to the first group header. Add a layout check for collapse, close, reopen. |
 
 ### Durable Delta Consistency Findings (Blocking)
 
 | ID | Status | Type | File:Line | Issue | Fix |
 |----|--------|------|-----------|-------|-----|
-| PRD1-01 | 🔴 Open | Code/knowledge contradiction | `.knowledge/architecture/arrow-puzzle.md:283` | `canvas_validation` described as puzzle 15 reached after puzzle 14; code numbers it 7th in Puzzle Lab and Next is group-scoped | Update the sentence |
-| PRD1-02 | 🔴 Open | Code/knowledge contradiction | `.knowledge/architecture/arrow-puzzle.md:753` | "the last catalog puzzle's results omit `%NextPuzzleButton`" — group-ending puzzles now show Level Select | Update the sentence |
-| PRD1-03 | 🔴 Open | Code/knowledge contradiction | `.knowledge/architecture/arrow-puzzle.md:870` | "Level Select stay hidden … unreachable from this menu" contradicts the scene (`LevelSelectButton` visible) and the new Results/Back return path | Correct the paragraph |
+| PRD1-01 | ✅ Resolved | Code/knowledge contradiction | `.knowledge/architecture/arrow-puzzle.md:283` | `canvas_validation` described as puzzle 15 reached after puzzle 14; code numbers it 7th in Puzzle Lab and Next is group-scoped | Update the sentence |
+| PRD1-02 | ✅ Resolved | Code/knowledge contradiction | `.knowledge/architecture/arrow-puzzle.md:753` | "the last catalog puzzle's results omit `%NextPuzzleButton`" — group-ending puzzles now show Level Select | Update the sentence |
+| PRD1-03 | ✅ Resolved | Code/knowledge contradiction | `.knowledge/architecture/arrow-puzzle.md:870` | "Level Select stay hidden … unreachable from this menu" contradicts the scene (`LevelSelectButton` visible) and the new Results/Back return path | Correct the paragraph |
 
 ### Medium Priority Suggestions
 
 | ID | Status | Principle | File:Line | Issue | Recommendation |
 |----|--------|-----------|-----------|-------|----------------|
-| M-01 | 🔴 Open | V. Practical Gameplay Verification | `tests/puzzle_catalog_check.gd:399`, `tests/run_puzzle_regressions.py:83` | Sampling the order-independence check for the most complex board reduces the proof where risk is highest, to fit a 45 s per-script timeout | Raise that script's timeout (the sampled run is 36 s, the full one 51 s) and drop the sampling |
-| M-02 | 🔴 Open | I. Simple, Maintainable Code ("justify new abstractions") | `scenes/puzzle/arrow_puzzle.gd:79` | F3 readout code runs `_process` every frame even when unused; unverified on a real desktop; its purpose (a cell-size measurement) was not achieved | Remove it, or keep it with `set_process(false)` until shown |
+| M-01 | ➡️ Carried — accepted/deferred recommendation | V. Practical Gameplay Verification | `tests/puzzle_catalog_check.gd:399`, `tests/run_puzzle_regressions.py:83` | Sampling the order-independence check for the most complex board reduces the proof where risk is highest, to fit a 45 s per-script timeout | Raise that script's timeout (the sampled run is 36 s, the full one 51 s) and drop the sampling |
+| M-02 | ✅ Resolved (removed) | I. Simple, Maintainable Code ("justify new abstractions") | `scenes/puzzle/arrow_puzzle.gd:79` | F3 readout code runs `_process` every frame even when unused; unverified on a real desktop; its purpose (a cell-size measurement) was not achieved | Remove it, or keep it with `set_process(false)` until shown |
 
 ### Low Priority Improvements
 
 | ID | Status | Principle | File:Line | Issue | Recommendation |
 |----|--------|-----------|-----------|-------|----------------|
-| L-01 | 🔴 Open | II. Prefer Project-Level Template Customization | `addons/maaacks_game_template/base/scenes/menus/options_menu/option_control/option_control.gd` | An addon edit and unrelated docs/timeline commits ride in this PR; Principle II asks that addon edits be justified | Split the unrelated commits into their own PR, or state in the PR body why the addon change is needed |
+| L-01 | ➡️ Carried — accepted PR-history hygiene | II. Prefer Project-Level Template Customization | `addons/maaacks_game_template/base/scenes/menus/options_menu/option_control/option_control.gd` | An addon edit and unrelated docs/timeline commits ride in this PR; Principle II asks that addon edits be justified | Split the unrelated commits into their own PR, or state in the PR body why the addon change is needed |
 
 ### Constitution Improvements
 
 | ID | Status | Section | Observation | Suggested Amendment |
 |----|--------|---------|-------------|---------------------|
-| CON-01 | 🔴 Open | V | The principle allows disclosing a check that "cannot be run" but not an owner-accepted decision not to run it, so the same shortfall reads as a violation or as a pass depending on wording. | Add: an owner-accepted unrun check is recorded as an accepted limitation with a stated reason and does not by itself block completion. |
+| CON-01 | ➡️ Carried — deferred to DevSpark improvement | V | The principle allows disclosing a check that "cannot be run" but not an owner-accepted decision not to run it, so the same shortfall reads as a violation or as a pass depending on wording. | Add: an owner-accepted unrun check is recorded as an accepted limitation with a stated reason and does not by itself block completion. |
 
 ## Constitution Alignment Details
 
@@ -157,7 +158,7 @@ None found.
 
 **Status**: ADEQUATE
 
-Both launchers exit 0 on the PR head (`313d5e6`): `run_puzzle_regressions.py` with every failure counter 0, `run_regressions.py` with `REGRESSION_FAILURES=0`. New coverage: catalog groups and group-scoped progression, grouped Level Select and accordion, group-end Results, Level Select request, Back wiring, tab order, analyzer shortcut equivalence, F3 readout. Gaps: collapse-then-reopen focus (H-02), sampled order-independence for the densest board (M-01), no real scene change on Back, no physical-device input.
+Both launchers exit 0 on the re-reviewed head (`6851baf`): `run_puzzle_regressions.py` with every failure counter 0, `run_regressions.py` with `REGRESSION_FAILURES=0`. New coverage: catalog groups and group-scoped progression, grouped Level Select and accordion, group-end Results, Level Select request, Back wiring, tab order, analyzer shortcut equivalence, F3 readout. Gaps: collapse-then-reopen focus (H-02), sampled order-independence for the densest board (M-01), no real scene change on Back, no physical-device input.
 
 ## Test Inventory
 
@@ -174,7 +175,7 @@ Removed tests: none (function counts counted by `_check`/`_test` prefix).
 
 ## Documentation Status
 
-**Status**: INADEQUATE until PRD1-01 to PRD1-03 are fixed. The new design report and the rest of the architecture node are accurate.
+**Status**: ADEQUATE. The three stale statements were corrected and no stale version remains elsewhere in durable knowledge.
 
 ## Changed Files Summary
 
@@ -214,11 +215,11 @@ None.
 
 ## Approval Decision
 
-**Recommendation**: ⚠️ REQUEST CHANGES
+**Recommendation**: ✅ APPROVE
 
-**Reasoning**: No security, data or rule-core risk, and the automated evidence is strong. Three stale statements in the architecture node (PRD1-01 to PRD1-03) and a reproducible hidden-focus bug in the new accordion (H-02) should be fixed before merge. H-01 is a decision rather than a code fix: the constitution asks that an unrun smoke test be left outstanding rather than counted as completion, so either run it or keep that status honest in the merge record. M-01, M-02 and L-01 are improvements.
+**Reasoning**: The blocking findings are resolved: three stale knowledge statements are corrected and swept, the hidden-focus defect is fixed with a regression test, and the F3 readout is removed. Gates are green. H-01 is an owner-accepted unrun-check limitation that is recorded and not counted as a pass; M-01, L-01 and CON-01 are accepted or deferred. Approval is advisory and based on the durable delta, the validation evidence and the recorded dispositions.
 
-**Estimated Rework Time**: about 1–2 hours (knowledge edits, a small focus fix with a test, and a smoke run or a recorded acceptance).
+**Estimated Rework Time**: N/A
 
 ---
 
