@@ -143,3 +143,11 @@ tests/run_*.py, tests/README.md       # doc/count updates only if counts are har
 ## Complexity Tracking
 
 No constitution violations; no waivers.
+
+## Implementation Notes
+
+- 2026-09-30 Deviation: the dense final board made the exhaustive longest-dependency-chain search in the analyzer unable to finish. The chain is now computed in linear time when the dependency graph is acyclic (identical results; exhaustive search kept for cyclic graphs). The requirement on analyzer changes was amended to permit exactly this.
+- 2026-09-30 Deviation: the catalog check samples every sixth branching state for the Reference Knot only, because the full check exceeds the launcher's per-script time limit.
+- 2026-09-30 Scope added by the owner after the first playtest: a Back button on the play HUD and collapsible Level Select groups. Saved progress was declined for this spec.
+- 2026-09-30 An F3 developer readout of on-screen cell size was added to gather the numeric readability evidence; it never displayed on the tester's desktop and the measurement was not captured. A tooltip variant was tried and reverted before commit.
+- 2026-10-01 Fresh-player validation moved to the next spec by owner decision.

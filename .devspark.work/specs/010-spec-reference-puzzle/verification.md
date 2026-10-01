@@ -78,3 +78,7 @@
   In memory only, no persistence, no gameplay change. Layout check covers it; gates and editor validation
   green. This supplies the FR-008 cell-size evidence without manual estimation; whether arrows were
   traceable at that size still needs the tester's own account.
+
+## Final closeout (2026-10-01)
+
+See the spec's Closeout section for the classification (passed / accepted limitation / deferred / learning / failed). No blocking defect remains. The pointer tooltip readout tried for the numeric cell size was reverted before commit (no independent product value). The end-to-end gate evidence is in gates/verify.md.

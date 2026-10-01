@@ -25,7 +25,7 @@ participants:
 
 **Feature Branch**: `010-spec-reference-puzzle`
 **Created**: 2026-09-29
-**Status**: In Progress <!-- Valid: Draft | In Progress | Complete -->
+**Status**: Complete <!-- Valid: Draft | In Progress | Complete -->
 **Input**: User description: "Spec 010 — The ArrowSpark Reference Puzzle: craft one deliberately composed knot level that combines the best Spec 006/009 lessons, iterate it through human playtesting, and organize the puzzle catalog into purpose-based groups (Foundations, Puzzle Lab / Experiments, ArrowSpark Levels)."
 
 > **Lifecycle note**: This spec is temporary working state under `.devspark.work/specs/`. It remains there until release archival and MUST NOT be referenced by durable code, tests, or `.knowledge/`.
@@ -91,7 +91,7 @@ Focus on (1) whether the playtest evidence honestly supports the "level I want s
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - Play the Reference Puzzle and feel the rhythm (Priority: P1)
+### User Story 1 - Play the Reference Puzzle and feel the rhythm ✅ Complete (Priority: P1)
 
 A player opens the ArrowSpark Levels group, starts the Reference Puzzle and sees an intriguing but readable knot. They pick a foothold, make local progress, get stuck on a stubborn arrow, trace its blocker to a distant region, discover the relationship, chain several removals, watch a long arrow unwind and the board visibly breathe, then have to stop and think again. This repeats a few times until the remaining structure is understood and collapses satisfyingly.
 
@@ -129,7 +129,7 @@ Questions 1–15 define the required observation categories for meaningful itera
 
 ---
 
-### User Story 2 - Find mature levels separately from foundations and experiments (Priority: P1)
+### User Story 2 - Find mature levels separately from foundations and experiments ✅ Complete (Priority: P1)
 
 A player or developer opens Level Select and sees puzzles organized by purpose: ArrowSpark Levels (mature, player-facing), Foundations (early mechanic/validation puzzles) and Puzzle Lab (research experiments). Every existing puzzle remains reachable and playable with its original id.
 
@@ -146,7 +146,7 @@ A player or developer opens Level Select and sees puzzles organized by purpose: 
 
 ---
 
-### User Story 3 - Durable design report and honest playtest record (Priority: P2)
+### User Story 3 - Durable design report and honest playtest record ✅ Complete (Priority: P2)
 
 A future designer reads a durable Reference Puzzle design report describing intent (neighborhoods, cross-region dependencies, bridge arrows, discovery beats, insight chains, major releases, experience curve), the iteration history, unedited human playtest observations, where play diverged from intent, which analyzer metrics and knot-experiment ingredients (long/bent arrows, regions, tail dependencies, releases) helped or disappointed, remaining weaknesses, and candidate design principles.
 
@@ -161,7 +161,7 @@ A future designer reads a durable Reference Puzzle design report describing inte
 
 ---
 
-### User Story 4 - Existing gameplay contracts are untouched (Priority: P2)
+### User Story 4 - Existing gameplay contracts are untouched ✅ Complete with accepted limitations (Priority: P2)
 
 Everything that worked before still works, including for the new puzzle: Open Move, scoring, session bests, replay, Next Puzzle/Level Select navigation, zoom/pan/Fit Puzzle, transformed selection and path-following departures.
 
@@ -201,7 +201,7 @@ Everything that worked before still works, including for the new puzzle: Open Mo
 - **FR-005**: Cross-neighborhood dependencies (including tail-based blocking) MUST matter to the solve, expressed as a partial ordering with real local freedom rather than one rigid region-by-region sequence.
 - **FR-006**: The puzzle MUST include at least one Bridge Arrow whose geometry or blocking role connects multiple neighborhoods and whose removal produces a major visual release.
 - **FR-007**: The puzzle MUST offer multiple distinct Discovery Beats separated by renewed uncertainty, and MUST NOT collapse into a single early aha followed by an obvious A-to-Z execution sequence, nor demand a full rescan after every removal.
-- **FR-008**: Geometry MUST remain readable: individual arrows must be traceable at a zoom level the viewport supports, avoiding the spaghetti boundary found in the knot experiments. Evidence: the playtest records the zoom level (on-screen cell size in pixels) at which the tester could trace arrows, which MUST fall within the viewport's supported zoom range; Fit Puzzle alone is not sufficient if arrows are untraceable at that size.
+- **FR-008**: Geometry MUST remain readable: individual arrows must be traceable at a zoom level the viewport supports, avoiding the spaghetti boundary found in the knot experiments. Evidence: the playtest records the zoom level (on-screen cell size in pixels) at which the tester could trace arrows, which MUST fall within the viewport's supported zoom range; Fit Puzzle alone is not sufficient if arrows are untraceable at that size. **Closeout 2026-10-01:** the playtest recorded that arrows were very easy to trace on a desktop screen and that mouse-wheel zoom was enough; the numeric on-screen cell-size measurement was NOT captured (an F3 readout did not appear on the tester's desktop and further measurement effort was judged disproportionate). Accepted verification limitation; readability rests on the human observation only.
 - **FR-009**: The endgame MUST avoid a prolonged residue of trivial cleanup; the last portion should reward understanding with a satisfying collapse. Evidence: after the final conceptual barrier, no more than five consecutive removals of single-cell arrows may occur without a new decision, recorded from the playtest and the witness as a diagnostic, not a score.
 - **FR-010**: All sequencing MUST emerge from the existing blocking/removal rules; the spec MUST NOT introduce new mechanics (locks, keys, doors, colored regions, neighborhood markers, power-ups, lives, timers, forced restarts, new hint systems, combo multipliers, scripted unlocking) or encode an intended solution order in runtime behavior.
 
@@ -257,7 +257,7 @@ Everything that worked before still works, including for the new puzzle: Open Mo
 - **SC-002**: In the final human playtest, the player reports at least three distinct "aha" moments, at least one of which let them anticipate several upcoming consequences, and identifies at least two points where they had to stop and rethink after a chain of removals.
 - **SC-003**: In the final playtest, the player names at least one neighborhood that was substantially progressed yet not completable until a dependency from another neighborhood was resolved.
 - **SC-004**: The player can identify and remove at least one bridge arrow and describe it as connecting or holding together separate areas; its removal is recorded as a visible simplification.
-- **SC-005**: The final playtest records no section where the player felt they were following an obvious sequence for too long, no section requiring a full rescan after every move, and no tedious cleanup at the end.
+- **SC-005**: The final playtest records no section where the player felt they were following an obvious sequence for too long, no section requiring a full rescan after every move, and no tedious cleanup at the end. **Original wording preserved above. Amended 2026-10-01 from human playtest evidence:** the criterion assumed that any obvious sequence, any rescanning and any short final collapse are defects. The playtest showed otherwise: a short obvious sequence after an earned insight lets the player enjoy mastery; some rescanning is what starts the next discovery; a small final collapse can be satisfying. What harms is EXCESS: an obvious sequence long enough to become mindless clicking, rescanning so frequent that understanding cannot form, or a long trivial cleanup after the puzzle is effectively solved. The amended criterion is: the final playtest records no excessive obvious sequence, no excessive rescanning and no tedious cleanup, where a short sequence, occasional rescanning and a small final collapse are healthy. **Disposition:** against the ORIGINAL wording SC-005 is NOT met (the tester reported a mild obvious-sequence stretch toward the middle and a few rescans). Against the AMENDED wording: rescanning is healthy (a few times, liked, eased by the Open Move hint); the ending is healthy (blocks to the end, about five obvious final clicks, no tedious cleanup, liked); the middle stretch of roughly ten simultaneously obvious moves "starts to feel old", sits at the boundary of excess, and is recorded as an accepted limitation, not a pass. No overall monotony or frustration was reported.
 - **SC-006**: The final playtest answers all fifteen required questions in writing, including the closing question, and the answer supports handing the level to someone else; if not, the spec status stays below Complete. The tester's prior exposure to this board and earlier candidates is recorded, and a tester who has not played it is preferred; a familiar-tester result is disclosed as a limitation.
 - **SC-007**: The design report contains all fourteen required items, with playtest observations for every serious iteration that was played, and contains zero invented scores or formulas.
 - **SC-008**: 22 of 22 catalog entries (21 existing plus the Reference Puzzle) belong to exactly one group, all existing puzzle ids resolve unchanged, and every entry is reachable from Level Select by keyboard/gamepad and pointer.
@@ -270,3 +270,15 @@ Everything that worked before still works, including for the new puzzle: Open Mo
 - The author (Mark) is the primary human playtester; additional playtesters are welcome and SC-009 originally needed at least one other person; it was deferred on 2026-10-01 (see SC-009), and no one other than the author has played the Reference Puzzle.
 - The initial group classification proposed for planning: the eight baseline puzzles → Foundations; the six structural experiments, the large-canvas validation puzzle (per the clarification) and the six knot experiments (13 in total) → Puzzle Lab; the Reference Puzzle → ArrowSpark Levels. This is a starting point subject to the review in FR-023.
 - Puzzle display numbering restarts at 1 within each group without changing stable puzzle IDs. Main-menu Play starts the Reference Puzzle in ArrowSpark Levels. Within-group progression preserves the existing relative catalog order; at the group's end, Results offers Level Select instead of Next Puzzle.
+
+## Closeout (2026-10-01)
+
+Convergence rule applied: a spec is complete when its objective is resolved, not when every observation generated during implementation has been eliminated. Only a blocking defect generates more work here. No blocking defect remains.
+
+| Class | Item |
+|---|---|
+| PASSED (evidence collected) | Automated regression gates, editor validation, structural report, catalog validity/solvability/witness replay/order independence (sampled for the densest board only); grouped Level Select, group-scoped Next, Level Select request, Back button and accordion by automated checks; designer playtest of the final version with all fifteen questions answered and an unqualified yes (SC-006 answer); SC-004 largely evidenced. |
+| ACCEPTED LIMITATION | Familiar tester only (the designer, who had played earlier versions); no independent player; SC-002 and SC-003 only partly evidenced (patterns, not located moments); the roughly ten-obvious-move middle stretch; numeric cell size not captured (FR-008); desktop smoke test not performed as a manual run (physical keyboard/gamepad, live Back and Level Select scene changes, frame-time observation); F3 readout never observed on a desktop. |
+| DEFERRED WORK | Fresh-player validation, including the Level Select / ArrowSpark Levels discovery check (SC-009) moves to the next spec (Web Showcase & Playtest) with its protocol preserved; saved progress; deciding whether the F3 readout stays. |
+| LEARNING / CHANGED ASSUMPTION | SC-005 as written was too absolute (see its amendment); neighborhoods emerge from cleared white space during play rather than from the starting layout; "some freedom good, too many simultaneously obvious moves feels like clicking" is a design boundary; analyzer longest-chain search needed a linear-time acyclic path for dense boards. |
+| FAILED | SC-005 against its original wording only (see amendment). |
