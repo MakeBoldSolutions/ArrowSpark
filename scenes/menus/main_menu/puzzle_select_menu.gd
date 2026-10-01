@@ -67,5 +67,18 @@ func _notification(what: int) -> void:
 		call_deferred("_grab_first_entry_focus")
 
 func _grab_first_entry_focus() -> void:
-	if _first_button != null:
-		_first_button.grab_focus()
+	var target := _first_visible_focus_target()
+	if target != null:
+		target.grab_focus()
+
+## The first entry button that can be seen, or the first group header when every
+## group is collapsed, so focus never lands on a hidden control (a collapsed
+## group keeps its state when the menu is reopened).
+func _first_visible_focus_target() -> Button:
+	for button in _entry_buttons:
+		if button.is_visible_in_tree():
+			return button
+	for header in _header_buttons:
+		if header.is_visible_in_tree():
+			return header
+	return null

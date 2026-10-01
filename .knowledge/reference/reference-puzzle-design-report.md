@@ -17,7 +17,7 @@ Evidence status in one place: one tester, the designer, who was familiar with ea
 
 ## Structural profile (final version)
 
-46x32 board, 115 arrows (3 single-cell, 112 multi-cell), 1348 of 1472 cells occupied (density 0.92). 207 bends in total (at most 9 on one arrow), longest arrow 43 cells, average 11.72. 6 of 115 arrows are legal at the start. Along the solver witness: 11 forced states, 104 branching states, longest forced run 3, up to 15 arrows legal at once. Dependency graph: 661 edges, depth 33, largest in-degree 20, one connected component, largest single unlock 5. Blocker distance: maximum 42, average 11.71. The solver confirms it solvable and its witness replays with zero mistakes; the catalog check also confirms the order-independence property, sampling every sixth branching state for this board only because the full check exceeds the launcher time limit.
+46x32 board, 115 arrows (3 single-cell, 112 multi-cell), 1348 of 1472 cells occupied (density 0.92). 207 bends in total (at most 9 on one arrow), longest arrow 43 cells, average 11.72. 6 of 115 arrows are legal at the start. Along the solver witness: 11 forced states, 104 branching states, longest forced run 3, up to 15 arrows legal at once. Dependency graph: 661 edges, depth 33, largest in-degree 20, one connected component, largest single unlock 5. Blocker distance: maximum 42, average 11.71. The solver confirms it solvable and its witness replays with zero mistakes; the catalog check also confirms the order-independence property at every branching state.
 
 ## Intended neighborhoods
 

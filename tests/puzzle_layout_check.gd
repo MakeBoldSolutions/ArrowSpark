@@ -620,6 +620,53 @@ func _check_level_select_accordion() -> void:
 	menu.queue_free()
 	await process_frame
 
+## Collapse state survives closing and reopening Level Select, so the initial
+## focus must go to something visible: the first visible entry, or the first
+## header when every group is collapsed -- never a hidden entry.
+func _check_level_select_focus_after_collapse() -> void:
+	var menu = load("res://scenes/menus/main_menu/main_menu_with_animations.tscn").instantiate()
+	get_root().add_child(menu)
+	await process_frame
+	await process_frame
+	menu._on_level_select_button_pressed()
+	await process_frame
+	await process_frame
+	var level_select = menu.level_select_scene
+	var headers: Array[Button] = level_select.header_buttons()
+	var buttons: Array[Button] = level_select.entry_buttons()
+	headers[0].button_pressed = false
+	await process_frame
+	menu._close_sub_menu()
+	await process_frame
+	await process_frame
+	menu._on_level_select_button_pressed()
+	for i in range(3):
+		await process_frame
+	var focus_owner := get_root().gui_get_focus_owner()
+	check(focus_owner != null and focus_owner.is_visible_in_tree(),
+		"reopening Level Select with the first group collapsed focuses a visible control")
+	var first_visible: Button = null
+	for button in buttons:
+		if button.is_visible_in_tree():
+			first_visible = button
+			break
+	check(focus_owner == first_visible,
+		"reopening Level Select with the first group collapsed focuses the first visible entry")
+	for header in headers:
+		header.button_pressed = false
+	await process_frame
+	menu._close_sub_menu()
+	await process_frame
+	await process_frame
+	menu._on_level_select_button_pressed()
+	for i in range(3):
+		await process_frame
+	focus_owner = get_root().gui_get_focus_owner()
+	check(focus_owner == headers[0],
+		"reopening Level Select with every group collapsed focuses the first header")
+	menu.queue_free()
+	await process_frame
+
 ## The Back button is present and wired; the real scene change it performs is not
 ## triggered here (the layout check never changes scenes through the live loader).
 func _check_back_button() -> void:
@@ -855,6 +902,7 @@ func _initialize() -> void:
 	await _check_level_select_menu()
 	await _check_level_select_request_opens_level_select()
 	await _check_level_select_accordion()
+	await _check_level_select_focus_after_collapse()
 	await _check_view_readout()
 	await _check_back_button()
 	await _check_replay_restart_and_next_puzzle()

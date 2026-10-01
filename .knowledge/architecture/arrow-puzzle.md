@@ -280,9 +280,9 @@ never share mutable substructure, the same isolation guarantee
 `create_fixed()` already had. `PuzzleDefinition` itself gained no
 catalog/progression fields; it remains anonymous structural data.
 
-`canvas_validation` is a plainly titled, player-visible entry (puzzle 15,
-reached by Next after puzzle 14, listed in Level Select and counted in the
-session score like any other). It is an authored 40x30 board packed with fifty-two arrows (about 87% of
+`canvas_validation` is a plainly titled, player-visible entry (the seventh
+Puzzle Lab entry, reached by Next from `composed_shaped`, listed in Level Select
+and counted in the session score like any other). It is an authored 40x30 board packed with fifty-two arrows (about 87% of
 the cells occupied): almost every arrow is long and bent (most 22-43 cells,
 only three shorter than eight), all four directions appear, long tails cross
 the rays of other arrows so most removals unlock several others, all four
@@ -358,7 +358,8 @@ solver-confirmed solvable with a replayed zero-mistake witness, the original
 fourteen entries' ids, order, dimensions and content unchanged, the
 `canvas_validation` fixture's dimensions/arrow count/bent long arrows/four
 directions/tail dependency/top-left open move/corner regions, `Next` from
-puzzle 14 reaching it and the continuation into the six new entries and last-entry `Next` absence, no
+`composed_shaped` reaching it and continuing into the knot experiments, `Next` being
+absent at each group's last entry, no
 difficulty-labeled title wording, each of the six experimental
 entries confirmed against its exact `PuzzleAnalyzer`-derived threshold (see
 below), the catalog-wide branching order-independence check (every one of
@@ -695,8 +696,8 @@ fresh-attempt guarantee (no carried-over mistakes, score, active state, or
 departure state) with no separate reset logic. `puzzle_results.gd` gains a
 `next_puzzle_requested` signal and a `%NextPuzzleButton`, shown/enabled only
 when the controller passes `has_next = true` (from
-`PuzzleSession.has_next()`) into `show_results()`; on the last catalog
-puzzle of a group it is hidden and a `%LevelSelectButton` (which returns to
+`PuzzleSession.has_next()`) into `show_results()`; on the last puzzle of a
+group it is hidden and a `%LevelSelectButton` (which returns to
 the main menu with Level Select open) takes its place, while Replay and Main
 Menu always remain available. `show_results()` also takes the completed puzzle's
 id, rendering a `%PuzzleLabel` identity line from the same
@@ -750,8 +751,8 @@ specific board's geometry. A further check drives the real
 `SceneLoader.reload_current_scene()`/`get_tree().change_scene_to_packed()`
 path directly (not just repeated `instantiate()` calls) to prove a non-first
 selected puzzle survives that exact reload, that Next Puzzle advances to
-the following catalog entry with fresh state, and that the last catalog
-puzzle's results omit `%NextPuzzleButton`. Interactive desktop smoke testing
+the following entry of its group with fresh state, and that a group-ending
+puzzle's results omit `%NextPuzzleButton` and show `%LevelSelectButton`. Interactive desktop smoke testing
 (resize, rapid clicks, pause mid-feedback, restart) remains a separate
 manual verification step; the headless checks above are not a replacement
 for it.
@@ -867,10 +868,12 @@ both point `game_scene_path` at `res://scenes/puzzle/arrow_puzzle.tscn`.
 `reference_knot` before delegating to the base `MainMenu`; `load_game_scene()`
 uses the base default implementation (`SceneLoader.load_scene(game_scene_path)` only), so
 opening the puzzle from Play/New Game never calls `GlobalState.reset()` or
-`GameState.start_game()`. Continue and Level Select stay hidden (the scene's
-default `visible = false`, no longer overridden to conditionally show them);
-their scenes/scripts remain in source, unreachable from this menu, so they
-can be restored later. The `NewGameButton` carries a tooltip
+`GameState.start_game()`. Continue stays hidden (the scene's default
+`visible = false`, no longer overridden to conditionally show it); its
+scene/script remain in source, unreachable from this menu, so it can be restored
+later. Level Select is visible and opens the grouped puzzle list; the Results
+Level Select button and the play HUD's Back button both return to it. The
+`NewGameButton` carries a tooltip
 ("Existing level progress is preserved even though it's hidden here.")
 stating this. Intro, options and credits are unaffected.
 
