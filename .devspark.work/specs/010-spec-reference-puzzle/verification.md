@@ -70,3 +70,11 @@
 - My scratch model independently gave initial legal 6 and 661 edges (matches exactly) and a depth of
   34 counted in nodes (33 in edges): consistent.
 - Both regression gates and the editor validation green after the fix. Nothing committed.
+
+## Playtest instrumentation
+
+- F3 developer readout (off by default) on the play screen: current on-screen cell size, supported range
+  (Fit Puzzle size to 192 px), and smallest/median/largest cell size in effect at clicks this attempt.
+  In memory only, no persistence, no gameplay change. Layout check covers it; gates and editor validation
+  green. This supplies the FR-008 cell-size evidence without manual estimation; whether arrows were
+  traceable at that size still needs the tester's own account.
