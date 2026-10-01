@@ -310,24 +310,25 @@ func _await_departures_for(puzzle: Control) -> void:
 func _check_focus_loop_and_neighbors() -> void:
 	var puzzle := await _spawn(LARGE_ID)
 	var board := _board(puzzle)
+	var back: Control = puzzle.get_node("%BackButton")
 	var open_move: Control = puzzle.get_node("%OpenMoveButton")
 	var zoom_out: Control = puzzle.get_node("%ZoomOutButton")
 	var zoom_in: Control = puzzle.get_node("%ZoomInButton")
 	var fit: Control = puzzle.get_node("%FitButton")
 	var pan: Control = puzzle.get_node("%PanButton")
-	var cycle: Array[Control] = [open_move, zoom_out, zoom_in, fit, pan, board]
+	var cycle: Array[Control] = [back, open_move, zoom_out, zoom_in, fit, pan, board]
 	var all_focusable := true
 	for control in cycle:
 		if control.focus_mode != Control.FOCUS_ALL:
 			all_focusable = false
-	check(all_focusable, "the Open Move button, toolbar controls and board are all keyboard/gamepad focusable")
+	check(all_focusable, "the Back button, Open Move button, toolbar controls and board are all keyboard/gamepad focusable")
 	var tab_ok := true
 	for i in range(cycle.size()):
 		if cycle[i].find_next_valid_focus() != cycle[(i + 1) % cycle.size()]:
 			tab_ok = false
 		if cycle[i].find_prev_valid_focus() != cycle[(i - 1 + cycle.size()) % cycle.size()]:
 			tab_ok = false
-	check(tab_ok, "Tab and Shift+Tab cycle Open Move, Zoom Out, Zoom In, Fit, Pan, board and back")
+	check(tab_ok, "Tab and Shift+Tab cycle Back, Open Move, Zoom Out, Zoom In, Fit, Pan, board and back")
 	check(board.find_valid_focus_neighbor(SIDE_TOP) == pan, "D-pad up from the board returns to Pan")
 	check(board.find_valid_focus_neighbor(SIDE_LEFT) == board and board.find_valid_focus_neighbor(SIDE_BOTTOM) == board,
 		"the board keeps directional focus on itself for other directions")
@@ -1123,12 +1124,12 @@ func _check_level_select_reaches_every_entry_at_supported_windows() -> void:
 		await process_frame
 		var list: VBoxContainer = menu.level_select_scene.get_node("%PuzzleListContainer")
 		var scroll: ScrollContainer = menu.level_select_scene.get_node("%ScrollContainer")
-		check(list.get_child_count() == PuzzleCatalog.count(), "Level Select lists the full catalog at %s" % [window])
+		var entry_buttons: Array[Button] = menu.level_select_scene.entry_buttons()
+		check(entry_buttons.size() == PuzzleCatalog.count(), "Level Select lists the full catalog at %s" % [window])
 		check(scroll.follow_focus and scroll.horizontal_scroll_mode == ScrollContainer.SCROLL_MODE_DISABLED,
 			"Level Select scrolls vertically and follows keyboard/gamepad focus at %s" % [window])
 		var all_reachable := true
-		for i in range(list.get_child_count()):
-			var button: Button = list.get_child(i)
+		for button in entry_buttons:
 			button.grab_focus()
 			await process_frame
 			await process_frame

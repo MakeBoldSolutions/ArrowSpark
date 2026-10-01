@@ -1,7 +1,7 @@
 {
   "generated": {
     "by": "build-knowledge-index",
-    "at": "2026-09-29T12:37:04Z"
+    "at": "2026-10-01T16:29:43Z"
   },
   "roots": [
     {
@@ -76,6 +76,7 @@
         "Rule Layer (Core Boundary)",
         "Solvability Analysis",
         "Puzzle Catalog and Session-Scoped Selection",
+        "Level groups",
         "Open Move Assistance and Session Scoring",
         "Structural Analysis (PuzzleAnalyzer)",
         "Puzzle-design vocabulary (provisional)",
@@ -178,6 +179,36 @@
       ]
     },
     {
+      "id": "guides-repo-story-repo-story-2026-09-30",
+      "type": "authoritative-reference",
+      "path": ".knowledge/guides/repo-story/repo-story-2026-09-30.md",
+      "title": "Repository Story: ArrowGame (ArrowSpark)",
+      "headings": [
+        "Repository Story: ArrowGame (ArrowSpark)",
+        "Executive Summary",
+        "Technical Analysis",
+        "Development Velocity",
+        "Contributor Dynamics",
+        "Quality Signals",
+        "Governance & Process Maturity",
+        "Architecture & Technology",
+        "Change Patterns",
+        "Milestone Timeline",
+        "Constitution Alignment",
+        "Developer FAQ",
+        "What does this project do?",
+        "What tech stack does it use?",
+        "Where do I start?",
+        "How do I run it locally?",
+        "How do I run the tests?",
+        "What is the branching/PR workflow?",
+        "Who do I ask when I'm stuck?",
+        "What areas of the code change most often?",
+        "Are there coding standards I must follow?",
+        "What version is currently released?"
+      ]
+    },
+    {
       "id": "product-branding",
       "type": "authoritative-reference",
       "path": ".knowledge/product/branding.md",
@@ -241,7 +272,37 @@
         "Findings by topic",
         "Objective measures versus experience",
         "Contradictions and limits",
-        "Transition"
+        "Transition",
+        "Catalog placement"
+      ]
+    },
+    {
+      "id": "reference-puzzle-design-report",
+      "type": "authoritative-reference",
+      "path": ".knowledge/reference/reference-puzzle-design-report.md",
+      "title": "Reference Puzzle Design Report",
+      "appliesTo": [
+        "scripts/puzzle/puzzle_catalog.gd",
+        "tests/puzzle_catalog_check.gd",
+        "tests/puzzle_analyzer_check.gd",
+        "tests/puzzle_structural_report.gd"
+      ],
+      "headings": [
+        "Reference Puzzle Design Report",
+        "Structural profile (final version)",
+        "Intended neighborhoods",
+        "Cross-neighborhood dependencies",
+        "Bridge arrows",
+        "Expected discovery beats and insight chains",
+        "Major releases and intended experience curve",
+        "Iteration history",
+        "Human observations (unedited)",
+        "Intent versus actual",
+        "Useful and less useful concepts",
+        "Remaining weaknesses and limitations",
+        "Lessons for judging levels",
+        "Group classification rationale",
+        "Candidate design principles (supported by this level only, not universal)"
       ]
     }
   ],

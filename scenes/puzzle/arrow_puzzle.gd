@@ -9,6 +9,7 @@ extends Control
 @onready var _remaining_label: Label = %RemainingLabel
 @onready var _mistakes_label: Label = %MistakesLabel
 @onready var _puzzle_label: Label = %PuzzleLabel
+@onready var _back_button: Button = %BackButton
 @onready var _open_move_button: Button = %OpenMoveButton
 @onready var _zoom_out_button: Button = %ZoomOutButton
 @onready var _zoom_in_button: Button = %ZoomInButton
@@ -28,6 +29,7 @@ func _ready() -> void:
 	_remaining_label.theme_type_variation = &"NumericText"
 	_mistakes_label.theme_type_variation = &"NumericText"
 	_puzzle_label.theme_type_variation = &"SupportingText"
+	_back_button.theme_type_variation = &"SecondaryButton"
 	_open_move_button.theme_type_variation = &"SecondaryButton"
 	for button in [_zoom_out_button, _zoom_in_button, _fit_button, _pan_button]:
 		button.theme_type_variation = &"SecondaryButton"
@@ -35,9 +37,11 @@ func _ready() -> void:
 	_results.replay_requested.connect(_on_results_replay_requested)
 	_results.main_menu_requested.connect(_on_results_main_menu_requested)
 	_results.next_puzzle_requested.connect(_on_results_next_puzzle_requested)
+	_results.level_select_requested.connect(_on_results_level_select_requested)
 	_board.cell_clicked.connect(_on_cell_clicked)
 	_board.hover_cell_changed.connect(_on_hover_cell_changed)
 	_board.departure_finished.connect(_on_departure_finished)
+	_back_button.pressed.connect(_on_back_button_pressed)
 	_open_move_button.pressed.connect(_on_open_move_button_pressed)
 	_zoom_out_button.pressed.connect(_board.zoom_out)
 	_zoom_in_button.pressed.connect(_board.zoom_in)
@@ -54,11 +58,11 @@ func _notification(what: int) -> void:
 	if what == NOTIFICATION_UNPAUSED and is_node_ready():
 		_refresh_navigation_help()
 
-## Tab order: Open Move, Zoom Out, Zoom In, Fit, Pan, board, back to Open Move.
+## Tab order: Back, Open Move, Zoom Out, Zoom In, Fit, Pan, board, back to Back.
 ## Directional (D-pad) neighbors always leave the toolbar and the board, so the
 ## canvas controls can never trap focus.
 func _configure_navigation_focus() -> void:
-	var chain: Array[Control] = [_open_move_button, _zoom_out_button, _zoom_in_button, _fit_button, _pan_button, _board]
+	var chain: Array[Control] = [_back_button, _open_move_button, _zoom_out_button, _zoom_in_button, _fit_button, _pan_button, _board]
 	for i in range(chain.size()):
 		var control: Control = chain[i]
 		control.focus_next = control.get_path_to(chain[(i + 1) % chain.size()])
@@ -147,7 +151,7 @@ func _start_new_attempt() -> void:
 	_pause_menu_controller.set_process_unhandled_input(true)
 	_board.set_navigation_enabled(true)
 	_board.setup(definition)
-	_puzzle_label.text = "%d. %s" % [PuzzleCatalog.index_of(puzzle_id) + 1, PuzzleCatalog.get_title(puzzle_id)]
+	_puzzle_label.text = "%d. %s" % [PuzzleCatalog.group_position(puzzle_id), PuzzleCatalog.get_title(puzzle_id)]
 	_update_hud()
 
 func _update_hud() -> void:
@@ -214,6 +218,18 @@ func _on_results_replay_requested() -> void:
 	SceneLoader.reload_current_scene()
 
 func _on_results_main_menu_requested() -> void:
+	SceneLoader.load_scene(main_menu_scene_path)
+
+## Leaves the puzzle mid-play for Level Select without finishing it. Abandoning
+## an attempt records nothing: no score, session best or progress is touched.
+func _on_back_button_pressed() -> void:
+	PuzzleSession.request_level_select()
+	SceneLoader.load_scene(main_menu_scene_path)
+
+## Returns to the main menu with Level Select open (shown at a group's end,
+## where there is no Next Puzzle).
+func _on_results_level_select_requested() -> void:
+	PuzzleSession.request_level_select()
 	SceneLoader.load_scene(main_menu_scene_path)
 
 ## Advances the session to the next catalog entry, then reloads the scene

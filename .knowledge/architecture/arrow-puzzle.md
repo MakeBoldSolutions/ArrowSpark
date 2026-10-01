@@ -235,7 +235,7 @@ reaches a complete, mistake-free solution either way (the order-independence
 property the no-backtracking design depends on). Order-independence is
 further checked at every branching state a witness actually passes through
 (not only a puzzle's opening move): for the shipped `create_fixed()` board
-here, and for all twenty-one `PuzzleCatalog` entries in
+here, and for all twenty-two `PuzzleCatalog` entries in
 tests/puzzle_catalog_check.gd, forcing each *other* currently-legal
 alternative next instead of the witness's own choice still reaches a
 complete, mistake-free solution from there — the automated, catalog-wide
@@ -257,8 +257,8 @@ and `PUZZLE_FAILURES=0`.
 
 `PuzzleCatalog` (scripts/puzzle/puzzle_catalog.gd) is a static-registry
 `RefCounted` class, never instantiated, sitting between the domain
-(`PuzzleDefinition`) and presentation. It holds an ordered array of twenty-one
-entries (`{id, title, build}`) — the original eight baseline puzzles, six
+(`PuzzleDefinition`) and presentation. It holds an ordered array of twenty-two
+entries (`{id, title, group, build}`) — the original eight baseline puzzles, six
 experimental puzzles (`nested_chain`, `cascade_key_arrow`,
 `dense_unravel`, `bent_network`, `long_range_blocker`, `composed_shaped`),
 each deliberately authored to combine structural features (dependency depth,
@@ -280,9 +280,9 @@ never share mutable substructure, the same isolation guarantee
 `create_fixed()` already had. `PuzzleDefinition` itself gained no
 catalog/progression fields; it remains anonymous structural data.
 
-`canvas_validation` is a plainly titled, player-visible entry (puzzle 15,
-reached by Next after puzzle 14, listed in Level Select and counted in the
-session score like any other). It is an authored 40x30 board packed with fifty-two arrows (about 87% of
+`canvas_validation` is a plainly titled, player-visible entry (the seventh
+Puzzle Lab entry, reached by Next from `composed_shaped`, listed in Level Select
+and counted in the session score like any other). It is an authored 40x30 board packed with fifty-two arrows (about 87% of
 the cells occupied): almost every arrow is long and bent (most 22-43 cells,
 only three shorter than eight), all four directions appear, long tails cross
 the rays of other arrows so most removals unlock several others, all four
@@ -300,6 +300,35 @@ structural measurements are documented in
 `.knowledge/reference/gordian-knot-experiments.md`. They reuse the same
 solver, assistance, scoring and session-only selection behavior.
 
+### Level groups
+
+Every catalog entry carries a `group` metadata key: `arrowspark_levels`
+("ArrowSpark Levels": designed against the current player-experience
+standard, currently the Reference Knot), `foundations` ("Foundations": the
+eight baseline puzzles) or `puzzle_lab` ("Puzzle Lab": the structural
+experiments, the large-canvas validation board and the knot experiments).
+Groups describe why content exists, not a quality ranking, and have no effect
+on rules, solver, analyzer, scoring, Open Move or the viewport. `PuzzleCatalog`
+exposes `group_ids()` (presentation order: ArrowSpark Levels, Foundations,
+Puzzle Lab), `group_title()`, `group_of()`, `ids_in_group()`, `group_position()`
+(1-based within the group) and `next_in_group()` (no wrap, no cross-group,
+empty for unknown ids). Level Select renders one non-focusable header per group
+as a collapsible accordion: a focusable toggle header button per group (marked
+`-` when expanded, `+` when collapsed, with the entry count) above that group's
+entry buttons, numbered by group position. Every group starts expanded;
+collapsing hides a group's entries so keyboard and gamepad focus skip them. The
+in-game label and results title use the same group-relative number. The play
+HUD has a Back button (first in the Tab order) that leaves the puzzle mid-play
+for Level Select without recording a score or touching progress. Play / New
+Game starts `reference_knot` without resetting progress.
+Source of truth: tests/puzzle_catalog_check.gd (group sizes, membership,
+position and next semantics, group-scoped session progression),
+tests/puzzle_layout_check.gd (grouped Level Select, accordion collapse and
+expand, Back button presence and wiring, group-end results buttons, Level
+Select request), tests/puzzle_canvas_check.gd (HUD tab order including Back;
+the live Back scene change itself is covered only by desktop smoke testing), tests/save_input_regression.gd (Play target, one-shot
+request, no progress change).
+
 `PuzzleSession` (scripts/puzzle_session.gd) is a process-lifetime,
 in-memory-only `RefCounted` class holding a single private `static var
 _current_id`, matching the same static-var precedent `GameVisualStyle._theme`
@@ -307,9 +336,11 @@ already established for process-lifetime state with no scene-tree
 involvement. `get_current_id()` defaults to `PuzzleCatalog.id_at(0)` whenever
 unset or no longer a valid catalog id; `set_current_id(id)` is a direct
 setter (the caller is responsible for passing a valid id);
-`advance_to_next()` moves to the next catalog entry and returns `true`, or
-leaves the id unchanged and returns `false` at the last entry; `has_next()`
-reports whether a next entry exists. It never reads or writes `GlobalState`,
+`advance_to_next()` moves to the next entry of the current puzzle's own group
+and returns `true`, or leaves the id unchanged and returns `false` at the
+group's end; `has_next()` reports whether a next entry exists in that group.
+`request_level_select()` / `consume_level_select_request()` are a one-shot,
+in-memory flag the main menu reads once on load to open Level Select. It never reads or writes `GlobalState`,
 `GameState`, `LevelState`, or `user://global_state.tres`, and is reset only
 by a fresh engine process — a scene reload (Replay, pause-menu Restart, Next
 Puzzle) leaves it unchanged, since a GDScript static var is bound to the
@@ -318,16 +349,17 @@ running process, not to any node or scene.
 Source of truth: tests/puzzle_catalog_check.gd (unique/valid stable ids
 independent of position, deterministic `id_at`/`index_of`/`ids` ordering,
 fresh-and-isolated `get_definition` per call including cross-id
-independence, every one of the twenty-one entries structurally valid and
+independence, every one of the twenty-two entries structurally valid and
 solver-confirmed solvable with a replayed zero-mistake witness, the original
 fourteen entries' ids, order, dimensions and content unchanged, the
 `canvas_validation` fixture's dimensions/arrow count/bent long arrows/four
 directions/tail dependency/top-left open move/corner regions, `Next` from
-puzzle 14 reaching it and the continuation into the six new entries and last-entry `Next` absence, no
+`composed_shaped` reaching it and continuing into the knot experiments, `Next` being
+absent at each group's last entry, no
 difficulty-labeled title wording, each of the six experimental
 entries confirmed against its exact `PuzzleAnalyzer`-derived threshold (see
 below), the catalog-wide branching order-independence check (every one of
-the twenty-one entries' witness, at every branching state it passes through,
+the twenty-two entries' witness, at every branching state it passes through,
 still completes when any other legal alternative is forced instead — see the
 Rule Layer's Solvability Analysis section above), `PuzzleSession` default/set/advance/has-next behavior including the
 last-entry no-op and the invalid-id fallback), run via the same
@@ -468,7 +500,13 @@ which is always finite even when a geometric dependency cycle exists (a
 per-path visited set forbids revisiting a node, so a cycle simply ends that
 branch of the search rather than looping) — ties are broken deterministically
 by the lexicographically smallest head sequence under `PuzzleSolver`'s own
-existing (y, x)-ascending comparator. This is an analysis-only allowance over
+existing (y, x)-ascending comparator. When the graph is acyclic (every solvable
+definition) the chain is computed by dynamic programming in time linear in the
+edge count, returning exactly what the exhaustive simple-path search returns;
+only a graph containing a cycle runs that exhaustive search, which is
+exponential and cannot finish on dense boards. tests/puzzle_analyzer_check.gd
+asserts the two agree on random acyclic graphs and that a dense layered graph
+resolves instantly. This is an analysis-only allowance over
 a *candidate* definition; it never implies solvability or catalog eligibility
 — `PuzzleSolver.analyze(definition).solvable` remains the sole authority on
 completability, and the catalog regression gate remains the sole authority on
@@ -654,9 +692,10 @@ fresh-attempt guarantee (no carried-over mistakes, score, active state, or
 departure state) with no separate reset logic. `puzzle_results.gd` gains a
 `next_puzzle_requested` signal and a `%NextPuzzleButton`, shown/enabled only
 when the controller passes `has_next = true` (from
-`PuzzleSession.has_next()`) into `show_results()`; on the last catalog
-puzzle it is hidden, while Replay, Level Select (via Main Menu) and Main
-Menu remain available. `show_results()` also takes the completed puzzle's
+`PuzzleSession.has_next()`) into `show_results()`; on the last puzzle of a
+group it is hidden and a `%LevelSelectButton` (which returns to
+the main menu with Level Select open) takes its place, while Replay and Main
+Menu always remain available. `show_results()` also takes the completed puzzle's
 id, rendering a `%PuzzleLabel` identity line from the same
 `PuzzleCatalog`/`PuzzleSession` pair the controller used for that attempt,
 alongside the total-arrows/mistakes/open-move-assists/score/accuracy metrics.
@@ -683,7 +722,7 @@ in-flight departure so no stale completion reaches a replaced attempt; a
 post-completion selection being ignored; a freshly instantiated scene
 starting clean; 20 rapid repeated selections on a blocked tail cell counting
 exactly once each without disturbing the attempt; the blocked-cue duration
-cap; and, for every one of the twenty-one `PuzzleCatalog` entries in turn: the
+cap; and, for every one of the twenty-two `PuzzleCatalog` entries in turn: the
 board's active view count matches the definition's arrow count, the HUD
 puzzle label matches the catalog title, and the same solver-derived
 zero-mistake witness clears through the real scene with unchanged
@@ -708,8 +747,8 @@ specific board's geometry. A further check drives the real
 `SceneLoader.reload_current_scene()`/`get_tree().change_scene_to_packed()`
 path directly (not just repeated `instantiate()` calls) to prove a non-first
 selected puzzle survives that exact reload, that Next Puzzle advances to
-the following catalog entry with fresh state, and that the last catalog
-puzzle's results omit `%NextPuzzleButton`. Interactive desktop smoke testing
+the following entry of its group with fresh state, and that a group-ending
+puzzle's results omit `%NextPuzzleButton` and show `%LevelSelectButton`. Interactive desktop smoke testing
 (resize, rapid clicks, pause mid-feedback, restart) remains a separate
 manual verification step; the headless checks above are not a replacement
 for it.
@@ -821,14 +860,16 @@ them.
 
 `scenes/menus/main_menu/main_menu.tscn` and `main_menu_with_animations.tscn`
 both point `game_scene_path` at `res://scenes/puzzle/arrow_puzzle.tscn`.
-`main_menu_with_animations.gd` no longer overrides `new_game()` or
-`load_game_scene()`; both now use the addon base `MainMenu`'s
-default implementation (`SceneLoader.load_scene(game_scene_path)` only), so
+`main_menu_with_animations.gd` overrides `new_game()` only to select
+`reference_knot` before delegating to the base `MainMenu`; `load_game_scene()`
+uses the base default implementation (`SceneLoader.load_scene(game_scene_path)` only), so
 opening the puzzle from Play/New Game never calls `GlobalState.reset()` or
-`GameState.start_game()`. Continue and Level Select stay hidden (the scene's
-default `visible = false`, no longer overridden to conditionally show them);
-their scenes/scripts remain in source, unreachable from this menu, so they
-can be restored later. The `NewGameButton` carries a tooltip
+`GameState.start_game()`. Continue stays hidden (the scene's default
+`visible = false`, no longer overridden to conditionally show it); its
+scene/script remain in source, unreachable from this menu, so it can be restored
+later. Level Select is visible and opens the grouped puzzle list; the Results
+Level Select button and the play HUD's Back button both return to it. The
+`NewGameButton` carries a tooltip
 ("Existing level progress is preserved even though it's hidden here.")
 stating this. Intro, options and credits are unaffected.
 

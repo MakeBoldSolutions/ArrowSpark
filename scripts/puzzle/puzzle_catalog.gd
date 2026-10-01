@@ -1,8 +1,12 @@
 class_name PuzzleCatalog
 extends RefCounted
-## Static registry of twenty-one authored puzzles: the original eight
+## Static registry of twenty-two authored puzzles: the original eight
 ## baseline puzzles, six earlier structural experiments, the large-canvas
-## validation puzzle, and six geometric-entanglement experiments. Earlier experiments deliberately
+## validation puzzle, six geometric-entanglement experiments, and the
+## hand-composed Reference Knot. Every entry carries a purpose group
+## (Foundations, Puzzle Lab, ArrowSpark Levels) that is pure metadata: it drives
+## Level Select sections, group-relative numbering and Next Puzzle scope, and
+## never affects rules. Earlier experiments deliberately
 ## combine structural features the baseline eight never do (see
 ## PuzzleAnalyzer), and one large-canvas validation board that is larger
 ## than a typical window at a comfortable arrow size. Never instantiated; every member is static. Each entry
@@ -13,33 +17,43 @@ extends RefCounted
 ## substructure across calls) falls out of the construction pattern itself,
 ## with no caching layer.
 
+const GROUP_ARROWSPARK_LEVELS := "arrowspark_levels"
+const GROUP_FOUNDATIONS := "foundations"
+const GROUP_PUZZLE_LAB := "puzzle_lab"
+const GROUP_TITLES := {
+	GROUP_ARROWSPARK_LEVELS: "ArrowSpark Levels",
+	GROUP_FOUNDATIONS: "Foundations",
+	GROUP_PUZZLE_LAB: "Puzzle Lab",
+}
+
 static var _entries: Array[Dictionary] = []
 
 static func _ensure_entries() -> void:
 	if not _entries.is_empty():
 		return
 	_entries = [
-		{"id": "intro", "title": "Simple Introduction", "build": Callable(PuzzleCatalog, "_build_intro")},
-		{"id": "first_bend", "title": "First Bend", "build": Callable(PuzzleCatalog, "_build_first_bend")},
-		{"id": "multi_bend", "title": "Multiple Bends", "build": Callable(PuzzleCatalog, "_build_multi_bend")},
-		{"id": "dependency_chain", "title": "Dependency Chain", "build": Callable(PuzzleCatalog, "_build_dependency_chain")},
-		{"id": "forced_sequence", "title": "Forced Sequence", "build": Callable(PuzzleCatalog, "_build_forced_sequence")},
-		{"id": "multiple_choices", "title": "Multiple Choices", "build": Callable(PuzzleCatalog, "_build_multiple_choices")},
-		{"id": "dense_board", "title": "Dense Board", "build": Callable(PuzzleCatalog, "_build_dense_board")},
-		{"id": "subtle_blockers", "title": "Subtle Blockers", "build": Callable(PuzzleCatalog, "_build_subtle_blockers")},
-		{"id": "nested_chain", "title": "Nested Chain", "build": Callable(PuzzleCatalog, "_build_nested_chain")},
-		{"id": "cascade_key_arrow", "title": "Cascade / Key Arrow", "build": Callable(PuzzleCatalog, "_build_cascade_key_arrow")},
-		{"id": "dense_unravel", "title": "Dense Unravel", "build": Callable(PuzzleCatalog, "_build_dense_unravel")},
-		{"id": "bent_network", "title": "Bent Network", "build": Callable(PuzzleCatalog, "_build_bent_network")},
-		{"id": "long_range_blocker", "title": "Long-Range Blocker", "build": Callable(PuzzleCatalog, "_build_long_range_blocker")},
-		{"id": "composed_shaped", "title": "Composed / Shaped", "build": Callable(PuzzleCatalog, "_build_composed_shaped")},
-		{"id": "canvas_validation", "title": "Large Canvas Validation", "build": Callable(PuzzleCatalog, "_build_canvas_validation")},
-		{"id": "knot_long_geometry", "title": "Long Geometry", "build": Callable(PuzzleCatalog, "_build_knot_long_geometry")},
-		{"id": "knot_interwoven_paths", "title": "Interwoven Paths", "build": Callable(PuzzleCatalog, "_build_knot_interwoven_paths")},
-		{"id": "knot_dense_core", "title": "Dense Core", "build": Callable(PuzzleCatalog, "_build_knot_dense_core")},
-		{"id": "knot_regions", "title": "Distinct Regions", "build": Callable(PuzzleCatalog, "_build_knot_regions")},
-		{"id": "knot_single_release", "title": "Single Release", "build": Callable(PuzzleCatalog, "_build_knot_single_release")},
-		{"id": "knot_boundary", "title": "Boundary Knot", "build": Callable(PuzzleCatalog, "_build_knot_boundary")},
+		{"id": "intro", "title": "Simple Introduction", "group": GROUP_FOUNDATIONS, "build": Callable(PuzzleCatalog, "_build_intro")},
+		{"id": "first_bend", "title": "First Bend", "group": GROUP_FOUNDATIONS, "build": Callable(PuzzleCatalog, "_build_first_bend")},
+		{"id": "multi_bend", "title": "Multiple Bends", "group": GROUP_FOUNDATIONS, "build": Callable(PuzzleCatalog, "_build_multi_bend")},
+		{"id": "dependency_chain", "title": "Dependency Chain", "group": GROUP_FOUNDATIONS, "build": Callable(PuzzleCatalog, "_build_dependency_chain")},
+		{"id": "forced_sequence", "title": "Forced Sequence", "group": GROUP_FOUNDATIONS, "build": Callable(PuzzleCatalog, "_build_forced_sequence")},
+		{"id": "multiple_choices", "title": "Multiple Choices", "group": GROUP_FOUNDATIONS, "build": Callable(PuzzleCatalog, "_build_multiple_choices")},
+		{"id": "dense_board", "title": "Dense Board", "group": GROUP_FOUNDATIONS, "build": Callable(PuzzleCatalog, "_build_dense_board")},
+		{"id": "subtle_blockers", "title": "Subtle Blockers", "group": GROUP_FOUNDATIONS, "build": Callable(PuzzleCatalog, "_build_subtle_blockers")},
+		{"id": "nested_chain", "title": "Nested Chain", "group": GROUP_PUZZLE_LAB, "build": Callable(PuzzleCatalog, "_build_nested_chain")},
+		{"id": "cascade_key_arrow", "title": "Cascade / Key Arrow", "group": GROUP_PUZZLE_LAB, "build": Callable(PuzzleCatalog, "_build_cascade_key_arrow")},
+		{"id": "dense_unravel", "title": "Dense Unravel", "group": GROUP_PUZZLE_LAB, "build": Callable(PuzzleCatalog, "_build_dense_unravel")},
+		{"id": "bent_network", "title": "Bent Network", "group": GROUP_PUZZLE_LAB, "build": Callable(PuzzleCatalog, "_build_bent_network")},
+		{"id": "long_range_blocker", "title": "Long-Range Blocker", "group": GROUP_PUZZLE_LAB, "build": Callable(PuzzleCatalog, "_build_long_range_blocker")},
+		{"id": "composed_shaped", "title": "Composed / Shaped", "group": GROUP_PUZZLE_LAB, "build": Callable(PuzzleCatalog, "_build_composed_shaped")},
+		{"id": "canvas_validation", "title": "Large Canvas Validation", "group": GROUP_PUZZLE_LAB, "build": Callable(PuzzleCatalog, "_build_canvas_validation")},
+		{"id": "knot_long_geometry", "title": "Long Geometry", "group": GROUP_PUZZLE_LAB, "build": Callable(PuzzleCatalog, "_build_knot_long_geometry")},
+		{"id": "knot_interwoven_paths", "title": "Interwoven Paths", "group": GROUP_PUZZLE_LAB, "build": Callable(PuzzleCatalog, "_build_knot_interwoven_paths")},
+		{"id": "knot_dense_core", "title": "Dense Core", "group": GROUP_PUZZLE_LAB, "build": Callable(PuzzleCatalog, "_build_knot_dense_core")},
+		{"id": "knot_regions", "title": "Distinct Regions", "group": GROUP_PUZZLE_LAB, "build": Callable(PuzzleCatalog, "_build_knot_regions")},
+		{"id": "knot_single_release", "title": "Single Release", "group": GROUP_PUZZLE_LAB, "build": Callable(PuzzleCatalog, "_build_knot_single_release")},
+		{"id": "knot_boundary", "title": "Boundary Knot", "group": GROUP_PUZZLE_LAB, "build": Callable(PuzzleCatalog, "_build_knot_boundary")},
+		{"id": "reference_knot", "title": "Reference Knot", "group": GROUP_ARROWSPARK_LEVELS, "build": Callable(PuzzleCatalog, "_build_reference_knot")},
 	]
 
 static func count() -> int:
@@ -77,6 +91,49 @@ static func get_title(id: String) -> String:
 	if index == -1:
 		return ""
 	return title_at(index)
+
+## Group ids in Level Select presentation order. Presentation order only; it
+## makes no quality claim.
+static func group_ids() -> Array[String]:
+	return [GROUP_ARROWSPARK_LEVELS, GROUP_FOUNDATIONS, GROUP_PUZZLE_LAB]
+
+static func group_title(group_id: String) -> String:
+	return String(GROUP_TITLES.get(group_id, ""))
+
+## Group id of an entry, or "" for an unknown id.
+static func group_of(id: String) -> String:
+	var index := index_of(id)
+	if index == -1:
+		return ""
+	return _entries[index]["group"]
+
+## Members of a group in catalog order; empty for an unknown group.
+static func ids_in_group(group_id: String) -> Array[String]:
+	_ensure_entries()
+	var result: Array[String] = []
+	for entry in _entries:
+		if entry["group"] == group_id:
+			result.append(entry["id"])
+	return result
+
+## 1-based position of an entry within its own group, or 0 for an unknown id.
+static func group_position(id: String) -> int:
+	var group_id := group_of(id)
+	if group_id.is_empty():
+		return 0
+	return ids_in_group(group_id).find(id) + 1
+
+## Next entry in the same group, or "" at the group's end. Never wraps and
+## never crosses into another group.
+static func next_in_group(id: String) -> String:
+	var group_id := group_of(id)
+	if group_id.is_empty():
+		return ""
+	var members := ids_in_group(group_id)
+	var position := members.find(id)
+	if position == -1 or position + 1 >= members.size():
+		return ""
+	return members[position + 1]
 
 ## Constructs and returns a fresh PuzzleDefinition for the given id, or null
 ## if the id is unknown. Every call rebuilds the definition from its literal
@@ -558,3 +615,142 @@ static func _build_knot_boundary() -> PuzzleDefinition:
 		arrows[shape[0]] = shape[1]
 		tails[shape[0]] = _tail_along(vertices)
 	return PuzzleDefinition.new(48, 36, arrows, tails)
+
+## Reference Knot: a 46x32 board packed with bent and straight arrows, over 90%
+## of the cells occupied and the longest over 40 cells, so almost no empty space
+## remains. It grew from a hand-composed skeleton: a north comb of six long
+## parallel arrows held by a row of vertical gates and an east wall, a chain
+## along the top edge that opens the gates, a full-width bridge arrow across the
+## middle held by one bent arrow, and tails along the bottom edge that hold the
+## east wall. Arrows were then added around that skeleton, long ones first and
+## short ones last to fill the gaps, found once by a seeded search that kept
+## every step solvable. The layout is fixed literal data, not generated at
+## runtime. Sequencing comes only from the ordinary blocking rules; nothing here
+## encodes a solve order.
+static func _build_reference_knot() -> PuzzleDefinition:
+	var d := PuzzleDefinition.Direction
+	var shapes := [
+		[Vector2i(14, 2), d.RIGHT, [Vector2i(14, 2), Vector2i(2, 2)]],
+		[Vector2i(16, 4), d.RIGHT, [Vector2i(16, 4), Vector2i(2, 4)]],
+		[Vector2i(13, 6), d.RIGHT, [Vector2i(13, 6), Vector2i(2, 6)]],
+		[Vector2i(17, 8), d.RIGHT, [Vector2i(17, 8), Vector2i(2, 8)]],
+		[Vector2i(15, 10), d.RIGHT, [Vector2i(15, 10), Vector2i(2, 10)]],
+		[Vector2i(14, 12), d.RIGHT, [Vector2i(14, 12), Vector2i(2, 12)]],
+		[Vector2i(23, 10), d.UP, [Vector2i(23, 10)]],
+		[Vector2i(21, 6), d.UP, [Vector2i(21, 6)]],
+		[Vector2i(40, 0), d.RIGHT, [Vector2i(40, 0), Vector2i(26, 0)]],
+		[Vector2i(24, 0), d.RIGHT, [Vector2i(24, 0)]],
+		[Vector2i(24, 1), d.UP, [Vector2i(24, 1), Vector2i(24, 9)]],
+		[Vector2i(30, 1), d.UP, [Vector2i(30, 1), Vector2i(30, 13), Vector2i(36, 13)]],
+		[Vector2i(34, 1), d.UP, [Vector2i(34, 1), Vector2i(34, 8)]],
+		[Vector2i(42, 1), d.UP, [Vector2i(42, 1), Vector2i(42, 11)]],
+		[Vector2i(0, 20), d.DOWN, [Vector2i(0, 20), Vector2i(0, 16), Vector2i(1, 16)]],
+		[Vector2i(2, 17), d.LEFT, [Vector2i(2, 17), Vector2i(43, 17)]],
+		[Vector2i(19, 19), d.UP, [Vector2i(19, 19), Vector2i(19, 22), Vector2i(14, 22)]],
+		[Vector2i(20, 20), d.LEFT, [Vector2i(20, 20), Vector2i(21, 20), Vector2i(21, 23), Vector2i(8, 23), Vector2i(8, 21)]],
+		[Vector2i(10, 25), d.DOWN, [Vector2i(10, 25), Vector2i(10, 24), Vector2i(4, 24), Vector2i(4, 27)]],
+		[Vector2i(26, 24), d.DOWN, [Vector2i(26, 24), Vector2i(26, 19), Vector2i(34, 19)]],
+		[Vector2i(30, 21), d.LEFT, [Vector2i(30, 21), Vector2i(44, 21), Vector2i(44, 29), Vector2i(38, 29)]],
+		[Vector2i(42, 25), d.UP, [Vector2i(42, 25), Vector2i(42, 28), Vector2i(28, 28)]],
+		[Vector2i(22, 30), d.UP, [Vector2i(22, 30), Vector2i(22, 31), Vector2i(10, 31)]],
+		[Vector2i(34, 30), d.UP, [Vector2i(34, 30), Vector2i(34, 31), Vector2i(30, 31)]],
+		[Vector2i(44, 31), d.LEFT, [Vector2i(44, 31), Vector2i(45, 31), Vector2i(45, 1)]],
+		[Vector2i(25, 16), d.DOWN, [Vector2i(25, 16), Vector2i(25, 5), Vector2i(29, 5), Vector2i(29, 1), Vector2i(25, 1), Vector2i(25, 4), Vector2i(27, 4), Vector2i(27, 2), Vector2i(28, 2), Vector2i(28, 4)]],
+		[Vector2i(12, 29), d.UP, [Vector2i(12, 29), Vector2i(12, 30), Vector2i(6, 30), Vector2i(6, 25), Vector2i(9, 25), Vector2i(9, 27)]],
+		[Vector2i(26, 11), d.UP, [Vector2i(26, 11), Vector2i(26, 16), Vector2i(31, 16), Vector2i(31, 14), Vector2i(27, 14), Vector2i(27, 10), Vector2i(29, 10), Vector2i(29, 6), Vector2i(27, 6), Vector2i(27, 9)]],
+		[Vector2i(8, 5), d.LEFT, [Vector2i(8, 5), Vector2i(22, 5), Vector2i(22, 9), Vector2i(13, 9)]],
+		[Vector2i(44, 12), d.UP, [Vector2i(44, 12), Vector2i(44, 20), Vector2i(32, 20)]],
+		[Vector2i(38, 6), d.UP, [Vector2i(38, 6), Vector2i(38, 15), Vector2i(32, 15), Vector2i(32, 14), Vector2i(34, 14)]],
+		[Vector2i(7, 11), d.RIGHT, [Vector2i(7, 11), Vector2i(0, 11), Vector2i(0, 13), Vector2i(9, 13), Vector2i(9, 16), Vector2i(13, 16), Vector2i(13, 13), Vector2i(11, 13), Vector2i(11, 15), Vector2i(12, 15)]],
+		[Vector2i(10, 3), d.LEFT, [Vector2i(10, 3), Vector2i(23, 3), Vector2i(23, 0), Vector2i(20, 0), Vector2i(20, 2), Vector2i(22, 2), Vector2i(22, 1), Vector2i(21, 1)]],
+		[Vector2i(25, 21), d.DOWN, [Vector2i(25, 21), Vector2i(25, 18), Vector2i(39, 18), Vector2i(39, 19), Vector2i(35, 19)]],
+		[Vector2i(16, 18), d.LEFT, [Vector2i(16, 18), Vector2i(24, 18), Vector2i(24, 25), Vector2i(18, 25)]],
+		[Vector2i(9, 1), d.LEFT, [Vector2i(9, 1), Vector2i(17, 1), Vector2i(17, 0), Vector2i(19, 0), Vector2i(19, 2), Vector2i(15, 2)]],
+		[Vector2i(18, 26), d.RIGHT, [Vector2i(18, 26), Vector2i(14, 26), Vector2i(14, 30), Vector2i(18, 30), Vector2i(18, 27), Vector2i(15, 27), Vector2i(15, 29), Vector2i(17, 29), Vector2i(17, 28), Vector2i(16, 28)]],
+		[Vector2i(36, 11), d.UP, [Vector2i(36, 11), Vector2i(36, 12), Vector2i(37, 12), Vector2i(37, 1), Vector2i(41, 1), Vector2i(41, 3), Vector2i(38, 3), Vector2i(38, 5), Vector2i(41, 5), Vector2i(41, 4), Vector2i(39, 4)]],
+		[Vector2i(0, 24), d.DOWN, [Vector2i(0, 24), Vector2i(0, 21), Vector2i(7, 21), Vector2i(7, 23), Vector2i(1, 23), Vector2i(1, 31), Vector2i(9, 31)]],
+		[Vector2i(35, 3), d.UP, [Vector2i(35, 3), Vector2i(35, 12), Vector2i(31, 12), Vector2i(31, 4), Vector2i(33, 4), Vector2i(33, 11), Vector2i(34, 11), Vector2i(34, 9)]],
+		[Vector2i(24, 27), d.DOWN, [Vector2i(24, 27), Vector2i(24, 26), Vector2i(31, 26), Vector2i(31, 27), Vector2i(41, 27), Vector2i(41, 22), Vector2i(28, 22), Vector2i(28, 25), Vector2i(26, 25)]],
+		[Vector2i(43, 10), d.UP, [Vector2i(43, 10), Vector2i(43, 16), Vector2i(32, 16)]],
+		[Vector2i(37, 23), d.UP, [Vector2i(37, 23), Vector2i(37, 26), Vector2i(32, 26), Vector2i(32, 23), Vector2i(29, 23), Vector2i(29, 25), Vector2i(31, 25), Vector2i(31, 24), Vector2i(30, 24)]],
+		[Vector2i(5, 20), d.LEFT, [Vector2i(5, 20), Vector2i(16, 20), Vector2i(16, 19), Vector2i(18, 19), Vector2i(18, 21), Vector2i(13, 21)]],
+		[Vector2i(0, 7), d.UP, [Vector2i(0, 7), Vector2i(0, 10), Vector2i(1, 10), Vector2i(1, 7), Vector2i(12, 7)]],
+		[Vector2i(0, 1), d.UP, [Vector2i(0, 1), Vector2i(0, 6), Vector2i(1, 6), Vector2i(1, 0), Vector2i(8, 0)]],
+		[Vector2i(29, 31), d.DOWN, [Vector2i(29, 31), Vector2i(29, 29), Vector2i(37, 29), Vector2i(37, 31), Vector2i(43, 31), Vector2i(43, 30), Vector2i(44, 30)]],
+		[Vector2i(22, 12), d.UP, [Vector2i(22, 12), Vector2i(22, 16), Vector2i(14, 16), Vector2i(14, 13), Vector2i(16, 13), Vector2i(16, 10), Vector2i(21, 10), Vector2i(21, 13)]],
+		[Vector2i(41, 8), d.DOWN, [Vector2i(41, 8), Vector2i(41, 6), Vector2i(39, 6), Vector2i(39, 15), Vector2i(40, 15), Vector2i(40, 7)]],
+		[Vector2i(1, 18), d.LEFT, [Vector2i(1, 18), Vector2i(8, 18), Vector2i(8, 19), Vector2i(10, 19), Vector2i(10, 18), Vector2i(14, 18), Vector2i(14, 19), Vector2i(11, 19)]],
+		[Vector2i(7, 15), d.DOWN, [Vector2i(7, 15), Vector2i(7, 14), Vector2i(1, 14), Vector2i(1, 15), Vector2i(6, 15), Vector2i(6, 16), Vector2i(2, 16)]],
+		[Vector2i(23, 20), d.UP, [Vector2i(23, 20), Vector2i(23, 24), Vector2i(11, 24), Vector2i(11, 29), Vector2i(7, 29), Vector2i(7, 28)]],
+		[Vector2i(2, 9), d.LEFT, [Vector2i(2, 9), Vector2i(9, 9)]],
+		[Vector2i(3, 26), d.RIGHT, [Vector2i(3, 26), Vector2i(2, 26), Vector2i(2, 30), Vector2i(5, 30), Vector2i(5, 28), Vector2i(4, 28)]],
+		[Vector2i(18, 14), d.DOWN, [Vector2i(18, 14), Vector2i(18, 11), Vector2i(17, 11), Vector2i(17, 15), Vector2i(15, 15), Vector2i(15, 14), Vector2i(16, 14)]],
+		[Vector2i(32, 3), d.LEFT, [Vector2i(32, 3), Vector2i(33, 3), Vector2i(33, 1), Vector2i(31, 1), Vector2i(31, 2), Vector2i(32, 2)]],
+		[Vector2i(23, 28), d.UP, [Vector2i(23, 28), Vector2i(23, 31), Vector2i(27, 31)]],
+		[Vector2i(27, 24), d.DOWN, [Vector2i(27, 24), Vector2i(27, 20), Vector2i(31, 20)]],
+		[Vector2i(18, 7), d.DOWN, [Vector2i(18, 7), Vector2i(18, 6), Vector2i(15, 6), Vector2i(15, 7), Vector2i(13, 7)]],
+		[Vector2i(13, 28), d.RIGHT, [Vector2i(13, 28), Vector2i(12, 28), Vector2i(12, 25), Vector2i(15, 25)]],
+		[Vector2i(33, 23), d.UP, [Vector2i(33, 23), Vector2i(33, 25), Vector2i(36, 25), Vector2i(36, 23), Vector2i(34, 23), Vector2i(34, 24), Vector2i(35, 24)]],
+		[Vector2i(9, 22), d.LEFT, [Vector2i(9, 22), Vector2i(12, 22), Vector2i(12, 21), Vector2i(9, 21)]],
+		[Vector2i(20, 30), d.DOWN, [Vector2i(20, 30), Vector2i(20, 26), Vector2i(19, 26), Vector2i(19, 28)]],
+		[Vector2i(23, 12), d.UP, [Vector2i(23, 12), Vector2i(23, 16), Vector2i(24, 16), Vector2i(24, 11)]],
+		[Vector2i(43, 1), d.LEFT, [Vector2i(43, 1), Vector2i(44, 1), Vector2i(44, 3), Vector2i(43, 3), Vector2i(43, 9), Vector2i(44, 9), Vector2i(44, 5)]],
+		[Vector2i(43, 28), d.DOWN, [Vector2i(43, 28), Vector2i(43, 22), Vector2i(42, 22), Vector2i(42, 24)]],
+		[Vector2i(39, 26), d.DOWN, [Vector2i(39, 26), Vector2i(39, 23), Vector2i(40, 23), Vector2i(40, 26)]],
+		[Vector2i(43, 18), d.UP, [Vector2i(43, 18), Vector2i(43, 19), Vector2i(40, 19), Vector2i(40, 18), Vector2i(42, 18)]],
+		[Vector2i(36, 3), d.UP, [Vector2i(36, 3), Vector2i(36, 10)]],
+		[Vector2i(22, 26), d.UP, [Vector2i(22, 26), Vector2i(22, 29), Vector2i(21, 29), Vector2i(21, 26)]],
+		[Vector2i(42, 12), d.UP, [Vector2i(42, 12), Vector2i(42, 15), Vector2i(41, 15), Vector2i(41, 11)]],
+		[Vector2i(24, 30), d.DOWN, [Vector2i(24, 30), Vector2i(24, 28), Vector2i(27, 28), Vector2i(27, 27), Vector2i(29, 27)]],
+		[Vector2i(28, 30), d.DOWN, [Vector2i(28, 30), Vector2i(28, 29), Vector2i(25, 29), Vector2i(25, 30), Vector2i(27, 30)]],
+		[Vector2i(32, 11), d.DOWN, [Vector2i(32, 11), Vector2i(32, 5)]],
+		[Vector2i(15, 11), d.RIGHT, [Vector2i(15, 11), Vector2i(11, 11)]],
+		[Vector2i(3, 5), d.LEFT, [Vector2i(3, 5), Vector2i(6, 5)]],
+		[Vector2i(1, 20), d.DOWN, [Vector2i(1, 20), Vector2i(1, 19), Vector2i(5, 19)]],
+		[Vector2i(28, 15), d.LEFT, [Vector2i(28, 15), Vector2i(30, 15)]],
+		[Vector2i(7, 3), d.LEFT, [Vector2i(7, 3), Vector2i(9, 3)]],
+		[Vector2i(22, 21), d.UP, [Vector2i(22, 21), Vector2i(22, 23)]],
+		[Vector2i(36, 31), d.DOWN, [Vector2i(36, 31), Vector2i(36, 30), Vector2i(35, 30)]],
+		[Vector2i(20, 15), d.DOWN, [Vector2i(20, 15), Vector2i(20, 13)]],
+		[Vector2i(26, 6), d.UP, [Vector2i(26, 6), Vector2i(26, 10)]],
+		[Vector2i(29, 13), d.RIGHT, [Vector2i(29, 13), Vector2i(28, 13), Vector2i(28, 11), Vector2i(29, 11), Vector2i(29, 12)]],
+		[Vector2i(8, 27), d.RIGHT, [Vector2i(8, 27), Vector2i(7, 27), Vector2i(7, 26), Vector2i(8, 26)]],
+		[Vector2i(38, 24), d.UP, [Vector2i(38, 24), Vector2i(38, 26)]],
+		[Vector2i(13, 0), d.LEFT, [Vector2i(13, 0), Vector2i(16, 0)]],
+		[Vector2i(3, 22), d.LEFT, [Vector2i(3, 22), Vector2i(6, 22)]],
+		[Vector2i(2, 3), d.LEFT, [Vector2i(2, 3), Vector2i(6, 3)]],
+		[Vector2i(0, 29), d.DOWN, [Vector2i(0, 29), Vector2i(0, 28)]],
+		[Vector2i(36, 1), d.UP, [Vector2i(36, 1), Vector2i(36, 2)]],
+		[Vector2i(1, 22), d.LEFT, [Vector2i(1, 22), Vector2i(2, 22)]],
+		[Vector2i(2, 20), d.LEFT, [Vector2i(2, 20), Vector2i(3, 20)]],
+		[Vector2i(23, 26), d.UP, [Vector2i(23, 26), Vector2i(23, 27)]],
+		[Vector2i(19, 11), d.UP, [Vector2i(19, 11), Vector2i(19, 12)]],
+		[Vector2i(25, 23), d.DOWN, [Vector2i(25, 23), Vector2i(25, 22)]],
+		[Vector2i(20, 19), d.LEFT, [Vector2i(20, 19), Vector2i(21, 19)]],
+		[Vector2i(19, 30), d.DOWN, [Vector2i(19, 30), Vector2i(19, 29)]],
+		[Vector2i(36, 14), d.RIGHT, [Vector2i(36, 14), Vector2i(35, 14)]],
+		[Vector2i(23, 8), d.UP, [Vector2i(23, 8), Vector2i(23, 9)]],
+		[Vector2i(42, 0), d.RIGHT, [Vector2i(42, 0), Vector2i(41, 0)]],
+		[Vector2i(8, 16), d.RIGHT, [Vector2i(8, 16), Vector2i(7, 16)]],
+		[Vector2i(40, 30), d.RIGHT, [Vector2i(40, 30), Vector2i(39, 30)]],
+		[Vector2i(13, 30), d.DOWN, [Vector2i(13, 30), Vector2i(13, 29)]],
+		[Vector2i(37, 13), d.UP, [Vector2i(37, 13), Vector2i(37, 14)]],
+		[Vector2i(21, 15), d.DOWN, [Vector2i(21, 15), Vector2i(21, 14)]],
+		[Vector2i(4, 29), d.RIGHT, [Vector2i(4, 29), Vector2i(3, 29)]],
+		[Vector2i(20, 12), d.DOWN, [Vector2i(20, 12), Vector2i(20, 11)]],
+		[Vector2i(20, 8), d.DOWN, [Vector2i(20, 8), Vector2i(20, 7)]],
+		[Vector2i(6, 19), d.LEFT, [Vector2i(6, 19), Vector2i(7, 19)]],
+		[Vector2i(10, 13), d.UP, [Vector2i(10, 13), Vector2i(10, 14)]],
+		[Vector2i(42, 30), d.RIGHT, [Vector2i(42, 30), Vector2i(41, 30)]],
+		[Vector2i(30, 30), d.LEFT, [Vector2i(30, 30), Vector2i(31, 30)]],
+		[Vector2i(9, 11), d.RIGHT, [Vector2i(9, 11), Vector2i(8, 11)]],
+		[Vector2i(21, 4), d.RIGHT, [Vector2i(21, 4), Vector2i(20, 4)]],
+	]
+	var arrows := {}
+	var tails := {}
+	for shape in shapes:
+		var vertices: Array[Vector2i] = []
+		vertices.assign(shape[2])
+		arrows[shape[0]] = shape[1]
+		tails[shape[0]] = _tail_along(vertices)
+	return PuzzleDefinition.new(46, 32, arrows, tails)

@@ -395,8 +395,8 @@ func _check_all_catalog_puzzles_play_through_real_scene() -> void:
 		var results = puzzle.get_node("%PuzzleResults")
 		check(board._views.size() == board.definition.arrows.size(),
 			"catalog entry '%s': board active view count matches the definition's arrow count" % id)
-		check(puzzle_label.text == "%d. %s" % [i + 1, PuzzleCatalog.get_title(id)],
-			"catalog entry '%s': HUD puzzle label matches the catalog title" % id)
+		check(puzzle_label.text == "%d. %s" % [PuzzleCatalog.group_position(id), PuzzleCatalog.get_title(id)],
+			"catalog entry '%s': HUD puzzle label shows its group-relative number and title" % id)
 
 		var clear_order := _clear_order_for(board.definition)
 		for head in clear_order:
@@ -542,6 +542,127 @@ func _check_open_move_keyboard_and_gamepad_reachable() -> void:
 	puzzle.queue_free()
 	await process_frame
 
+## Accordion headers collapse and expand their group: collapsed entries are
+## hidden (so focus skips them), expanding restores them, and other groups are
+## unaffected.
+func _check_level_select_accordion() -> void:
+	var menu = load("res://scenes/menus/main_menu/main_menu_with_animations.tscn").instantiate()
+	get_root().add_child(menu)
+	await process_frame
+	await process_frame
+	var level_select = menu.level_select_scene
+	var headers: Array[Button] = level_select.header_buttons()
+	var buttons: Array[Button] = level_select.entry_buttons()
+	check(buttons.all(func(b: Button) -> bool: return b.is_visible_in_tree() or not level_select.is_visible_in_tree()),
+		"every Level Select group starts expanded")
+	var foundations_ids := PuzzleCatalog.ids_in_group(PuzzleCatalog.GROUP_FOUNDATIONS)
+	var foundations_header: Button = headers[PuzzleCatalog.group_ids().find(PuzzleCatalog.GROUP_FOUNDATIONS)]
+	var first_foundation: Button = buttons[PuzzleCatalog.ids_in_group(PuzzleCatalog.GROUP_ARROWSPARK_LEVELS).size()]
+	check(foundations_header.text.begins_with("- "), "an expanded header shows its collapse marker")
+	foundations_header.button_pressed = false
+	await process_frame
+	check(not first_foundation.get_parent().visible and foundations_header.text.begins_with("+ "),
+		"collapsing a group hides its entries and shows the expand marker")
+	check(buttons[0].get_parent().visible, "collapsing one group leaves the others expanded")
+	check(foundations_ids.size() == 8, "collapsing hides entries without removing them")
+	foundations_header.button_pressed = true
+	await process_frame
+	check(first_foundation.get_parent().visible and foundations_header.text.begins_with("- "),
+		"expanding a group shows its entries again")
+	menu.queue_free()
+	await process_frame
+
+## Collapse state survives closing and reopening Level Select, so the initial
+## focus must go to something visible: the first visible entry, or the first
+## header when every group is collapsed -- never a hidden entry.
+func _check_level_select_focus_after_collapse() -> void:
+	var menu = load("res://scenes/menus/main_menu/main_menu_with_animations.tscn").instantiate()
+	get_root().add_child(menu)
+	await process_frame
+	await process_frame
+	menu._on_level_select_button_pressed()
+	await process_frame
+	await process_frame
+	var level_select = menu.level_select_scene
+	var headers: Array[Button] = level_select.header_buttons()
+	var buttons: Array[Button] = level_select.entry_buttons()
+	headers[0].button_pressed = false
+	await process_frame
+	menu._close_sub_menu()
+	await process_frame
+	await process_frame
+	menu._on_level_select_button_pressed()
+	for i in range(3):
+		await process_frame
+	var focus_owner := get_root().gui_get_focus_owner()
+	check(focus_owner != null and focus_owner.is_visible_in_tree(),
+		"reopening Level Select with the first group collapsed focuses a visible control")
+	var first_visible: Button = null
+	for button in buttons:
+		if button.is_visible_in_tree():
+			first_visible = button
+			break
+	check(focus_owner == first_visible,
+		"reopening Level Select with the first group collapsed focuses the first visible entry")
+	for header in headers:
+		header.button_pressed = false
+	await process_frame
+	menu._close_sub_menu()
+	await process_frame
+	await process_frame
+	menu._on_level_select_button_pressed()
+	for i in range(3):
+		await process_frame
+	focus_owner = get_root().gui_get_focus_owner()
+	check(focus_owner == headers[0],
+		"reopening Level Select with every group collapsed focuses the first header")
+	menu.queue_free()
+	await process_frame
+
+## The Back button is present and wired; the real scene change it performs is not
+## triggered here (the layout check never changes scenes through the live loader).
+func _check_back_button() -> void:
+	PuzzleSession.set_current_id("multi_bend")
+	var puzzle: Control = load("res://scenes/puzzle/arrow_puzzle.tscn").instantiate()
+	get_root().add_child(puzzle)
+	await process_frame
+	var back: Button = puzzle.get_node("%BackButton")
+	check(back.visible and back.focus_mode == Control.FOCUS_ALL and back.text == "Back",
+		"the play HUD has a visible, focusable Back button")
+	check(back.pressed.get_connections().size() > 0, "the Back button is wired to its handler")
+	check(puzzle.has_method("_on_back_button_pressed"), "the Back handler exists (it opens Level Select, not a live scene change here)")
+	puzzle.queue_free()
+	await process_frame
+	PuzzleSession.set_current_id("")
+
+## The results panel's Level Select button asks the main menu to open Level
+## Select on load: with the one-shot request set, a freshly instantiated menu
+## ends with Level Select visible and focus on its first entry, and the
+## request does not repeat for the next menu.
+func _check_level_select_request_opens_level_select() -> void:
+	PuzzleSession.request_level_select()
+	var menu = load("res://scenes/menus/main_menu/main_menu_with_animations.tscn").instantiate()
+	get_root().add_child(menu)
+	for i in range(6):
+		await process_frame
+	var level_select = menu.level_select_scene
+	check(level_select != null and level_select.visible,
+		"a pending Level Select request opens Level Select when the main menu loads")
+	var focus_owner := get_root().gui_get_focus_owner()
+	check(focus_owner != null and focus_owner == level_select._first_button,
+		"the requested Level Select opens with focus on its first entry")
+	menu.queue_free()
+	await process_frame
+
+	var second_menu = load("res://scenes/menus/main_menu/main_menu_with_animations.tscn").instantiate()
+	get_root().add_child(second_menu)
+	for i in range(4):
+		await process_frame
+	check(not second_menu.level_select_scene.visible,
+		"the Level Select request is consumed and does not reopen on a later menu")
+	second_menu.queue_free()
+	await process_frame
+
 ## Level Select lists every catalog puzzle in
 ## deterministic order with distinguishing identity, none locked/hidden, and
 ## opens with keyboard/gamepad focus already placed on the first entry
@@ -564,14 +685,21 @@ func _check_level_select_menu() -> void:
 		"Level Select's puzzle_selected signal is connected to the main menu's handler")
 
 	var list_container: VBoxContainer = level_select.get_node("%PuzzleListContainer")
-	check(list_container.get_child_count() == PuzzleCatalog.count(),
+	var buttons: Array[Button] = level_select.entry_buttons()
+	var headers: Array[Button] = level_select.header_buttons()
+	check(list_container != null and buttons.size() == PuzzleCatalog.count(),
 		"Level Select lists exactly one entry per catalog puzzle")
-	for i in range(list_container.get_child_count()):
-		var entry_button: Button = list_container.get_child(i)
-		check(entry_button.visible and not entry_button.disabled,
-			"Level Select entry %d is neither locked nor hidden" % i)
-		check(entry_button.text == "%d. %s" % [i + 1, PuzzleCatalog.title_at(i)],
-			"Level Select entry %d shows its 1-based number and title in catalog order" % i)
+	check(headers.size() == PuzzleCatalog.group_ids().size() and headers[0].focus_mode == Control.FOCUS_ALL,
+		"Level Select has one focusable accordion header per group")
+	var button_index := 0
+	for group_id in PuzzleCatalog.group_ids():
+		for id in PuzzleCatalog.ids_in_group(group_id):
+			var entry_button: Button = buttons[button_index]
+			button_index += 1
+			check(entry_button.visible and not entry_button.disabled,
+				"Level Select entry '%s' is neither locked nor hidden" % id)
+			check(entry_button.text == "%d. %s" % [PuzzleCatalog.group_position(id), PuzzleCatalog.get_title(id)],
+				"Level Select entry '%s' shows its group-relative number and title in group order" % id)
 
 	menu._on_level_select_button_pressed()
 	await process_frame
@@ -580,8 +708,8 @@ func _check_level_select_menu() -> void:
 	var focus_owner := get_root().gui_get_focus_owner()
 	check(focus_owner != null and focus_owner.is_visible_in_tree() and focus_owner.focus_mode == Control.FOCUS_ALL,
 		"opening Level Select places a visible, actionable keyboard/gamepad focus owner")
-	check(focus_owner == list_container.get_child(0),
-		"opening Level Select places initial focus on PuzzleCatalog.id_at(0)'s entry, not a hidden main-menu button")
+	check(focus_owner == buttons[0],
+		"opening Level Select places initial focus on the first (ArrowSpark Levels) entry, not a hidden main-menu button")
 
 	PuzzleSession.set_current_id(PuzzleCatalog.id_at(3))
 	var selected_puzzle: Control = load("res://scenes/puzzle/arrow_puzzle.tscn").instantiate()
@@ -642,7 +770,10 @@ func _check_replay_restart_and_next_puzzle() -> void:
 	check(advanced._state.mistakes == 0 and advanced._state.successful_removals == 0,
 		"Next Puzzle starts a fresh attempt with no carried-over mistakes or removals")
 
-	PuzzleSession.set_current_id(PuzzleCatalog.id_at(PuzzleCatalog.count() - 1))
+	# The last Foundations entry (small and stable) ends its group, so its
+	# results offer Level Select instead of Next Puzzle.
+	var group_end_id: String = PuzzleCatalog.ids_in_group(PuzzleCatalog.GROUP_FOUNDATIONS).back()
+	PuzzleSession.set_current_id(group_end_id)
 	change_scene_to_packed(load("res://scenes/puzzle/arrow_puzzle.tscn"))
 	await process_frame
 	await process_frame
@@ -653,9 +784,11 @@ func _check_replay_restart_and_next_puzzle() -> void:
 		last_board.cell_clicked.emit(head)
 	await _await_departures_complete(last_puzzle, _worst_case_seconds_for(last_board.definition))
 	var last_results = last_puzzle.get_node("%PuzzleResults")
-	check(last_results.visible, "the last catalog puzzle's results appear once every departure clears")
+	check(last_results.visible, "a group-ending puzzle's results appear once every departure clears")
 	check(not last_results.get_node("%NextPuzzleButton").visible,
-		"Next Puzzle is not shown on the last catalog puzzle's results")
+		"Next Puzzle is not shown on a group-ending puzzle's results")
+	check(last_results.get_node("%LevelSelectButton").visible,
+		"Level Select is shown on a group-ending puzzle's results")
 
 	PuzzleSession.set_current_id(PuzzleCatalog.id_at(0))
 
@@ -719,6 +852,10 @@ func _initialize() -> void:
 	await _check_open_move_keyboard_and_gamepad_reachable()
 	await _check_results_screen_shows_open_move_assists()
 	await _check_level_select_menu()
+	await _check_level_select_request_opens_level_select()
+	await _check_level_select_accordion()
+	await _check_level_select_focus_after_collapse()
+	await _check_back_button()
 	await _check_replay_restart_and_next_puzzle()
 	await _check_replay_resets_open_move_fields()
 

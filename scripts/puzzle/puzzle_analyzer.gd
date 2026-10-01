@@ -253,7 +253,64 @@ static func _union(parent: Dictionary, a: Vector2i, b: Vector2i) -> void:
 ## sequence under PuzzleSolver.analyze()'s own (y, x)-ascending comparator --
 ## this is an analysis-only capability over a *candidate* definition; it never
 ## implies the definition is solvable or catalog-eligible.
+## Deepest dependency chain, ties broken by the (y, x) head ordering. When the
+## dependency graph is acyclic (every solvable definition) the chain is found by
+## dynamic programming in time linear in the number of edges, because the
+## exhaustive simple-path search below grows exponentially with edge count and
+## cannot finish on dense boards. A graph with a cycle keeps that exhaustive
+## search, so its results are unchanged.
 static func _longest_simple_path(heads: Array, out_neighbors: Dictionary) -> Dictionary:
+	var order: Array = _topological_order(heads, out_neighbors)
+	if order.size() != heads.size():
+		return _longest_simple_path_search(heads, out_neighbors)
+	var best_chain: Dictionary = {} # head -> deepest chain starting at that head
+	for i in range(order.size() - 1, -1, -1):
+		var head: Vector2i = order[i]
+		var chain: Array[Vector2i] = [head]
+		for neighbor in (out_neighbors[head] as Array):
+			var candidate: Array[Vector2i] = [head]
+			candidate.append_array(best_chain[neighbor])
+			if candidate.size() > chain.size() or (candidate.size() == chain.size() and _chain_less_than(candidate, chain)):
+				chain = candidate
+		best_chain[head] = chain
+	var result: Dictionary = {"depth": 0, "chain": [] as Array[Vector2i]}
+	for head in heads:
+		var chain: Array[Vector2i] = best_chain[head]
+		var depth: int = chain.size() - 1
+		if depth >= 1 and (depth > int(result["depth"]) or (depth == int(result["depth"]) and _chain_less_than(chain, result["chain"]))):
+			result["depth"] = depth
+			result["chain"] = chain
+	return result
+
+## Kahn's algorithm. Returns every head in dependency order, or fewer than all
+## of them when the graph contains a cycle.
+static func _topological_order(heads: Array, out_neighbors: Dictionary) -> Array:
+	var remaining_in: Dictionary = {}
+	for head in heads:
+		remaining_in[head] = 0
+	for head in heads:
+		for neighbor in (out_neighbors[head] as Array):
+			remaining_in[neighbor] += 1
+	var queue: Array = []
+	for head in heads:
+		if int(remaining_in[head]) == 0:
+			queue.append(head)
+	var order: Array = []
+	var index := 0
+	while index < queue.size():
+		var head: Vector2i = queue[index]
+		index += 1
+		order.append(head)
+		for neighbor in (out_neighbors[head] as Array):
+			remaining_in[neighbor] -= 1
+			if int(remaining_in[neighbor]) == 0:
+				queue.append(neighbor)
+	return order
+
+## Exhaustive longest simple directed path; exponential in general, kept for
+## graphs with a cycle and as the reference the acyclic shortcut is checked
+## against.
+static func _longest_simple_path_search(heads: Array, out_neighbors: Dictionary) -> Dictionary:
 	var result: Dictionary = {"depth": 0, "chain": [] as Array[Vector2i]}
 	for start in heads:
 		var visited: Dictionary = {start: true}

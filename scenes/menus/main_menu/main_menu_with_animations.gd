@@ -46,6 +46,18 @@ func _ready():
 	super._ready()
 	_setup_level_select()
 	animation_state_machine = $MenuAnimationTree.get("parameters/playback")
+	if PuzzleSession.consume_level_select_request():
+		call_deferred("_open_requested_level_select")
+
+## Opens Level Select on load after the results panel's Level Select button.
+## Deferred so the Level Select child (added deferred in _setup_level_select)
+## is in the tree and the animation state machine is assigned; the intro is
+## finished first so the AnimationTree is out of Intro.
+func _open_requested_level_select() -> void:
+	if level_select_scene == null:
+		return
+	intro_done()
+	_open_sub_menu(level_select_scene)
 
 ## Continue stays hidden: this puzzle is session-only and implies no saved
 ## level progression to continue from. Its scene/script remains in source,
@@ -56,12 +68,12 @@ func _on_continue_game_button_pressed():
 func _on_level_select_button_pressed():
 	_open_sub_menu(level_select_scene)
 
-## New Game always starts catalog position 0, regardless of any prior Level
-## Select choice earlier in the same session. The base implementation's
+## New Game (Play) always starts the Reference Knot, regardless of any prior
+## Level Select choice earlier in the same session. The base implementation's
 ## existing no-GlobalState.reset()/no-GameState.start_game() guarantee is
 ## otherwise untouched — this only sets which puzzle load_game_scene() opens.
 func new_game():
-	PuzzleSession.set_current_id(PuzzleCatalog.id_at(0))
+	PuzzleSession.set_current_id("reference_knot")
 	super.new_game()
 
 func _on_puzzle_selected(id: String):

@@ -1,0 +1,40 @@
+# Specification Quality Checklist: The ArrowSpark Reference Puzzle and Level Groups
+
+**Purpose**: Validate specification completeness and quality before proceeding to planning
+**Created**: 2026-09-29
+**Feature**: [spec.md](../spec.md)
+
+## Content Quality
+
+- [x] Frontmatter matches the shared validation contract
+- [x] Required headings for the selected route are present in canonical order
+- [x] Status line uses a valid lifecycle state
+- [x] No implementation details (languages, frameworks, APIs)
+- [x] Focused on user value and business needs
+- [x] Written for non-technical stakeholders
+- [x] All mandatory sections completed
+
+## Requirement Completeness
+
+- [x] No [NEEDS CLARIFICATION] markers remain; five clarification answers are integrated into the spec.
+- [x] Requirements are testable and unambiguous
+- [x] Success criteria are measurable
+- [x] Success criteria are technology-agnostic (no implementation details)
+- [x] All acceptance scenarios are defined
+- [x] Edge cases are identified
+- [x] Scope is clearly bounded
+- [x] Dependencies and assumptions identified
+
+## Feature Readiness
+
+- [x] All functional requirements have clear acceptance criteria
+- [x] User scenarios cover primary flows
+- [x] Feature meets measurable outcomes defined in Success Criteria
+- [x] No implementation details leak into specification
+
+## Notes
+
+- Domain terms (arrow, catalog, solver, analyzer, Open Move) are product vocabulary of this game, not implementation leakage.
+- Human-playtest criteria (SC-002–SC-006, SC-009) cannot be automated. Amendment 2026-10-01: SC-009 (a person other than the author) was not performed and is deferred to the next spec as an accepted limitation; the others stand on the evidence collected.
+- Clarification completed: large-canvas group, group-end progression, main-menu Play destination, per-group numbering, and the explicit fifteen-question playtest questionnaire.
+- Planning must resolve final group names, report placement, and the remaining catalog classification review. Keep historical iteration records out of current-truth `.knowledge/` nodes in accordance with the shared preamble contract.

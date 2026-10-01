@@ -269,3 +269,7 @@ No contradictions were recorded between the session conclusions themselves. The 
 The structural and geometric puzzle experiments taught us about individual ingredients: geometry, density, dependencies, blocker distance, long arrows, bends, regions, interweaving, releases, readability and excessive complexity. Knowing the properties of the tools is not the same as knowing how to compose them into an excellent level.
 
 The next problem is not how to generate ArrowSpark levels automatically. It is whether we can intentionally compose what we have learned into one level that delivers a compelling sequence of discovery, understanding, execution, release and renewed discovery.
+
+### Catalog placement
+
+The six knot experiments, like the earlier structural experiments and the large-canvas validation board, are grouped under Puzzle Lab in the catalog: they exist to test ingredients, not as designed levels. Grouping is metadata only and implies no quality ranking.

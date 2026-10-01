@@ -11,6 +11,7 @@ extends RefCounted
 ## fresh engine process.
 
 static var _current_id: String = ""
+static var _level_select_requested: bool = false
 
 ## Defaults to the first catalog entry whenever unset or no longer a valid
 ## catalog id, so the very first read (before any New Game/Level Select
@@ -25,14 +26,26 @@ static func get_current_id() -> String:
 static func set_current_id(id: String) -> void:
 	_current_id = id
 
-## Advances to the next catalog entry in order; no-op (returns false) at the
-## last entry.
+## Advances to the next entry in the current puzzle's own group; no-op
+## (returns false) at the group's end. Never crosses into another group.
 static func advance_to_next() -> bool:
-	var index := PuzzleCatalog.index_of(get_current_id())
-	if index + 1 >= PuzzleCatalog.count():
+	var next_id := PuzzleCatalog.next_in_group(get_current_id())
+	if next_id.is_empty():
 		return false
-	_current_id = PuzzleCatalog.id_at(index + 1)
+	_current_id = next_id
 	return true
 
 static func has_next() -> bool:
-	return PuzzleCatalog.index_of(get_current_id()) + 1 < PuzzleCatalog.count()
+	return not PuzzleCatalog.next_in_group(get_current_id()).is_empty()
+
+## One-shot, in-memory request for the main menu to open Level Select when it
+## next loads (used by the results panel's Level Select button). Never
+## persisted.
+static func request_level_select() -> void:
+	_level_select_requested = true
+
+## Returns true at most once per request, clearing it.
+static func consume_level_select_request() -> bool:
+	var requested := _level_select_requested
+	_level_select_requested = false
+	return requested

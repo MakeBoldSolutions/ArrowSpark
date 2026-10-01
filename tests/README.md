@@ -74,9 +74,9 @@ This runs nine independent headless checks, in execution order:
    fingerprint, checks the appended `canvas_validation` fixture (40x30, fifty-two
    arrows, long bent arrows, all four directions, a tail-caused dependency, a
    top-left open move, occupied corners) and the Next flow from puzzle 14, and
-   enumerates all 21 authored catalog entries (eight baseline puzzles, six
-   structural experiments, one large-canvas fixture and six Gordian Knot
-   experiments) asserting, for each: a unique, non-empty stable id
+   enumerates all 22 authored catalog entries (eight baseline puzzles, six
+   structural experiments, one large-canvas fixture, six Gordian Knot
+   experiments and the Reference Knot) in three purpose groups asserting, for each: a unique, non-empty stable id
    independent of array position; structural validity via
    `PuzzleDefinition.is_valid()`; solver-confirmed solvability via
    `PuzzleSolver.analyze()`; the returned witness replays against a fresh
@@ -131,7 +131,7 @@ This runs nine independent headless checks, in execution order:
    resize and zero-extent recovery while paused, a combined concurrent-
    departure/pause/resize/resume scenario, setup-replacement disposal of
    in-flight departures, and that the blocked-cue duration constant does not
-   exceed its coded cap. Also covers every one of the 21 `PuzzleCatalog`
+   exceed its coded cap. Also covers every one of the 22 `PuzzleCatalog`
    entries played start-to-finish through the real scene (active view count,
    HUD puzzle label, unchanged scoring for a zero-mistake witness); Level
    Select's listing/ordering/titles, its initial keyboard/gamepad focus
