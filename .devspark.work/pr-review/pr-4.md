@@ -14,7 +14,7 @@ summary: "Re-review at 6851baf: the three stale knowledge statements and the hid
 - **Source Branch**: 010-spec-reference-puzzle
 - **Target Branch**: main
 - **Review Date**: 2026-10-01 16:14:06 UTC
-- **Last Updated**: 2026-10-01 17:00:00 UTC
+- **Last Updated**: 2026-10-01 17:20:00 UTC
 - **Reviewed Commit**: 6851baf
 - **Reviewer**: devspark.pr-review
 - **Constitution Version**: 2.0.1
@@ -32,19 +32,19 @@ summary: "Re-review at 6851baf: the three stale knowledge statements and the hid
 - **Author**: @markhazleton
 - **Created**: 2026-10-01
 - **Status**: OPEN (draft)
-- **Files Changed**: 84
-- **Commits**: 17
-- **Lines**: +5733 -106
+- **Files Changed**: 85
+- **Commits**: 21
+- **Lines**: +5942 -117
 
 ## Stats
 
 | Metric | Value |
 |--------|-------|
-| Files changed | 84 |
-| Lines added | +5797 |
-| Lines removed | −116 |
-| Net lines | +5681 |
-| Code/test lines (scripts, scenes, tests) | +830 −86 |
+| Files changed | 85 |
+| Lines added | +5942 |
+| Lines removed | −117 |
+| Net lines | +5825 |
+| Code/test lines (scripts, scenes, tests) | +750 −87 |
 | Commit snapshot | `6851baf` |
 
 *Collected from the PR context and `git diff --numstat`.*
@@ -54,7 +54,7 @@ summary: "Re-review at 6851baf: the three stale knowledge statements and the hid
 - ✅ **Constitution Compliance**: PASS WITH ACCEPTED LIMITATION (6/6 principles checked: principle V carries an owner-accepted unrun check)
 - 🔄 **Durable Delta Consistency**: PASS (0 open PRD findings; the stale statements were corrected and a sweep found no other stale versions)
 - 🔒 **Security**: 0 issues found
-- 📊 **Code Quality**: 3 recommendations
+- 📊 **Code Quality**: 0 open recommendations (M-01 accepted as a bounded tradeoff; M-02 removed)
 - 🧪 **Testing**: PASS (both gates exit 0)
 - 📝 **Documentation**: ADEQUATE apart from the stale statements above
 - 🏛️ **Constitution Improvements**: 1 CON finding
@@ -138,11 +138,11 @@ None found.
 
 | Principle | Status | Evidence | Notes |
 |-----------|--------|----------|-------|
-| I. Simple, Maintainable Code | ⚠️ Partial | `arrow_puzzle.gd:79` | snake_case and typing fine; F3 readout questionable (M-02) |
+| I. Simple, Maintainable Code | ✅ Pass | project scripts and scenes | snake_case and typing fine; the F3 readout that raised M-02 was removed |
 | II. Prefer Project-Level Template Customization | ✅ Pass | Game logic lives in project scripts and scenes | Unrelated addon commit noted (L-01) |
-| III. Accessible, Configurable Controls | ⚠️ Partial | `puzzle_select_menu.gd:71` | Focus bug (H-02); physical input not verified (H-01) |
+| III. Accessible, Configurable Controls | ✅ Pass with accepted limitation | `puzzle_select_menu.gd` (focus fix and regression check) | Focus defect fixed; physical keyboard/gamepad input not observed (owner-accepted, H-01) |
 | IV. Responsive Gameplay | ✅ Pass | No blocking frame-loop work added | Idle `_process` noted (M-02) |
-| V. Practical Gameplay Verification | ⚠️ Partial | Gates green; smoke test not run | Disclosed (H-01, M-01, CON-01) |
+| V. Practical Gameplay Verification | ⚠️ Partial — owner-accepted | Gates green; smoke test not run | Disclosed (H-01, M-01, CON-01) |
 | VI. Preserve Saved Progress and Settings | ✅ Pass | `tests/save_input_regression.gd` | No persistence added; progress untouched |
 
 ## Security Checklist
@@ -181,14 +181,14 @@ Removed tests: none (function counts counted by `_check`/`_test` prefix).
 
 | File | Tier | Changes | Type | Findings |
 |------|------|---------|------|---------|
-| `scripts/puzzle/puzzle_catalog.gd` | P1 | +242 | Modified | None |
+| `scripts/puzzle/puzzle_catalog.gd` | P1 | +219 −23 | Modified | None |
 | `scripts/puzzle/puzzle_analyzer.gd` | P1 | +57 | Modified | None |
 | `scripts/puzzle_session.gd` | P1 | +25/−10 | Modified | None |
-| `scenes/menus/main_menu/puzzle_select_menu.gd` | P1 | +61 | Modified | H-02 |
-| `scenes/puzzle/arrow_puzzle.gd` | P1 | +64 | Modified | M-02 |
-| `scenes/puzzle/puzzle_results.gd` / `.tscn` | P1 | +20 | Modified | None |
+| `scenes/menus/main_menu/puzzle_select_menu.gd` | P1 | +62 −12 | Modified | H-02 (fixed) |
+| `scenes/puzzle/arrow_puzzle.gd` | P1 | +19 −3 | Modified | M-02 (removed) |
+| `scenes/puzzle/puzzle_results.gd` / `.tscn` | P1 | +16 −4 | Modified | None |
 | `scenes/menus/main_menu/main_menu_with_animations.gd` | P1 | +18 | Modified | None |
-| `tests/*` (5 check files, launcher, README) | P2 | +780/−87 total with code | Modified | M-01 |
+| `tests/*` (5 check files, launcher, README) | P2 | +337 −35 | Modified | M-01 (accepted) |
 | `.knowledge/architecture/arrow-puzzle.md` | P3 | edited | Modified | PRD1-01, PRD1-02, PRD1-03 |
 | `.knowledge/reference/reference-puzzle-design-report.md` | P3 | new | Added | None |
 | `.devspark.work/**` | working records | bundle for this PR's own feature | Added | None (expected to ride in the diff) |
