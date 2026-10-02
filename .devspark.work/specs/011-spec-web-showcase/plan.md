@@ -42,7 +42,7 @@ Only the designer has played ArrowSpark, and the DevSpark story exists only as s
 - [spec.md](spec.md), [showcase-research.md](showcase-research.md) (§1-16), [research.md](research.md) (Phase 0, R1-R7).
 - [contracts/](contracts/): reactions API, attempt event, content collections. [data-model.md](data-model.md), [quickstart.md](quickstart.md).
 - Owner answers (2026-10-02): a Mac with Safari is available; the API base is `https://makeboldspark.com`.
-- The MakeBoldSpark.com repository conventions (feature folders, per-feature CORS, the in-memory limiter, the SQLite/WAL decision, the Bold workflow).
+- The MakeBoldSpark.com repository conventions (feature folders, per-feature CORS, the in-memory limiter, the Bold workflow).
 
 ### Tradeoffs Considered
 
@@ -79,7 +79,7 @@ Only the designer has played ArrowSpark, and the DevSpark story exists only as s
 
 ## Summary
 
-The deliverable is a public, static showcase at `https://arrow.makeboldspark.com`, built from the Make Bold theme, with two equal entry points (Try the Game, Built with DevSpark) rejoining at a Journey. The Play page hosts the unchanged Reference Knot as a Godot 4.4 Web export in a same-origin iframe. Completion posts a one-way, identifier-free result to the page, and visitors can optionally send a short anonymous reaction to one new endpoint on the existing MakeBoldSpark API, stored in its existing SQLite database. The story is published as durable Markdown and YAML content collections refreshed from the working corpus. Observed fresh-player sessions and unobserved reactions are gathered for 14 days from publication, then reported as they stand.
+The deliverable is a public, static showcase at `https://arrow.makeboldspark.com`, built from the Make Bold theme, with two equal entry points (Try the Game, Built with DevSpark) rejoining at a Journey. The Play page hosts the unchanged Reference Knot as a Godot 4.4 Web export in a same-origin iframe. Completion posts a one-way, identifier-free result to the page, and visitors can optionally send a short anonymous reaction to one endpoint on the existing MakeBoldSpark API, which is built by a separate API project. Until that endpoint is live, unsent reactions wait in a small pending queue in the visitor's own browser. The story is published as durable Markdown and YAML content collections refreshed from the working corpus. Observed fresh-player sessions and unobserved reactions are gathered for 14 days from publication, then reported as they stand.
 
 ## Technical Context
 
@@ -113,7 +113,7 @@ The deliverable is a public, static showcase at `https://arrow.makeboldspark.com
 
 **Project Type**: an existing desktop game plus a new static web front end. A cross-repo API addition lives elsewhere.
 
-**Performance Goals**: from the landing page to an interactive Reference Knot in under 30 s on typical home broadband (SC-001). Load time and transferred size are measured once and recorded, with no speculative optimization.
+**Performance Goals**: from the landing page to an interactive Reference Knot in under 30 s under the SC-001 profile (≥ 25 Mbps downstream, ≤ 50 ms RTT, cold browser cache). Load time and transferred size are measured once and recorded, with no speculative optimization.
 
 **Constraints**:
 - no SSR;
@@ -210,12 +210,12 @@ tests/README.md, .knowledge/architecture/{arrow-puzzle,save-progression}.md  # C
 
 web/
 ├── package.json  package-lock.json  astro.config.mjs  tsconfig.json
-├── staticwebapp.config.json               # MIME (.wasm/.pck), caching, CSP connect-src, no cookies
+├── staticwebapp.config.json               # MIME (.wasm/.pck), immutable cache for /game/<sha>/, no-cache HTML, Godot-compatible CSP, no cookies
 ├── THEME.md                               # provenance of the vendored theme + extension rules
 ├── public/
 │   ├── fonts/        # WOFF2 (converted) + licenses/OFL-BeVietnamPro.txt, OFL-InterTight.txt
 │   ├── brand/logo-mark.svg
-│   └── game/         # Godot export output (git-ignored, CI-generated)
+│   └── game/<commit-short-sha>/  # Godot export output under a build-unique path (git-ignored, CI-generated)
 ├── theme/make-bold/  # DURABLE THEME COPY: tokens/*.css, styles.css, readme.md, fonts/*.ttf, logo-mark.svg (unchanged)
 ├── src/
 │   ├── styles/global.css        # imports theme/make-bold/styles.css (+ WOFF2 @font-face override)
@@ -311,14 +311,14 @@ Pipeline: working corpus → editorial refresh → durable content → validatio
 
 ### Phase 4: Godot Web export and embedding [A]
 
-1. `export_presets.cfg` "Web": threads off, release, canvas resize policy adaptive, and an export path under `web/public/game/` (git-ignored).
+1. `export_presets.cfg` "Web": threads off, release, canvas resize policy adaptive, a custom HTML shell (`web/game-shell/shell.html`) carrying the in-game zoom/pinch guard and an `engineState` marker, and an export path under the build-unique `web/public/game/<commit-short-sha>/` (git-ignored).
 2. `PuzzleContentVersion.of()` plus its pin test, and `WebAttemptEmitter.build_payload(puzzle_id, definition, results, elapsed_ms) -> Dictionary` (pure) with `emit(payload)` (web-gated `postMessage`). Payload tests check the exact key set, integer fields and that no identifier keys exist.
 3. `arrow_puzzle.gd`: record the start tick in `_start_new_attempt()`, record the completion tick in the REMOVED branch where `_state.completed`, and call `WebAttemptEmitter` in `_show_results()` after `record_attempt`. Nothing else changes.
 4. `puzzle_select_menu.gd`: one honest description line per group (FR-006), with no ranking words, and passing the R-4 scan.
 5. Play page:
-   - **GameFrame** contains the dark frame, title bar, a Fullscreen button (on the iframe), a loading state with a progress note, and a same-origin `<iframe src="/game/index.html">` with `allow="fullscreen; autoplay"`.
+   - **GameFrame** contains the dark frame, title bar, a Fullscreen button (on the iframe), a loading state with a progress note, and a same-origin `<iframe src="/game/<commit-short-sha>/index.html">` (path set at build) with `allow="fullscreen; autoplay"`.
    - **Focus:** clicking the frame focuses the iframe, and an instruction line says so.
-   - **`page-zoom-guard.ts`:** while the pointer is over, or focus is in, the frame, it prevents ctrl+wheel and Ctrl/Cmd +/- page zoom from reaching the page.
+   - **Zoom guard:** in-game ctrl+wheel/pinch and Ctrl/Cmd +/- are suppressed by the custom Godot shell, because iframe events never reach the host. `page-zoom-guard.ts` covers only the surrounding page chrome. Per-browser results are recorded, and suppression a browser disallows is an accepted limitation.
    - **Audio:** audio is not unlocked before a user gesture (browser default), and the first click starts it.
    - **DesktopOnlyNotice:** shown for `(pointer: coarse)` or a viewport under 960×540. It offers the story and copy-link or `mailto:`; there is no email capture.
    - The **session-memory** note.
@@ -331,22 +331,18 @@ Pipeline: working corpus → editorial refresh → durable content → validatio
 The endpoint is not built here. Everything below is verified against the development mock, with the real endpoint absent.
 - `reaction-schema.ts` mirrors contracts/reactions-api.md exactly (enums, limits, no extra properties, a 4,096-byte cap).
 - `reaction-client.ts`: POST to `${PUBLIC_REACTIONS_URL}/api/public/arrowspark/reactions` with an 8 s timeout. Responses map to `sent`, `invalid` or `pending` (FR-032). An unset URL behaves like an unreachable endpoint.
-- `pending-queue.ts`: one browser-storage key; at most 5 contract-valid bodies; `flush()` once on each page load and before each new submission; remove on 202 or 400/413/415; keep on 429/5xx/network/timeout and stop flushing; a Discard control; clear without sending when the build is configured as feedback-closed; and the unavailable-message fallback when storage is blocked. No timers, service worker or background sync.
+- `pending-queue.ts`: one browser-storage key; at most 5 entries of `{ body, savedOn }` (`savedOn` a UTC date used only for expiry); entries older than 7 days pruned unsent on load; when full after pruning, the newest attempt is refused with a notice; `flush()` once on each page load and before each new submission; remove on 202 or 400/413/415; keep on 404/405/429/5xx/network/timeout/CORS/CSP and stop flushing; flushes serialized across tabs with the Web Locks API; a Discard control; clear without sending when the build is configured as feedback-closed; and the unavailable-message fallback when storage is blocked. No timers, service worker or background sync.
 - **ReactionForm** (game): at most 5 questions, matching the mockup; the attempt is attached only if the bridge holds one.
 - **StoryReactionForm** (end of the method path): at most 4 questions.
 - `mock-reactions.mjs` (dev only): accept, invalid and unavailable modes, switchable while running, so "unavailable, then available" can be exercised. Tests cover the payload built from form + attempt, the no-identifier rule, every response class, and the queue lifecycle (save, cap of 5, flush on load, removal on 202 and 4xx, keep on 5xx, Discard, blocked storage, feedback-closed clearing). These are the SC-006 and SC-014 checks.
 
-**Not in this plan (separate API project spec):** the following were planned here earlier and now belong to that spec.
-- `Features/ArrowSpark/`: the endpoint `POST /api/public/arrowspark/reactions`, a strict validator, the feature CORS policy (`https://arrow.makeboldspark.com`, POST, `Content-Type`, validated dev origins), a fixed-window per-IP limiter policy, the type/trace-only error filter, and `no-store`.
-- The entity and migration for the insert-only table, following that repo's backup and migration procedure.
-- Conformance tests from contracts/reactions-api.md, including all the invalid examples, the 413/415/429 paths and "no IP stored".
-- Deployed by that repo's process. The deployment date is recorded in `evidence/window.md`.
+**Not in this plan:** the endpoint and everything server-side are owned by the separate MakeBoldSpark API project, per the external requirements in FR-026 (part B) and FR-031, against [contracts/reactions-api.md](contracts/reactions-api.md). That covers server validation, CORS, rate limiting, logging, storage and purge. The current external storage contract is one JSON file per reaction, never committed to any repository, purged after the closeout.
 
 **Exit:** the client, forms and pending queue pass their tests against the contract and the mock, with no real endpoint.
 
 ### Phase 6: Integration and browser validation [A] [O]
 
-- **CI** (`.github/workflows/showcase.yml`): both Godot gates on 4.4-stable, then the web export with 4.4-stable templates (SHA-512 verified), then `npm ci && npm run check && npm run build`, then the SWA deploy (a preview environment on PRs, production on `main`).
+- **CI** (`.github/workflows/showcase.yml`): both Godot gates on 4.4-stable, then the web export with 4.4-stable templates (SHA-512 verified), then `npm ci && npm audit --audit-level=high && npm run check && npm run build`, then the SWA deploy (a preview environment on PRs, production on `main`).
 - **Browser smoke (FR-025)**, recorded in `evidence/browser-smoke.md` with browser and OS versions, on a Chromium-based browser (Windows), Firefox (Windows) and Safari (macOS). It covers:
   - load time and transferred size;
   - focus on click;
@@ -387,9 +383,9 @@ The endpoint is not built here. Everything below is verified against the develop
 | Layer | Proves | Where |
 |---|---|---|
 | Automated: Godot | rules unchanged; Reference Knot content version pinned; payload shape with no identifiers; group lines present | existing launchers on 4.4-stable |
-| Automated: site | types; schemas; bridge rejects foreign or malformed messages; client handles every response class; unavailable isolation; pending-queue lifecycle (SC-014); no `.devspark.work`; commit-pinned links; no placeholders; pre-play word scan; no raw hex or px outside the theme | `npm run check` in CI |
+| Automated: site | one synthetic headless-browser load check (engine started, no console/CSP errors) on each SWA preview and daily against production during the window; types; schemas; bridge rejects foreign or malformed messages; client handles every response class; unavailable isolation; pending-queue lifecycle (SC-014); no `.devspark.work`; commit-pinned links; no placeholders; pre-play word scan; no raw hex or px outside the theme | `npm run check` in CI |
 | Automated: API | *not Spec 011*: covered by the separate API spec | that project |
-| Browser | real input, focus, zoom, audio, iframe messaging, deployed endpoint | three browsers, recorded |
+| Browser | real input, focus, zoom, audio, iframe messaging, reaction client and pending queue against the mock | three browsers, recorded |
 | Human | equal billing, fresh play, interview, DevSpark comprehension, theme recognition (SC-013) | observed sessions |
 
 Humans are never asked to verify what the automated layers already prove.

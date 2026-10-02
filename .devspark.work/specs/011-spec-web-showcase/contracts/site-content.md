@@ -5,10 +5,25 @@
 
 ## Global rules (enforced by `web/scripts/check-content.mjs` and the collection schemas)
 
-- **R-1:** no content file, data file or built page contains the substring `.devspark.work`.
-- **R-2:** every evidence `url` is either an internal site path (`/…`) or a commit-pinned repository permalink matching `^https://github\.com/MakeBoldSolutions/ArrowSpark/(blob|tree|commit)/[0-9a-f]{40}(/.*)?$`, or a merged pull request URL `^https://github\.com/MakeBoldSolutions/ArrowSpark/pull/\d+$`.
+- **R-1:** no content file, data file or built page contains the substring `.devspark.work`, in any form (relative path, branch URL or commit-pinned URL). Published content never links to temporary spec, plan, task, gate or development documents, live or archived.
+- **R-2 (evidence hierarchy):** every evidence `url` is one of the following, in order of preference:
+  1. a durable `.knowledge/` document;
+  2. code or tests;
+  3. a merged PR (`^https://github\.com/MakeBoldSolutions/ArrowSpark/pull/\d+$`);
+  4. a commit (`…/commit/<40-hex>`) or a commit-pinned durable file (`…/(blob|tree)/<40-hex>/<path>`, where `<path>` is not under `.devspark.work/`);
+  5. an internal site path (`/…`).
+
+  Temporary gate or planning evidence may appear only as a short quotation or paraphrase in the text, attributed and supported by an `evidence` entry pointing at the durable commit or PR that shows the resulting decision or change. Items 1 and 2 are linked as commit-pinned permalinks.
 - **R-3:** no published file contains an author placeholder (`TODO(`, `<!-- TODO`, `[Mark`, `Mark:`).
-- **R-4 (pre-play scan):** the built landing page, Play page and game-loading markup, plus the text of `scenes/menus/**/*.tscn` and `scenes/loading_screen/**/*.tscn`, contain none of: *neighborhood, neighbourhood, bridge arrow, insight chain, discovery beat, major release, meaningful density, spaghetti, zone*. The scan is case-insensitive.
+- **R-4 (pre-play scan):** every surface a first-time visitor can reach before playing contains none of the words below. The scanned set is:
+  - the built landing page, the Play page and the game-loading/pre-play shell markup;
+  - the built Journey page (reachable before play);
+  - the built site header, footer and the desktop-only notice;
+  - the text of `scenes/menus/**/*.tscn` and `scenes/loading_screen/**/*.tscn`;
+  - the string literals in `scenes/menus/**/*.gd`, including `puzzle_select_menu.gd`.
+
+  Only visible text is scanned: HTML text nodes, plus `alt`, `title` and `aria-label` values. Script, style, other attributes and code are excluded, and matching is whole-word and case-insensitive. Pages behind a play-first note (spoiler chapters, design beats) and the rest of the repository are not scanned. The prohibited words are: *neighborhood, neighbourhood, bridge arrow, insight chain, discovery beat, major release, meaningful density, spaghetti, zone*. The scan is case-insensitive.
+- **Link liveness:** fetching every external URL (`check-content.mjs --fetch-links`) runs as a pre-publication step and on a schedule, never on every push, to avoid rate-limit flakiness. The offline pattern checks (R-1, R-2) run on every build.
 - **R-5:** every fact with a number carries a `source` (a permanent URL per R-2), and where the number is derived, a `command` that reproduces it.
 
 ## Collections
@@ -28,7 +43,7 @@ sources:                 # evidence the chapter relies on (R-2)
 updated: date
 ```
 
-The published set is parts 1-6 as refreshed, part 7 split (Spec 009 and the audit only), part 8 (Reference Knot, `spoiler: true`), and part 9 "Now It's Your Turn". Parts 5 and 7 are `spoiler: true` where they use design vocabulary.
+The published set is parts 1-6 as refreshed, part 7 split (Spec 009 and the audit only), part 8 (Reference Knot, `spoiler: true`), and part 9 "Now It's Your Turn". Any published chapter is `spoiler: true` if it contains Reference Knot design vocabulary or level-specific design details. This is decided from its final published text, not fixed by chapter number.
 
 ### `beats` (YAML data, `src/content/beats.yaml`): Built with DevSpark
 

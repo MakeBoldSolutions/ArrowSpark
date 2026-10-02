@@ -41,7 +41,7 @@ See [contracts/reactions-api.md](contracts/reactions-api.md). Client-side form s
 idle --(visitor answers)--> editing --(Send)--> sending
 sending --202--> sent            ("Thanks. Nothing here is required.")
 sending --400/413/415--> invalid ("Something in this reaction couldn't be sent.")  # should not occur; the client validates first
-sending --429/5xx/network/timeout--> pending  ("Saved on this device, not sent yet. It will be sent the next time you visit while feedback is available.")
+sending --404/405/429/5xx/network/timeout/CORS/CSP--> pending  ("Saved on this device, not sent yet. It will be sent the next time you visit while feedback is available.")
 sending --(storage blocked)--> unavailable ("Feedback is temporarily unavailable. Your game and the story are unaffected.")
 pending --(queue full: 5)--> notSaved ("This one couldn't be saved; you already have 5 unsent reactions.")
 ```
@@ -55,10 +55,11 @@ pending --(queue full: 5)--> notSaved ("This one couldn't be saved; you already 
 on page load (once)       -> prune entries with savedOn older than 7 days (unsent), then flush()
 on save when 5 remain     -> refuse the newest with a notice (no eviction)
 before a new submission   -> flush(), then send the new one
-flush(): for each item, send once:
-    202            -> remove
-    400/413/415    -> remove (never acceptable)
-    429/5xx/net/timeout -> keep, stop flushing (the endpoint is down)
+flush(): under one cross-tab lock (Web Locks API: one lock name for this queue), for each item send once:
+    202                                         -> remove
+    400/413/415                                 -> remove (never acceptable)
+    404/405/429/5xx/network/timeout/CORS/CSP    -> keep, stop flushing (the endpoint is down or not yet deployed)
+    (no other outcome deletes an entry)
 Discard            -> clear the key
 feedback closed    -> clear the key on load, send nothing
 ```

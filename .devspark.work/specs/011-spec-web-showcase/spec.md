@@ -10,7 +10,7 @@ route_intent: full-spec
 depends_on: []
 supersedes: []
 archetype: game
-risk_profile: public
+risk_profile: customer-facing
 change_type: brownfield
 participants:
   owner: human
@@ -46,6 +46,7 @@ ArrowSpark has one level we believe is good, the Reference Knot. Only the person
 - Q: How are reactions stored and how long are they kept? → A: Not in a database. Each reaction is its own JSON file in the API's server storage, never checked in to any repository, and every file is purged after the closeout (FR-031).
 - Q: Does Spec 011 build the reaction endpoint and its storage? → A: No. They are a separate API project with its own spec. Spec 011 must work with the API unavailable, and must keep unsent feedback in the visitor's browser so it can be submitted later (FR-031, FR-032).
 - Q: Is the Godot 4.4 Web export check a global gate? → A: No, a branch gate. It blocks only work that needs a working Web export: the export setup, iframe integration, browser smoke, browser performance and publication. Site, content, reaction-client, session-prep and baseline work proceed independently (FR-023).
+- Q: May published content link directly to temporary spec, plan or gate artifacts as evidence? → A: No. There is no constitution exception. Evidence follows the FR-013 hierarchy: durable knowledge, code/tests, merged PRs, commit-pinned durable files, then short quotations of temporary evidence supported by the durable commit or PR (owner decision on a critic finding).
 - Q: What are the exact bounds of the pending queue? → A: At most 5 entries; each is the contract body plus a day-precision `savedOn` date used only for expiry; entries expire after 7 days and are dropped unsent; when full, the newest attempt is refused; retries happen only on page load and before an explicit new submission (FR-032).
 
 ## Rationale Summary
@@ -105,7 +106,8 @@ Build one lightweight public showcase with a shared landing page and two equal p
 - Published story content becomes durable site content. It must stand alone after the working documents are archived.
 - Three separate authorities (FR-030): **Astro** owns the site shell and content; **Godot** owns gameplay; the **MakeBoldSpark API** owns validating and storing a reaction. No layer duplicates another's authority.
 - **New technology in this repository:** an Astro/TypeScript site and its Node build. The constitution's Technology section lists only Godot, GDScript and Python tooling, so a constitution amendment is a Prerequisite (see Technical Constraints).
-- No new persistence, identity or tracking. The only new stored data is anonymous reaction records in the existing API's storage.
+- No new identity, tracking, analytics or gameplay persistence. Spec 011 introduces exactly one new piece of client-side data: the **bounded pending queue** (FR-032), which lives only in the visitor's own browser. It holds at most 5 entries that expire after 7 days, contains only reactions the visitor explicitly tried to submit, and carries no identifiers.
+- Server-side reaction storage is an external contract (FR-026 B, FR-031), owned and implemented by the separate MakeBoldSpark API project, not by Spec 011.
 
 ### Reviewer Guidance
 
@@ -165,7 +167,11 @@ After playing, a player can say in under a minute how satisfying it was, whether
 
 1. **Given** a player who has played, **When** they open What did you notice?, **Then** they see no more than five short questions, all optional, including whether they read the story before playing, and a one-line notice beside the comment box that comments are anonymous and may be quoted publicly.
 2. **Given** a story reader, **When** they reach the end of the method path, **Then** they are offered no more than four short, optional questions.
-3. **Given** the feedback channel is unreachable, **When** a visitor plays or submits, **Then** gameplay is unaffected and the visitor sees a plain message that the reaction wasn't sent.
+3. **Given** the reaction endpoint is unreachable, **When** a visitor submits a reaction, **Then** gameplay is unaffected and either:
+   - **browser storage is available:** the reaction is saved to the bounded pending queue (FR-032), and the visitor sees "Saved on this device, not sent yet. It will be sent the next time you visit while feedback is available."; or
+   - **browser storage is unavailable or blocked:** the reaction is not saved, and the visitor sees a plain message that it was not sent.
+
+   Nothing implies the reaction was submitted.
 4. **Given** any submission, **When** it is stored, **Then** the stored record contains no account, persistent visitor id, cross-session id, advertising id, tracking-cookie value, network address or similar correlation data, and the application makes no attempt to link it to any other submission.
 
 ---
@@ -215,7 +221,7 @@ Before the showcase goes public, the player-visible text and durable project kno
 - **Shared computer:** an unsent reaction stays in that browser until it is sent or discarded. The "saved on this device" notice and the Discard control make this visible.
 - **Browser storage blocked (private mode, strict settings):** no queue. The visitor sees the plain unavailable message.
 - **Visitor submits a reaction twice:** both are accepted as independent observations, within the rate limit (FR-026). There is no de-duplication by identity.
-- **Malformed, oversized or off-origin submission:** rejected by the endpoint with a plain error. Nothing is stored, and the visitor's play is unaffected.
+- **Malformed or oversized submission:** the client validates every reaction against the schema before sending, so this should not occur. If the endpoint still answers `400`, `413` or `415`, the reaction is dropped (not queued) and the visitor sees "This reaction couldn't be sent". Play is unaffected. How the server rejects such requests is an external requirement (FR-026 B).
 - **Hand-off ignored or failing:** the game plays and completes normally. The reaction is sent without attempt data, or not at all.
 - **A story visitor plays afterwards and gives a game reaction:** the "read the story first" answer marks it as primed evidence.
 - **Recruitment stalls:** the spec still closes at the end of the fixed learning window, with whatever evidence exists, stated as such. The window is not extended automatically (FR-020).
@@ -254,7 +260,14 @@ Before the showcase goes public, the player-visible text and durable project kno
   - review finding real defects after everything was green (the hidden-focus bug and stale durable knowledge).
 - **FR-011**: The Built with DevSpark path MUST present the method as a sequence of evidence beats, each "Belief → Evidence → Next decision", from first playable to the outside-player question (research §4). The shared Journey (FR-002) covers the same arc as chronology. Neither may be a list of features or specs.
 - **FR-012**: The method path MUST include What Worked and What Didn't sections of comparable weight, with concrete, sourced examples. It MUST state the evidence limits plainly: one tester who designed the level; no independent player before this showcase; the Web-readiness gate (three keeper puzzles and an outside tester) not met.
-- **FR-013**: Every factual claim on the method path (dates, durations, counts, results, quotations) MUST link to a permanent source that will still resolve after working documents are archived: a published chapter, or a commit-pinned location in the public repository. Published content MUST NOT depend on working-document paths.
+- **FR-013**: Every factual claim on the method path (dates, durations, counts, results, quotations) MUST be supported by a permanent source that will still resolve after working documents are archived. Sources are used in this order of preference:
+  1. durable `.knowledge/` documents;
+  2. code and tests;
+  3. merged pull requests;
+  4. commit-pinned durable repository files;
+  5. short quotations or paraphrases of temporary gate or planning evidence, where they help the story, each supported by the durable commit or merged PR that shows the resulting decision or change.
+
+  Published content MUST NOT link to, or depend on, any `.devspark.work/` path (spec, plan, task, gate or development document), live or archived, by any URL form.
 - **FR-014**: Wall-clock and effort figures MUST appear with the caveats already established: elapsed time is not effort; commit-bracketed time is a floor; no speed-up multiple without the author's own baseline. The commands that reproduce each figure MUST be shown.
 - **FR-015**: The story MUST be built from the existing chapters and development documents per the content-source map, refreshed so no published figure contradicts the repository. Chapter 7 is split and the closing chapter written as planned in `14-showcase-story-plan.md`. Existing wording MUST be reused where it is accurate. Internal planning material MUST NOT be published merely because it exists.
 - **FR-016**: Pages that discuss the Reference Knot's design MUST carry a short play-first note that does not block reading.
@@ -299,19 +312,29 @@ Before the showcase goes public, the player-visible text and durable project kno
 
 **Feedback endpoint safety**
 
-- **FR-026**: The reaction endpoint, `POST /api/public/arrowspark/reactions` on the existing MakeBoldSpark API, MUST be bounded as follows. It serves only ArrowSpark showcase reactions. Plan records the final field names in External Contracts and may rename to match the API's conventions, but may not add fields.
+- **FR-026**: **Reaction contract.** The reaction endpoint is `POST /api/public/arrowspark/reactions` on the existing MakeBoldSpark API, serving only ArrowSpark showcase reactions. The request schema below is the shared contract between Spec 011 and the separate API project. Plan records the final field names in External Contracts and may rename to match the API's conventions, but may not add fields.
   - **Exact request schema** (JSON). Exactly two reaction types, each with only these properties; any other property is rejected. Every answer property is optional.
     - *Game reaction:* `reactionType` = `game`; `readStoryFirst` ∈ {`yes`, `no`}; `finished` ∈ {`finished`, `partway`, `notStarted`}; `satisfaction` ∈ {1, 2, 3, 4, 5}; `playAnother` ∈ {`yes`, `maybe`, `no`}; `comment` (free text); optional `attempt`, present only from the FR-019 hand-off, containing exactly `puzzleId` and `puzzleVersion` (each at most 64 characters of lowercase letters, digits, underscore and hyphen), `mistakes`, `openMoveAssists` and `score` (whole numbers, 0 to 10,000) and `elapsedSeconds` (whole number, 0 to 86,400). The endpoint validates format and range only and holds no copy of the catalog. Matching against published puzzle ids and content versions happens when results are analyzed.
     - *Story reaction:* `reactionType` = `story`; `madeSense` ∈ {`yes`, `partly`, `no`}; `changedView` ∈ {`moreInterested`, `noChange`, `lessInterested`}; `wouldUse` ∈ {`yes`, `maybe`, `no`}; `comment` (free text).
-  - **Responses:** `202 Accepted` with no body and no record id on success; a validation problem for invalid input; payload-too-large, unsupported-media-type and too-many-requests responses where those apply. No response reveals anything about other submissions.
   - **Free-text limit:** each free-text field holds at most 1,000 characters. The whole request is limited to a small fixed size, about 4 KB.
-  - **Server-side validation:** reject unknown fields, missing or unknown `kind`, values outside the allowed sets or ranges, over-length text and oversized requests. Rejected requests store nothing. Client-side checks are a convenience, never the guarantee.
-  - **Safe text handling:** free text is stored as plain text and treated as untrusted. Wherever it is later displayed it is escaped, never rendered as markup or followed as a link.
-  - **Origin policy:** a feature-specific CORS policy allows only the `https://arrow.makeboldspark.com` origin, with the POST method and the JSON content-type header. Explicit development origins are allowed only through configuration that rejects wildcards. This follows the API's existing per-feature policy pattern.
-  - **Abuse limiting:** a fixed-window per-source rate limit, using the API's existing in-memory limiter pattern, rejects bursts. Source information used for limiting is held only transiently in memory and is never written to the reaction record (FR-018).
-  - **Error logging:** failures are logged by exception type and trace id only, never with submitted text, matching the API's existing filter pattern. Responses carry `Cache-Control: no-store`.
-  - **Stored record:** defined by FR-031.
-  - **Failure isolation:** endpoint failure, rejection, slowness or absence never affects gameplay or the story pages. The visitor sees a plain "not sent" message.
+  - **A. Spec 011 client obligation** (built and verified here). The showcase MUST:
+    - create only requests that match the schema and limits above, validated client-side before sending;
+    - send them to the configured endpoint (`PUBLIC_REACTIONS_URL`) with no credentials or cookies;
+    - classify responses exactly:
+      - **`202` = sent**: removed from the queue;
+      - **`400`, `413`, `415` = invalid**: dropped, never queued or retried, and the visitor sees "This reaction couldn't be sent";
+      - **`404`, `405`, `429`, any `5xx`, network errors, timeouts, and CORS- or CSP-blocked requests = unavailable**: kept pending (FR-032). This includes the state before the endpoint exists. No other status deletes a reaction;
+    - never depend on the endpoint existing or succeeding: gameplay and the story pages are unaffected by any endpoint failure, rejection, slowness or absence.
+
+    Spec 011 verifies the client request shape, its behavior against the development mock, failure handling, and the pending queue. It does **not** verify any server behavior.
+  - **B. External requirements** (*owned and verified by the separate MakeBoldSpark API project; not Spec 011 implementation scope*). A Spec 011 verify gate MUST NOT fail because these are not yet implemented:
+    - **Server-side validation:** reject unknown fields, missing or unknown `reactionType`, values outside the allowed sets or ranges, over-length text and oversized requests. Rejected requests store nothing. Client-side checks are a convenience, never the guarantee.
+    - **Responses:** `202 Accepted` with no body and no record id on success; a validation problem for invalid input; payload-too-large, unsupported-media-type and too-many-requests responses where those apply. No response reveals anything about other submissions.
+    - **Safe text handling:** free text is stored as plain text and treated as untrusted. Wherever it is later displayed it is escaped, never rendered as markup or followed as a link.
+    - **Origin policy:** a feature-specific CORS policy allows only the `https://arrow.makeboldspark.com` origin, with the POST method and the JSON content-type header. Explicit development origins are allowed only through configuration that rejects wildcards. This follows the API's existing per-feature policy pattern.
+    - **Abuse limiting:** a fixed-window per-source rate limit, using the API's existing in-memory limiter pattern, rejects bursts. Source information used for limiting is held only transiently in memory and is never written to the reaction record (FR-018).
+    - **Error logging:** failures are logged by exception type and trace id only, never with submitted text, matching the API's existing filter pattern. Responses carry `Cache-Control: no-store`.
+    - **Stored record and purge:** defined by FR-031.
 
 **Theme, stack and storage**
 
@@ -345,7 +368,7 @@ Before the showcase goes public, the player-visible text and durable project kno
     - **Retention: 7 days.** Entries older than 7 days are dropped on the next page load, without sending. This keeps free text on a shared machine short-lived.
     - **When full** (after expired entries are pruned): the newest attempt is refused with a notice ("You already have 5 unsent reactions on this device"). Nothing older is evicted silently.
     - It is never read for tracking, never sent anywhere except the reaction endpoint, and never shown to the game.
-    - **Retry only at bounded moments:** once on each site page load, and just before a new submission. Each pending item is sent once per moment, then:
+    - **Retry only at bounded moments:** once on each site page load, and just before a new submission. Flushes are serialized across tabs of the same browser, so two open showcase tabs never send the same entry twice. Each pending item is sent once per moment, then:
       - removed on `202`;
       - removed on `400`, `413` or `415` (it will never be accepted);
       - kept on `429`, `5xx`, a network error or a timeout.
@@ -401,7 +424,7 @@ Applying the Spec 010 lesson, criteria are split. **Delivery criteria** (SC-001 
 
 **Delivery: showcase**
 
-- **SC-001**: A first-time visitor on a supported desktop browser can go from the landing page to an interactive Reference Knot in under 30 seconds on a typical home broadband connection, with no install or sign-in. Load time and transferred size are measured and recorded.
+- **SC-001**: A first-time visitor on a supported desktop browser can go from the landing page to an interactive Reference Knot in under 30 seconds, with no install or sign-in. This is measured under a fixed profile: **≥ 25 Mbps downstream, ≤ 50 ms round-trip time, cold browser cache**. Each measurement records the browser, connection profile, cache state, load time and transferred size.
 - **SC-002**: Three people who were not involved in building the site each look at the landing page and independently say that neither Try the Game nor Built with DevSpark appears visually or semantically secondary. Observed-session participants may supply this as their first step (FR-020).
 - **SC-003**: Zero instances of the internal design vocabulary, and zero descriptions of the Reference Knot's contents, appear on any surface a visitor passes before first play (checked by a word-list review of the landing page, Play page, loading screen and game menus).
 - **SC-004**: 100% of factual claims on the method path link to a permanent source that resolves. They are checked by following every link once at publication, and once after a simulated archive of the working documents.

@@ -73,6 +73,13 @@ The whole request body may be at most **4,096 bytes**.
 
 Every response sets `Cache-Control: no-store`. No response sets a cookie.
 
+## Consumer handling (Spec 011 client)
+
+- `202` = sent.
+- `400` / `413` / `415` = invalid: dropped, never queued.
+- `404`, `405`, `429`, any `5xx`, network error, timeout, and CORS- or CSP-blocked request = unavailable: kept in the local pending queue.
+- No other outcome deletes a reaction.
+
 ## CORS
 
 - A feature-specific policy allows the origin `https://arrow.makeboldspark.com` only, the method `POST` and the request header `Content-Type`.
