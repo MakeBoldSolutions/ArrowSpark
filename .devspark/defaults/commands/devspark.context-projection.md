@@ -65,7 +65,10 @@ For a normal projection run, present:
 - `SEEDS` / `UNRESOLVED_SEEDS` — which seed ids actually resolved to a known node/entity.
 - `CANDIDATES` — each with `id`, `candidate_type` (`entity` | `governance` | `current-knowledge`),
   `distance` (hop count), and `reasons` (provenance: `seed`, `via`, `relation`, `distance` for
-  each shortest path that reaches it).
+  each shortest path that reaches it). Each reason carries a `type` — `structural_composition`
+  for an entity/layer composition edge, `governance_constraint` for a binding decision, and
+  `graph_relation` for an authored architectural relationship — so a consumer can tell "this is
+  part of that entity" from "someone authored a dependency between them".
 - `CHANNELS` — candidates grouped into `entity` / `governance` / `other`, never forced into one
   competing lexical score (governance and entity candidates are graph-based, not ranked).
 - `GUARDRAILS` — `seed_count`, `hop1_candidate_count`, `hop2_candidate_count`,
@@ -76,7 +79,18 @@ For `--audit-fan-out`, present the per-entity `FAN_OUT_AUDIT` list and the `SUMM
 1-hop and 2-hop sizes, `high_fanout_entities`) — this identifies graph hubs before Context
 Projection is trusted as default `/devspark.plan` behavior (Section 17/24).
 
-### 3. Never author
+### 3. Candidates are not resolved context
+
+What this command returns is **candidate** context: everything structurally reachable from the
+seeds within the hop budget. It is deliberately generous so that nothing relevant is unreachable.
+It is not a working set, and it is never recorded wholesale as `context_resolved`.
+
+Narrowing candidates to the smallest set the work actually needs is `/devspark.plan`'s job, and
+the provenance above exists to support that judgement — a candidate reached only as a sibling
+layer, or only through a shared governance hub, is usually reachable rather than needed. Expect
+`context_resolved` to be materially smaller than `CANDIDATES`.
+
+### 4. Never author
 
 Context Projection is read-only. It never writes to `.knowledge`, never authors a relationship,
 and never promotes any candidate into authoritative truth on its own initiative — that remains a

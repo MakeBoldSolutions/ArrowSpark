@@ -9,9 +9,9 @@ in and, best-effort, a Python module docstring extracted from the cited source. 
 dry-run; writes only with --write, and refuses to overwrite an existing entity without --force.
 
 Usage:
-    python scaffold-entity.py --repo-root . --entity-id widget --type service --owner team-x \
+    python scaffold-entity.py --repo-root . --entity-id widget --type subsystem --owner team-x \
         --source src/widget/service.py --layer architecture --json
-    python scaffold-entity.py --repo-root . --entity-id widget --type service --owner team-x \
+    python scaffold-entity.py --repo-root . --entity-id widget --type subsystem --owner team-x \
         --source src/widget/service.py --layer architecture --write
 """
 
@@ -25,7 +25,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from build_knowledge_index import ALLOWED_LAYERS, _is_forbidden_reference
+from build_knowledge_index import ALLOWED_LAYERS, ENTITY_TYPES, _is_forbidden_reference
 
 SLUG_RE_MESSAGE = "entity-id must be lowercase alphanumeric with single hyphens (e.g. 'token-service')"
 ENTITY_ID_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
@@ -133,7 +133,14 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", default=".")
     parser.add_argument("--entity-id", required=True)
-    parser.add_argument("--type", dest="entity_type", required=True)
+    parser.add_argument(
+        "--type",
+        dest="entity_type",
+        required=True,
+        choices=sorted(ENTITY_TYPES),
+        help="Controlled entity classification. "
+        + "; ".join(f"{name}: {desc}" for name, desc in sorted(ENTITY_TYPES.items())),
+    )
     parser.add_argument("--owner", required=True)
     parser.add_argument("--source", dest="sources", action="append", required=True)
     parser.add_argument("--layer", dest="layers", action="append", required=True)

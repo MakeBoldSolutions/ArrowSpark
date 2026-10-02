@@ -1,6 +1,7 @@
 ---
 source: "BSW.DevSpark — © 2026 Baylor Scott & White Health. Source: https://bsw-devspark.bswhive.com"
 description: "Task list template for feature implementation"
+devspark_version: "<version that authored this task list; omit if undeterminable>"
 participants:
   owner: human
   planner: ai

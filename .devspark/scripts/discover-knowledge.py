@@ -50,6 +50,11 @@ STOPWORDS = {
     "test", "tests", "spec", "specs", "impl", "index", "main", "base", "core", "util", "utils",
 }
 SOURCE_EXTENSIONS = {".py", ".cs", ".ts", ".tsx", ".js", ".jsx", ".go", ".rs", ".java", ".rb", ".ps1", ".sh"}
+# The two ways Knowledge may reference a repository path. They are not interchangeable: ownership
+# asserts "changing this file may make me stale", applicability asserts "I govern this file".
+# Only ownership can conflict, so only ownership feeds overlapping-ownership analysis.
+CLAIM_OWNERSHIP = "source_of_truth"
+CLAIM_APPLICABILITY = "appliesTo"
 EXCLUDED_DIRS = {
     ".git", ".devspark.work", ".archive", ".devspark", "node_modules", "__pycache__",
     ".venv", "venv", "dist", "build", "bin", "obj",
@@ -217,14 +222,23 @@ def expand_pattern(repo: Path, pattern: str) -> list[str]:
     return []
 
 
-def collect_claims(repo: Path, index: dict[str, Any]) -> tuple[dict[str, list[str]], list[dict[str, Any]]]:
-    """Return (claims_by_file, claim_records) by expanding every declared `appliesTo` mapping (all
-    node types) and every entity-layer `source_of_truth` claim -- never inferred, only what the
-    repository already declares. `claims_by_file` maps a concrete file to the node ids that claim
-    it; `claim_records` lists each declared mapping with its own match count, for over-broad
-    mapping evaluation.
+def collect_claims(
+    repo: Path, index: dict[str, Any]
+) -> tuple[dict[str, list[str]], list[dict[str, Any]], dict[str, list[str]]]:
+    """Return (claims_by_file, claim_records, ownership_by_file) by expanding every declared
+    `appliesTo` mapping (all node types) and every entity-layer `source_of_truth` claim -- never
+    inferred, only what the repository already declares.
+
+    The two claim kinds answer different questions and are kept apart. `source_of_truth` is
+    evidence ownership ("changing this file may make the document stale"); `appliesTo` is
+    applicability scope ("this document governs that file"). `ownership_by_file` therefore holds
+    ownership claims only, because a governance document applying to a file an entity owns is
+    normal and must never read as an ownership conflict. `claims_by_file` keeps both kinds and is
+    used only for "is this file described by anything at all?" questions such as gap detection.
+    `claim_records` lists each declared mapping with its kind and match count.
     """
     claims_by_file: dict[str, list[str]] = {}
+    ownership_by_file: dict[str, list[str]] = {}
     claim_records: list[dict[str, Any]] = []
 
     def _add(node_id: str, kind: str, pattern: str) -> None:
@@ -232,19 +246,21 @@ def collect_claims(repo: Path, index: dict[str, Any]) -> tuple[dict[str, list[st
         claim_records.append({"node": node_id, "kind": kind, "pattern": pattern, "match_count": len(matches)})
         for match in matches:
             claims_by_file.setdefault(match, []).append(node_id)
-
+            if kind == CLAIM_OWNERSHIP:
+                ownership_by_file.setdefault(match, []).append(node_id)
 
     for node in index.get("nodes", []):
         node_id = str(node["id"])
         for pattern in node.get("appliesTo", []) or []:
-            _add(node_id, "appliesTo", str(pattern))
-        if node.get("type") == "entity-layer":
+            _add(node_id, CLAIM_APPLICABILITY, str(pattern))
+        # Ownership is a property of the entity layer form, not of any role a document declares.
+        if (node.get("form") or node.get("type")) == "entity-layer":
             for claim in node.get("source_of_truth", []) or []:
                 path_value = claim.get("path") if isinstance(claim, dict) else claim
                 if path_value:
-                    _add(node_id, "source_of_truth", str(path_value))
+                    _add(node_id, CLAIM_OWNERSHIP, str(path_value))
 
-    return claims_by_file, claim_records
+    return claims_by_file, claim_records, ownership_by_file
 
 
 def _flat_or_entity(production: list[str], tests: list[str]) -> str:
@@ -359,6 +375,7 @@ def discover_mapping_ambiguities(
     overbroad_threshold: int,
     scope: dict[str, Any],
     entity_files: set[str] | None,
+    ownership_by_file: dict[str, list[str]],
 ) -> list[dict[str, Any]]:
     # Fix #4: prior to 7.6.1, this function ignored `scope` entirely -- broad-mapping and
     # overlapping-ownership findings were identical across every scoped invocation. Both
@@ -395,7 +412,7 @@ def discover_mapping_ambiguities(
         )
 
     groups: dict[tuple[str, ...], list[str]] = {}
-    for path, owners in claims_by_file.items():
+    for path, owners in ownership_by_file.items():
         key = tuple(sorted(set(owners)))
         if len(key) > 1:
             groups.setdefault(key, []).append(path)
@@ -408,8 +425,11 @@ def discover_mapping_ambiguities(
                 severity="low",
                 confidence="medium",
                 subject="|".join(owners),
-                summary=f"{', '.join(owners)} jointly claim {len(paths)} file(s).",
-                evidence=[{"type": "shared-paths", "paths": sorted(paths)[:10], "shared_path_count": len(paths)}],
+                summary=f"{', '.join(owners)} jointly claim {len(paths)} file(s) as source_of_truth.",
+                evidence=[
+                    {"type": "shared-paths", "paths": sorted(paths)[:10], "shared_path_count": len(paths)},
+                    {"type": "claim-kind", "value": CLAIM_OWNERSHIP},
+                ],
                 recommendation=(
                     f"Confirm whether the overlap between {', '.join(owners)} reflects genuinely "
                     "shared behavior or should be narrowed to a single owner."
@@ -591,7 +611,11 @@ def discover_governance_relationships(repo: Path, index: dict[str, Any], scope: 
     decision's `constrains` is a recorded relationship, not a candidate, and is skipped.
     """
     findings: list[dict[str, Any]] = []
-    decisions = [node for node in index.get("nodes", []) if node.get("type") == "governance-decision"]
+    decisions = [
+        node
+        for node in index.get("nodes", [])
+        if (node.get("form") or node.get("type")) == "governance-decision"
+    ]
     if not decisions:
         return findings
 
@@ -1033,7 +1057,7 @@ def main() -> int:
         return 1
 
     scope = resolve_scope(repo, index, args.scope)
-    claims_by_file, claim_records = collect_claims(repo, index)
+    claims_by_file, claim_records, ownership_by_file = collect_claims(repo, index)
     entity_files = entity_scope_files(repo, index, scope["value"]) if scope["type"] == "entity" else None
 
     # Fix #4: scoped discovery now actually scopes every category. Categories that can never be
@@ -1042,7 +1066,7 @@ def main() -> int:
     # instead of being silently identical across every scoped invocation.
     scoped_findings: list[dict[str, Any]] = []
     scoped_findings.extend(discover_mapping_gaps(index, scope))
-    scoped_findings.extend(discover_mapping_ambiguities(claim_records, claims_by_file, args.overbroad_threshold, scope, entity_files))
+    scoped_findings.extend(discover_mapping_ambiguities(claim_records, claims_by_file, args.overbroad_threshold, scope, entity_files, ownership_by_file))
     scoped_findings.extend(discover_relationship_candidates(repo, index, scope))
     scoped_findings.extend(discover_governance_relationships(repo, index, scope))
     scoped_findings.extend(discover_alias_candidates(repo, index, scope, args.min_alias_occurrences))

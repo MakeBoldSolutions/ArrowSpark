@@ -188,8 +188,20 @@ def check_taxonomy_consistency(repo: Path, index: dict[str, Any]) -> list[dict[s
         explicit_type = metadata.get("type")
         if not explicit_type:
             continue  # nothing to disagree with; inferred type is the only signal
-        inferred_type = primary_engine.infer_type(rel, mappings)
+        # Only a flat document's role is assigned by the taxonomy. An entity layer's role is its
+        # `layer` and a decision's is `governance` -- both structural, so neither can disagree
+        # with a path mapping. Comparing them here is what manufactured permanent false mismatches.
+        form = str(node.get("form") or primary_engine.infer_form(rel))
+        if form != primary_engine.FORM_FLAT:
+            continue
+        inferred_type, pattern = primary_engine.resolve_role(rel, mappings)
         if str(explicit_type) == inferred_type:
+            continue
+        # A glob maps a directory's default; declaring a different role for one document inside it
+        # is the precedence rule working, not a defect, so it is not worth a standing finding.
+        # An exact-path mapping is a statement about *this* file, and two deliberate statements
+        # disagreeing is a real contradiction someone has to settle.
+        if pattern is None or primary_engine.GLOB_CHARS_RE.search(pattern):
             continue
         findings.append(
             make_finding(
@@ -197,13 +209,14 @@ def check_taxonomy_consistency(repo: Path, index: dict[str, Any]) -> list[dict[s
                 severity="low",
                 confidence="high",
                 subject=node["id"],
-                summary=f"'{node['id']}' declares type '{explicit_type}', overriding the taxonomy registry's inferred type '{inferred_type}' for its path.",
+                summary=f"'{node['id']}' declares role '{explicit_type}' but the taxonomy registry maps its exact path to '{inferred_type}'.",
                 evidence=[
                     {"type": "knowledge-node", "id": node["id"], "path": rel},
                     {"type": "explicit-type", "value": str(explicit_type)},
                     {"type": "inferred-type", "value": inferred_type},
+                    {"type": "taxonomy-pattern", "value": pattern},
                 ],
-                recommendation="Confirm the explicit type override is intentional; update the frontmatter or the taxonomy-registry pattern if it is not.",
+                recommendation="Two deliberate statements disagree about one file: correct the frontmatter role or the exact-path taxonomy mapping so only one of them stands.",
                 changes_authoritative_truth=False,
                 source="knowledge-integrity",
             )
@@ -282,16 +295,16 @@ def check_schema_tooling_contradictions(repo: Path) -> list[dict[str, Any]]:
     findings: list[dict[str, Any]] = []
     for mapping in primary_engine.load_registry(repo):
         node_type = mapping.get("nodeType")
-        if node_type and node_type not in primary_engine.ALLOWED_TYPES:
+        if node_type and node_type not in primary_engine.FLAT_ROLES:
             findings.append(
                 make_finding(
                     category="schema-tooling-contradiction",
                     severity="medium",
                     confidence="high",
                     subject=str(mapping.get("pathPattern", node_type)),
-                    summary=f"taxonomy-registry.json maps '{mapping.get('pathPattern')}' to nodeType '{node_type}', which the knowledge schema does not allow.",
+                    summary=f"taxonomy-registry.json maps '{mapping.get('pathPattern')}' to nodeType '{node_type}', which is not an assignable document role.",
                     evidence=[{"type": "schema-rule", "path": ".knowledge/taxonomy-registry.json", "nodeType": str(node_type)}],
-                    recommendation="Correct the registry mapping to an allowed type, or extend the schema if the type is genuinely needed.",
+                    recommendation="Map the pattern to a document role; structural forms such as entity-layer are derived from location and cannot be assigned by the registry.",
                     changes_authoritative_truth=False,
                     source="knowledge-integrity",
                 )

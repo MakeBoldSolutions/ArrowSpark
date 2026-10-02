@@ -13,9 +13,8 @@
       "description": "Must match the parent folder name under .knowledge/entities/."
     },
     "type": {
-      "type": "string",
-      "minLength": 1,
-      "description": "Domain-entity classification (e.g. service, workflow, integration) — distinct from doc-level `layer`."
+      "enum": ["subsystem", "domain", "integration", "tooling"],
+      "description": "Controlled semantic classification of the entity - distinct from doc-level `layer`. Advisory only: it never requires a layer to exist, because layer coverage is evidence-driven. subsystem = an internal capability of the system this repository builds; domain = a business/problem-space concept whose rules originate outside the code; integration = a boundary with an external system or third-party service; tooling = developer-facing automation that supports delivery rather than being shipped."
     },
     "owner": {
       "type": "string",

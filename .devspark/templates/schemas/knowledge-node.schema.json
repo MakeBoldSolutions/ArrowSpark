@@ -22,7 +22,7 @@
         "governance-decision",
         "entity-layer"
       ],
-      "description": "Use 'entity-layer' for docs under .knowledge/entities/<id>/ and set `layer` for the specific layer. Use 'governance-decision' for docs under .knowledge/governance/decisions/."
+      "description": "Authored classification. This single field spans both ontology axes for backward compatibility: for a flat document it names the semantic ROLE (the kind of truth it carries); for an entity layer or a decision it names the structural FORM. Use 'entity-layer' for docs under .knowledge/entities/<id>/ and set `layer` for the specific layer; use 'governance-decision' for docs under .knowledge/governance/decisions/. The builder derives separate canonical `form` and `role` fields from this plus location - see templates/schemas/knowledge-ontology.json. An explicit value here outranks path inference, so a navigational README beside a set of decisions may declare it is not one."
     },
     "title": {
       "type": "string",

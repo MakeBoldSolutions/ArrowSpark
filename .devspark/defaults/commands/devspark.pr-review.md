@@ -189,6 +189,8 @@ Start the review with a gate result block:
 
 ```yaml
 gate: pr-review
+devspark_version: "<installed version, or `unknown`>"
+generated: "<ISO-8601 timestamp of this run>"
 status: pass | warn | fail
 blocking: true | false
 severity: info | warning | error | showstopper
@@ -462,6 +464,42 @@ under `entities/<id>/`):
    a `constrains` decision, objects citing the same `source_of_truth`) — never brute-force
    pairwise comparison across the whole repo. Judging whether a candidate is a genuine contradiction
    or acceptable nuance is a human call; surface it as a **non-blocking warning** for review, always.
+
+### 6d. Closeout Consumption (review the convergence decision, don't restart it)
+
+If the PR's planning bundle contains `gates/closeout.md`, read it. Your job here is to judge whether
+the **convergence decision is defensible** — not to rediscover the route's findings from zero, and
+not to treat a classified finding as unfinished work. The contract governing that artifact is
+`/.devspark/templates/closeout-contract.md` (or `templates/closeout-contract.md` in source repos);
+§9 of it defines exactly this exchange.
+
+| Closeout state | Response |
+|---|---|
+| An `unclassified` finding remains | **`PRD6` (BLOCKING)** — the route never converged |
+| A `blocking-defect` finding is unresolved | **`PRD6` (BLOCKING)** |
+| A `requirement` is `not-satisfied`, or an `invariant` is violated, but the finding was classified as anything other than `blocking-defect` | **`PRD6` (BLOCKING)** — laundering, per contract §3/§4 |
+| `accepted-limitation` with a real `accepted_by` | OK — do not reopen |
+| `deferred-work` with a `captured_as` pointing at a record that actually exists | OK — do not reopen |
+| `learning` retaining original expectation, evidence, and revised understanding | OK — do not reopen |
+| `decision: complete` whose counts contradict the `findings:` list | **`PRD6` (BLOCKING)** — the arithmetic must hold |
+
+`PRD6 — Unconverged or indefensible closeout (BLOCKING)` joins the `PRD{N}` family from §6 and is
+reported the same way: stable `PRD6-{seq}` id, Findings Detail row, Immediate Actions entry.
+
+Two rules bound this check in the other direction:
+
+1. **An improvement you noticed is not a reason to reopen the spec.** Capture it as a Recommended
+   Improvement (non-blocking) or route it to `/devspark.specify`. The mere availability of better
+   work is never a blocking finding — that is the expansion loop this gate exists to stop.
+2. **A genuine defect still reopens the work.** If you find something that independently meets the
+   Blocking Defect bar — a failed requirement, a violated invariant, a correctness defect, a
+   regression introduced by this diff — raise it under its own code at its own severity. A
+   documented classification does not immunize a real defect; it only immunizes a *disagreement of
+   preference* with a classification the evidence supports.
+
+**No closeout artifact at all** is a non-blocking note, not a finding — many routes (quickfix, small
+quick-spec, pre-upgrade branches) legitimately never produced one. Judge the PR on its durable delta
+as §6 already requires. Never require the author to go run a command to satisfy this section.
 
 ### 7. Generate Review Report
 

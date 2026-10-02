@@ -11,6 +11,7 @@ Use this template as the structural guide when drafting a `spec.md` with the
 
 ```yaml
 ---
+devspark_version: "<installed DevSpark version, or omit if undeterminable>"
 classification: full-spec
 risk_level: low|medium|high
 status: Draft
@@ -18,6 +19,9 @@ status: Draft
 ```
 
 `status` must always be `Draft` when produced by this skill.
+
+`devspark_version` records the version that **authored** the spec. It is never
+updated by a later framework upgrade or by a later lifecycle command.
 
 ---
 

@@ -14,6 +14,7 @@ import json
 import re
 import subprocess
 import sys
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -31,9 +32,29 @@ from build_knowledge_index import (  # noqa: E402
     rotate_claim,
 )
 
+# A word earns a place here only when its *independent* presence carries little
+# repository-specific meaning. The operational test is word class: closed-class function words
+# (pronouns, determiners, auxiliaries, prepositions, conjunctions, particles) are glue in every
+# repository and are removed. Open-class words -- nouns, verbs, adjectives -- stay, even when they
+# feel generic, because "system", "work", "check", "order" and "claim" all name real things here.
 STOPWORDS = {
-    "how", "is", "the", "a", "an", "of", "in", "to", "and", "or", "does", "do", "are", "for",
-    "on", "with", "what", "when", "where", "why", "this", "that", "was", "were", "be", "it",
+    # determiners, articles, demonstratives
+    "a", "an", "the", "this", "that", "these", "those", "each", "every", "any", "all", "both",
+    "some", "such", "same", "other", "others", "no", "none", "own",
+    # pronouns and possessives
+    "i", "me", "my", "we", "us", "our", "you", "your", "he", "him", "his", "she", "her", "hers",
+    "it", "its", "they", "them", "their", "there", "who", "whom", "whose", "which",
+    # auxiliaries and modals
+    "am", "is", "are", "was", "were", "be", "been", "being", "do", "does", "did", "have", "has",
+    "had", "can", "could", "will", "would", "shall", "should", "may", "might", "must", "let",
+    # prepositions and conjunctions
+    "about", "across", "after", "against", "and", "as", "at", "because", "before", "between",
+    "but", "by", "during", "for", "from", "if", "in", "into", "nor", "of", "off", "on", "onto",
+    "or", "out", "over", "per", "so", "than", "then", "through", "to", "under", "until", "up",
+    "upon", "via", "while", "with", "within", "without", "yet",
+    # interrogatives and residual particles
+    "how", "what", "when", "where", "why", "again", "also", "else", "just", "only", "too", "very",
+    "not",
 }
 TEXT_EXTENSIONS = {
     ".md", ".py", ".ps1", ".sh", ".js", ".jsx", ".ts", ".tsx", ".cs", ".go", ".rs",
@@ -42,6 +63,15 @@ TEXT_EXTENSIONS = {
 TEST_PATH_RE = re.compile(r"(?i)(^|/)(tests?|__tests__|spec)(/|$)|(_test\.|\.test\.|_spec\.|\.spec\.)")
 GLOB_CHARS = re.compile(r"[*?\[]")
 WORD_BOUNDARY_RE = re.compile(r"[^a-z0-9]+")
+TOKEN_SPLIT_RE = re.compile(r"[^A-Za-z0-9]+")
+# `buildKnowledgeIndex` and `HTTPServer` both split into their constituent words.
+CAMEL_BOUNDARY_RE = re.compile(r"(?<=[a-z0-9])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])")
+MIN_KEYWORD_LENGTH = 3
+# Singular nouns that merely happen to end in `s`. Without this, `alias` would normalize to
+# `alia` and stop matching `aliases`. The `ss`/`us`/`is` suffix rules below cover the rest.
+IRREGULAR_SINGULARS = {
+    "alias", "atlas", "bias", "canvas", "gas", "lens", "news", "series", "species",
+}
 # Deterministic retrieval weights, strongest signal first. A keyword scores once per evidence
 # class per query term, so relevance comes from *where* a term appears, never from how often or
 # how many fields of the same class repeat it (ten matching headings score like one). Identical
@@ -72,10 +102,63 @@ def relative(repo: Path, path: Path) -> str:
     return path.relative_to(repo).as_posix()
 
 
+def normalize_token(token: str) -> str:
+    """Fold a token to its singular form. Inflectional number only -- deliberately not a stemmer.
+
+    `findings` and `finding` are the same word and must match. `plan` and `planner`, `run` and
+    `runtime`, `config` and `configuration` are different words: relating those is a vocabulary
+    decision an author makes with an alias, not something retrieval may infer.
+    """
+    if len(token) <= MIN_KEYWORD_LENGTH or token in IRREGULAR_SINGULARS:
+        return token
+    if token.endswith("ies") and len(token) > 4:
+        return token[:-3] + "y"
+    if token.endswith(("ses", "xes", "zes", "ches", "shes")) and len(token) > 4:
+        return token[:-2]
+    if token.endswith(("ss", "us", "is")):
+        return token
+    if token.endswith("s"):
+        return token[:-1]
+    return token
+
+
+def tokenize_text(text: str) -> frozenset[str]:
+    """Every matchable token in a haystack, normalized.
+
+    Splits on punctuation and case boundaries so `scripts/build_knowledge_index.py` yields
+    `build`, `knowledge`, `index`, `py`. Because tokens are whole words, `system` no longer
+    matches `subsystem` the way substring containment did.
+    """
+    tokens: set[str] = set()
+    for chunk in TOKEN_SPLIT_RE.split(text):
+        if not chunk:
+            continue
+        tokens.add(normalize_token(chunk.lower()))
+        for part in CAMEL_BOUNDARY_RE.sub(" ", chunk).split():
+            tokens.add(normalize_token(part.lower()))
+    tokens.discard("")
+    return frozenset(tokens)
+
+
+@lru_cache(maxsize=2048)
+def _cached_tokens(text: str) -> frozenset[str]:
+    return tokenize_text(text)
+
+
+# Stopwords are matched after normalization, so `does` must be excluded as `doe` too.
+NORMALIZED_STOPWORDS = STOPWORDS | {normalize_token(word) for word in STOPWORDS}
+
+
 def tokenize(topic: str) -> list[str]:
-    words = re.findall(r"[a-zA-Z][a-zA-Z0-9_-]{2,}", topic.lower())
-    keywords = sorted({w for w in words if w not in STOPWORDS})
-    return keywords or sorted(set(words))
+    tokens = tokenize_text(topic)
+    keywords = sorted(
+        token
+        for token in tokens
+        if len(token) >= MIN_KEYWORD_LENGTH
+        and token[0].isalpha()
+        and token not in NORMALIZED_STOPWORDS
+    )
+    return keywords or sorted(token for token in tokens if token[0].isalpha())
 
 
 def index_is_fresh(repo: Path, index: dict[str, Any]) -> bool:
@@ -96,9 +179,10 @@ def node_haystack(node: dict[str, Any]) -> str:
 
 
 def keyword_hits(haystack: str, keywords: list[str]) -> list[str]:
-    """Keywords present in a field. Presence, never occurrence count -- a long document must not
-    outrank a precise one by repeating a term."""
-    return [kw for kw in keywords if kw in haystack]
+    """Keywords present in a field as whole tokens. Presence, never occurrence count -- a long
+    document must not outrank a precise one by repeating a term."""
+    tokens = _cached_tokens(haystack)
+    return [kw for kw in keywords if normalize_token(kw) in tokens]
 
 
 def _source_path(claim: Any) -> str:
@@ -238,13 +322,37 @@ def match_knowledge_nodes(
     return scored[:limit]
 
 
+def layer_nodes_by_entity(index: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:
+    grouped: dict[str, list[dict[str, Any]]] = {}
+    for node in index.get("nodes", []):
+        entity_id = str(node.get("entity", ""))
+        if entity_id:
+            grouped.setdefault(entity_id, []).append(node)
+    return grouped
+
+
+def entity_haystack(entity: dict[str, Any], layer_nodes: list[dict[str, Any]]) -> str:
+    """Meaning-bearing text for an entity: its id plus its layers' titles, aliases, and headings.
+
+    Storage location and ownership are deliberately excluded. Every entity lives beneath
+    `.knowledge/entities/`, so scoring `path` lets one generic corpus word ("knowledge") match
+    every entity at once; scoring `owner` lets a team name do the same. Relation targets are
+    excluded too -- adjacency is Context Projection's job, not lexical relevance's.
+    """
+    entity_id = str(entity.get("id", ""))
+    parts = [entity_id, _normalize_phrase(entity_id)]
+    for node in layer_nodes:
+        parts.append(str(node.get("title", "")))
+        parts.extend(str(alias) for alias in node.get("aliases", []) or [])
+        parts.extend(str(heading) for heading in node.get("headings", []) or [])
+    return " ".join(parts).lower()
+
+
 def match_entities(index: dict[str, Any], keywords: list[str], limit: int) -> list[dict[str, Any]]:
+    grouped = layer_nodes_by_entity(index)
     scored = []
     for entity in index.get("entities", []):
-        haystack = " ".join(
-            [str(entity.get("id", "")), str(entity.get("owner", "")), str(entity.get("path", ""))]
-            + [str(r) for r in entity.get("relations", []) or []]
-        ).lower()
+        haystack = entity_haystack(entity, grouped.get(str(entity.get("id", "")), []))
         entity_score = len(keyword_hits(haystack, keywords))
         if entity_score > 0:
             scored.append((entity_score, entity))
@@ -301,7 +409,7 @@ def enrich_node(repo: Path, node: dict[str, Any], entity_lookup: dict[str, dict[
     entry["claim_states"] = claim_states
     if claim_error:
         entry["claim_states_error"] = claim_error
-    if node.get("type") == "governance-decision":
+    if (node.get("form") or node.get("type")) == "governance-decision":
         metadata, _ = parse_frontmatter(repo / node["path"])
         constrains = [str(c) for c in (metadata.get("constrains") or [])]
         entry["constrains"] = constrains

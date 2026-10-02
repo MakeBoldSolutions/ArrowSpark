@@ -117,15 +117,18 @@ Multi-app scope and script resolution are defined by the shared preamble contrac
    - **IF EXISTS**: Read research.md for technical decisions and constraints
    - **IF EXISTS**: Read quickstart.md for integration scenarios
 
-   **Consume `context_resolved` as already-resolved** — `/devspark.plan` did the expensive multi-hop
-   traversal so this command doesn't have to. Never traverse the `.knowledge/` ontology more than one
-   hop beyond an entity already named in `context_resolved`. If a task genuinely requires escalating
-   past that one hop (the resolved set doesn't cover something the task needs), do the extra hop, but
-   log it: append a line to `plan.md` under a `## Implementation Notes` entry noting the task ID, the
-   entity/relation that required the escalation, and why. This is an attributable signal, not a
-   failure — frequent escalation on the same entity pair means the ontology's relations are too
-   sparse (add the edge directly); escalation despite a passing `context_resolved` means
-   `/devspark.critic`'s sufficiency check missed a gap (tighten that prompt, don't just patch here).
+   **Consume `context_resolved` as already-resolved** — `/devspark.plan` did the bounded projection
+   so this command doesn't have to. Every entry is equally authoritative regardless of its `kind`: a
+   flat Knowledge document carries exactly the same weight as an entity, an entity layer, or a
+   decision, and a resolved set containing no entities at all is complete, not deficient. Never
+   traverse `.knowledge/` more than **one additional hop** beyond an item already named in
+   `context_resolved`. If a task genuinely requires escalating past that one hop (the resolved set
+   doesn't cover something the task needs), do the extra hop, but log it: append a line to `plan.md`
+   under a `## Implementation Notes` entry noting the task ID, the item and relation that required
+   the escalation, and why. This is an attributable signal, not a failure — frequent escalation on
+   the same pair means the corpus's relations are too sparse (add the edge directly); escalation
+   despite a passing `context_resolved` means `/devspark.critic`'s sufficiency check missed a gap
+   (tighten that prompt, don't just patch here).
 
    **Gate pre-flight (hard halt on failure unless the user explicitly overrides)**:
 

@@ -1,5 +1,6 @@
 ---
 source: "BSW.DevSpark — © 2026 Baylor Scott & White Health. Source: https://bsw-devspark.bswhive.com"
+devspark_version: "<version that authored this spec; omit if undeterminable>"
 classification: quick-spec
 risk_level: medium
 target_workflow: specify-light

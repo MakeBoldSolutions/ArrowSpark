@@ -1,5 +1,6 @@
 ---
 source: "BSW.DevSpark — © 2026 Baylor Scott & White Health. Source: https://bsw-devspark.bswhive.com"
+devspark_version: "<version that authored this plan; omit if undeterminable>"
 participants:
   owner: human
   planner: ai
@@ -84,16 +85,30 @@ participants:
 
 ## Context Resolution
 
-*The multi-hop `.knowledge/` traversal for this delta, pinned down here so `/devspark.implement` consumes it as already-resolved and never traverses more than one hop itself. `/devspark.analyze` validates every entry resolves against the current ontology; `/devspark.critic` judges whether the set is sufficient for the delta.*
+*The bounded `.knowledge/` working set for this delta, pinned down here so `/devspark.implement` consumes it as already-resolved and never traverses more than one additional hop itself. `/devspark.analyze` validates every entry resolves against the current corpus; `/devspark.critic` judges whether the set is sufficient for the delta.*
+
+This section records **resolved** context, which is a selection from — not a copy of — the
+**candidate** context Context Projection returns. Projection is deliberately generous so that
+nothing relevant is unreachable; this list is deliberately small. Record an item because the delta
+needs it, not because the graph could reach it.
 
 ```yaml
 context_resolved:
-  - id: [entity or decision id, e.g. entities/token_service]
-    via: [relation/path traversed, e.g. direct | depends_on -> entities/auth_gateway]
-    hop: [1|2|3]
+  - id: [knowledge id, e.g. token-service | azure-devops-work-tracking]
+    kind: [knowledge | entity | entity-layer | decision]
+    via: [relation or match that reached it, e.g. direct | depends-on -> auth-gateway]
+    hop: [0|1|2]
+    reason: [why this item informs the delta]
 ```
 
-[Leave empty only if this delta touches no existing `.knowledge/` entities or decisions — state that explicitly rather than omitting the section.]
+Flat Knowledge documents are first-class resolved context. A working set made entirely of
+`kind: knowledge` entries is valid and complete — never promote a flat document into an entity
+just so it can be listed here.
+
+`hop: 0` is a direct lexical match, `hop: 1` is one authoritative relationship away, `hop: 2` is
+two. Planning never records a hop greater than 2.
+
+[Leave empty only if this delta touches no existing `.knowledge/` content — state that explicitly rather than omitting the section.]
 
 ## Project Structure
 
