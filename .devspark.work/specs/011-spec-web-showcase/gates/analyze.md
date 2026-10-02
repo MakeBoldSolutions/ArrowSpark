@@ -92,22 +92,22 @@ findings:
     intent_cue: ""
     recommended_action: "Extend tasks.md T031 so .knowledge/architecture/web-showcase.md documents those five items, sourced from durable code/config."
     execution_mode: auto
-    status: open
-    outcome: ""
+    status: resolved
+    outcome: "T031 now lists all five behaviors and their durable sources and completes before T061; T068 and T071 add the CSP/caching and schedule sections when their files exist (post-gate remediation, 2026-10-02)."
   - finding_id: analyze-D2
     severity: low
     description: "research.md R6 Deployment and Permanent links rows predate the remediation (missing npm audit, synthetic check, versioned game path, PR links and the evidence hierarchy)."
     intent_cue: ""
     recommended_action: "Point research.md:165 and :169 at their authorities (T014/T071, FR-013 and site-content R-1/R-2) or update them."
     execution_mode: auto
-    status: open
-    outcome: ""
+    status: resolved
+    outcome: "Both rows updated to match and cite their authorities (Deployment: T014/T071; Permanent links: FR-013, site-content R-1/R-2); the SWA config row also cites T068 (post-gate remediation, 2026-10-02)."
   - finding_id: analyze-S1
     severity: low
     description: "T014's synthetic check depends on the exported game and custom shell, but only its export step is tagged [S-1]."
     intent_cue: ""
     recommended_action: "Tag the synthetic-check part of T014 [S-1]; before S-1 it checks / and story pages only."
     execution_mode: auto
-    status: open
-    outcome: ""
+    status: resolved
+    outcome: "T014's /play engine wait is tagged [S-1] (before S-1 the check loads / and story pages only); the Phase 2 exception note lists it (post-gate remediation, 2026-10-02)."
 ```
