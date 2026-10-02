@@ -290,33 +290,130 @@ The new principle is:
 **The puzzle defines the world. The screen is only a window into it.**
 
 This is the intended subject of Spec 008.
+This became the subject of Spec 008.
 
-## 12. Current Moment
+## 12. Spec 008 --- Large Zoomable Puzzle Canvas (2026-09-28)
 
-At this documentation snapshot: - Specs 001--007 are complete; Spec 007
-was merged after its automated checks went green and its manual desktop
-checks passed; - the repository now lives at
-`MakeBoldSolutions/ArrowSpark` with `main` as its default branch; - Spec
-008, **Large Zoomable Puzzle Canvas**, is in progress on
-`008-spec-large-zoomable-canvas`: specified, planned, tasked, and through
-the checklist, analyze, and critic gates, but with no implementation task
-executed yet; - the following puzzle-design work is expected to explore
-**Gordian Knot Experiments** (Spec 009), followed by a Web playtest build
-(Spec 010). See [13-roadmap-008-010.md](13-roadmap-008-010.md).
+Spec 008 was implemented and merged as PR #1 (`faa4575`). It separated four
+ideas that had been conflated: board size, geometric density, viewport and
+zoom.
 
-The project has therefore moved through three phases:
+- A new presentation authority, `PuzzleViewportTransform`, maps logical grid,
+  board-local and screen coordinates. Its math is unit-tested apart from
+  rendering.
+- Zoom, pan and **Fit Puzzle** work by mouse, keyboard and gamepad. View state
+  is transient: no camera state is persisted, and each replay starts at Fit.
+- Open Move now brings an off-screen target into view without changing its
+  contract (one deterministic target, one cost, no removal).
+- Departures stay correct under navigation and complete on full logical
+  clearance, not on viewport clipping.
+- A 52-arrow `canvas_validation` puzzle (40x30) exercised all of this.
+- Level Select gained a scroll container after 15 entries clipped at 960x540.
 
-**Phase 1 --- Prove the game works.**\
-Specs 001--005.
+Verification passed on Godot 4.4 and 4.7.2. The verify gate was `warn`: some
+scenarios (gamepad hardware, and others) were accepted as outstanding and not
+claimed as passed. Touch input was deliberately left out.
 
-**Phase 2 --- Learn what the game actually is.**\
-Spec 006 and the playtesting/design discussion.
+The same day added `.knowledge` integrity validation and, on 2026-09-28,
+the rebrand of repo-facing docs to **ArrowSpark / Make Bold Solutions**
+(`0ea27a6`).
 
-**Phase 3 --- Establish the contract and remove artificial
-constraints.**\
-Spec 007 (complete) and Spec 008 (in progress).
+## 13. Spec 009 --- Gordian Knot Experiments (2026-09-29)
 
-The eventual goal is not simply "more levels."
+Spec 009 answered the Spec 008 follow-up question with content: six
+hand-authored experimental puzzles (PR #2, `8a00239`), taking the catalog from
+15 to 21 entries.
 
-It is to understand what makes a knot satisfying enough that, only then,
-procedural generation might be worth attempting.
+Puzzles: Long Geometry, Interwoven Paths, Dense Core, Distinct Regions,
+Single Release, Boundary Knot. Each is solver-confirmed solvable, passes the
+catalog gate, and has a recorded structural report from `PuzzleAnalyzer`
+(descriptive only; nothing gates on difficulty). Findings are in
+`.knowledge/reference/gordian-knot-experiments.md`.
+
+Human evidence is thin and stated as such: one aggregate author session across
+all six puzzles, with per-puzzle detail not recorded. The aggregate reaction
+supported the geometric-entanglement hypothesis (long, bent removals are
+satisfying; tail-based dependencies create reasoning challenge). It is one
+tester who knew the designs, so it is evidence and not proof.
+
+The spec also added a structural-report launcher and a playtest guide, and was
+re-verified on Godot 4.4.1.
+
+## 14. Codebase Audit (2026-09-29)
+
+A `devspark.site-audit` run found no gameplay defect. Its one high finding was
+escaped planning references (temporary review ids) in durable comments, plus
+stale test documentation. PR #3 (`312b0c7`) recorded the audit and the PR
+review documentation. Audit evidence is in `.devspark.work/audit/`.
+
+## 15. Spec 010 --- Reference Puzzle and Level Groups (2026-09-29 to 2026-10-01)
+
+**The numbering moved.** The 2026-09-28 roadmap reserved "Spec 010" for a Web
+Playtest Build. The number was spent on a different question instead: *what
+does the intended ArrowSpark experience feel like in one composed level?*
+The Web work moves down a slot (see [13-roadmap-008-010.md](13-roadmap-008-010.md)).
+
+Delivered (PR #4, `6e60e11`, merged 2026-10-01):
+
+- **Purpose groups** in `PuzzleCatalog`: Foundations (8), Puzzle Lab (13),
+  ArrowSpark Levels (1). Groups are metadata only and own no gameplay.
+- **Accordion Level Select**, group-relative numbering, group-scoped Next
+  Puzzle (never wraps or crosses groups), and a Back button.
+- **Reference Knot** (`reference_knot`): a hand-composed 46x32 board with 115
+  arrows, 1348 of 1472 cells occupied, 207 bends, longest arrow 43. Main-menu
+  Play now starts it. Solver confirms it solvable; its witness replays with zero
+  mistakes.
+- Analyzer longest-chain search was reworked to a linear-time acyclic path so
+  dense boards stay tractable.
+- A temporary F3 cell-size readout was added, then removed during PR review.
+- The design report is durable knowledge:
+  `.knowledge/reference/reference-puzzle-design-report.md`.
+
+Human playtest: the designer played the final version and answered all fifteen
+questions with an unqualified yes. Learning that changed an assumption:
+
+- "Some freedom is good; too many simultaneously obvious moves feels like
+  clicking." About ten obvious moves in the middle "starts to feel old."
+- Neighborhoods emerge from cleared white space during play rather than from the
+  starting layout.
+- SC-005 as originally written was too absolute and was amended with the
+  original wording preserved. Against the original wording it is **not met**;
+  this is recorded, not hidden.
+
+Documented limitations at close: familiar tester only; no independent player;
+SC-009 (fresh-player discovery of the ArrowSpark Levels group) **not
+performed** and deferred; desktop smoke test not run as a manual pass.
+PR review went three revisions to approve with no blocking findings.
+
+## 16. Current Moment
+
+At this documentation snapshot (2026-10-01, `main` at `6e60e11`, clean tree,
+91 commits):
+
+- **Specs 001--010 are all complete and merged.** There is no active feature
+  branch.
+- The catalog has **22 puzzles in three groups**.
+- Both regression gates and Godot validation were green at PR #4 review.
+- The next spec is expected to be a **Web Showcase & Playtest**, which also
+  inherits the deferred fresh-player validation protocol
+  (`.devspark.work/specs/010-spec-reference-puzzle/deferred-to-next-spec.md`).
+- A seven-part article series about the project lives in
+  `.devspark.work/development/arrowspark-series/` (parts 5--7, added 2026-09-30, cover
+  playtest findings, scoring and knot experiments).
+
+The project has moved through four phases:
+
+**Phase 1 --- Prove the game works.** Specs 001--005.
+
+**Phase 2 --- Learn what the game actually is.** Spec 006 and the
+playtesting/design discussion.
+
+**Phase 3 --- Establish the contract and remove artificial constraints.**
+Specs 007 and 008.
+
+**Phase 4 --- Author content and find what a good knot is.** Specs 009 and 010.
+
+The eventual goal is still not simply "more levels." It is to understand what
+makes a knot satisfying enough that, only then, procedural generation might be
+worth attempting. The evidence base is still one tester, so the next phase has
+to bring in other people.

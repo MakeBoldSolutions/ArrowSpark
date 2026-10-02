@@ -1,6 +1,6 @@
 # ArrowSpark Development Documentation
 
-**Snapshot date:** 2026-09-28 (updated: Specs 001--007 complete, Spec 008 in progress)\
+**Snapshot date:** 2026-10-01 (updated: Specs 001--010 complete, next spec not yet specified)\
 **Project:** ArrowSpark\
 **Family:** A Make Bold Spark Game\
 **Creator:** Make Bold Solutions\
@@ -79,6 +79,9 @@ The next architectural direction is:
     project has taught us about DevSpark itself.
 13. [13-roadmap-008-010.md](13-roadmap-008-010.md) --- living roadmap
     for Specs 008--010 with entry/exit criteria and a revision protocol.
+-   [14-showcase-story-plan.md](14-showcase-story-plan.md) --- plan to
+    merge this folder and the `arrowspark-series/` articles into one
+    story for the game's showcase website.
 14. [source-spec-007.md](source-spec-007.md) --- captured Spec 007
     source document supplied during this development discussion.
 15. [source-analyze-007.md](source-analyze-007.md) --- captured Analyze
@@ -118,11 +121,13 @@ they are pulling a thread out of a knot.
 Spec 007 establishes the safety contract required before making puzzles
 significantly harder: unlimited mistakes, no fail state, a costly Open
 Move assist, replay for score improvement, and no persistent player
-memory. Spec 008 (in progress) removes the next artificial constraint:
-puzzle size should no longer be limited by screen size. A large puzzle
-should be navigable through zoom, pan, and Fit Puzzle.
+memory. Spec 008 removed the next artificial constraint:
+puzzle size is no longer limited by screen size. Large puzzles are
+navigable through zoom, pan, and Fit Puzzle. Specs 009 and 010 then
+authored experimental knots, grouped the catalog by purpose and composed
+the Reference Knot.
 
-This documentation snapshot represents the state after Spec 007 was
-completed and merged (automated checks green, manual desktop checks
-passed) and while Spec 008 is planned but not yet implemented. Specs
-001--007 are complete; Spec 008 is in progress.
+This documentation snapshot represents the state of `main` at `6e60e11`
+on 2026-10-01, after Spec 010 merged. Specs 001--010 are complete and
+there is no active feature branch. See [08-current-state.md](08-current-state.md)
+for the 22-puzzle catalog, evidence quality and open limitations.

@@ -8,8 +8,9 @@ Do not add systems merely because successful games often contain them.
 
 Each major step should remove one constraint or answer one uncertainty.
 
-> **Status note (2026-09-28):** Specs 001--007 are complete. Spec 008 is in
-> progress. The detailed, living plan for Specs 008--010 is
+> **Status note (2026-10-01):** Specs 001--010 are complete. The next spec is
+> expected to be a Web Showcase & Playtest. (2026-09-28 note: Specs 001--007
+> were complete and Spec 008 was in progress.) The detailed, living plan for Specs 008--010 is
 > [13-roadmap-008-010.md](13-roadmap-008-010.md); it supersedes this file where
 > they differ. This file remains the longer-range view.
 
@@ -18,10 +19,9 @@ Each major step should remove one constraint or answer one uncertainty.
 Spec 007 (Open Move and session scoring) is complete and merged. Its manual
 desktop checks passed on 2026-09-28.
 
-## Now --- Spec 008: Large Zoomable Puzzle Canvas (in progress)
+## Done --- Spec 008: Large Zoomable Puzzle Canvas
 
-Status: planned; checklist, analyze, and critic gates pass; implementation not
-started.
+Status: complete; merged as PR #1 on 2026-09-28.
 
 Question answered:
 
@@ -33,7 +33,25 @@ departure animation; - resize stability.
 
 This is an enabling architecture specification.
 
-## Next --- Spec 009: Gordian Knot Experiments
+## Done --- Spec 009: Gordian Knot Experiments
+
+Status: complete; merged as PR #2 on 2026-09-29. Six hand-authored experiments
+shipped, with one aggregate author playtest (per-puzzle detail not recorded).
+The suggested experiment set below is the original plan; the shipped set is
+in `.knowledge/reference/gordian-knot-experiments.md`.
+
+## Done --- Spec 010: Reference Puzzle and Level Groups
+
+Not in the original roadmap. Added purpose groups, accordion Level Select and a
+hand-composed Reference Knot. Complete with documented limitations; merged as
+PR #4 on 2026-10-01. See [08-current-state.md](08-current-state.md).
+
+## Now --- Web Showcase & Playtest (not yet specified)
+
+Get outside players, and with them the deferred fresh-player validation. See
+[13-roadmap-008-010.md](13-roadmap-008-010.md#checkpoint-after-spec-010).
+
+### Original Spec 009 plan (historical)
 
 Question answered:
 
