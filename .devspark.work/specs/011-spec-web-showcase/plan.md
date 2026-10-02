@@ -257,7 +257,10 @@ Each phase lists its repository and exit evidence. **[A]** = ArrowSpark repo; **
 | 0.4 | Cross-repo | Contract first. Spec 011 is complete and verifiable with no endpoint; unsent reactions wait in the local pending queue (R4, FR-032) |
 | 0.5 | Safari | Mac available, so Safari on macOS is in the smoke test (R5) |
 
-**S-1 [A]:** install the 4.4-stable editor and templates (SHA-512 verified), create the Web preset, export, serve locally, play the Reference Knot to results, and note `SceneLoader` behaviour and load size. **Exit:** confirmed, or a version-change prerequisite is raised and implementation stops.
+**S-1 [A]:** install the 4.4-stable editor and templates (SHA-512 verified), create the Web preset, export, serve locally, play the Reference Knot to results, and note `SceneLoader` behaviour and load size.
+- **Exit:** confirmed, or a version-change prerequisite is raised.
+- **Branch gate:** S-1 blocks only the game/Web-integration work: the engine doc pin, the CI export step, gates and re-export on the confirmed engine, the real game in the Play frame, browser performance, the browser smoke test and publication.
+- Site, theme, content, the reaction client and queue, session preparation, the truthful baseline, and the GDScript helpers with their headless tests all proceed in parallel. If the version changes, only the GDScript work is re-validated.
 
 ### Phase 1: Prerequisites (bounded to the four approved)
 
@@ -395,7 +398,7 @@ Humans are never asked to verify what the automated layers already prove.
 
 | ID | Prerequisite | Owner | Blocks |
 |---|---|---|---|
-| S-1 | 4.4 web export spike | AI runs; owner reviews | everything after Phase 0 |
+| S-1 | 4.4 web export spike | AI runs; owner reviews | game/Web-integration branch only (tasks marked [S-1]) |
 | P1 | Constitution MINOR amendment | owner approves | Phase 2 onward |
 | P2 | Godot 4.4-stable pin everywhere | AI | Phase 4 and 6 |
 | P3 | Truthful baseline | AI; owner reviews | Phase 7 (publication) |
@@ -440,7 +443,7 @@ Humans are never asked to verify what the automated layers already prove.
 8. **Browsers:** a Chromium-based browser and Firefox on Windows, and Safari on macOS (available per the owner).
 9. **Prerequisites and owners:** S-1 (AI), P1 (owner approves), P2 (AI), P3 (AI, owner reviews), P4 (AI). Owner actions O-1 (SWA and DNS) and O-2 (API deploy).
 10. **Deferred:** as listed above.
-11. **Remaining blockers:** none. S-1 is the only gate that could raise one.
+11. **Remaining blockers:** none. S-1 is the only gate that could raise one, and it gates only the game/Web-integration branch.
 
 ## Complexity Tracking
 

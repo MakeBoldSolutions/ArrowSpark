@@ -22,7 +22,7 @@
 
 **Gate (first implementation task, S-1):** install the 4.4-stable editor and export templates from the official release, verifying the SHA-512 sums. Export the Web/no-threads preset, serve it locally, and play the Reference Knot through to the results screen.
 - **Pass:** 4.4 is confirmed.
-- **Fail with a concrete engine defect:** stop. A version change becomes an explicit prerequisite under FR-023, with its own task, a regression run on the new version and a constitution Technology update. Implementation does not continue on an unconfirmed engine.
+- **Fail with a concrete engine defect:** stop. A version change becomes an explicit prerequisite under FR-023, with its own task, a regression run on the new version and a constitution Technology update. Game/Web-integration work does not merge on an unconfirmed engine. S-1 is a branch gate, and site, content and client work proceed in parallel.
 
 **Alternatives considered:**
 - **4.4.1-stable:** a patch release, but no concrete web-export reason to move has been found, and it would change CI.

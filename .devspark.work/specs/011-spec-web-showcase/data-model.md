@@ -6,7 +6,7 @@ Temporary planning material. Entities from spec Key Entities, with fields, valid
 |---|---|---|---|
 | Puzzle content version | Godot rule core (pure helper) | `PuzzleContentVersion.of(definition)` | derived; Reference Knot value pinned in a test |
 | Completed attempt (hand-off) | Godot controller → page bridge | iframe message → page memory | none (page visit only) |
-| Pending reaction (unsent) | site UI | visitor's browser storage, at most 5 contract-valid bodies | until sent (`202`), rejected (`4xx`), discarded, or feedback closes |
+| Pending reaction (unsent) | site UI | visitor's browser storage: at most 5 entries of `{ body, savedOn }` | until sent (`202`), rejected (`4xx`), discarded, expired (7 days), or feedback closes |
 | Game reaction | site UI → API | request → one JSON file | API host storage only, purged after closeout |
 | Story reaction | site UI → API | request → one JSON file | API host storage only, purged after closeout |
 | Reaction record | MakeBoldSpark API | `<recordId>.json` in a dedicated server directory (never in a repo) | write-once; purged after closeout |
@@ -46,10 +46,14 @@ sending --(storage blocked)--> unavailable ("Feedback is temporarily unavailable
 pending --(queue full: 5)--> notSaved ("This one couldn't be saved; you already have 5 unsent reactions.")
 ```
 
-**Pending queue (FR-032):** one browser-storage key holding an array of at most 5 request bodies, exactly as they would be POSTed. No ids, timestamps or other fields.
+**Pending queue (FR-032):** one browser-storage key holding an array of at most 5 entries `{ body, savedOn }`.
+- `body` is the request exactly as it would be POSTed.
+- `savedOn` is a UTC date (`YYYY-MM-DD`), used only for the 7-day expiry and never sent.
+- There are no ids and no other fields.
 
 ```
-on page load (once)       -> flush()
+on page load (once)       -> prune entries with savedOn older than 7 days (unsent), then flush()
+on save when 5 remain     -> refuse the newest with a notice (no eviction)
 before a new submission   -> flush(), then send the new one
 flush(): for each item, send once:
     202            -> remove
