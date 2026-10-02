@@ -93,7 +93,11 @@
 - App Service can also run **two worker processes briefly during restarts and deployments** (overlapped recycling). An in-process single-writer lock therefore cannot be relied on.
 - The single-instance condition is **not guaranteed**.
 
-**Decision:** use the **existing SQLite mechanism**, exactly as the spec's fallback (FR-031) requires.
+**Decision (revised 2026-10-02 by owner clarification, superseding the SQLite choice below):** store **one JSON file per reaction** in a dedicated directory on the API host's persistent storage. The directory is outside the web root and outside any repository, and is never checked in anywhere. Each file is written under a temporary name and renamed into place. Every file, and every private local copy, is purged after the closeout. No database is used.
+
+*Why this resolves the concurrency finding:* every request creates its own uniquely named file, so overlapping processes never share a file and no lock is needed.
+
+*Original planning decision, kept for the record:* use the **existing SQLite mechanism**, exactly as the spec's fallback (FR-031) required.
 - One new append-only table in the existing `MakeBoldSparkDbContext`, added by an EF Core migration through that repository's established migration and backup procedure (the WAL convention, `bold-docs/system/decisions/0002-sqlite-default.md`; the deployment steps used in `bold-docs/system/family-memories-api.md`).
 - The table holds the same record shape the JSONL design specified: `RecordId` (random GUID, primary key), `SchemaVersion`, `ReceivedUtc` (truncated to the minute), `ReactionType`, and `Payload` (the validated, canonically re-serialized reaction JSON).
 - Insert-only. No public read, update, delete, list or export endpoint.
@@ -110,6 +114,8 @@
 
 ## R4. Cross-repo API work
 
+> **Revised 2026-10-02 (owner clarification):** the endpoint, its storage and purge are a **separate API project with its own spec**, not Spec 011 work. Spec 011 delivers only the client: forms, contract-valid requests, the unavailable state and the local pending queue (spec FR-032). It must be complete and verifiable with no endpoint deployed. The text below stays as context for that separate spec.
+
 **Owning repository:** `MakeBoldSolutions/MakeBoldSpark.com`. That repo uses its own **Bold** workflow (`AGENTS.md`, `bold-docs/backbone.md`, `bold-docs/features/NNNN-*`). The endpoint is planned and built there as its own feature, expected to be `0007-arrowspark-reactions`, through `/bold-plan`. It is **not** built from this repository, and no MakeBoldSpark code is committed here.
 
 **Contract first:** [contracts/reactions-api.md](contracts/reactions-api.md) is the single contract both repositories implement against. Its version is `schemaVersion` 1.
@@ -123,7 +129,7 @@
 2. **ArrowSpark side**, unblocked from day one: the reaction UI and client against the contract, tested with
    - (a) a contract-fake mode in unit tests,
    - (b) a local mock server script used only in development (`web/scripts/mock-reactions.mjs`: validates per the contract and returns 202, 400 or 503 on demand), and
-   - (c) the **unavailable** path, which is the default when `PUBLIC_REACTIONS_URL` is unset.
+   - (c) the **unavailable** path, where an unset `PUBLIC_REACTIONS_URL` or an unreachable endpoint saves the reaction to the local pending queue (spec FR-032).
 3. **MakeBoldSpark side** (feature 0007 in that repo): the endpoint, CORS policy, rate-limit policy, validation, migration and tests, built and deployed on that repo's schedule.
 4. **Integration:** after 0007 is deployed, the showcase is built with `PUBLIC_REACTIONS_URL` set, and the browser smoke test submits one game and one story reaction from `https://arrow.makeboldspark.com`. The owner confirms the rows exist with the expected fields only.
 
@@ -133,7 +139,7 @@
 - Only the final smoke test crosses the boundary.
 - Neither repository's CI calls the other's.
 
-**Publication does not wait on the API:** the site may go public with the reaction feature showing "Feedback is temporarily unavailable". The learning window still opens on publication (FR-020). If 0007 lags, observed sessions still count; unobserved reactions are lost for that period, which is recorded as an accepted limitation.
+**Publication does not wait on the API:** the site may go public before the endpoint exists. Reactions written meanwhile are kept in each visitor's browser and sent when that visitor returns after the endpoint is live (FR-032). The learning window still opens on publication (FR-020). Observed sessions count regardless. Reactions from visitors who never return are lost, which is an accepted limitation.
 
 ---
 
@@ -168,7 +174,7 @@
 | Finding | Class |
 |---|---|
 | R1: 4.4 web export not yet observed | **Prerequisite** (S-1 gate) |
-| R3: single instance not guaranteed, so SQLite instead of JSONL | **Learning / Changed Assumption** (allowed by FR-031; no scope change) |
+| R3: single instance not guaranteed. SQLite was chosen at first; the owner's clarification then chose one JSON file per reaction, never in a repo, purged after closeout | **Learning / Changed Assumption** (FR-031 rewritten) |
 | R4: API repo has its own workflow (Bold) and host naming | **Learning**; dependency recorded, no scope change |
 | R4: publication may precede API deployment | **Accepted Limitation** if it happens |
 | `SceneLoader` threaded loading on single-threaded web | Risk checked in S-1; **Blocking Defect** only if observed failing |

@@ -26,8 +26,7 @@ Only the designer has played ArrowSpark, and the DevSpark story exists only as s
 
 - Pin **Godot 4.4-stable** everywhere, gated by a first-task export spike.
 - Embed the Web export in a **same-origin iframe** that `postMessage`s one JSON `attemptCompleted` event to a validating TypeScript bridge.
-- Store reactions in the **existing SQLite database** of the MakeBoldSpark API, not JSONL, because a single instance is not guaranteed.
-- Build the endpoint **as its own feature in that repository**, against a shared contract.
+- The reaction endpoint and its storage (one JSON file per reaction, never in a repo, purged after closeout) are a **separate API project spec**. Spec 011 builds only the client, which must work with the API unavailable and keep unsent reactions in a small local pending queue (FR-032).
 - Port the Make Bold theme into a **static Astro + TypeScript** site under `web/`.
 - Publish the story as **content collections**, with one source per fact.
 
@@ -47,10 +46,10 @@ Only the designer has played ArrowSpark, and the DevSpark story exists only as s
 
 ### Tradeoffs Considered
 
-- **JSONL storage:** rejected for this deployment (research R3). Overlapped App Service recycling can run two writers.
+- **Server storage:** out of Spec 011 scope. The owner's choice of one JSON file per reaction is recorded in FR-031 for the API spec. A shared JSONL file was rejected (overlapped recycling), and so was a database.
 - **Direct canvas embed:** rejected. The engine's globals and keyboard capture would leak into the site, and fullscreen and focus are harder to scope.
 - **Building the API change from this repository:** rejected. That repo has its own workflow and review, and one PR can't span both repos.
-- **Selected:** the iframe + `postMessage` bridge, SQLite insert-only storage, a contract-first two-repo delivery, and site publication that does not wait for the API.
+- **Selected:** the iframe + `postMessage` bridge, a contract-first boundary with the separate API spec, a client that works with the API absent (pending queue), and site publication that does not wait for the API.
 
 ### Architectural Impact
 
@@ -65,7 +64,7 @@ Only the designer has played ArrowSpark, and the DevSpark story exists only as s
   - tests that pin the content version and the payload builder;
   - knowledge and test docs (truthful baseline).
 - **Unchanged:** the puzzle rules, solver, analyzer, scoring, scoreboard, catalog content and groups' gameplay meaning, and the session boundary.
-- **New in MakeBoldSpark.com** (separate feature): one endpoint, a CORS policy, a limiter policy, one table and its migration.
+- **New in MakeBoldSpark.com:** delivered by the separate API project spec, not this plan.
 - **Desktop builds:** behaviour is identical. The emitter is a no-op off the web.
 
 ### Reviewer Guidance
@@ -100,7 +99,8 @@ The deliverable is a public, static showcase at `https://arrow.makeboldspark.com
 
 **Storage**:
 - None in the site or game beyond the existing local settings.
-- Reactions are stored in the API's **existing SQLite** database, in one new insert-only table (research R3).
+- The visitor's browser holds at most 5 unsent reaction bodies (the pending queue, FR-032).
+- Server-side reaction storage is the separate API spec's: one JSON file per reaction, purged after closeout (FR-031).
 
 **Testing**:
 - **Existing:** `tests/run_puzzle_regressions.py`, `tests/run_regressions.py` and `--headless --editor --quit`, all on 4.4-stable.
@@ -145,7 +145,7 @@ The deliverable is a public, static showcase at `https://arrow.makeboldspark.com
 | VI. Preserve saved progress and settings | Desktop `user://` data is untouched. Web builds get their own browser-local storage, which is a new location, not a migration. No gameplay memory is added | Pass |
 | Technology section | Lists Godot, GDScript and Python only. Astro, TypeScript and Node are new | **Prerequisite P1:** MINOR amendment adding the static showcase site technology and browser verification, done through the constitution workflow before Phase 2 |
 
-**Post-design re-check (after contracts and data model):** unchanged. No contract introduces identity, persistence of gameplay memory or rule duplication. SQLite-in-the-API-repo is governed by that repository, not this constitution.
+**Post-design re-check (after contracts and data model):** unchanged. No contract introduces identity, persistence of gameplay memory or rule duplication. Server-side reaction storage belongs to the separate API spec and is governed by that repository, not this constitution. The browser pending queue holds only unsent contract bodies (no identity, no gameplay memory), so Principle VI and DP-005/DP-006 are unaffected.
 
 ## Context Resolution
 
@@ -232,19 +232,14 @@ web/
 │   ├── content.config.ts        # Zod schemas per contracts/site-content.md
 │   ├── pages/  index.astro  play.astro  devspark.astro  journey.astro  evidence.astro
 │   │           story/index.astro  story/[slug].astro
-│   └── scripts/  game-bridge.ts  reaction-client.ts  reaction-schema.ts  page-zoom-guard.ts
+│   └── scripts/  game-bridge.ts  reaction-client.ts  reaction-schema.ts  pending-queue.ts  page-zoom-guard.ts
 ├── scripts/  check-content.mjs  mock-reactions.mjs  convert-fonts.md (documented one-time command)
-└── tests/    game-bridge.test.ts  reaction-client.test.ts  reaction-schema.test.ts
+└── tests/    game-bridge.test.ts  reaction-client.test.ts  reaction-schema.test.ts  pending-queue.test.ts
 ```
 
-### Source Code (MakeBoldSpark.com repository, separate feature, for reference only)
+### Source Code (MakeBoldSpark.com repository)
 
-```text
-src/MakeBoldSpark.Api/Features/ArrowSpark/   # endpoint, validator, CORS + limiter policies, filter
-src/MakeBoldSpark.Api/Infrastructure/Data/   # entity + EF migration for the insert-only table
-tests/…                                       # contract conformance tests
-bold-docs/features/0007-arrowspark-reactions/ # that repo's own planning artifacts
-```
+Not part of this plan. The separate API project spec owns the endpoint, validation, CORS, rate limiting, per-reaction JSON files, purge and disable switch, implemented against [contracts/reactions-api.md](contracts/reactions-api.md).
 
 **Structure decision:** the site lives in `web/` in this repository, so one change can carry the game export and the site that hosts it (spec assumption). The durable theme copy (`web/theme/make-bold/`) is the implementation authority, and the ZIP stays as source evidence in this bundle. The API change lives entirely in its own repository.
 
@@ -258,8 +253,8 @@ Each phase lists its repository and exit evidence. **[A]** = ArrowSpark repo; **
 |---|---|---|
 | 0.1 | Godot version | **4.4-stable** (research R1). Empirical **S-1** export spike is the first implementation task |
 | 0.2 | Bridge | Same-origin iframe; JSON-string `postMessage` to the frame's own origin; bridge validates origin, source and shape (R2) |
-| 0.3 | API deployment | Single instance **not guaranteed**, so **SQLite**, existing database, new insert-only table (R3) |
-| 0.4 | Cross-repo | Contract first; feature 0007 in the API repo; publication does not wait for the API (R4) |
+| 0.3 | API deployment and storage | **Out of Spec 011 scope** (owner clarification). The separate API spec owns them; FR-031 records the choice of one JSON file per reaction, never in a repo, purged after closeout |
+| 0.4 | Cross-repo | Contract first. Spec 011 is complete and verifiable with no endpoint; unsent reactions wait in the local pending queue (R4, FR-032) |
 | 0.5 | Safari | Mac available, so Safari on macOS is in the smoke test (R5) |
 
 **S-1 [A]:** install the 4.4-stable editor and templates (SHA-512 verified), create the Web preset, export, serve locally, play the Reference Knot to results, and note `SceneLoader` behaviour and load size. **Exit:** confirmed, or a version-change prerequisite is raised and implementation stops.
@@ -328,22 +323,23 @@ Pipeline: working corpus → editorial refresh → durable content → validatio
 
 **Exit:** both gates green on 4.4-stable (with the new pin and payload checks); `npm run check` green; a local export plays the Reference Knot in the iframe, and one validated event reaches the bridge.
 
-### Phase 5: Reactions [A] and [M]
+### Phase 5: Reactions (client only) [A]
 
-**[A] ArrowSpark (independent of API deployment):**
+The endpoint is not built here. Everything below is verified against the development mock, with the real endpoint absent.
 - `reaction-schema.ts` mirrors contracts/reactions-api.md exactly (enums, limits, no extra properties, a 4,096-byte cap).
-- `reaction-client.ts`: POST to `${PUBLIC_REACTIONS_URL}/api/public/arrowspark/reactions` with an 8 s timeout. Responses map to `sent` / `invalid` / `unavailable`. There is no retry and no local queue (FR-032, minimum fallback). An unset URL means `unavailable` immediately.
+- `reaction-client.ts`: POST to `${PUBLIC_REACTIONS_URL}/api/public/arrowspark/reactions` with an 8 s timeout. Responses map to `sent`, `invalid` or `pending` (FR-032). An unset URL behaves like an unreachable endpoint.
+- `pending-queue.ts`: one browser-storage key; at most 5 contract-valid bodies; `flush()` once on each page load and before each new submission; remove on 202 or 400/413/415; keep on 429/5xx/network/timeout and stop flushing; a Discard control; clear without sending when the build is configured as feedback-closed; and the unavailable-message fallback when storage is blocked. No timers, service worker or background sync.
 - **ReactionForm** (game): at most 5 questions, matching the mockup; the attempt is attached only if the bridge holds one.
 - **StoryReactionForm** (end of the method path): at most 4 questions.
-- `mock-reactions.mjs` (dev only): accept, invalid and unavailable modes. Tests cover the payload built from form + attempt, the no-identifier rule and every response class.
+- `mock-reactions.mjs` (dev only): accept, invalid and unavailable modes, switchable while running, so "unavailable, then available" can be exercised. Tests cover the payload built from form + attempt, the no-identifier rule, every response class, and the queue lifecycle (save, cap of 5, flush on load, removal on 202 and 4xx, keep on 5xx, Discard, blocked storage, feedback-closed clearing). These are the SC-006 and SC-014 checks.
 
-**[M] MakeBoldSpark.com** (feature `0007-arrowspark-reactions` through that repo's `/bold-plan` → `/bold-build`; **not executed from this repo**):
+**Not in this plan (separate API project spec):** the following were planned here earlier and now belong to that spec.
 - `Features/ArrowSpark/`: the endpoint `POST /api/public/arrowspark/reactions`, a strict validator, the feature CORS policy (`https://arrow.makeboldspark.com`, POST, `Content-Type`, validated dev origins), a fixed-window per-IP limiter policy, the type/trace-only error filter, and `no-store`.
 - The entity and migration for the insert-only table, following that repo's backup and migration procedure.
 - Conformance tests from contracts/reactions-api.md, including all the invalid examples, the 413/415/429 paths and "no IP stored".
 - Deployed by that repo's process. The deployment date is recorded in `evidence/window.md`.
 
-**Exit [A]:** client and forms pass their tests against the contract and the mock. **Exit [M]:** that repo's tests pass and the endpoint is deployed; the date is recorded.
+**Exit:** the client, forms and pending queue pass their tests against the contract and the mock, with no real endpoint.
 
 ### Phase 6: Integration and browser validation [A] [O]
 
@@ -358,26 +354,29 @@ Pipeline: working corpus → editorial refresh → durable content → validatio
   - a blocked move, Open Move, Fit, Pan and Zoom;
   - completion and results, Replay, Back, and Level Select with the group lines;
   - one `attemptCompleted` reaching the bridge;
-  - reaction submit (mock, then the real endpoint once it is deployed);
-  - the API unavailable (the game unaffected);
+  - reaction submit against the mock;
+  - the API unavailable, the game unaffected, the reaction saved as pending;
+  - the mock switched to available, reload, the pending reaction sent and cleared;
   - the story pages at phone width;
   - the desktop-only notice on a touch emulation and on a real phone.
 
   Any check not performed is marked as not performed.
-- **Privacy check (SC-006):** with the real endpoint, submit one game and one story reaction, then the owner inspects the rows and confirms only contract fields are present.
+- **Privacy check (SC-006):** inspect the outgoing requests (devtools) and the pending-queue storage value, and confirm only contract fields are present. Server-side record inspection belongs to the API spec.
 
 **Exit:** CI green; the smoke results are recorded; no failed check that affects play is open.
 
 ### Phase 7: Publish [O] [A]
 
 - **[O] Owner:** create the Azure Static Web App, the deploy token secret, and DNS plus the custom domain for `arrow.makeboldspark.com`; confirm the API host is `https://makeboldspark.com` at deploy time.
-- **[A]:** a production build with `PUBLIC_REACTIONS_URL` set (or unset, if 0007 is not deployed yet; the site then shows "temporarily unavailable"), then deploy.
+- **[A]:** a production build with `PUBLIC_REACTIONS_URL` set to the agreed endpoint base, then deploy. If the endpoint doesn't exist yet, reactions wait in visitors' pending queues.
 - Record `published_reachable_at` in `evidence/window.md` on the day `https://arrow.makeboldspark.com` first serves the showcase, and compute `closes_at` as that date + 14 days.
 
 ### Phase 8: 14-day evidence window and closeout [O] [A]
 
 - **[O] Owner:** recruit participants and run observed sessions in the FR-020 order (landing impression → fresh play → interview → Built with DevSpark → DevSpark comprehension). One participant may cover SC-002, SC-007, SC-008 and SC-011. There are no recruitment tasks per criterion. Each session is recorded per data-model.md in `evidence/sessions/`.
-- **[A]:** at day 14, export the reaction rows (owner-run query), then report them in three tiers (observed / unobserved first-contact / unobserved read-story-first), quoting free text as given.
+- **[A]:** at day 14, take whatever reactions the API project has received in the window (obtained through that project's process; none is an acceptable answer) and report them in three tiers (observed / unobserved first-contact / unobserved read-story-first), quoting free text as given.
+- **Close feedback [A]:** after the closeout, rebuild the site in feedback-closed mode. The forms are replaced by "Feedback for this showcase has closed", and each visitor's pending queue is cleared on their next load without sending. Server-side purge and endpoint disable belong to the API spec.
+- Delete the raw observed-session notes (private, outside any repo); the anonymized summaries remain in the bundle.
 - The spec closeout sorts every item into Passed / Accepted Limitation / Deferred Work / Learning / Failed. The window is **not extended**, and negative reactions are findings for later specs, not fixes here.
 
 ## Validation Matrix (layered, with no duplication)
@@ -385,8 +384,8 @@ Pipeline: working corpus → editorial refresh → durable content → validatio
 | Layer | Proves | Where |
 |---|---|---|
 | Automated: Godot | rules unchanged; Reference Knot content version pinned; payload shape with no identifiers; group lines present | existing launchers on 4.4-stable |
-| Automated: site | types; schemas; bridge rejects foreign or malformed messages; client handles every response class; unavailable isolation; no `.devspark.work`; commit-pinned links; no placeholders; pre-play word scan; no raw hex or px outside the theme | `npm run check` in CI |
-| Automated: API [M] | contract conformance, CORS, limits, storage fields | `dotnet test` in that repo |
+| Automated: site | types; schemas; bridge rejects foreign or malformed messages; client handles every response class; unavailable isolation; pending-queue lifecycle (SC-014); no `.devspark.work`; commit-pinned links; no placeholders; pre-play word scan; no raw hex or px outside the theme | `npm run check` in CI |
+| Automated: API | *not Spec 011*: covered by the separate API spec | that project |
 | Browser | real input, focus, zoom, audio, iframe messaging, deployed endpoint | three browsers, recorded |
 | Human | equal billing, fresh play, interview, DevSpark comprehension, theme recognition (SC-013) | observed sessions |
 
@@ -402,7 +401,7 @@ Humans are never asked to verify what the automated layers already prove.
 | P3 | Truthful baseline | AI; owner reviews | Phase 7 (publication) |
 | P4 | Durable theme copy | AI | Phase 2 |
 | O-1 | SWA resource, secret and DNS | owner | Phase 7 |
-| O-2 | API feature 0007 deployed | owner, in the API repo | real reactions only; not publication |
+| O-2 | Separate API spec delivered and deployed | owner, in the API project | real reactions only; never blocks Spec 011 |
 
 ## Deferred
 
@@ -433,8 +432,8 @@ Humans are never asked to verify what the automated layers already prove.
 
 1. **Godot version:** 4.4-stable, pinned for the export, gates and docs. The empirical S-1 spike is the first task.
 2. **Bridge:** same-origin iframe; a web-gated `JavaScriptBridge.get_interface("window").parent.postMessage(JSON.stringify(payload), window.location.origin)`; the TypeScript bridge validates origin, source and exact shape; fire-and-forget; no page-to-game path; desktop is a no-op.
-3. **API single instance:** not guaranteed (no scale lock; App Service overlapped recycling), so **existing SQLite**, a new insert-only table, not JSONL.
-4. **Cross-repo order:** contract (done) → [A] client, forms and mock in parallel with [M] feature 0007 → [M] deploy → integration smoke from the live site. Publication does not wait for [M].
+3. **API single instance / storage:** out of Spec 011 scope. The separate API spec stores one JSON file per reaction, never in a repo, purged after closeout (FR-031).
+4. **Cross-repo order:** contract (done). Spec 011 builds the client and pending queue against the mock and ships without the endpoint. The API spec builds and deploys the endpoint on its own schedule, and pending reactions flow once it is live.
 5. **Durable theme destination:** `web/theme/make-bold/` (unchanged copy, with hashes in `web/THEME.md`). The ZIP stays as source evidence only.
 6. **Astro structure:** `web/` per Project Structure (ui, site, story and play components; content collections; scripts; tests).
 7. **Content pipeline:** `.devspark.work/development/*` → manual editorial refresh → `web/src/content/` (chapters 01-09, beats, journey, lessons, evidence, facts) → `check-content.mjs` (R-1 to R-5) and a link check.

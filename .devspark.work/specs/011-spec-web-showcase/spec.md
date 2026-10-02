@@ -41,6 +41,10 @@ ArrowSpark has one level we believe is good, the Reference Knot. Only the person
 - Q: Where should the showcase be hosted? → A: A static site at `arrow.makeboldspark.com` (FR-024).
 - Q: Where do anonymous reactions go? → A: One small anonymous public endpoint on the existing Make Bold API platform (FR-017, External Contracts).
 - Q: How do objective results reach a reaction? → A: The game hands a completed attempt's results to the page, one way, with no identifier (FR-019).
+- Q: Where do observed-session records live, given the repository is public? → A: Raw notes stay private, outside the repository. Only an anonymized per-session summary is committed, and participants are told up front that anonymized quotes may be published (FR-020).
+- Q: Are unobserved visitors told their free-text comments may be published? → A: Yes. A short notice beside each free-text box says comments are anonymous and may be quoted publicly in the project write-up; submitting implies agreement, and there is no extra opt-in step (FR-017).
+- Q: How are reactions stored and how long are they kept? → A: Not in a database. Each reaction is its own JSON file in the API's server storage, never checked in to any repository, and every file is purged after the closeout (FR-031).
+- Q: Does Spec 011 build the reaction endpoint and its storage? → A: No. They are a separate API project with its own spec. Spec 011 must work with the API unavailable, and must keep unsent feedback in the visitor's browser so it can be submitted later (FR-031, FR-032).
 
 ## Rationale Summary
 
@@ -56,7 +60,7 @@ Build one lightweight public showcase with a shared landing page and two equal p
 - durable Markdown/MDX story content;
 - the existing Godot project exported for the Web;
 - a one-way `attemptCompleted` hand-off;
-- one narrow reaction endpoint on the existing MakeBoldSpark API, appending JSON Lines.
+- one narrow reaction endpoint on the existing MakeBoldSpark API, **built in a separate API project**. Spec 011 delivers the client side, which works with the API unavailable and keeps unsent feedback locally for later submission.
 
 ### Key Drivers
 
@@ -76,7 +80,7 @@ Build one lightweight public showcase with a shared landing page and two equal p
 
 ### External Contracts
 
-- **MakeBoldSpark.com API (owning repo: `MakeBoldSolutions/MakeBoldSpark.com`):** one new anonymous endpoint, `POST /api/public/arrowspark/reactions`. The exact segment follows that repo's conventions and is confirmed in plan. The request schema, allowed values, limits and responses are fixed by FR-026, and the stored record by FR-031. It sets no cookie, issues no identifier, returns no record id, and keeps no network address or similar correlation data in the stored record (FR-018).
+- **MakeBoldSpark.com API (owning repo: `MakeBoldSolutions/MakeBoldSpark.com`), delivered by a separate API project and spec, not by Spec 011:** one new anonymous endpoint, `POST /api/public/arrowspark/reactions`. Spec 011 does not depend on its deployment. The exact segment follows that repo's conventions and is confirmed in plan. The request schema, allowed values, limits and responses are fixed by FR-026, and the stored record by FR-031. It sets no cookie, issues no identifier, returns no record id, and keeps no network address or similar correlation data in the stored record (FR-018).
   - Drift policy: if that endpoint's shape changes, treat it as breaking and re-run analyze and critic before merge.
 - **Azure Static Web Apps at `arrow.makeboldspark.com`:** static hosting for the Astro build and the Godot Web export (FR-024). The DNS, custom domain and hosting configuration are owned outside this repository.
 - **Game → page event contract (internal, but crosses two authorities):** `attemptCompleted`, version 1 (FR-019). It is changed only together with the page bridge.
@@ -89,7 +93,7 @@ Build one lightweight public showcase with a shared landing page and two equal p
 - **Mobile/touch support now:** rejected for the first release. There is no intentional touch model, and relying on mouse emulation would be pretending.
 - **A full SPA, or React / Next.js / Blazor:** rejected. The site is editorial with a few interactive islands. The theme's React components are small enough to re-express as Astro components.
 - **A database or CMS for articles:** rejected. Markdown/MDX content collections are enough and stay reviewable in Git.
-- **A new feedback service or database:** rejected. One endpoint on the existing API, with append-only JSON Lines.
+- **A new feedback service or any database:** rejected. One endpoint on the existing API writes one JSON file per reaction; the files are temporary and purged after the closeout.
 - **Selected:** one site, shared landing page, two equal paths that rejoin; desktop-browser-first; the existing game unchanged except for honest labels, corrected text and the completion hand-off. Built with Astro + TypeScript on the Make Bold theme.
 
 ### Architectural Impact
@@ -157,7 +161,7 @@ After playing, a player can say in under a minute how satisfying it was, whether
 
 **Acceptance Scenarios**:
 
-1. **Given** a player who has played, **When** they open What did you notice?, **Then** they see no more than five short questions, all optional, including whether they read the story before playing.
+1. **Given** a player who has played, **When** they open What did you notice?, **Then** they see no more than five short questions, all optional, including whether they read the story before playing, and a one-line notice beside the comment box that comments are anonymous and may be quoted publicly.
 2. **Given** a story reader, **When** they reach the end of the method path, **Then** they are offered no more than four short, optional questions.
 3. **Given** the feedback channel is unreachable, **When** a visitor plays or submits, **Then** gameplay is unaffected and the visitor sees a plain message that the reaction wasn't sent.
 4. **Given** any submission, **When** it is stored, **Then** the stored record contains no account, persistent visitor id, cross-session id, advertising id, tracking-cookie value, network address or similar correlation data, and the application makes no attempt to link it to any other submission.
@@ -205,6 +209,9 @@ Before the showcase goes public, the player-visible text and durable project kno
 - **Browser zoom gestures:** a trackpad pinch or ctrl+wheel over the game must not unexpectedly zoom the whole page instead of the board.
 - **Window resize mid-attempt:** no attempt reset, score change or broken departure. This matches the desktop resize guarantees.
 - **Player reaches results but never opens feedback:** nothing nags them. One unobtrusive offer is enough.
+- **Feedback written while the API is unavailable:** saved on the visitor's device, marked not sent, and sent at the next opportunity (FR-032). If the visitor never returns, it is never sent, which is accepted.
+- **Shared computer:** an unsent reaction stays in that browser until it is sent or discarded. The "saved on this device" notice and the Discard control make this visible.
+- **Browser storage blocked (private mode, strict settings):** no queue. The visitor sees the plain unavailable message.
 - **Visitor submits a reaction twice:** both are accepted as independent observations, within the rate limit (FR-026). There is no de-duplication by identity.
 - **Malformed, oversized or off-origin submission:** rejected by the endpoint with a plain error. Nothing is stored, and the visitor's play is unaffected.
 - **Hand-off ignored or failing:** the game plays and completes normally. The reaction is sent without attempt data, or not at all.
@@ -252,7 +259,7 @@ Before the showcase goes public, the player-visible text and durable project kno
 
 **Feedback and evidence**
 
-- **FR-017**: The showcase MUST offer an optional game reaction (at most five questions, including "did you read how it was built before playing?" and an optional free-text "what did you notice?") and an optional story reaction (at most four questions, including an optional free-text comment), delivered to the single reaction endpoint on the existing MakeBoldSpark API (FR-026). The game reaction's free text is labeled "What did you notice?" and carried as `comment`.
+- **FR-017**: The showcase MUST offer an optional game reaction (at most five questions, including "did you read how it was built before playing?" and an optional free-text "what did you notice?") and an optional story reaction (at most four questions, including an optional free-text comment), delivered to the single reaction endpoint on the existing MakeBoldSpark API (FR-026). The game reaction's free text is labeled "What did you notice?" and carried as `comment`. Beside each free-text box, a one-line notice MUST say that comments are anonymous and may be quoted publicly in the project write-up. Submitting a comment implies agreement; there is no separate opt-in control.
 - **FR-018**: The showcase application and its reaction data model MUST:
   - require no login or account;
   - create, set or read no persistent visitor id, cross-session id, tracking cookie or advertising id, and perform no intentional fingerprinting;
@@ -274,6 +281,7 @@ Before the showcase goes public, the player-visible text and durable project kno
   - **Participant reuse:** the same participant MAY supply evidence for several human-evidence criteria (SC-002, SC-007, SC-008, SC-011) in one session, provided the order preserves first contact: landing-page impression → fresh play → fresh-play interview → Built with DevSpark → DevSpark comprehension and reaction. Separate people are not required merely because the criteria are separate. A participant who sees the story before playing counts for SC-011 but not for SC-007.
   - **Learning window:** the window is 14 days. It starts on the date the public showcase is actually published and reachable at `arrow.makeboldspark.com`, not on the date the spec or build is finished. The start and end dates are recorded.
   - **No automatic extension:** at the window's close, the spec reports whatever evidence exists, as it stands. A recruiting shortfall is recorded as an Accepted Limitation and does not extend the window or the spec.
+  - **Record privacy:** raw session notes (the facilitator's working notes, and any recording if one is made) MUST stay private, outside the public repository. The repository receives only an **anonymized session summary**: a sequence number, the session order followed, the checklist answers paraphrased or quoted, discovery observations, facilitator influence, and objective attempt data. It contains no name, contact detail, employer or other identifying detail. Before the session starts, each participant is told that anonymized quotes from it may be published as part of the project write-up; a participant who declines is paraphrased only.
 - **FR-021**: Results MUST be reported in the spec's closeout as evidence tiers that are never merged:
   - observed sessions;
   - unobserved reactions, first-contact;
@@ -318,19 +326,30 @@ Before the showcase goes public, the player-visible text and durable project kno
   - **Godot** owns gameplay, rules, score, puzzle state, session best and results;
   - **the MakeBoldSpark API** owns validating and storing a reaction.
   The site never recomputes scores or rules. The game never renders site content or calls the API. The API never interprets gameplay.
-- **FR-031**: **Reaction storage.** Each accepted reaction MUST be stored as one independent record, appended to a JSON Lines file (for example `arrowspark-reactions.jsonl`) in the API's existing persistent storage, with a single-writer guarantee. A record holds only:
-  - `schemaVersion`;
-  - a server-generated UTC timestamp, truncated to the minute;
-  - an internal random `recordId` used only for integrity and operations, never returned, never derived from request data and never used to correlate visitors;
-  - the validated reaction fields.
-
-  If Phase 0 finds that file-based appends are unsafe in the existing hosting model (for example more than one running instance, or no persistent storage), the smallest storage mechanism already present in MakeBoldSpark infrastructure is used instead. No new database or data platform is introduced. Reactions have no public read path, dashboard or export feature. The owner reads the file directly for the closeout.
-- **FR-032**: **Feedback unavailable.** If submission fails, the page MUST tell the visitor plainly that the reaction was not sent, for example "Feedback is temporarily unavailable." Gameplay and story stay fully functional. Plan chooses between:
-  - **the minimum fallback**, that message only (recommended in research §16);
-  - **a small local pending copy**: only the unsent payload kept in the visitor's browser and clearly marked not yet submitted, with no identifier, never used for tracking, removed after a successful send, and retried only at a bounded moment (the next submission or the next page load).
-
-  Background sync, service workers for retry, retry timers, offline analytics and queue infrastructure are excluded.
-- **FR-033**: **No new identity or platform infrastructure.** Spec 011 MUST NOT add authentication, accounts, visitor identity, cross-session tracking, an analytics platform, a dashboard, a generic survey engine, a CMS, or a database for articles or reactions beyond FR-031's fallback rule.
+- **FR-031**: **Reaction storage and purge** (*external requirement*: implemented and verified by the separate API project, recorded here so the contract is complete; no Spec 011 task builds it). Each accepted reaction MUST be written as **its own JSON file**, in a dedicated directory in the API host's persistent server storage. There is no database (neither the API's existing database nor a new one) and no shared append file.
+  - **Location:** the directory is outside any repository checkout, outside any web-served path, and never committed, synced or copied into any repository.
+  - **Naming and atomicity:** each file is named from a new random identifier, written in full under a temporary name, then renamed into place. A reader never sees a partial file, and two concurrent requests, even from overlapping server processes, never touch the same file. No locking is needed or built.
+  - **Record contents only:**
+    - `schemaVersion`;
+    - a server-generated UTC timestamp, truncated to the minute;
+    - an internal random `recordId` (the same value as the file name), used only for integrity and operations, never returned, never derived from request data and never used to correlate visitors;
+    - the validated reaction fields.
+  - **No public read path,** dashboard or export feature. For the closeout, the owner copies the files to a private local folder that is also outside any repository.
+  - **Purge after closeout:** once the closeout report is written, every reaction file on the server and every private local copy is deleted, and the deletion date is recorded in the closeout. The endpoint is then disabled, and the site's reaction forms are replaced by a plain "Feedback for this showcase has closed" note. The committed closeout keeps only counts and the anonymous quotes the FR-017 notice allows, never the raw files.
+- **FR-032**: **Feedback unavailable and local pending queue.** Spec 011 MUST work completely while the reaction endpoint does not exist or cannot be reached. The endpoint is delivered by the separate API project (FR-031).
+  - **Unavailable message:** if a reaction can't be sent, the page tells the visitor plainly. Gameplay and the story are never affected.
+  - **Local pending queue (required):** an unsent reaction is kept in the visitor's own browser storage, and the page says so, for example: "Saved on this device, not sent yet. It will be sent the next time you visit while feedback is available."
+    - It stores **only** the contract-valid request bodies (FR-026), at most **5**. When the queue is full, the visitor is told the new reaction can't be saved. There is no identifier, timestamp or other metadata.
+    - It is never read for tracking, never sent anywhere except the reaction endpoint, and never shown to the game.
+    - **Retry only at bounded moments:** once on each site page load, and just before a new submission. Each pending item is sent once per moment, then:
+      - removed on `202`;
+      - removed on `400`, `413` or `415` (it will never be accepted);
+      - kept on `429`, `5xx`, a network error or a timeout.
+    - A visible "Discard unsent feedback" control clears the queue.
+    - If browser storage is unavailable or blocked, the page falls back to the unavailable message only.
+    - When the showcase's feedback is closed after the closeout, the next page load clears the queue **without** sending it.
+  - **Excluded:** background sync, service workers, retry timers or loops, offline analytics and queue infrastructure.
+- **FR-033**: **No new identity or platform infrastructure.** Spec 011 MUST NOT add authentication, accounts, visitor identity, cross-session tracking, an analytics platform, a dashboard, a generic survey engine, a CMS, or a database (for articles or for reactions).
 
 ### Technical Constraints / Implementation Direction
 
@@ -345,7 +364,7 @@ These choices are approved and are **not** re-evaluated in planning. Phase 0 con
 | Game | Existing Godot project, Web export, engine version per FR-023 (4.4 unless blocked) | Embedding method (iframe or direct), export options, Godot-to-page mechanism |
 | Game/page boundary | One-way `attemptCompleted` (FR-019) → TypeScript bridge → page-local state → optional reaction | The exact mechanism |
 | Hosting | Azure Static Web Apps, `arrow.makeboldspark.com` | Headers, caching and content types for the engine files |
-| Feedback | Existing MakeBoldSpark API, one endpoint (FR-026), JSON Lines (FR-031) | Route segment; single-instance storage safety |
+| Feedback | Spec 011 builds the client only: forms, contract-valid requests, the unavailable state and the local pending queue (FR-032). The endpoint and its storage (FR-026, FR-031) are the separate API project's | Storage key name; queue UI placement |
 | Responsive | Story pages for desktop, tablet and phone; the game is desktop-browser-first with an honest notice elsewhere | Breakpoint for the notice |
 
 **Prerequisites before implementation** (only these expand the spec):
@@ -366,12 +385,13 @@ The convergence rule from Spec 010 applies to this spec. Every finding raised du
 - **Game reaction**: one anonymous, independent observation. Optional answers, a first-contact flag and, if the visitor completed an attempt during the visit, that attempt's hand-off data (FR-019).
 - **Completion hand-off**: the one-way, identifier-free record a completed attempt sends to the hosting page.
 - **Story reaction**: one anonymous, independent observation about the method story.
-- **Observed session record**: the facilitator's record of one participant: the order of the session, landing impression, checklist answers in the participant's words, discovery observations, facilitator influence, objective attempt data with the puzzle content version, whether the story was seen first, and any DevSpark comprehension answers.
+- **Observed session record**: the facilitator's private raw notes for one participant, kept outside the repository.
+- **Anonymized session summary**: the committed counterpart of an observed session record. It holds a sequence number, the order of the session, landing impression, checklist answers (quoted only with the participant's agreement, otherwise paraphrased), discovery observations, facilitator influence, objective attempt data with the puzzle content version, whether the story was seen first, and any DevSpark comprehension answers. It never holds a name, contact detail or identifying detail.
 - **Puzzle content version**: the identity of a puzzle's geometry, independent of the application version. The Reference Knot's value is fixed for the showcase, and all evidence refers to it.
 
 ## Success Criteria *(mandatory)*
 
-Applying the Spec 010 lesson, criteria are split. **Delivery criteria** (SC-001 to SC-006) gate completion. **Learning criteria** (SC-007 to SC-011) gate only that evidence was gathered within the fixed window and reported honestly. Their *answers* may be positive or negative, and a negative answer is a valid outcome that never blocks completion. A recruiting shortfall at the end of the window is an Accepted Limitation and does not extend the spec. One participant may serve several human-evidence criteria under the sequencing rule in FR-020.
+Applying the Spec 010 lesson, criteria are split. **Delivery criteria** (SC-001 to SC-006, SC-013 and SC-014) gate completion. **Learning criteria** (SC-007 to SC-011) gate only that evidence was gathered within the fixed window and reported honestly. Their *answers* may be positive or negative, and a negative answer is a valid outcome that never blocks completion. A recruiting shortfall at the end of the window is an Accepted Limitation and does not extend the spec. One participant may serve several human-evidence criteria under the sequencing rule in FR-020.
 
 ### Measurable Outcomes
 
@@ -382,11 +402,12 @@ Applying the Spec 010 lesson, criteria are split. **Delivery criteria** (SC-001 
 - **SC-003**: Zero instances of the internal design vocabulary, and zero descriptions of the Reference Knot's contents, appear on any surface a visitor passes before first play (checked by a word-list review of the landing page, Play page, loading screen and game menus).
 - **SC-004**: 100% of factual claims on the method path link to a permanent source that resolves. They are checked by following every link once at publication, and once after a simulated archive of the working documents.
 - **SC-005**: The browser smoke test (FR-025) is recorded for a Chromium-based desktop browser, Firefox desktop and Safari on macOS, with every check marked passed, failed or not performed. Safari not performed for lack of a Mac is allowed only as a disclosed limitation. No failed check that affects play remains open at publication.
-- **SC-006**: Gameplay is unaffected when feedback is unavailable (shown by playing the Reference Knot to completion with the channel disabled), and inspection of stored reactions finds only the FR-031 record fields: no visitor identifier, network address or other correlation data.
+- **SC-006**: With the endpoint absent, the Reference Knot plays to completion with no difference in behavior. Every request the client sends, and every item in the local pending queue, contains only FR-026 contract fields: no visitor identifier, timestamp or correlation data. (Inspecting the server-side stored records belongs to the separate API spec.)
+- **SC-014**: A reaction submitted while the endpoint is unavailable is shown as "saved on this device, not sent yet". It is submitted at the next page load or submission once the endpoint is available, and removed from the device after a `202`. A queue of 5 refuses a sixth reaction with a notice, and Discard empties the queue. All of this is demonstrated against the development mock with no real endpoint.
 
 **Learning: game half** (answers are evidence; any answer is acceptable)
 
-- **SC-007**: At least 3 observed sessions with genuinely new players (who, before the session, had not seen the game, the story or the design documents) are recorded under the protocol within the learning window, each with the participant's own words for the facilitator checklist. If fewer than 3 occur, the shortfall is reported as an Accepted Limitation, not hidden, and the window is not extended.
+- **SC-007**: At least 3 observed sessions with genuinely new players (who, before the session, had not seen the game, the story or the design documents) are recorded under the protocol within the learning window, each with the participant's own words for the facilitator checklist (in the private record; the committed anonymized summary quotes or paraphrases per FR-020). If fewer than 3 occur, the shortfall is reported as an Accepted Limitation, not hidden, and the window is not extended.
 - **SC-008**: For every observed session, the record states whether the participant started without guidance, engaged meaningfully (finished, or played at least 10 minutes), used Open Move and understood its cost, and found the ArrowSpark Levels group in Level Select unaided, and how long that took. It also names the puzzle content version played.
 - **SC-009**: Game reactions are reported in the three evidence tiers (FR-021), and free-text "what did you notice?" answers are quoted as given, including negative ones.
 
@@ -399,7 +420,7 @@ Applying the Spec 010 lesson, criteria are split. **Delivery criteria** (SC-001 
 
 **Closure**
 
-- **SC-012**: The spec closes at the end of the 14-day learning window, which starts on the date the showcase is published and reachable at `arrow.makeboldspark.com`. The closeout sorts every item into Passed, Accepted Limitation, Deferred Work, Learning / Changed Assumption or Failed, and states plainly what outside players said about the game and about the process.
+- **SC-012**: The spec closes at the end of the 14-day learning window, which starts on the date the showcase is published and reachable at `arrow.makeboldspark.com`. The closeout records the date every reaction file and private copy was purged, and the date the endpoint was disabled. It sorts every item into Passed, Accepted Limitation, Deferred Work, Learning / Changed Assumption or Failed, and states plainly what outside players said about the game and about the process.
 
 ## Assumptions
 
@@ -412,7 +433,7 @@ Applying the Spec 010 lesson, criteria are split. **Delivery criteria** (SC-001 
 - Story pages are readable on phones even though the game is desktop-first.
 - The repository is public, so commit-pinned links are reachable by any visitor.
 - A Mac with current Safari is expected to be available for FR-025. If not, see FR-025.
-- The MakeBoldSpark API runs as a single instance with persistent storage, which makes a single-writer JSON Lines file safe. Phase 0 verifies this (FR-031).
+- The MakeBoldSpark API host has persistent server storage outside its web root, where a dedicated reaction directory can live. One file per reaction means no single-instance guarantee is needed (FR-031).
 - The site source lives in this repository beside the Godot project, so one change can carry the game export and the site together. Plan may revisit this only with a concrete reason.
 - The mockup in the theme ZIP is a design reference, not content. Its placeholder text, counts and article list are replaced by sourced content (FR-013, FR-015).
 - Context gathering: constitution 2.0.1 loaded; no `.knowledge` node contradicts this request. The stale knowledge statements found are prerequisites, not contradictions of intent.
@@ -425,6 +446,7 @@ Applying the Spec 010 lesson, criteria are split. **Delivery criteria** (SC-001 
 - Analytics platforms, telemetry, tracking, advertising, monetization.
 - React, Next.js, Blazor or any other application framework; a full SPA; server-side rendering; a second major CSS framework.
 - Service workers, background sync or retry infrastructure for reactions.
+- Building, deploying or operating the reaction endpoint and its storage and purge (FR-026 server side, FR-031). That is the separate API project's spec.
 - A CMS or general-purpose feedback platform; any feedback capability beyond the single anonymous submission endpoint (no dashboards, accounts, exports or analytics on it).
 - Rewriting the article series beyond the refresh, the Chapter 7 split and the closing chapter.
 - Changes to DevSpark itself. Framework lessons (for example the unrun-check wording and the severity/impact-domain split) are referred to DevSpark, not fixed here.

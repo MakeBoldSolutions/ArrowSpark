@@ -6,12 +6,14 @@ Temporary planning material. Entities from spec Key Entities, with fields, valid
 |---|---|---|---|
 | Puzzle content version | Godot rule core (pure helper) | `PuzzleContentVersion.of(definition)` | derived; Reference Knot value pinned in a test |
 | Completed attempt (hand-off) | Godot controller → page bridge | iframe message → page memory | none (page visit only) |
-| Game reaction | site UI → API | request → SQLite row | API storage only |
-| Story reaction | site UI → API | request → SQLite row | API storage only |
-| Reaction record | MakeBoldSpark API | existing SQLite database, new table | insert-only |
+| Pending reaction (unsent) | site UI | visitor's browser storage, at most 5 contract-valid bodies | until sent (`202`), rejected (`4xx`), discarded, or feedback closes |
+| Game reaction | site UI → API | request → one JSON file | API host storage only, purged after closeout |
+| Story reaction | site UI → API | request → one JSON file | API host storage only, purged after closeout |
+| Reaction record | MakeBoldSpark API | `<recordId>.json` in a dedicated server directory (never in a repo) | write-once; purged after closeout |
 | Published chapter | Astro content | `web/src/content/chapters/*` | Git |
 | Beat / Journey step / Evidence item / Lesson / Fact | Astro content | `web/src/content/*.yaml` | Git |
-| Observed session record | owner (facilitator) | spec bundle `evidence/sessions/` | temporary, until release archival |
+| Observed session record (raw) | owner (facilitator) | private, outside any repository | deleted after closeout |
+| Anonymized session summary | owner | spec bundle `evidence/sessions/` | temporary, until release archival |
 | Learning window | owner | spec bundle `evidence/window.md` | temporary |
 
 ## Puzzle content version
@@ -39,29 +41,43 @@ See [contracts/reactions-api.md](contracts/reactions-api.md). Client-side form s
 idle --(visitor answers)--> editing --(Send)--> sending
 sending --202--> sent            ("Thanks. Nothing here is required.")
 sending --400/413/415--> invalid ("Something in this reaction couldn't be sent.")  # should not occur; the client validates first
-sending --429/5xx/network/timeout--> unavailable ("Feedback is temporarily unavailable. Your game and the story are unaffected.")
+sending --429/5xx/network/timeout--> pending  ("Saved on this device, not sent yet. It will be sent the next time you visit while feedback is available.")
+sending --(storage blocked)--> unavailable ("Feedback is temporarily unavailable. Your game and the story are unaffected.")
+pending --(queue full: 5)--> notSaved ("This one couldn't be saved; you already have 5 unsent reactions.")
 ```
 
-- No retry loop and no local queue (FR-032, minimum fallback).
+**Pending queue (FR-032):** one browser-storage key holding an array of at most 5 request bodies, exactly as they would be POSTed. No ids, timestamps or other fields.
+
+```
+on page load (once)       -> flush()
+before a new submission   -> flush(), then send the new one
+flush(): for each item, send once:
+    202            -> remove
+    400/413/415    -> remove (never acceptable)
+    429/5xx/net/timeout -> keep, stop flushing (the endpoint is down)
+Discard            -> clear the key
+feedback closed    -> clear the key on load, send nothing
+```
+
+- No timers, loops, service worker or background sync.
 - `sent` disables the form for that page visit, so an accidental double click doesn't double-submit. A reload allows another submission, which is a valid independent observation.
 - Timeout: 8 s. The form never blocks or delays the game iframe.
 
 ## Reaction record (API side)
 
-| Column | Type | Notes |
-|---|---|---|
-| `RecordId` | TEXT (GUID), PK | random, server-generated, internal only |
-| `SchemaVersion` | INTEGER | 1 |
-| `ReceivedUtc` | TEXT (ISO 8601, minute precision) | truncated server time |
-| `ReactionType` | TEXT | `game` / `story` |
-| `Payload` | TEXT (JSON) | validated, canonical re-serialization |
+One file per reaction, `<recordId>.json`:
 
-- Insert-only.
-- No IP, user agent, referrer, cookie, header or identity column.
+```json
+{"schemaVersion":1,"receivedUtc":"2026-10-20T14:03Z","recordId":"3f9c…","reactionType":"game","readStoryFirst":"no","finished":"finished","satisfaction":4,"playAnother":"yes","comment":"…","attempt":{"puzzleId":"reference_knot","puzzleVersion":"g1-…","mistakes":2,"openMoveAssists":2,"score":103,"elapsedSeconds":1260}}
+```
+
+- Written once: temporary name, then rename. Never modified afterwards.
+- Contains no IP, user agent, referrer, cookie, header or identity field.
+- **Lifecycle:** `written` → `copied privately for the closeout` → `purged`, together with all copies, after the closeout report. The purge date is recorded.
 
 ## Observed session record (owner)
 
-One Markdown file per session in the spec bundle, with these fields:
+The raw notes are private, outside any repository, and deleted after the closeout. One **anonymized summary** per session is committed in the spec bundle. Participants are told before the session that anonymized quotes may be published; anyone who declines is paraphrased only. Summary fields:
 - session date, and a participant label that is a sequence number only (no name);
 - **order followed** (must be: landing impression → fresh play → fresh-play interview → Built with DevSpark → DevSpark comprehension). Any deviation is recorded;
 - **story seen before play?** (yes or no; yes excludes the session from SC-007);

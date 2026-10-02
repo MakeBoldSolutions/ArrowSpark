@@ -1,6 +1,6 @@
 # Contract: ArrowSpark Reactions API (schemaVersion 1)
 
-**Owner of implementation:** `MakeBoldSolutions/MakeBoldSpark.com`, as its own feature. **Consumer:** the ArrowSpark showcase (`web/`) in this repository.
+**Owner of implementation:** `MakeBoldSolutions/MakeBoldSpark.com`, in a **separate API project spec**, not part of Spec 011. **Consumer:** the ArrowSpark showcase (`web/`) in this repository, which must work whether or not the endpoint exists (FR-032).
 **Status:** contract for Spec 011. Both sides implement and test against this document independently.
 **Change policy:** any change to fields, enums, limits or responses is breaking. Bump `schemaVersion`, update both sides, and re-run analyze and critic.
 
@@ -88,7 +88,7 @@ Every response sets `Cache-Control: no-store`. No response sets a cookie.
 
 On failure, log the exception type and trace id only, following the existing feature-filter pattern. Never log the request body, `comment` text, IP address, user agent or referrer.
 
-## Storage (implementer-side contract)
+## Storage (implementer-side contract, owned by the API spec; informative for Spec 011)
 
 Each accepted request becomes exactly one insert-only record:
 
@@ -102,7 +102,14 @@ Each accepted request becomes exactly one insert-only record:
 
 **Never stored:** IP address, user agent, referrer, cookies, headers, or any visitor, session or device identifier.
 
-**Mechanism:** a new insert-only table in the API's existing SQLite database (research R3). There is no read, update, delete, list or export endpoint; the owner reads the table directly for analysis.
+**Mechanism (FR-031):**
+- One JSON file per accepted reaction, named `<recordId>.json`, in a dedicated directory on the API host's persistent storage (configured path, outside the web root and outside any repository).
+- Each file is written under a temporary name in the same directory, then renamed into place, so no locking is needed.
+- No database.
+- No read, update, delete, list or export endpoint.
+- For the closeout, the owner copies the files to a private local folder outside any repository.
+
+**Purge:** after the closeout report is written, all reaction files and all private copies are deleted. The endpoint is then disabled: it is removed, or returns `410 Gone` behind a configuration switch.
 
 ## Conformance examples
 

@@ -32,7 +32,7 @@ Uses the committed `export_presets.cfg` "Web" preset (threads off). The output g
 cd web
 npm ci
 npm run check          # astro check + vitest + check-content.mjs
-npm run dev            # http://localhost:4321  (reactions -> "temporarily unavailable" unless configured)
+npm run dev            # http://localhost:4321  (no endpoint configured: reactions are saved as pending on this device)
 ```
 
 To use the mock reactions server:
@@ -56,7 +56,12 @@ Open `/play` and confirm:
 
 Then open devtools and confirm the bridge logged exactly one validated `attemptCompleted` event in development mode only; production builds log nothing.
 
-Submit a game reaction with the mock in `accept`, `invalid` and `unavailable` modes, and check that gameplay is unaffected each time.
+Submit a game reaction with the mock in `accept`, `invalid` and `unavailable` modes, and check that gameplay is unaffected each time. Then check the pending queue:
+- in `unavailable` mode, submit, and see "Saved on this device, not sent yet";
+- switch the mock to `accept` and reload; the reaction is sent once and the queue is empty;
+- fill the queue to 5 and see the sixth refused with a notice;
+- use Discard;
+- block site storage in the browser and see the plain unavailable message.
 
 ## 5. Production build
 
