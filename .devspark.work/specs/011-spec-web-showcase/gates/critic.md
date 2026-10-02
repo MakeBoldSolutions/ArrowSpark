@@ -3,40 +3,61 @@ gate: critic
 status: warn
 blocking: false
 severity: warning
-summary: "FULL critique. No showstoppers, 1 critical, 5 high, 6 medium. The design is sound and correctly bounded. The risks sit at the browser/hosting seams the plan only checks by hand, plus one governance tension: the security headers can break the engine only in production; unhashed engine files are long-cached; the page-zoom guard sits outside the iframe that receives the events; 404 and CORS failures are unclassified while the API is expected to be absent; and published content's strongest evidence lives in planning records that durable outputs may not link to. All are fixable by editing existing tasks before or during implementation."
+summary: "FULL run 2 after remediation (c96422a). All 12 prior findings are resolved in the artifacts. The remediation introduced 3 new risks, none critical: the strict CSP (default-src 'self') will also block the inline <style> and <script> that Astro and the Godot shell emit unless the build forbids or hashes them; headless WebGL in CI can make the synthetic check report false outages; and a two-tab Web Locks test under a DOM shim may prove only the shim. Verdict: PROCEED, applying critic-013 before Phase 8 and critic-014/015 when their tasks run."
 reviewed_artifacts:
   - path: spec.md
-    hash: "abd3541be5513f43461bdc16487690f1188dc927"
+    hash: "ce966a662651a79e53c96d46393cd047d7a764ec"
   - path: plan.md
-    hash: "e93ae84b2b010ae6c18bca8c0cd2620eb141fecc"
+    hash: "782ebd5588372a92eccef727593c7411d991f3f0"
   - path: tasks.md
-    hash: "8bf009f885131693e6b812b78db120c8791a2c92"
+    hash: "adad7c3cd3a93a706865b9a8afb74987f3a3889d"
   - path: research.md
-    hash: "e946c5239bfaf82a112bf309c88a3cf56001b43b"
+    hash: "ac918a74b5fa9563e2b87fb76f6da58cb166954c"
+  - path: data-model.md
+    hash: "e28cb66e961440e98e968e150d20db25546c01f5"
   - path: contracts/reactions-api.md
-    hash: "c17b5c25cb6eceb61853643065ac824366be4df7"
+    hash: "5dd6eec78c79fd0e217d81cf41d842c0ec886144"
+  - path: contracts/site-content.md
+    hash: "401813074a19c1d70a47683666840eb0827b4d0d"
 ```
 
 ## Technical Risk Assessment
 
-**Analysis Date:** 2026-10-02T20:59Z
-**Scope:** FULL (spec + plan + tasks; research, data-model, contracts and quickstart also read)
-**Detected Archetype:** game (frontmatter). Because this delta is mostly a static web front end hosting a Godot Web export, the universal categories (`trust_boundaries`, `error_handling_resilience`, `testing_strategy`, `dependency_supply_chain`, `documentation`) were applied to the site, along with `concurrency_async` and `binary_size_perf` for the game archetype.
-**Detected Stack:** GDScript on Godot 4.4-stable (Web, no threads), Astro + TypeScript (static), browser `localStorage` (pending queue only); hosting on Azure Static Web Apps; the external API is out of scope.
+**Analysis Date:** 2026-10-02
+**Scope:** FULL
+**Detected Archetype:** game (universal categories applied to the static web front end, as in run 1)
+**Detected Stack:** GDScript on Godot 4.4-stable (Web, no threads, custom HTML shell); Astro + TypeScript (static); browser `localStorage` + Web Locks (pending queue); Azure Static Web Apps; the external API is out of scope
 **Context Mode:** brownfield
-**Risk Profile:** customer-facing (frontmatter value `public` is not a registry value; see critic-001). Severity shift 0.
-**Risk Posture:** YELLOW
+**Risk Profile:** customer-facing (no severity shift)
+**Risk Posture:** GREEN-YELLOW
 
 ### Executive Summary
 
-The artifacts are well bounded: the rule core is untouched, the API is external, the queue is tightly specified, and S-1 is correctly a branch gate. What will go wrong is at the seams the plan verifies only by hand, after the fact:
+The run 1 risks are closed in the artifacts:
+- the CSP now accounts for WebAssembly and derives `connect-src` from the build setting;
+- the engine lives under per-build paths;
+- the zoom guard sits in the document that receives the events;
+- every failure status is classified;
+- the evidence rule is explicit;
+- one synthetic check covers preview and production.
 
-- the production security headers can stop the Godot engine from starting, and nothing tests them before go-live;
-- the engine's unhashed files are long-cached across redeploys;
-- the page-zoom guard runs in a document that never receives the iframe's events;
-- the "API not deployed yet" state, which the plan deliberately publishes into, returns `404`/CORS failures the client contract doesn't classify.
+The new risks are second-order effects of those fixes. The tightened CSP's `default-src 'self'` will also block **inline styles and scripts** that Astro and the Godot shell emit, so the site or the loader could break in production in a different way. The other two concern whether the new tests prove what they claim. **Verdict: PROCEED.**
 
-Separately, the story's best evidence (gate reports, the deferral protocol, PR review files) lives in planning records that DevSpark forbids durable outputs from linking to, so the content check and the governance rule will collide at publication. **Verdict: CONDITIONAL.** Resolve critic-002 through critic-006 by editing existing tasks before the affected phases start.
+### Prior findings: verification
+
+| ID | Status | Evidence |
+|---|---|---|
+| critic-001 | resolved | `risk_profile: customer-facing` |
+| critic-002 | resolved | FR-026 A, data-model, contract consumer section, T052/T055: only 202 sent; 400/413/415 dropped; everything else kept |
+| critic-003 | resolved (see critic-013 for a residual) | T068: `script-src 'self' 'wasm-unsafe-eval'` plus the shell bootstrap hash; `connect-src` from `PUBLIC_REACTIONS_URL`; T072 on the SWA preview with production headers |
+| critic-004 | resolved | T001 custom shell guard; T025 limited to page chrome; per-browser record and accepted-limitation rule in T072 |
+| critic-005 | resolved | `/game/<commit-short-sha>/` with an immutable cache; second-deploy check in T072 |
+| critic-006 | resolved | FR-013 evidence hierarchy; R-1/R-2 ban `.devspark.work` in any URL form; owner decision recorded |
+| critic-007 | resolved (see critic-015 for test fidelity) | T054 Web Locks plus claim-before-send fallback; two-context test in T051 |
+| critic-008 / critic-011 | resolved (see critic-014 for flakiness) | One synthetic check: T014 builds it, T071 runs it per PR and daily during the window, T073/T076 switch it on and off |
+| critic-009 | resolved | Visible-text, whole-word R-4; link fetching pre-publication and scheduled |
+| critic-010 | resolved | `licenses.astro` (T010); `npm audit --audit-level=high` (T014) |
+| critic-012 | resolved | Sizes in T002; transferred size and `Content-Encoding` on the preview in T070; optimize only on failure |
 
 ### Findings (source of truth)
 
@@ -45,221 +66,211 @@ findings:
   - finding_id: critic-001
     category: documentation
     archetype_applicable: true
-    location: spec.md#frontmatter (risk_profile)
-    description: "risk_profile is 'public', which is not a registry value (experimental | internal | customer-facing | revenue-critical | safety-critical | regulated). Gates fall back to defaults, so severity scaling is not deterministic across runs."
+    location: spec.md#frontmatter
+    description: "risk_profile was not a registry value."
     intent_cue: ""
     base_severity: high
     effective_severity: high
-    recommended_action: "Set spec.md frontmatter risk_profile: customer-facing (a public showcase with anonymous visitors and no revenue)."
+    recommended_action: "none (resolved)"
     execution_mode: auto
-    status: open
-    outcome: ""
+    status: resolved
+    outcome: "Set to customer-facing (c96422a)."
   - finding_id: critic-002
     category: error_handling_resilience
     archetype_applicable: true
-    location: spec.md#FR-026 (part A), tasks.md#T053, tasks.md#T055
-    description: "The client maps 202 → sent, 400/413/415 → drop, and 429/5xx/network/timeout → keep, but 404/405 and CORS or CSP rejections are unclassified. These are exactly what a visitor gets while the endpoint is not yet deployed, which the plan deliberately publishes into. If an implementation treats 404 as 'not acceptable', every reaction written before the API ships is silently deleted instead of queued."
+    location: spec.md#FR-026 A
+    description: "404/405/CORS failures were unclassified while the API is absent."
     intent_cue: ""
     base_severity: high
     effective_severity: high
-    recommended_action: "In FR-026 A and data-model.md, classify every status other than 202 and 400/413/415 as 'unavailable → keep' (explicitly including 404, 405, opaque/CORS TypeError and CSP-blocked fetch). Add those cases to the T055 client tests and the T051 queue tests."
+    recommended_action: "none (resolved)"
     execution_mode: auto
-    status: open
-    outcome: ""
+    status: resolved
+    outcome: "Exact classification in FR-026 A, data-model, contract, T052/T055 (c96422a)."
   - finding_id: critic-003
     category: error_handling_resilience
     archetype_applicable: true
-    location: tasks.md#T068 (staticwebapp.config.json CSP), tasks.md#T072 (smoke environment), plan.md#R6 SWA config
-    description: "The planned CSP specifies connect-src and frame-ancestors but not script-src. A Godot Web export's generated index.html runs inline bootstrap script and compiles WebAssembly, which a default 'self' script-src blocks: inline scripts need a hash or allowance, and WebAssembly needs 'wasm-unsafe-eval'. These headers exist only in Azure Static Web Apps, not in the local dev server where the smoke checklist is described, so the first time the engine meets them is production. A connect-src not derived from PUBLIC_REACTIONS_URL would also block every submission silently, and each reaction then sits queued until it expires."
+    location: tasks.md#T068, tasks.md#T072
+    description: "CSP lacked script-src for Godot and WebAssembly; production headers were untested; connect-src was not bound to the reactions URL."
     intent_cue: ""
     base_severity: critical
     effective_severity: critical
-    recommended_action: "Edit T068 to define script-src 'self' 'wasm-unsafe-eval' plus a hash (or nonce-free allowance) for the Godot shell's inline script, and to generate connect-src from PUBLIC_REACTIONS_URL at build time. Edit T072 so the browser smoke test runs against the deployed SWA preview environment (production headers), with the devtools console checked for CSP violations, not only against a local export."
+    recommended_action: "none (resolved); see critic-013 for the inline-style/script residual"
     execution_mode: selective
-    status: open
-    outcome: ""
+    status: resolved
+    outcome: "T068 defines 'wasm-unsafe-eval' plus the shell hash and derives connect-src; T072 runs on the SWA preview (c96422a)."
   - finding_id: critic-004
     category: concurrency_async
     archetype_applicable: true
-    location: tasks.md#T025 (page-zoom-guard.ts), tasks.md#T026, plan.md#Phase 4 step 5
-    description: "page-zoom-guard.ts runs in the Astro host page, but ctrl+wheel (trackpad pinch) and Ctrl/Cmd +/- over the game are dispatched to the iframe's own document and never bubble to the parent. The guard therefore cannot stop page zoom where it matters, and Firefox and Safari differ in whether keyboard zoom can be prevented at all."
+    location: tasks.md#T001, tasks.md#T025
+    description: "Zoom guard sat outside the iframe that receives the events."
     intent_cue: ""
     base_severity: high
     effective_severity: high
-    recommended_action: "Move the guard into the game document by adding a custom Godot HTML shell (the export preset's custom HTML shell option) with the same listeners. Keep the host-page guard only for the frame border and chrome. Record per browser in T072 whether pinch and keyboard zoom are prevented, and accept residual keyboard zoom as a limitation if a browser disallows preventDefault."
+    recommended_action: "none (resolved)"
     execution_mode: selective
-    status: open
-    outcome: ""
+    status: resolved
+    outcome: "Guard moved into the custom Godot shell; per-browser record (c96422a)."
   - finding_id: critic-005
     category: binary_size_perf
     archetype_applicable: true
-    location: plan.md#R6 SWA config ("long cache for hashed engine files"), tasks.md#T068, tasks.md#T079 (feedback-closed rebuild)
-    description: "Godot Web exports use fixed file names (index.wasm, index.pck, index.js) with no content hash. Caching them long-term means any redeploy (a game fix, the feedback-closed rebuild) can serve a fresh index.html with a stale cached .pck or .wasm. That mismatch fails at engine start for returning visitors, who are exactly the ones whose queued reactions the design depends on."
+    location: tasks.md#T068, tasks.md#T014
+    description: "Unhashed engine files were long-cached."
     intent_cue: ""
     base_severity: high
     effective_severity: high
-    recommended_action: "Choose one in T068/T014: deploy each export under a build-unique path (e.g. /game/<commit-short-sha>/) with long cache, or serve /game/* with Cache-Control: no-cache (ETag revalidation). Add a T072 check: deploy twice, reload, and confirm the new build loads."
+    recommended_action: "none (resolved)"
     execution_mode: selective
-    status: open
-    outcome: ""
+    status: resolved
+    outcome: "Build-unique /game/<sha>/ path with an immutable cache; second-deploy check (c96422a)."
   - finding_id: critic-006
     category: documentation
     archetype_applicable: true
-    location: spec.md#FR-013, contracts/site-content.md#R-1 and R-2, tasks.md#T038-T043, .devspark/templates/command-preamble-contract.md §0
-    description: "The story's strongest receipts (Spec 010's critic and verify gates, the deferral protocol, the PR review files, spec-006-report) live under .devspark.work/. R-1 rejects any content containing '.devspark.work', and the DevSpark contract forbids durable outputs from linking to spec, plan or task records 'live or archived'. Authors will either break the rule or silently drop the evidence FR-012/FR-013 call for, and this surfaces at publication time, which is the most expensive time to find it."
+    location: spec.md#FR-013, contracts/site-content.md#R-1/R-2
+    description: "Evidence lived in planning records that durable outputs may not link to."
     intent_cue: ""
     base_severity: high
     effective_severity: high
-    recommended_action: "Decide explicitly before content work (T033-T047). Recommended: published content may cite commits, merged PRs and durable files (code, tests, .knowledge reports) by permalink, and quote short excerpts from planning records with the commit that introduced them, never linking a .devspark.work path. Write this rule into contracts/site-content.md R-1/R-2. If owner prefers direct links, scope an explicit exception into the P1 constitution amendment (T003) instead."
+    recommended_action: "none (resolved)"
     execution_mode: manual
-    status: open
-    outcome: ""
+    status: resolved
+    outcome: "Owner decision: no exception; FR-013 evidence hierarchy; R-1/R-2 enforce it (c96422a)."
   - finding_id: critic-007
     category: concurrency_async
     archetype_applicable: true
-    location: spec.md#FR-032, tasks.md#T054 (pending-queue.ts), tasks.md#T051
-    description: "flush() runs on every page load. A visitor with two showcase tabs (common for Play next to Built with DevSpark) loads both and each reads the same queue, so both POST the same entries before either removes them. Since the design has no de-duplication by intent, duplicates go straight into a tens-of-reactions evidence set."
+    location: tasks.md#T054, tasks.md#T051
+    description: "Multi-tab flushes could double-send queued reactions."
     intent_cue: ""
     base_severity: medium
     effective_severity: medium
-    recommended_action: "In T054, serialize flush with the Web Locks API (navigator.locks.request('arrowspark-reactions', ...), supported in all three target browsers), or claim entries by removing them from storage before sending and re-adding them on a keep outcome. Add a two-context test to T051."
+    recommended_action: "none (resolved); see critic-015 for test fidelity"
     execution_mode: auto
-    status: open
-    outcome: ""
+    status: resolved
+    outcome: "Web Locks serialization plus claim-before-send fallback; two-context test (c96422a)."
   - finding_id: critic-008
     category: testing_strategy
     archetype_applicable: true
-    location: plan.md#Validation Matrix, tasks.md#T014, tasks.md#T072
-    description: "Everything the static site cannot prove in unit tests is checked only by the manual three-browser smoke test, once, before publication: engine load under production headers, MIME types, cache behavior, the real postMessage hop, and audio unlock. A later content-only deploy (chapter fix, feedback-closed rebuild) can break the game with no automated signal."
+    location: tasks.md#T014, tasks.md#T071
+    description: "Browser-level behavior was verified only manually."
     intent_cue: ""
     base_severity: high
     effective_severity: medium
-    recommended_action: "Add to T014 one headless-browser check (e.g. Playwright, or any WebDriver runner) that loads the built site, waits for the Godot canvas to report ready, asserts no console or CSP errors, and receives one attemptCompleted from a scripted test build. Run it against the SWA preview on each PR. Keep the manual smoke test for input feel and Safari."
+    recommended_action: "none (resolved); see critic-014"
     execution_mode: selective
-    status: open
-    outcome: ""
+    status: resolved
+    outcome: "One synthetic headless check on each preview (c96422a)."
   - finding_id: critic-009
     category: testing_strategy
     archetype_applicable: true
-    location: tasks.md#T029 (R-4 scan), tasks.md#T033 (--fetch-links), contracts/site-content.md#R-4
-    description: "Two checks will be flaky. The R-4 scan of built HTML will match 'zone' inside script and attribute text (e.g. timeZone), and similar substrings, failing builds for no reason. The --fetch-links mode, if run on every CI push, will hit GitHub's unauthenticated rate limits and fail intermittently."
+    location: tasks.md#T029, tasks.md#T033
+    description: "R-4 scan and link fetching would be flaky."
     intent_cue: ""
     base_severity: medium
     effective_severity: medium
-    recommended_action: "Scan visible text nodes only (strip script, style and attributes; match whole words, case-insensitive). Run --fetch-links as an explicit pre-publication step and on a schedule, not on every push."
+    recommended_action: "none (resolved)"
     execution_mode: auto
-    status: open
-    outcome: ""
+    status: resolved
+    outcome: "Visible-text whole-word scan; fetch pre-publication and scheduled (c96422a)."
   - finding_id: critic-010
     category: dependency_supply_chain
     archetype_applicable: true
-    location: tasks.md#T007 (OFL notices only), tasks.md#T010 (footer licences link), tasks.md#T014
-    description: "The web build redistributes the Godot engine (MIT, with bundled third-party licences in the export), Maaack's Game Template and the fonts, but only the font OFL notices are planned. The site's npm dependencies also have no audit step, though the sibling API repository gates on `npm audit --audit-level=high`."
+    location: tasks.md#T010, tasks.md#T014
+    description: "Redistributed licences and npm audit were missing."
     intent_cue: ""
     base_severity: medium
     effective_severity: medium
-    recommended_action: "Extend T010's licences link to a /licenses page listing Godot (with its third-party notices), Maaack's Game Template, Lucide (ISC) and the fonts (OFL). Add `npm audit --audit-level=high` to T014."
+    recommended_action: "none (resolved)"
     execution_mode: auto
-    status: open
-    outcome: ""
+    status: resolved
+    outcome: "licenses.astro page; npm audit --audit-level=high (c96422a)."
   - finding_id: critic-011
     category: error_handling_resilience
     archetype_applicable: true
-    location: plan.md#Phase 8 (learning window), spec.md#FR-018
-    description: "With no telemetry by design, nobody learns during the 14-day window that the game stopped loading for real visitors (a browser update, a CSP or cache regression, an SWA incident) unless an observed participant happens to hit it. A silent multi-day outage would empty the evidence window."
+    location: tasks.md#T071, tasks.md#T073, tasks.md#T076
+    description: "No signal if the game stopped loading during the window."
     intent_cue: ""
     base_severity: medium
     effective_severity: medium
-    recommended_action: "Schedule the critic-008 headless check to run daily against production during the window. It tracks no visitors, only the owner's own synthetic load. Record its results in evidence/window.md."
+    recommended_action: "none (resolved); see critic-014"
     execution_mode: selective
-    status: open
-    outcome: ""
+    status: resolved
+    outcome: "Same synthetic check scheduled daily during the window (c96422a)."
   - finding_id: critic-012
     category: binary_size_perf
     archetype_applicable: true
-    location: spec.md#SC-001, tasks.md#T070, research.md#R6 (SWA config)
-    description: "SC-001's 30 s at 25 Mbps assumes the Godot runtime (tens of MB uncompressed) arrives compressed. Azure Static Web Apps' automatic compression is not guaranteed for application/wasm or .pck, so an uncompressed transfer could exceed the target on the cold-cache profile."
+    location: tasks.md#T002, tasks.md#T070
+    description: "WebAssembly compression on SWA was assumed."
     intent_cue: ""
     base_severity: medium
     effective_severity: medium
-    recommended_action: "In S-1 (T002) record raw and compressed sizes. In T070 confirm the Content-Encoding actually served for .wasm and .pck on the SWA preview. If uncompressed, add precompressed assets or accept and record the measured time. Don't build optimization infrastructure."
+    recommended_action: "none (resolved)"
+    execution_mode: auto
+    status: resolved
+    outcome: "Raw and transferred sizes and Content-Encoding recorded; optimize only on failure (c96422a)."
+  - finding_id: critic-013
+    category: error_handling_resilience
+    archetype_applicable: true
+    location: tasks.md#T068 (CSP), tasks.md#T006 (Astro config), tasks.md#T001 (custom shell)
+    description: "The CSP sets default-src 'self' and a script-src that allows only 'self', 'wasm-unsafe-eval' and the shell bootstrap hash. It sets no style-src, so inline <style> falls back to default-src and is blocked. Astro inlines small stylesheets and is:inline scripts by default, and Godot's shell has an inline <style> for the loader. In production only, pages could render unstyled or lose inline behavior. The engine may also need blob: or worker URLs (for example its audio worklet) that the policy doesn't list."
+    intent_cue: ""
+    base_severity: high
+    effective_severity: high
+    recommended_action: "Edit T006 to set Astro build.inlineStylesheets to 'never' and forbid is:inline scripts (or hash every inline block at build). Edit T001/T068 so the shell's inline <style> is moved to a file or hashed into style-src, and add explicit style-src/img-src/font-src/worker-src directives. Keep the T072 preview check for CSP console violations as the proof, and add any engine-required source it reveals (e.g. blob:) narrowly."
+    execution_mode: selective
+    status: open
+    outcome: ""
+  - finding_id: critic-014
+    category: testing_strategy
+    archetype_applicable: true
+    location: tasks.md#T014 (synthetic-check.mjs), tasks.md#T071 (daily schedule)
+    description: "The synthetic check waits for engineState=started in a headless CI browser. Hosted CI runners have no GPU, and headless Chromium's software WebGL path is version-dependent, so the Godot Compatibility renderer may fail to start in CI while it works for real visitors. A daily false 'outage' trains the owner to ignore the only live signal."
+    intent_cue: ""
+    base_severity: medium
+    effective_severity: medium
+    recommended_action: "In T014, launch the headless browser with an explicit software WebGL backend (e.g. ANGLE/SwiftShader flags for Chromium) and record in evidence which backend ran. Distinguish 'engine failed to start' from 'WebGL unavailable in runner'. Only the former fails the check; the latter is reported as inconclusive."
+    execution_mode: selective
+    status: open
+    outcome: ""
+  - finding_id: critic-015
+    category: testing_strategy
+    archetype_applicable: true
+    location: tasks.md#T051 (two-context test), tasks.md#T054
+    description: "The planned unit-test environment (Vitest with a DOM shim) has no real Web Locks or cross-tab storage semantics. A 'two contexts flush once' test there would prove the hand-written lock shim, not that two real tabs never double-send."
+    intent_cue: ""
+    base_severity: medium
+    effective_severity: medium
+    recommended_action: "Keep the unit test for the claim-before-send logic, and run the two-tab case once in a real browser: two pages of one browser context in the synthetic-check runner, or a manual step in the T072 smoke. Record the result."
     execution_mode: auto
     status: open
     outcome: ""
 ```
 
-### Critical
-
-| ID | Category | Location | Risk | Likely Impact | Action |
-|---|---|---|---|---|---|
-| critic-003 | error_handling_resilience | T068, T072, plan R6 | CSP lacks script-src for the Godot shell and WebAssembly; production-only headers are never tested before go-live; connect-src not tied to the reactions URL | Game fails to start on the live site, or reactions are silently CSP-blocked and stuck in queues | Define script-src (`'wasm-unsafe-eval'` plus a shell hash) and derive connect-src from the build setting; run the smoke test on the SWA preview with production headers |
-
 ### High
 
 | ID | Category | Location | Issue | Impact | Suggestion |
 |---|---|---|---|---|---|
-| critic-001 | documentation | spec frontmatter | `risk_profile: public` is invalid | Non-deterministic severity scaling across gates | Use `customer-facing` |
-| critic-002 | error_handling_resilience | FR-026 A, T053, T055 | 404/405/CORS failures are unclassified during "API not yet live" | Reactions written before the API ships may be deleted instead of queued | Classify them as unavailable → keep; test them |
-| critic-004 | concurrency_async | T025, T026 | Zoom guard sits outside the iframe that receives the events | Pinch and keyboard page zoom still hit visitors | Put the guard in a custom Godot HTML shell; record per browser |
-| critic-005 | binary_size_perf | plan R6, T068 | Unhashed engine files are long-cached | A redeploy breaks the game for returning visitors | Build-unique `/game/<sha>/` path, or `no-cache` with ETag |
-| critic-006 | documentation | FR-013, site-content R-1/R-2 | Best evidence lives in planning records that durable outputs may not link to | Rule violation or lost evidence, found at publication | Cite commits, PRs and durable files; quote excerpts; or scope an exception in P1 |
-
-### Missing Critical Tasks
-
-- **Testing:** an automated headless-browser load check of the built site with the engine under production-equivalent headers (critic-008).
-- **Operations:** a daily synthetic liveness check during the learning window (critic-011).
-- **Documentation / Legal:** a licences page for the redistributed engine, template, icons and fonts (critic-010).
-- **Security / Supply chain:** `npm audit` in CI (critic-010); a CSP specification for the engine (critic-003).
+| critic-013 | error_handling_resilience | T068, T006, T001 | `default-src 'self'` blocks the inline styles and scripts Astro and the Godot shell emit; the engine may need blob:/worker sources | Unstyled or partly broken pages, or loader failures, in production only | Disable inlining in the Astro config or hash inline blocks; move or hash the shell `<style>`; set explicit style/img/font/worker directives; prove on the preview |
 
 ### Questionable Assumptions
 
-1. **"The smoke test catches header problems."** Failure mode: it runs on a local export, where Azure Static Web Apps' production headers don't exist (critic-003, critic-008).
-2. **"The guard can stop page zoom from the host page."** Failure mode: iframe events never reach the parent (critic-004).
-3. **"A missing endpoint looks like a 5xx."** Failure mode: it's a 404 or a CORS TypeError (critic-002).
-4. **"Engine files are hashed."** Failure mode: Godot's are not (critic-005).
-5. **"Static hosting compresses WebAssembly."** Failure mode: not guaranteed (critic-012).
-6. **"Commit-pinned links are always acceptable evidence."** Failure mode: the DevSpark contract bars linking planning records from durable outputs (critic-006).
-
-### Dependency Risk Assessment
-
-| Dependency | Concern | Alternative |
-|---|---|---|
-| Godot 4.4-stable web templates | Large download in CI; fixed file names; inline bootstrap under CSP | Cache by version (planned); versioned deploy path; shell hash in CSP |
-| Azure Static Web Apps | Header, MIME and compression behavior differs from local dev; preview URLs are public | Test on the preview environment; content-only previews are fine |
-| Astro (current major at implementation) | Major-version drift between plan and implementation | Lockfile pin (planned); `npm audit` (critic-010) |
-| External reactions API | Absent at publication by design | Contract plus queue (planned); classify 404/CORS (critic-002) |
-
-### Estimated Technical Debt at Launch
-
-- **Operational:** no live signal for engine-load failures without critic-011.
-- **Testing:** browser-level behavior is manual-only without critic-008.
-- **Documentation:** licence attribution gap (critic-010) and the evidence-citation rule (critic-006).
-- **Code:** low. The rule core is untouched and the new GDScript surface is two small files.
+1. **"script-src is the only CSP directive Godot and Astro need."** Failure mode: inline style and blob or worker sources are blocked (critic-013).
+2. **"A headless CI browser renders WebGL like a visitor's browser."** Failure mode: false outage signals (critic-014).
+3. **"A DOM-shim test proves cross-tab locking."** Failure mode: it proves only the shim (critic-015).
 
 ### Metrics
 
-- Showstopper 0 · Critical 1 · High 5 · Medium 6 (effective; critic-008 sits at medium effective, high base)
-- By category: error_handling_resilience 3 (002, 003, 011) · documentation 2 (001, 006) · concurrency_async 2 (004, 007) · binary_size_perf 2 (005, 012) · testing_strategy 2 (008, 009) · dependency_supply_chain 1 (010)
-- Missing operational tasks: 4 (headless load check, window liveness check, licences page, npm audit)
-- No stack/archetype checklists were found at `.devspark/risk-checklists/` or `.devspark.work/risk-checklists/`; risks were derived from first principles. Consider seeding `game.md` and `web-static.md` from this run.
+- Effective: showstopper 0 · critical 0 open (1 resolved) · high 1 open (5 resolved) · medium 2 open (6 resolved)
+- Open by category: error_handling_resilience 1, testing_strategy 2
+- Missing operational tasks: 0 (all run 1 gaps are now owned by existing tasks)
+- No stack/archetype checklists exist yet; run 1's suggestion to seed `game.md` and `web-static.md` stands.
 
-**VERDICT:** CONDITIONAL
+**VERDICT:** PROCEED
 
-**Required Actions Before Implementation:**
+**Required before the affected phase:**
 
-1. critic-006: decide the evidence-citation rule and write it into contracts/site-content.md (owner decision, `manual`) before content tasks start.
-2. critic-002: classify 404/405/CORS/CSP failures as unavailable → keep in FR-026 A and data-model.md.
-3. critic-001: set `risk_profile: customer-facing`.
-
-**Required before the affected phase (edit existing tasks; no new scope):**
-
-- critic-003 and critic-005 into T068/T014/T072 before Phase 8.
-- critic-004 into T025/T026 and the export preset (T001) before US1 completes.
-- critic-007 into T054/T051.
+1. critic-013 into T006, T001 and T068 before Phase 8 (publication). It is the only finding that could change production behavior.
 
 **Recommended Risk Mitigations:**
 
-- critic-008/011: one headless load check, run per PR on the SWA preview and daily during the window.
-- critic-009: scan visible text only, and run link-fetch pre-publication.
-- critic-010: licences page and `npm audit`.
-- critic-012: record compression in S-1 and T070.
+- critic-014: pin the headless WebGL backend and separate "inconclusive" from "failed".
+- critic-015: one real two-tab run.
