@@ -64,7 +64,8 @@
 /* Touch screens in landscape: keep the whole frame inside the visible height (no covered toolbar)
    and let the page header scroll away instead of overlaying the game. */
 @media (pointer: coarse) and (orientation: landscape) {
-  .site-header { position: static; }
+  /* !important: the header's own scoped style sets position: sticky with higher specificity. */
+  .site-header { position: static !important; }
   .game-frame { width: min(100%, calc((100dvh - 4rem) * 16 / 9 + 1rem)); margin-inline: auto; }
 }
 .game-frame__mark { height: 44px; width: auto; }
