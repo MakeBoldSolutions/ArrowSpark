@@ -3,12 +3,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Eyebrow from '../components/ui/Eyebrow.astro';
 import Icon from '../components/ui/Icon.astro';
 import GameFrame from '../components/play/GameFrame.astro';
-import DesktopOnlyNotice from '../components/play/DesktopOnlyNotice.astro';
+import PlayUnavailableNotice from '../components/play/PlayUnavailableNotice.astro';
 import ReactionForm from '../components/play/ReactionForm.astro';
 ---
 <BaseLayout
   title="Try the Game"
-  description="Play ArrowSpark in a desktop browser: untangle a board of arrows. No install, no account."
+  description="Play ArrowSpark in your browser, on desktop or on mobile web in beta: untangle a board of arrows. No install, no account."
   current="play"
 >
   <div class="page play">
@@ -27,14 +27,19 @@ import ReactionForm from '../components/play/ReactionForm.astro';
     </div>
 
     <div class="play__game">
+      <p class="play__beta" role="note">
+        <strong>Mobile Web Beta.</strong> ArrowSpark now works on mobile web in beta. Landscape is recommended.
+        Some touch gestures are still being refined.
+      </p>
       <GameFrame />
       <ul class="play__notes">
-        <li><strong>Click inside the game once</strong> to use the keyboard. Scroll the mouse wheel over the board to zoom; drag with the middle button, or use Pan, to move.</li>
-        <li>Designed for desktop browsers with a mouse or trackpad and a keyboard.</li>
+        <li class="play__note-desktop"><strong>Click inside the game once</strong> to use the keyboard. Scroll the mouse wheel over the board to zoom; drag with the middle button, or use Pan, to move.</li>
+        <li class="play__note-touch"><strong>On a touch screen,</strong> tap an arrow to send it off. Use Zoom In, Zoom Out and Fit Puzzle to change the view; turn Pan on, then drag, to move around. Pinching to zoom is not reliable yet.</li>
+        <li>Works best on a desktop browser with a mouse or trackpad, and in landscape on mobile web.</li>
         <li>Scores last only for this visit. Reloading starts fresh.</li>
       </ul>
     </div>
-    <DesktopOnlyNotice />
+    <PlayUnavailableNotice />
 
     <ReactionForm />
 
@@ -98,7 +103,21 @@ import ReactionForm from '../components/play/ReactionForm.astro';
     font-size: var(--fs-lg);
   }
 
-  @media not all and (pointer: fine), (max-width: 59.9375rem), (max-height: 33.6875rem) {
-    .play__game { display: none; }
+  /* The page script (play-admission.ts) sets html[data-play] and html[data-touch]. */
+  .play__game { display: none; }
+  :global(html[data-play='play']) .play__game { display: block; }
+  .play__beta {
+    display: none;
+    margin: 0 0 var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    border-left: var(--border-accent) solid var(--accent);
+    background: var(--surface-card);
+    border-radius: var(--radius-md);
+    font-size: var(--fs-sm);
+    color: var(--ink-700);
   }
+  :global(html[data-touch]) .play__beta { display: block; }
+  .play__note-touch { display: none; }
+  :global(html[data-touch]) .play__note-touch { display: list-item; }
+  :global(html[data-touch]) .play__note-desktop { display: none; }
 </style>

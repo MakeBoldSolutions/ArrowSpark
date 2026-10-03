@@ -11,7 +11,7 @@ appliesTo:
 # ArrowSpark Web Showcase (Static Site and Browser Build)
 
 The public showcase at `https://arrow.makeboldspark.com` is a static site in
-`web/` that lets a visitor play ArrowSpark in a desktop browser and read how
+`web/` that lets a visitor play ArrowSpark in a browser (desktop, and mobile web in beta) and read how
 it was built. It has two entry points of equal weight — **Try the Game**
 (`/play/`) and **Built with DevSpark** (`/devspark/`) — that rejoin at the
 **Journey** (`/journey/`), plus an Evidence page, the story chapters and a
@@ -34,7 +34,7 @@ Responsibilities never overlap:
 - Astro with strict TypeScript, `output: 'static'`, no adapter, no server
   functions and no UI framework (`web/astro.config.mjs`). Interactive parts
   are small bundled module scripts: the game host and bridge, the reaction
-  forms, the desktop-only notice's copy button.
+  forms, the unavailable-screen notice's copy button.
 - Styles and scripts always ship as files, never inline
   (`build.inlineStylesheets: 'never'`, `vite.build.assetsInlineLimit: 0`),
   and no markup uses `style` attributes, so the production
@@ -99,11 +99,37 @@ narrow screens.
   game frame's own border and title bar; everywhere else on the page,
   browser zoom works normally. Events inside the iframe never reach the page,
   which is why the shell guards those.
-- **Desktop-only boundary.** The game is supported with a fine pointer on a
-  viewport of at least 960 × 540 CSS pixels (`web/src/scripts/desktop-query.ts`).
-  Outside that, CSS hides the game and `DesktopOnlyNotice.astro` says play
-  isn't supported on that screen yet, links to the story, and offers to copy
-  the link or open the visitor's own mail app with it. Nothing is collected.
+- **Play admission (`web/src/scripts/play-admission.ts`).** A pure function of
+  viewport size and input capabilities, never of the user agent, decides
+  whether the Play page shows the game. The page script re-asks on resize and
+  orientation change and sets `html[data-play]` (`play`, `rotate` or `larger`)
+  and `html[data-touch]`; CSS shows the game, the beta note or the notice from
+  those attributes. The engine downloads only when the verdict is `play`, and a
+  loaded game stays loaded (hidden) if the verdict later changes, so an attempt
+  survives a rotation.
+  - *Desktop:* a fine pointer and at least 960 × 540 CSS px (unchanged).
+  - *Mobile web beta:* a touch-capable screen in landscape, at least 640 × 320
+    CSS px. Touch and a fine pointer are independent, so a hybrid device may
+    qualify by either route; the page never switches mode on the last input.
+  - *Otherwise:* portrait touch asks the visitor to rotate; anything smaller
+    asks for a larger screen. `PlayUnavailableNotice.astro` shows the message,
+    links to the story and offers to copy the link or open the visitor's own
+    mail app with it. Nothing is collected.
+- **Mobile web beta: what is verified.** Public wording is "ArrowSpark now
+  works on mobile web in beta. Landscape is recommended. Some touch gestures
+  are still being refined." Real-device evidence so far is one Google Pixel 7
+  Pro (Android 17) in Chrome 154 and Edge Beta 155: the game loads in the
+  frame, taps select and remove arrows (the engine turns touch into the
+  existing click path), the Zoom, Fit, Pan, Back and menu buttons work, play
+  works in the page's full-screen mode, and gestures inside the game do not
+  scroll or zoom the page (`touch-action: none` on the game shell). **iPhone
+  Safari has not been verified on a real device** and is admitted by the same
+  capability rule, not claimed as supported. Known limitations: pinch to zoom
+  does not work, one-finger drag moves the view only in Pan mode, controls are
+  small touch targets, selection happens on touch-down, and fullscreen may be
+  unavailable (the button is hidden when the browser refuses it). On touch
+  screens in landscape the frame is sized to fit the visible height and the
+  site header scrolls away instead of covering the toolbar.
 
 ## Completion bridge
 
@@ -245,7 +271,7 @@ below enforces it.
 - **Pre-play words:** a list of internal design vocabulary must not appear,
   whole-word and case-insensitive (plurals included), on any surface a
   visitor reaches before playing: the built landing, Play and Journey pages
-  (with their header, footer and desktop-only notice), the game's loading
+  (with their header, footer and unavailable-screen notice), the game's loading
   shell, the text of `scenes/menus/**/*.tscn` and
   `scenes/loading_screen/**/*.tscn`, and the string literals in
   `scenes/menus/**/*.gd`. Only visible text is scanned (text nodes plus

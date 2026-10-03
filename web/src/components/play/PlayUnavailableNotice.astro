@@ -1,0 +1,72 @@
+---
+import Button from '../ui/Button.astro';
+import Icon from '../ui/Icon.astro';
+
+const playUrl = 'https://arrow.makeboldspark.com/play/';
+const mailto = `mailto:?subject=${encodeURIComponent('ArrowSpark: try the game')}&body=${encodeURIComponent(playUrl)}`;
+---
+<div class="unavailable" role="note">
+  <p class="unavailable__title unavailable__rotate">Turn your device sideways to play.</p>
+  <p class="unavailable__text unavailable__rotate">
+    ArrowSpark plays on mobile web in landscape. Rotate your phone or tablet and the board will appear.
+    The story of how it was built works anywhere.
+  </p>
+  <p class="unavailable__title unavailable__larger">This screen is too small to play ArrowSpark yet.</p>
+  <p class="unavailable__text unavailable__larger">
+    Try a larger window, or a phone or tablet turned sideways. The story of how it was built works anywhere.
+  </p>
+  <div class="unavailable__actions">
+    <Button href="/devspark/">Read how it was built</Button>
+    <Button variant="secondary" type="button" data-copy-link={playUrl}><Icon name="copy" /><span>Copy the link</span></Button>
+    <Button variant="secondary" href={mailto}><Icon name="mail" /><span>Email myself the link</span></Button>
+  </div>
+  <p class="unavailable__status" data-copy-status aria-live="polite"></p>
+</div>
+
+<script>
+  const button = document.querySelector<HTMLButtonElement>('[data-copy-link]');
+  const status = document.querySelector<HTMLElement>('[data-copy-status]');
+  button?.addEventListener('click', () => {
+    const url = button.dataset.copyLink ?? '';
+    navigator.clipboard
+      ?.writeText(url)
+      .then(() => {
+        if (status) status.textContent = 'Link copied.';
+      })
+      .catch(() => {
+        if (status) status.textContent = `Copy this link: ${url}`;
+      });
+  });
+</script>
+
+<style>
+  .unavailable {
+    display: none;
+    background: var(--surface-card);
+    border: var(--border-hairline) solid var(--border-default);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: var(--space-10) var(--space-6);
+    text-align: center;
+  }
+  .unavailable__title {
+    font-family: var(--font-display);
+    font-weight: var(--fw-extrabold);
+    font-size: var(--fs-2xl);
+    line-height: var(--lh-snug);
+    color: var(--text-strong);
+    margin: 0;
+  }
+  .unavailable__text { max-width: 46ch; margin: var(--space-3) auto 0; }
+  .unavailable__actions { margin-top: var(--space-6); display: flex; flex-wrap: wrap; gap: var(--space-3); justify-content: center; }
+  .unavailable__status { margin-top: var(--space-3); font-size: var(--fs-sm); color: var(--text-muted); min-height: 1lh; }
+
+  /* The page script (play-admission.ts) sets html[data-play]; with no script the larger-screen text shows. */
+  .unavailable__rotate { display: none; }
+  :global(html[data-play='play']) .unavailable { display: none; }
+  :global(html:not([data-play])) .unavailable,
+  :global(html[data-play='rotate']) .unavailable,
+  :global(html[data-play='larger']) .unavailable { display: block; }
+  :global(html[data-play='rotate']) .unavailable__rotate { display: block; }
+  :global(html[data-play='rotate']) .unavailable__larger { display: none; }
+</style>
