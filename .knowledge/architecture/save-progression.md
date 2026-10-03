@@ -101,7 +101,7 @@ focus can always leave it, which means such a remap also moves GUI focus.
 `scenes/menus/main_menu/main_menu_with_animations.gd`'s Play/New Game path
 (`main_menu.tscn` and `main_menu_with_animations.tscn`, both routed to
 `res://scenes/puzzle/arrow_puzzle.tscn`) overrides `new_game()` only to set
-`PuzzleSession.set_current_id(PuzzleCatalog.id_at(0))` before delegating to
+`PuzzleSession.set_current_id("reference_knot")` (the Reference Knot) before delegating to
 the base `new_game()` (`load_game_scene()`); it still never calls
 `GlobalState.reset()` or `GameState.start_game()`. The puzzle attempt itself
 (`scripts/puzzle/puzzle_state.gd`) is in-memory only and is never read from
@@ -111,8 +111,9 @@ or written to `GlobalState`/`GameState`; see
 settings and recovery behavior described above are therefore unaffected by
 starting, playing, replaying, or selecting the puzzle. Continue stays
 hidden on the main menu (its scene/script remains in source, unreachable
-from this menu); the `NewGameButton` tooltip states that existing level
-progress is preserved. Puzzle entry also never touches the input-remap
+from this menu); the `NewGameButton` tooltip reads "Starts the Reference Knot.
+Existing level progress (Continue) is preserved even though it's hidden
+here." Puzzle entry also never touches the input-remap
 system: a keyboard/gamepad remap seeded before `new_game()`/
 `load_game_scene()` is unaffected by either call. Source of truth:
 tests/save_input_regression.gd's `_test_no_reset_on_puzzle_entry()`.
@@ -135,7 +136,9 @@ the inherited `_open_sub_menu()` mechanism does not do this itself (see
 .knowledge/architecture/arrow-puzzle.md's Puzzle Catalog and
 Session-Scoped Selection section, and the sub-menu open/close mechanics
 below). The entry list sits in a vertically scrolling, focus-following
-`ScrollContainer` (horizontal scrolling disabled) so all twenty-one entries stay
+`ScrollContainer` (horizontal scrolling disabled) so all twenty-two entries,
+shown as three collapsible group sections (an accordion: a toggle header per
+group, its one-line description, then its entries), stay
 reachable and fully visible when focused at 960x540, 800x800 and 1280x720; the
 list is centered when it fits. Source of truth: tests/puzzle_layout_check.gd (listing/ordering,
 initial focus placement, non-first-selection loading the correct puzzle),
@@ -144,8 +147,16 @@ three supported window sizes)
 and tests/save_input_regression.gd's extended
 `_test_no_reset_on_puzzle_entry()` (selection sets `PuzzleSession`, opens via
 `SceneLoader.load_scene`, disturbs no save/settings/remap state, and
-`new_game()` still resets to catalog position 0 regardless of a prior
+`new_game()` still starts the Reference Knot regardless of a prior
 Level Select choice earlier in the same session).
+
+### Web builds
+
+In the Web build, Godot maps `user://` to the browser's own storage for the
+site, so settings, input remaps and the legacy `global_state.tres` persist
+locally in that browser. This is a new storage location, not a migration:
+desktop data is untouched, and nothing stored there is transmitted anywhere.
+Gameplay scores remain session-only, so reloading the page starts fresh.
 
 ## Validation and Limits
 

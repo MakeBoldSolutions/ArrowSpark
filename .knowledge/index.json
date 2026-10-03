@@ -1,7 +1,7 @@
 {
   "generated": {
     "by": "build-knowledge-index",
-    "at": "2026-10-02T22:00:56Z"
+    "at": "2026-10-03T00:50:32Z"
   },
   "roots": [
     {
@@ -41,6 +41,8 @@
         "scripts/puzzle/puzzle_results_format.gd",
         "scripts/puzzle/puzzle_catalog.gd",
         "scripts/puzzle/puzzle_analyzer.gd",
+        "scripts/puzzle/puzzle_content_version.gd",
+        "scripts/presentation/web_attempt_emitter.gd",
         "scripts/puzzle_session.gd",
         "scripts/puzzle_scoreboard.gd",
         "scripts/presentation/arrow_departure_geometry.gd",
@@ -55,6 +57,7 @@
         "scenes/menus/main_menu/main_menu.tscn",
         "scenes/menus/main_menu/main_menu_with_animations.tscn",
         "scenes/menus/main_menu/main_menu_with_animations.gd",
+        "scenes/menus/main_menu/puzzle_select_menu.gd",
         "tests/puzzle_regression.gd",
         "tests/puzzle_catalog_check.gd",
         "tests/puzzle_analyzer_check.gd",
@@ -79,6 +82,8 @@
         "Solvability Analysis",
         "Puzzle Catalog and Session-Scoped Selection",
         "Level groups",
+        "Puzzle content version",
+        "Attempt timing and the Web completion hand-off",
         "Open Move Assistance and Session Scoring",
         "Structural Analysis (PuzzleAnalyzer)",
         "Puzzle-design vocabulary (provisional)",
@@ -154,7 +159,35 @@
         "Canvas Actions and Transient Camera State",
         "Session-Only Puzzle Entry vs. Preserved Legacy Storage",
         "Level Select",
+        "Web builds",
         "Validation and Limits"
+      ]
+    },
+    {
+      "id": "web-showcase",
+      "type": "architecture",
+      "form": "flat-document",
+      "role": "architecture",
+      "path": ".knowledge/architecture/web-showcase.md",
+      "title": "ArrowSpark Web Showcase (Static Site and Browser Build)",
+      "appliesTo": [
+        "web/**",
+        "export_presets.cfg",
+        ".github/workflows/showcase.yml"
+      ],
+      "headings": [
+        "ArrowSpark Web Showcase (Static Site and Browser Build)",
+        "Authorities",
+        "Stack and build",
+        "Visual foundation",
+        "The game in the page",
+        "Completion bridge",
+        "Reactions (client side)",
+        "Content model",
+        "Publication checks",
+        "Hosting headers, caching and the Content-Security-Policy",
+        "Licences",
+        "Continuous integration and the synthetic check"
       ]
     },
     {
@@ -170,7 +203,9 @@
         "scenes/**",
         "resources/**",
         "assets/**",
-        "addons/**"
+        "addons/**",
+        "export_presets.cfg",
+        "web/**"
       ],
       "headings": [
         "ArrowSpark Constitution",
@@ -231,10 +266,13 @@
         "CLAUDE.md",
         "ATTRIBUTION.md",
         "scenes/menus/main_menu/main_menu_with_animations.tscn",
-        "scenes/credits/credits.tscn"
+        "scenes/credits/credits.tscn",
+        "web/src/components/site/SiteHeader.astro",
+        "web/src/components/site/SiteFooter.astro"
       ],
       "headings": [
         "Product Identity and Branding Hierarchy",
+        "The playable showcase",
         "Presentation principle"
       ]
     },

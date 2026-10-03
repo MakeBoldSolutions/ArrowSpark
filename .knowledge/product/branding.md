@@ -9,6 +9,8 @@ appliesTo:
   - ATTRIBUTION.md
   - scenes/menus/main_menu/main_menu_with_animations.tscn
   - scenes/credits/credits.tscn
+  - web/src/components/site/SiteHeader.astro
+  - web/src/components/site/SiteFooter.astro
 ---
 
 # Product Identity and Branding Hierarchy
@@ -30,6 +32,16 @@ Maaack template addon). The Main Menu subtitle carries the tagline
 "A Make Bold Spark Game". Creator credit and the public link live in Credits
 only (`ATTRIBUTION.md`, rendered by `scenes/credits/credits.gd`), not on the
 Main Menu.
+
+## The playable showcase
+
+`https://arrow.makeboldspark.com` is ArrowSpark's public showcase under the
+Make Bold Spark domain: the place to play the game in a desktop browser and
+read how it was built (`.knowledge/architecture/web-showcase.md`). Its header
+carries the Make Bold peak mark, "ArrowSpark" and a spaced "MAKE BOLD SPARK"
+family label, and its footer reads "A Make Bold Spark experiment". It uses
+the Make Bold visual system unchanged; it is a Make Bold property that
+contains a puzzle game, not a separate game brand.
 
 ## Presentation principle
 

@@ -10,6 +10,8 @@ appliesTo:
   - scripts/puzzle/puzzle_results_format.gd
   - scripts/puzzle/puzzle_catalog.gd
   - scripts/puzzle/puzzle_analyzer.gd
+  - scripts/puzzle/puzzle_content_version.gd
+  - scripts/presentation/web_attempt_emitter.gd
   - scripts/puzzle_session.gd
   - scripts/puzzle_scoreboard.gd
   - scripts/presentation/arrow_departure_geometry.gd
@@ -24,6 +26,7 @@ appliesTo:
   - scenes/menus/main_menu/main_menu.tscn
   - scenes/menus/main_menu/main_menu_with_animations.tscn
   - scenes/menus/main_menu/main_menu_with_animations.gd
+  - scenes/menus/main_menu/puzzle_select_menu.gd
   - tests/puzzle_regression.gd
   - tests/puzzle_catalog_check.gd
   - tests/puzzle_analyzer_check.gd
@@ -233,10 +236,12 @@ definition or a separately live attempt built from it; and forcing either of
 two simultaneously-legal arrows first on a genuine branching state still
 reaches a complete, mistake-free solution either way (the order-independence
 property the no-backtracking design depends on). Order-independence is
-further checked at every branching state a witness actually passes through
+further checked at the branching states a witness actually passes through
 (not only a puzzle's opening move): for the shipped `create_fixed()` board
-here, and for all twenty-two `PuzzleCatalog` entries in
-tests/puzzle_catalog_check.gd, forcing each *other* currently-legal
+here, and for the `PuzzleCatalog` entries in tests/puzzle_catalog_check.gd —
+every branching state for twenty-one of them, and every sixth branching state
+for the densest board, `reference_knot`, which is too large to check
+exhaustively within the launcher's time limit — forcing each *other* currently-legal
 alternative next instead of the witness's own choice still reaches a
 complete, mistake-free solution from there — the automated, catalog-wide
 proof that "every unfinished state reached through legal play has a legal
@@ -315,7 +320,12 @@ Puzzle Lab), `group_title()`, `group_of()`, `ids_in_group()`, `group_position()`
 empty for unknown ids). Level Select renders one non-focusable header per group
 as a collapsible accordion: a focusable toggle header button per group (marked
 `-` when expanded, `+` when collapsed, with the entry count) above that group's
-entry buttons, numbered by group position. Every group starts expanded;
+entry buttons, numbered by group position. Under each header is one
+non-focusable line saying what the group is for — ArrowSpark Levels: "The
+intended ArrowSpark experience."; Foundations: "Small boards that teach the
+rule."; Puzzle Lab: "Development experiments, some deliberately
+over-tangled." — which stays visible when the group is collapsed and never
+ranks one group above another. Every group starts expanded;
 collapsing hides a group's entries so keyboard and gamepad focus skip them. The
 in-game label and results title use the same group-relative number. The play
 HUD has a Back button (first in the Tab order) that leaves the puzzle mid-play
@@ -324,7 +334,8 @@ Game starts `reference_knot` without resetting progress.
 Source of truth: tests/puzzle_catalog_check.gd (group sizes, membership,
 position and next semantics, group-scoped session progression),
 tests/puzzle_layout_check.gd (grouped Level Select, accordion collapse and
-expand, Back button presence and wiring, group-end results buttons, Level
+expand, the group description lines and their no-ranking wording, Back button
+presence and wiring, group-end results buttons, Level
 Select request), tests/puzzle_canvas_check.gd (HUD tab order including Back;
 the live Back scene change itself is covered only by desktop smoke testing), tests/save_input_regression.gd (Play target, one-shot
 request, no progress change).
@@ -358,14 +369,59 @@ directions/tail dependency/top-left open move/corner regions, `Next` from
 absent at each group's last entry, no
 difficulty-labeled title wording, each of the six experimental
 entries confirmed against its exact `PuzzleAnalyzer`-derived threshold (see
-below), the catalog-wide branching order-independence check (every one of
-the twenty-two entries' witness, at every branching state it passes through,
-still completes when any other legal alternative is forced instead — see the
+below), the catalog-wide branching order-independence check (each entry's
+witness, at every branching state it passes through — every sixth one for
+`reference_knot` — still completes when any other legal alternative is forced
+instead — see the
 Rule Layer's Solvability Analysis section above), `PuzzleSession` default/set/advance/has-next behavior including the
 last-entry no-op and the invalid-id fallback), run via the same
 `run_puzzle_regressions.py` launcher in the same bare isolated temp project
 as tests/puzzle_regression.gd (PuzzleCatalog depends only on
 PuzzleDefinition); requires `PUZZLE_CATALOG_FAILURES=0`.
+
+### Puzzle content version
+
+`PuzzleContentVersion.of(definition)` (scripts/puzzle/puzzle_content_version.gd)
+names a puzzle's geometry, independent of the application version, catalog
+position, id, title and group. It hashes a canonical text — `w:<width>;h:<height>;`
+then, for every head in (y, x) order, `<x>,<y>,<direction name>:<tail cells
+in path order, "|"-separated>;` — and returns `g1-` plus the first 12
+lowercase hex digits of its SHA-256. The value changes if and only if the
+board size, a head, a direction or a tail cell changes; directions are
+written by name so reordering the enum cannot alter values, and any change to
+the canonical text gets a new prefix (`g2`) rather than silently changing
+`g1` values. It is a pure function and never touches rules or state. The
+Reference Knot's value is pinned: `g1-7ce0942d4a5e`. Evidence about play
+(observed sessions, reactions) names this value. Source of truth:
+tests/puzzle_catalog_check.gd (the literal pin, stability across calls,
+independence from id/title/group, and changes for a moved tail cell, a
+turned arrow and a resized board).
+
+### Attempt timing and the Web completion hand-off
+
+`arrow_puzzle.gd` records `Time.get_ticks_msec()` when an attempt starts
+(`_start_new_attempt()`) and again at the removal that completes the puzzle.
+The difference is wall-clock time, pauses included; it is used only for the
+Web hand-off below and never affects rules, score or results.
+
+In `_show_results()`, after `PuzzleScoreboard.record_attempt()`, the
+controller calls `WebAttemptEmitter.emit(WebAttemptEmitter.build_payload(...))`
+(scripts/presentation/web_attempt_emitter.gd). `build_payload()` is pure and
+returns exactly eight keys: `type` (`"arrowspark.attemptCompleted"`),
+`contractVersion` (1), `puzzleId`, `puzzleVersion` (the content version
+above), `mistakes`, `openMoveAssists`, `score` (copied unchanged from
+`PuzzleState.get_results()`) and `elapsedSeconds` (the attempt time rounded
+to the nearest whole second, never negative). There is no player, visitor,
+session or device identifier and no timestamp. `emit()` does nothing and
+returns false unless `OS.has_feature("web")`; on the Web it posts the payload
+as a JSON string to `window.parent` restricted to the document's own origin
+through `JavaScriptBridge`, fire-and-forget. The game never waits for, reads
+or depends on the hosting page, so play is identical whether or not anyone
+listens; an attempt left by Back, Main Menu or a reload emits nothing.
+Replays and other puzzles emit again. Source of truth:
+tests/puzzle_presentation_check.gd (exact key set, integer fields, rounding,
+no identifying data, size limit, no-op outside the Web); the receiving page
+is described in `.knowledge/architecture/web-showcase.md`.
 
 ## Open Move Assistance and Session Scoring
 
@@ -665,7 +721,10 @@ one-line help label that wraps below the buttons when narrow) stacked above
 `BoardArea`/`PuzzleBoard`; a container stack
 cannot overlap its children by construction at every window size. `PuzzleResults` is `mouse_filter = MOUSE_FILTER_STOP` and covers the
 full rect as the last child (so it draws above the board), absorbing
-background input while shown.
+background input while shown. Because it is hidden while its parent is first
+sized, `show_results()` re-applies the full-rect anchors and offsets before
+showing it, so it covers the scene even when the window never resizes after
+load (as in the Web build); tests/puzzle_layout_check.gd checks this.
 
 **Replay and pause-menu Restart both call `SceneLoader.reload_current_scene()`**
 rather than resetting counters in place: reloading the scene reconstructs a
@@ -822,8 +881,8 @@ second (normalized diagonals, board-focused and window-focused only, polled per
 frame); events matching these actions are consumed by the focused board so a
 stick push cannot also move GUI focus. Focus navigation is never consumed
 whatever the remapping: Tab/Shift+Tab and D-pad buttons always keep a way off the
-board. Tab order is Open Move, Zoom Out, Zoom In, Fit Puzzle, Pan, board, then
-back; the board's D-pad up returns to Pan and every toolbar control has
+board. Tab order is Back, Open Move, Zoom Out, Zoom In, Fit Puzzle, Pan, board,
+then back to Back; the board's D-pad up returns to Pan and every toolbar control has
 directional neighbors that leave the toolbar. The board draws a visible focus
 outline; toolbar controls are never disabled at a limit. The toolbar's help
 line and tooltips derive their key names from the live `InputMap` (refreshed on
