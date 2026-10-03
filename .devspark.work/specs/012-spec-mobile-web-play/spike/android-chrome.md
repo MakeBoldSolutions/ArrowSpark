@@ -149,3 +149,9 @@ This shows the code path works under simulated touch. It does not show real-fing
 
 Layout observation from the page-embedded run (emulation): in landscape at 915 x 412 the page's game frame is 16:9 about 826 x 465 CSS px, taller than the 412 px viewport, and the page's sticky header overlays the top of the frame when the page is scrolled, so the game's top toolbar can be covered. The owner has so far played in full screen, which avoids this on Android; iPhone Safari probably has no iframe fullscreen (unverified). This belongs in the T034-T036 page-layout work, not a Godot change.
 
+## Owner report on the touch prototype build (Pixel 7 Pro, Chrome, PR #7 preview, first real-finger test)
+
+- **Pinch zoom does not work on the real phone** ("pretty much single finger functionality"), even though the same prototype zooms under simulated multi-touch in Chromium. Cause unknown: either the browser is not delivering two touches to the game, the engine is dropping the second finger, or the build tested was not the prototype. A build id and a "max fingers down" counter were added to the probe overlay (PR #7 commit 30a337e) to tell these apart; a re-test is needed.
+- **Pan button:** works as a toggle; on landscape it is small and hard to press (consistent with the 17 CSS px button height).
+- **Pan on:** one-finger drag moves the board up and down only. At Fit zoom the board already spans the viewport width, so there is nothing to pan horizontally until the view is zoomed in; zooming currently needs the Zoom In button because pinch does not work. Expected behavior of the bounded viewport transform, not a defect.
+
