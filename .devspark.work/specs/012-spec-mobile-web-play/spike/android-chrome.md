@@ -135,3 +135,17 @@ Still unrecorded for Android (both browsers): press-vs-release timing, page scro
 - In the page's full-screen mode, **Back, Zoom In, Zoom Out, Pan and the menus all function well**, and the owner finds play "more fun on mobile since you can click the arrows faster" than with a mouse (qualitative, one tester, unmodified game).
 - Pinch zoom and Pan-off one-finger drag remain unimplemented in the unmodified build; a throwaway prototype (branch `012-spike-touch-prototype`, PR #7) now tries them for the next device round.
 
+## Touch prototype, simulated check (T010; supplemental emulation, not a device reading)
+
+Prototype: branch `012-spike-touch-prototype` (draft PR #7, preview `https://green-bay-09bdc1010-7.centralus.5.azurestaticapps.net/play/?spike`, game build `f3d72dd`). Release-time tap, one-finger Pan-mode drag and two-finger pinch call the existing `PuzzleViewportTransform` (`pan_pixels`, `zoom_at`); synthesized mouse events (device = emulation) are ignored on the board. CI on PR #7: the Godot regression workflow and the Azure build/deploy passed.
+
+Driven with Chromium touch events (Pixel-7-sized landscape 915 x 412, CDP multi-touch; evidence/prototype-touch-sim-contact-sheet.png, left to right then second row: start, pinch out, one-finger drag with Pan off, drag with Pan on, pinch in), counting pixels that changed between steps:
+- pinch out: board zoomed in (about 440k pixels changed);
+- one-finger drag, Pan off: board unchanged (461 pixels, hover highlight only);
+- one-finger drag, Pan on: board panned (about 342k pixels);
+- pinch in: board zoomed back out (about 436k pixels);
+- browser-level counters rose with each gesture (touchstart = touchend = pointerdown), mousedown 0.
+This shows the code path works under simulated touch. It does not show real-finger behavior, tap timing, or iOS; the owner's Pixel run is the real test.
+
+Layout observation from the page-embedded run (emulation): in landscape at 915 x 412 the page's game frame is 16:9 about 826 x 465 CSS px, taller than the 412 px viewport, and the page's sticky header overlays the top of the frame when the page is scrolled, so the game's top toolbar can be covered. The owner has so far played in full screen, which avoids this on Android; iPhone Safari probably has no iframe fullscreen (unverified). This belongs in the T034-T036 page-layout work, not a Godot change.
+
