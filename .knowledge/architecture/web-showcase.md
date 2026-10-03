@@ -304,8 +304,14 @@ validates an editor import on a fresh copy without `.godot` (one launch to
 build the import cache, then a second that fails on any script error except
 the template's known `opening.gd` "SceneLoader not declared" reports, which
 Godot 4.4 emits on headless Linux even on `main`), exports the
-game, then runs `npm ci`, `npm audit --audit-level=high`, `npm run check`
-and `npm run build` in `web/`.
+game, then runs `npm ci`, `node scripts/audit-check.mjs`, `npm run check`
+and `npm run build` in `web/`. `web/scripts/audit-check.mjs` runs
+`npm audit --json` and fails on any high or critical advisory that is not in
+its allowlist. Each allowed advisory carries its reason in the script and is
+removed once a fixed version can be installed. The one current entry is
+GHSA-ch52-4w7c-c8xp in `http-cache-semantics` (no patched release). Astro
+uses that package only to cache remote images at build time, and the site
+has no remote images and no server-side HTTP cache.
 
 `web/scripts/synthetic-check.mjs` is one headless-browser visit with no
 visitor data: it loads `/` and the story pages, then `/play/`, and waits for

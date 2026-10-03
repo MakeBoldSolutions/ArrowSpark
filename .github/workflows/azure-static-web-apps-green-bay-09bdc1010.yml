@@ -123,7 +123,8 @@ jobs:
 
       - name: Audit site dependencies
         working-directory: web
-        run: npm audit --audit-level=high
+        # Fails on any high or critical advisory not explicitly allowed (with its reason) in the script.
+        run: node scripts/audit-check.mjs
 
       - name: Check site
         working-directory: web
