@@ -255,3 +255,15 @@ FR-001 T002–T015 · FR-002 T018, T023, T025, T028–T029 · FR-003 T013, T030,
 - **Owner decision 2026-10-03 (iPhone):** no iPhone is available. Continue with the Android spike; the iPhone is not frozen as Supported and is recorded as Unverified (best educated guess, not claimed). The T016 freeze therefore proceeds on Android rows; iOS-specific checks (iframe fullscreen, Safari scroll/gesture behavior) remain open tasks for when an iPhone is available. The only iPhone data so far is one portrait screenshot from a family member's phone (spike/iphone-safari.md).
 - **T010 prototype:** built on the separate throwaway branch `012-spike-touch-prototype` (its own draft PR and preview), not on this planning branch, so nothing spike-only is merged.
 
+## Release Posture (owner decision 2026-10-03: usable mobile-web beta)
+
+Supersedes the sequencing above for what must happen before publishing. Only Blocking Defects prevent release; no further analyze/critic cycle is required because known limitations remain.
+
+**Release checks (the whole bar):** site check and build pass; desktop smoke passes; automated admission tests pass; emulated phone, portrait, small-screen and tablet smoke pass; one short owner smoke on real mobile hardware (page loads, game starts, tap works, basic pan/zoom/navigation usable, no showstopper); production deployment loads.
+
+**Classification of the remaining tasks**
+- *Shipped in the beta (done):* admission rule and tests (T033, T034, T035), the rotate / larger-screen notice (T036), the spike flag and probe removed (T040), touch wording on the Play page (T042), knowledge and constitution updates (T050-T053, T060 in part: web-showcase and constitution; game-visual-system unchanged because the game UI is unchanged).
+- *Deferred improvement (not release gates):* touch scaling and 44 x 44 CSS px controls (T018-T020, T025, T028, T029, T031), release-time touch selection and emulated-mouse suppression (T021-T023, T026, T059), pinch and one-finger pan without Pan mode (the throwaway prototype on its own branch), touch help text inside the game (T041, T043), safe-area handling (T027), audio start (nothing to unlock: no audio content found), page-gesture guard (the game shell already sets touch-action: none; no leakage seen on the one tested device).
+- *Deferred verification / post-release learning:* iPhone Safari verification, additional Android devices, the 20-tap working-zoom protocol, engine-level touch-plus-mouse counts, the full real-device checklist and the Matrix Freeze (T006-T017, T048, T049, T056-T058, T061). The beta claims only what is recorded: one Pixel 7 Pro (Chrome 154 and Edge Beta 155); iPhone is admitted by capability but not verified.
+- *Known limitations (shipped, documented):* pinch zoom does not work; touch targets are small; selection happens on touch-down; fullscreen may be unavailable; some viewport sizes are awkward; landscape is recommended.
+
