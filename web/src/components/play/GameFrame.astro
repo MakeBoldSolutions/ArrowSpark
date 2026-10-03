@@ -1,0 +1,99 @@
+---
+import Icon from '../ui/Icon.astro';
+
+// The exported game lives under a build-unique folder; CI passes its id as PUBLIC_GAME_BUILD.
+const build = import.meta.env.PUBLIC_GAME_BUILD;
+const gameSrc = build ? `/game/${build}/index.html` : undefined;
+---
+<section class="game-frame" aria-label="ArrowSpark game" data-game-host>
+  <div class="game-frame__bar">
+    <span class="game-frame__title">
+      <img class="game-frame__bar-mark" src="/brand/logo-mark.svg" alt="" width="28" height="14" />
+      <span>ArrowSpark</span>
+    </span>
+    <button type="button" class="game-frame__button" data-fullscreen disabled>
+      <Icon name="maximize" /><span>Fullscreen</span>
+    </button>
+  </div>
+  <div class="game-frame__stage">
+    {gameSrc
+      ? (
+        <iframe
+          data-game-frame
+          data-src={gameSrc}
+          title="ArrowSpark game"
+          allow="fullscreen; autoplay"
+          allowfullscreen
+        ></iframe>
+      )
+      : null}
+    <div class="game-frame__loading" data-loading>
+      <img class="game-frame__mark" src="/brand/logo-mark.svg" alt="" width="88" height="44" />
+      <p class="game-frame__loading-title">{gameSrc ? 'Loading ArrowSpark' : 'The game is not part of this build'}</p>
+      {gameSrc && <div class="game-frame__track" aria-hidden="true"><span></span></div>}
+      <p class="game-frame__loading-note">
+        {gameSrc ? 'Preparing the board. This takes a few seconds.' : 'Export the game to see it here.'}
+      </p>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { startGameBridge } from '../../scripts/game-bridge';
+  import { guardFrameChrome } from '../../scripts/page-zoom-guard';
+  import { DESKTOP_QUERY } from '../../scripts/desktop-query';
+
+  const host = document.querySelector<HTMLElement>('[data-game-host]');
+  const iframe = document.querySelector<HTMLIFrameElement>('iframe[data-game-frame]');
+  const loading = document.querySelector<HTMLElement>('[data-loading]');
+  const fullscreen = document.querySelector<HTMLButtonElement>('[data-fullscreen]');
+
+  if (host) guardFrameChrome(host);
+
+  if (iframe && iframe.dataset.src) {
+    const src = iframe.dataset.src;
+    startGameBridge(iframe);
+    iframe.addEventListener('load', () => {
+      if (iframe.getAttribute('src')) loading?.setAttribute('hidden', '');
+    });
+    // Load the game only on screens it supports, so phones never download the engine.
+    const desktop = window.matchMedia(DESKTOP_QUERY);
+    const loadIfDesktop = () => {
+      if (desktop.matches && !iframe.getAttribute('src')) {
+        iframe.setAttribute('src', src);
+        if (fullscreen) fullscreen.disabled = !document.fullscreenEnabled;
+      }
+    };
+    loadIfDesktop();
+    desktop.addEventListener('change', loadIfDesktop);
+
+    fullscreen?.addEventListener('click', () => {
+      void iframe.requestFullscreen?.().then(() => iframe.focus()).catch(() => undefined);
+    });
+    // A click anywhere on the frame hands keyboard focus to the game.
+    host?.addEventListener('click', (event) => {
+      if (event.target !== fullscreen && !fullscreen?.contains(event.target as Node)) iframe.focus();
+    });
+  }
+</script>
+
+<style>
+  .game-frame__title { display: flex; align-items: center; gap: var(--space-2); }
+  .game-frame__button {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    background: transparent;
+    border: var(--border-hairline) solid var(--ink-600);
+    color: var(--ink-200);
+    border-radius: var(--radius-sm);
+    padding: var(--space-1) var(--space-3);
+    font: inherit;
+    font-weight: var(--fw-semibold);
+    cursor: pointer;
+  }
+  .game-frame__button:hover:not(:disabled) { border-color: var(--ink-300); color: var(--cream); }
+  .game-frame__button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .game-frame__loading-title { font-family: var(--font-display); font-weight: var(--fw-bold); font-size: var(--fs-lg); margin: 0; }
+  .game-frame__loading-note { font-size: var(--fs-sm); color: var(--ink-600); margin: 0; }
+</style>

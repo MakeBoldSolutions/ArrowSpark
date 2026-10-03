@@ -1,0 +1,37 @@
+# What worked and what didn't, at comparable weight. Each item has a permanent source.
+
+worked:
+  - text: Keeping the rules in plain classes apart from presentation, so every rule is tested without a screen.
+    source: https://github.com/MakeBoldSolutions/ArrowSpark/blob/6e60e117acc175a47feb55f52a3a8da1c6cedaab/.knowledge/architecture/arrow-puzzle.md
+  - text: Solver-backed content. Every shipped puzzle is proven solvable, with a mistake-free solution replayed in the tests.
+    source: https://github.com/MakeBoldSolutions/ArrowSpark/blob/6e60e117acc175a47feb55f52a3a8da1c6cedaab/tests/puzzle_catalog_check.gd
+  - text: Adversarial review before code. It caught a Level Select plan that would have left keyboard players with nothing selected.
+    source: https://github.com/MakeBoldSolutions/ArrowSpark/commit/6aaf79d15fd9d82b6ebf83d77244c7bf6834c3d4
+  - text: Regression depth. Two required gates with over 4,000 passing checks run on every push.
+    source: https://github.com/MakeBoldSolutions/ArrowSpark/blob/6e60e117acc175a47feb55f52a3a8da1c6cedaab/tests/README.md
+  - text: Treating specs as temporary and code, tests and knowledge as the durable record.
+    source: https://github.com/MakeBoldSolutions/ArrowSpark/blob/6e60e117acc175a47feb55f52a3a8da1c6cedaab/.knowledge/governance/constitution.md
+  - text: Letting a human playtest overturn a green experiment instead of explaining it away.
+    source: https://github.com/MakeBoldSolutions/ArrowSpark/commit/7edd8e11a1c5fe75ace7b2e5976ea7544e20603e
+  - text: Recording checks that weren't run as not run. The final verify gate says exactly what its pass does not cover.
+    source: https://github.com/MakeBoldSolutions/ArrowSpark/commit/313d5e636b2dd0083a20ef4b7956fbcb45a44cc1
+  - text: Pull-request review after every gate was green, which still found a real bug (focus landing on a hidden entry).
+    source: https://github.com/MakeBoldSolutions/ArrowSpark/commit/4998d18c4f692cc31c13e7bafc04f46c5bacc48c
+
+didnt:
+  - text: Structural metrics did not predict fun. Six experiments hit every target and rated about 2 out of 5 for challenge.
+    source: https://github.com/MakeBoldSolutions/ArrowSpark/commit/7edd8e11a1c5fe75ace7b2e5976ea7544e20603e
+  - text: The evidence base is one tester, who designed the level. No independent player had tried it before this showcase.
+    source: https://github.com/MakeBoldSolutions/ArrowSpark/blob/6e60e117acc175a47feb55f52a3a8da1c6cedaab/.knowledge/reference/reference-puzzle-design-report.md
+  - text: A success criterion encoded the wrong assumption. It failed against its original wording and was amended in the open, with the original kept beside it.
+    source: https://github.com/MakeBoldSolutions/ArrowSpark/commit/69414148c6a1e0c89adc3548c496e92281910677
+  - text: The fresh-player check was not run. It was deferred, with a written protocol, to this showcase.
+    source: https://github.com/MakeBoldSolutions/ArrowSpark/commit/4aba5e71bd7b72284a0c7841f945b9890a8253cf
+  - text: The project broke its own rule. Temporary review identifiers leaked into durable code comments, a test and the test README.
+    source: https://github.com/MakeBoldSolutions/ArrowSpark/pull/3
+  - text: Verification grew its own scope. A developer readout added to gather evidence never served its purpose and was removed in review.
+    source: https://github.com/MakeBoldSolutions/ArrowSpark/commit/6851baf98101e63957f72f1140ab45d2681faa93
+  - text: Durable knowledge went stale. Three statements contradicted the new code until pull-request review caught them.
+    source: https://github.com/MakeBoldSolutions/ArrowSpark/commit/4998d18c4f692cc31c13e7bafc04f46c5bacc48c
+  - text: Early content was too simple. Most early puzzles were built from single-cell arrows a player can read at a glance.
+    source: https://github.com/MakeBoldSolutions/ArrowSpark/commit/7edd8e11a1c5fe75ace7b2e5976ea7544e20603e

@@ -1,0 +1,134 @@
+---
+import { getEntry } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Eyebrow from '../components/ui/Eyebrow.astro';
+import Card from '../components/ui/Card.astro';
+import Badge from '../components/ui/Badge.astro';
+import Icon from '../components/ui/Icon.astro';
+import EvidenceCallout from '../components/story/EvidenceCallout.astro';
+import FactTiles from '../components/story/FactTiles.astro';
+import SpoilerGate from '../components/site/SpoilerGate.astro';
+
+const evidence = (await getEntry('evidence', 'main'))!.data;
+const facts = (await getEntry('facts', 'main'))!.data;
+const limitationLabels = {
+  'accepted-limitation': { label: 'Accepted limitation', tone: 'caution' },
+  deferred: { label: 'Deferred', tone: 'info' },
+  'not-performed': { label: 'Not performed', tone: 'neutral' },
+} as const;
+---
+<BaseLayout
+  title="Evidence"
+  description="What the ArrowSpark project can show and what it can't: automated checks, the human evidence so far, what is not claimed, and the known limits."
+  current="evidence"
+>
+  <section class="page section">
+    <Eyebrow>Evidence</Eyebrow>
+    <h1 class="page-title">What we can show, and what we can’t.</h1>
+
+    <h2 class="evidence__heading">Automated evidence</h2>
+    <ul class="evidence__grid">
+      {evidence.automated.map((item) => (
+        <li>
+          <Card padding="md">
+            <p class="evidence__title">{item.title}</p>
+            <p class="evidence__detail">{item.detail}</p>
+            {item.command && <p class="evidence__command"><span>Reproduce:</span> <code>{item.command}</code></p>}
+            <p class="evidence__source"><a href={item.source}>Source</a></p>
+          </Card>
+        </li>
+      ))}
+    </ul>
+
+    <h2 class="evidence__heading">Human evidence</h2>
+    <EvidenceCallout eyebrow="Baseline before this showcase" tone="ember">
+      {evidence.human.baseline}
+      <Fragment slot="more">
+        <p>This showcase exists to gather that evidence. The optional reactions on the Play page and at the end of the story are how it arrives.</p>
+        <p>{evidence.human.sources.map((source, index) => <>{index > 0 && ' · '}<a href={source.url}>{source.label}</a></>)}</p>
+      </Fragment>
+    </EvidenceCallout>
+
+    <h2 class="evidence__heading">Things not claimed</h2>
+    <Card padding="lg">
+      <ul class="evidence__list">
+        {evidence.notClaimed.map((item) => <li><span class="evidence__dash"><Icon name="minus" /></span><span>{item}</span></li>)}
+      </ul>
+    </Card>
+
+    <h2 class="evidence__heading">Known limitations</h2>
+    <Card padding="lg">
+      <ul class="evidence__list">
+        {evidence.limitations.map((item) => (
+          <li>
+            <span class="evidence__badge"><Badge tone={limitationLabels[item.class].tone}>{limitationLabels[item.class].label}</Badge></span>
+            <span>{item.item} <a class="evidence__inline-source" href={item.source}>Source</a></span>
+          </li>
+        ))}
+      </ul>
+    </Card>
+
+    <h2 class="evidence__heading">The clock</h2>
+    <p class="evidence__clock-intro">
+      Counted from the first commit to the merge of the tenth spec
+      (<a href={facts.clock.source}><code>{facts.clock.cutoffCommit.slice(0, 7)}</code></a>). Elapsed time is not effort:
+      nights are included in the first figure, and commit timestamps miss work done before a session’s first commit, so
+      the session figure is a floor, not a timesheet. There is no speed-up multiple, because there is no stated baseline
+      to compare against.
+    </p>
+    <div class="evidence__table-wrap">
+      <table class="evidence__table">
+        <thead><tr><th scope="col">Figure</th><th scope="col">Value</th><th scope="col">Reproduce</th></tr></thead>
+        <tbody>
+          {facts.clock.items.map((item) => (
+            <tr><th scope="row">{item.label}</th><td>{item.value}</td><td><code>{item.command}</code></td></tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    <h2 class="evidence__heading">The Reference Knot’s board</h2>
+    <SpoilerGate headline="These numbers describe the board" />
+    <FactTiles facts={facts.referenceKnot} />
+  </section>
+</BaseLayout>
+
+<style>
+  .evidence__heading { font-size: var(--fs-h3); margin: var(--space-12) 0 var(--space-5); }
+  .evidence__grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+    gap: var(--space-4);
+  }
+  .evidence__grid :global(.card) { height: 100%; }
+  .evidence__title { font-family: var(--font-display); font-weight: var(--fw-extrabold); font-size: var(--fs-xl); line-height: var(--lh-snug); color: var(--text-strong); margin: 0; }
+  .evidence__detail { font-size: var(--fs-sm); color: var(--ink-600); margin-top: var(--space-2); }
+  .evidence__command { font-size: var(--fs-xs); color: var(--ink-600); margin-top: var(--space-2); overflow-wrap: anywhere; }
+  .evidence__source { font-size: var(--fs-sm); margin-top: var(--space-2); }
+  .evidence__list { list-style: none; margin: 0; padding: 0; }
+  .evidence__list li {
+    display: flex;
+    gap: var(--space-4);
+    padding-block: var(--space-3);
+    border-top: var(--border-hairline) solid var(--border-subtle);
+  }
+  .evidence__list li:first-child { border-top: 0; }
+  .evidence__dash { color: var(--brand); flex: none; }
+  .evidence__badge { flex: none; }
+  .evidence__inline-source { font-size: var(--fs-sm); white-space: nowrap; }
+  .evidence__clock-intro { max-width: 70ch; color: var(--ink-700); }
+  .evidence__table-wrap { overflow-x: auto; margin-top: var(--space-5); }
+  .evidence__table { width: 100%; border-collapse: collapse; background: var(--surface-card); font-size: var(--fs-sm); }
+  .evidence__table th, .evidence__table td {
+    text-align: left;
+    vertical-align: top;
+    padding: var(--space-3) var(--space-4);
+    border-bottom: var(--border-hairline) solid var(--border-default);
+  }
+  .evidence__table thead th { font-size: var(--fs-xs); letter-spacing: var(--ls-wide); text-transform: uppercase; color: var(--text-muted); }
+  .evidence__table td:nth-child(2) { white-space: nowrap; font-weight: var(--fw-semibold); }
+  .evidence__table code { overflow-wrap: anywhere; }
+</style>

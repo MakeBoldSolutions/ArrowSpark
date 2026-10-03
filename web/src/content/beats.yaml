@@ -1,0 +1,141 @@
+# Built with DevSpark: what we believed, what the evidence said, what we did next.
+# Every beat has at least one permanent source. Beats that discuss how the Reference Knot was
+# designed are marked spoiler and shown behind the play-first note.
+
+- n: 1
+  title: Rules before code
+  belief: Write down what the game promises before building any of it.
+  evidence: A constitution, a specification, a plan and two rounds of adversarial review landed before the first arrow. The first playable board arrived 3 h 14 min after the first commit, with twelve commits of governance and planning in front of it.
+  decision: Keep the gates in front of implementation, and keep the rules in plain classes that can be tested without a screen.
+  sources:
+    - label: First playable board (commit)
+      url: https://github.com/MakeBoldSolutions/ArrowSpark/commit/0ec2dda8a4748c40b8bf42d8ed769a7a7d855236
+    - label: Constitution requiring practical verification (commit)
+      url: https://github.com/MakeBoldSolutions/ArrowSpark/commit/ce55cd4e6b7ea8c048428b88433b58962546932d
+  spoiler: false
+
+- n: 2
+  title: Hard is good. Unsolvable is not.
+  belief: A difficult puzzle should never be able to become impossible.
+  evidence: Removing an arrow only ever frees cells, so every legal move keeps a solvable board solvable. A short solver can prove each puzzle can be finished.
+  decision: No lives, no fail state, unlimited mistakes. A mistake costs score, never play.
+  sources:
+    - label: Solver and validation (commit)
+      url: https://github.com/MakeBoldSolutions/ArrowSpark/commit/b98c5af235eca0b507bca728c753db430c2b9726
+    - label: Gameplay contract (knowledge)
+      url: https://github.com/MakeBoldSolutions/ArrowSpark/blob/6e60e117acc175a47feb55f52a3a8da1c6cedaab/.knowledge/product/gameplay-contract.md
+  spoiler: false
+
+- n: 3
+  title: Animation is not just polish
+  belief: How an arrow leaves the board is presentation.
+  evidence: Long arrows feeding out along their own bends, instead of sliding off rigidly, read as pulling a thread free, and became one of the most satisfying parts of the game.
+  decision: Let that image organize the design that followed, while the rules still remove an arrow the instant it is selected.
+  sources:
+    - label: Path-following departure merged (commit)
+      url: https://github.com/MakeBoldSolutions/ArrowSpark/commit/92fba25b4ac4f8bcecbafa54d37649393464f89e
+  spoiler: false
+
+- n: 4
+  title: "“Keyboard accessible” is not a plan"
+  belief: A requirement that Level Select works with a keyboard or gamepad is enough.
+  evidence: The adversarial review read the template's code and found that opening the menu gave nothing focus, so a keyboard player would land nowhere. Nothing looked wrong on screen.
+  decision: Fix it before implementation, test it, and ask game-specific questions in review (who owns focus when this appears?).
+  sources:
+    - label: Spec 005 merged with the focus fix (commit)
+      url: https://github.com/MakeBoldSolutions/ArrowSpark/commit/6aaf79d15fd9d82b6ebf83d77244c7bf6834c3d4
+  spoiler: false
+
+- n: 5
+  title: Metrics would tell us what was hard
+  belief: Deeper dependency chains, density and cascades would predict challenge.
+  evidence: Six experiments hit every structural target exactly. In human play they rated about 2 out of 5 for challenge.
+  decision: Structural complexity is not perceptual complexity. Look at long, bent, interwoven arrows instead, and keep the metrics as descriptions only.
+  sources:
+    - label: Spec 006 report with the playtest (commit)
+      url: https://github.com/MakeBoldSolutions/ArrowSpark/commit/7edd8e11a1c5fe75ace7b2e5976ea7544e20603e
+  spoiler: false
+
+- n: 6
+  title: Contract before difficulty
+  belief: The next step is harder puzzles.
+  evidence: A board that looks overwhelming asks the player for trust. Harder puzzles needed a safety valve first.
+  decision: "Show Me an Open Move: one legal arrow highlighted, never removed, costing five mistakes' worth of score. Then make it harder."
+  sources:
+    - label: Open Move and session scoring merged (commit)
+      url: https://github.com/MakeBoldSolutions/ArrowSpark/commit/f53469161728569432837c286791f80b655ca0bd
+    - label: Gameplay contract (knowledge)
+      url: https://github.com/MakeBoldSolutions/ArrowSpark/blob/6e60e117acc175a47feb55f52a3a8da1c6cedaab/.knowledge/product/gameplay-contract.md
+  spoiler: false
+
+- n: 7
+  title: The screen should not constrain the puzzle
+  belief: Puzzles have to fit the screen.
+  evidence: Bigger boards made arrows smaller, which hurt reading, tracing and selecting all at once.
+  decision: A zoomable, pannable canvas before any large content. The puzzle defines the world; the screen is a window into it.
+  sources:
+    - label: Large zoomable canvas (PR #1)
+      url: https://github.com/MakeBoldSolutions/ArrowSpark/pull/1
+  spoiler: false
+
+- n: 8
+  title: Experiments gave vocabulary, not a recipe
+  belief: A set of experiments would add up to a formula for a good level.
+  evidence: Six hand-built experiments taught useful concepts, but none was the level. The human evidence was one aggregate session, recorded per puzzle as unknown, not zero.
+  decision: Compose one real level by hand, judged by a person.
+  sources:
+    - label: Six knot experiments (PR #2)
+      url: https://github.com/MakeBoldSolutions/ArrowSpark/pull/2
+    - label: Experiment report (knowledge)
+      url: https://github.com/MakeBoldSolutions/ArrowSpark/blob/6e60e117acc175a47feb55f52a3a8da1c6cedaab/.knowledge/reference/gordian-knot-experiments.md
+  spoiler: false
+
+- n: 9
+  title: A rule you don't audit is a wish
+  belief: We follow our own rule that durable files never point at temporary planning notes.
+  evidence: An audit found review identifiers leaked into code comments, a test and the test README.
+  decision: Keep the explanation, remove the citation, and audit regularly.
+  sources:
+    - label: Audit fixes (PR #3)
+      url: https://github.com/MakeBoldSolutions/ArrowSpark/pull/3
+  spoiler: false
+
+- n: 10
+  title: Green checks were not enough
+  belief: A spec is done when its checks are green.
+  evidence: "Spec 010's definition of done was a human answer. The designer played the Reference Knot to the end and said: “Yes, I would be happy to have a friend play this level.” One criterion failed against its original wording and was amended in the open; another was deferred with a written protocol."
+  decision: One tester is not outside validation. Build this public showcase to find out.
+  sources:
+    - label: Reference Puzzle closed with documented limitations (commit)
+      url: https://github.com/MakeBoldSolutions/ArrowSpark/commit/69414148c6a1e0c89adc3548c496e92281910677
+    - label: Reference Puzzle design report (knowledge)
+      url: https://github.com/MakeBoldSolutions/ArrowSpark/blob/6e60e117acc175a47feb55f52a3a8da1c6cedaab/.knowledge/reference/reference-puzzle-design-report.md
+    - label: Spec 010 (PR #4)
+      url: https://github.com/MakeBoldSolutions/ArrowSpark/pull/4
+  spoiler: false
+
+- n: 11
+  title: Verification can create scope
+  belief: More verification always means more confidence.
+  evidence: A developer readout was added only to gather closeout evidence, never served its purpose, and was removed in review. Review went through three revisions after the objective was already met.
+  decision: "The convergence rule: a finding becomes work only if it blocks the objective. Everything else is classified and carried."
+  sources:
+    - label: Readout added (commit)
+      url: https://github.com/MakeBoldSolutions/ArrowSpark/commit/b3aa17ee0f8f528c8315ecc766932638efb23a59
+    - label: Readout removed in review (commit)
+      url: https://github.com/MakeBoldSolutions/ArrowSpark/commit/6851baf98101e63957f72f1140ab45d2681faa93
+    - label: Spec 010 (PR #4)
+      url: https://github.com/MakeBoldSolutions/ArrowSpark/pull/4
+  spoiler: false
+
+- n: 12
+  title: The designer's opinion is not enough
+  belief: If the person who built the level likes it, it's good.
+  evidence: One tester, who designed the level. No independent player had tried it before this showcase.
+  decision: You play it, and tell us what you think.
+  sources:
+    - label: Reference Puzzle design report (knowledge)
+      url: https://github.com/MakeBoldSolutions/ArrowSpark/blob/6e60e117acc175a47feb55f52a3a8da1c6cedaab/.knowledge/reference/reference-puzzle-design-report.md
+    - label: Fresh-player check deferred (commit)
+      url: https://github.com/MakeBoldSolutions/ArrowSpark/commit/4aba5e71bd7b72284a0c7841f945b9890a8253cf
+  spoiler: false

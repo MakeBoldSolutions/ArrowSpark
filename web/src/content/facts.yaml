@@ -1,0 +1,66 @@
+# Reference Knot board facts and the project clock. Pages render these; they never restate them.
+# Board facts describe the board. They do not judge it.
+
+referenceKnot:
+  - value: "46 × 32"
+    label: board
+    source: https://github.com/MakeBoldSolutions/ArrowSpark/blob/6e60e117acc175a47feb55f52a3a8da1c6cedaab/.knowledge/reference/reference-puzzle-design-report.md
+    command: "python tests/run_puzzle_structural_report.py --godot <godot-4.4>"
+  - value: "115"
+    label: arrows
+    source: https://github.com/MakeBoldSolutions/ArrowSpark/blob/6e60e117acc175a47feb55f52a3a8da1c6cedaab/.knowledge/reference/reference-puzzle-design-report.md
+    command: "python tests/run_puzzle_structural_report.py --godot <godot-4.4>"
+  - value: "1,348"
+    label: occupied cells (of 1,472)
+    source: https://github.com/MakeBoldSolutions/ArrowSpark/blob/6e60e117acc175a47feb55f52a3a8da1c6cedaab/.knowledge/reference/reference-puzzle-design-report.md
+    command: "python tests/run_puzzle_structural_report.py --godot <godot-4.4>"
+  - value: "92%"
+    label: density
+    source: https://github.com/MakeBoldSolutions/ArrowSpark/blob/6e60e117acc175a47feb55f52a3a8da1c6cedaab/.knowledge/reference/reference-puzzle-design-report.md
+    command: "python tests/run_puzzle_structural_report.py --godot <godot-4.4>"
+  - value: "207"
+    label: bends
+    source: https://github.com/MakeBoldSolutions/ArrowSpark/blob/6e60e117acc175a47feb55f52a3a8da1c6cedaab/.knowledge/reference/reference-puzzle-design-report.md
+    command: "python tests/run_puzzle_structural_report.py --godot <godot-4.4>"
+  - value: "43 cells"
+    label: longest arrow
+    source: https://github.com/MakeBoldSolutions/ArrowSpark/blob/6e60e117acc175a47feb55f52a3a8da1c6cedaab/.knowledge/reference/reference-puzzle-design-report.md
+    command: "python tests/run_puzzle_structural_report.py --godot <godot-4.4>"
+  - value: "6"
+    label: legal opening moves
+    source: https://github.com/MakeBoldSolutions/ArrowSpark/blob/6e60e117acc175a47feb55f52a3a8da1c6cedaab/.knowledge/reference/reference-puzzle-design-report.md
+    command: "python tests/run_puzzle_structural_report.py --godot <godot-4.4>"
+  - value: "661"
+    label: dependency edges
+    source: https://github.com/MakeBoldSolutions/ArrowSpark/blob/6e60e117acc175a47feb55f52a3a8da1c6cedaab/.knowledge/reference/reference-puzzle-design-report.md
+    command: "python tests/run_puzzle_structural_report.py --godot <godot-4.4>"
+
+clock:
+  # The clock stops at the Spec 010 merge (PR #4), the last commit before this showcase.
+  cutoffCommit: 6e60e117acc175a47feb55f52a3a8da1c6cedaab
+  source: https://github.com/MakeBoldSolutions/ArrowSpark/commit/6e60e117acc175a47feb55f52a3a8da1c6cedaab
+  items:
+    - label: First commit to the Spec 010 merge, elapsed (nights included)
+      value: "121 h 10 min"
+      command: "git log --reverse --format='%h %ad %s' --date=format:'%Y-%m-%d %H:%M' 6e60e11 | sed -n '1p;$p'"
+    - label: Commits
+      value: "91"
+      command: "git rev-list --count 6e60e11"
+    - label: Merged GitHub pull requests
+      value: "4"
+      command: "git log --merges --oneline 6e60e11 | grep -c 'Merge pull request'"
+    - label: Work sessions (a new session after a gap over 90 minutes)
+      value: "17"
+      command: "git log --reverse --format=%at 6e60e11, then split wherever consecutive commits are more than 5,400 seconds apart"
+    - label: Commit-bracketed activity across those sessions (a floor, not a timesheet)
+      value: "about 22.9 h"
+      command: "sum of (last commit − first commit) per session from the same split"
+    - label: Commits that touch tests/
+      value: "19"
+      command: "git log --oneline 6e60e11 -- tests | wc -l"
+    - label: Lines of GDScript in scripts/ and scenes/
+      value: "3,820"
+      command: "git ls-tree -r --name-only 6e60e11 | grep -E '^(scripts|scenes)/.*\\.gd$' | xargs -I{} git show 6e60e11:{} | wc -l"
+    - label: Lines of GDScript in tests/
+      value: "5,340"
+      command: "git ls-tree -r --name-only 6e60e11 | grep -E '^tests/.*\\.gd$' | xargs -I{} git show 6e60e11:{} | wc -l"

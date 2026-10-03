@@ -1,0 +1,228 @@
+name: Showcase
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+  workflow_dispatch:
+  schedule:
+    # Daily production load check; does nothing unless SYNTHETIC_DAILY is 'true' (learning window only).
+    - cron: '17 13 * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    if: github.event_name != 'schedule' && !(github.event_name == 'pull_request' && github.event.action == 'closed')
+    runs-on: ubuntu-latest
+    env:
+      GODOT_VERSION: "4.4-stable"
+      GODOT_DIR: ${{ github.workspace }}/../godot
+    outputs:
+      game_build: ${{ steps.export.outputs.game_build }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Cache Godot ${{ env.GODOT_VERSION }} editor and Web templates
+        id: godot-cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.GODOT_DIR }}
+          key: godot-${{ env.GODOT_VERSION }}-linux-web-v1
+
+      - name: Download and verify Godot ${{ env.GODOT_VERSION }} (SHA-512)
+        if: steps.godot-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p "$GODOT_DIR" && cd "$GODOT_DIR"
+          BASE="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}"
+          EDITOR="Godot_v${GODOT_VERSION}_linux.x86_64.zip"
+          TEMPLATES="Godot_v${GODOT_VERSION}_export_templates.tpz"
+          curl -fsSL -o SHA512-SUMS.txt "$BASE/SHA512-SUMS.txt"
+          curl -fsSL -o "$EDITOR" "$BASE/$EDITOR"
+          curl -fsSL -o "$TEMPLATES" "$BASE/$TEMPLATES"
+          grep -F " ${EDITOR}" SHA512-SUMS.txt | sha512sum --check --strict -
+          grep -F " ${TEMPLATES}" SHA512-SUMS.txt | sha512sum --check --strict -
+          unzip -q "$EDITOR"
+          mkdir -p templates
+          unzip -q -j "$TEMPLATES" templates/web_nothreads_release.zip templates/version.txt -d templates
+          rm "$EDITOR" "$TEMPLATES"
+
+      - name: Install Godot templates
+        run: |
+          VERSION_DIR="$(cat "$GODOT_DIR/templates/version.txt")"
+          mkdir -p "$HOME/.local/share/godot/export_templates/$VERSION_DIR"
+          cp "$GODOT_DIR/templates/"* "$HOME/.local/share/godot/export_templates/$VERSION_DIR/"
+          chmod +x "$GODOT_DIR/Godot_v${GODOT_VERSION}_linux.x86_64"
+          echo "GODOT_BIN=$GODOT_DIR/Godot_v${GODOT_VERSION}_linux.x86_64" >> "$GITHUB_ENV"
+
+      - name: Run puzzle rule, layout, and solvability regressions
+        run: python tests/run_puzzle_regressions.py --godot "$GODOT_BIN"
+
+      - name: Run save/settings and input regressions
+        run: python tests/run_regressions.py --godot "$GODOT_BIN"
+
+      # Godot 4.4 can report spurious autoload parse errors when a project that already has a
+      # .godot cache is imported again, so validate a fresh copy without one.
+      - name: Validate project (editor import, fresh copy)
+        run: |
+          mkdir -p ../validate
+          tar --exclude=./.godot --exclude=./.git --exclude=./web -cf - . | tar -xf - -C ../validate
+          "$GODOT_BIN" --headless --path ../validate --editor --quit 2>&1 | tee editor.log
+          if grep -E "SCRIPT ERROR|Parse Error" editor.log; then exit 1; fi
+
+      - name: Export the game for the Web
+        id: export
+        run: |
+          BUILD="$(node web/scripts/export-game.mjs --godot "$GODOT_BIN" | tail -n 1)"
+          echo "game_build=$BUILD" >> "$GITHUB_OUTPUT"
+          echo "PUBLIC_GAME_BUILD=$BUILD" >> "$GITHUB_ENV"
+
+      - name: Install site dependencies
+        working-directory: web
+        run: npm ci
+
+      - name: Audit site dependencies
+        working-directory: web
+        run: npm audit --audit-level=high
+
+      - name: Check site
+        working-directory: web
+        run: npm run check
+
+      - name: Build site
+        working-directory: web
+        env:
+          PUBLIC_REACTIONS_URL: ${{ vars.PUBLIC_REACTIONS_URL }}
+        run: npm run build
+
+      - name: Synthetic load check (local build)
+        working-directory: web
+        run: |
+          npx playwright install --with-deps chromium
+          npx astro preview --port 4321 &
+          for i in $(seq 1 60); do curl -fsS -o /dev/null http://localhost:4321/ && break; sleep 1; done
+          set +e
+          node scripts/synthetic-check.mjs http://localhost:4321
+          code=$?
+          set -e
+          if [ "$code" = "3" ]; then
+            echo "::warning::Synthetic check inconclusive (no WebGL2 in this runner); not an outage."
+          elif [ "$code" != "0" ]; then
+            exit "$code"
+          fi
+
+      - name: Upload site
+        uses: actions/upload-artifact@v4
+        with:
+          name: site
+          path: web/dist
+          retention-days: 7
+
+  # Deploys the built site: a preview environment for each pull request, production on main.
+  # Needs the AZURE_STATIC_WEB_APPS_API_TOKEN secret; PUBLIC_REACTIONS_URL is a repository variable.
+  deploy:
+    needs: build
+    if: >-
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-latest
+    outputs:
+      url: ${{ steps.deploy.outputs.static_web_app_url }}
+    steps:
+      - name: Download site
+        uses: actions/download-artifact@v4
+        with:
+          name: site
+          path: dist
+
+      - name: Deploy to Azure Static Web Apps
+        id: deploy
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: upload
+          app_location: dist
+          skip_app_build: true
+          skip_api_build: true
+
+  # One synthetic load check against the deployment that was just made. A failure blocks the PR;
+  # "inconclusive" (no WebGL2 in the runner) is a warning naming the cause, never an outage.
+  synthetic-preview:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Synthetic load check
+        working-directory: web
+        env:
+          TARGET_URL: ${{ needs.deploy.outputs.url }}
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+          set +e
+          node scripts/synthetic-check.mjs "$TARGET_URL"
+          code=$?
+          set -e
+          if [ "$code" = "3" ]; then
+            echo "::warning::Synthetic check inconclusive on $TARGET_URL: no WebGL2 in this runner (software WebGL backend unavailable). Not an outage."
+          elif [ "$code" != "0" ]; then
+            exit "$code"
+          fi
+
+  close-preview:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close the pull request's preview environment
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          action: close
+
+  # Daily check of production during the learning window only (repository variable SYNTHETIC_DAILY).
+  synthetic-daily:
+    if: github.event_name == 'schedule' && vars.SYNTHETIC_DAILY == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Synthetic load check (production)
+        working-directory: web
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+          set +e
+          node scripts/synthetic-check.mjs https://arrow.makeboldspark.com
+          code=$?
+          set -e
+          if [ "$code" = "3" ]; then
+            echo "::warning::Synthetic check inconclusive: no WebGL2 in this runner. Not an outage."
+          elif [ "$code" != "0" ]; then
+            exit "$code"
+          fi

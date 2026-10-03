@@ -1,0 +1,24 @@
+---
+// Spaced uppercase label above a heading.
+interface Props {
+  tone?: 'accent' | 'brand' | 'muted' | 'onDark';
+  as?: 'div' | 'p' | 'span';
+}
+const { tone = 'accent', as: Tag = 'div' } = Astro.props;
+---
+<Tag class={`eyebrow eyebrow--${tone}`}><slot /></Tag>
+
+<style>
+  .eyebrow {
+    font-family: var(--font-body);
+    font-weight: var(--fw-semibold);
+    font-size: var(--fs-xs);
+    letter-spacing: var(--ls-eyebrow);
+    text-transform: uppercase;
+    margin: 0;
+  }
+  .eyebrow--accent { color: var(--accent-strong); }
+  .eyebrow--brand { color: var(--brand); }
+  .eyebrow--muted { color: var(--text-muted); }
+  .eyebrow--onDark { color: var(--ember-300); }
+</style>

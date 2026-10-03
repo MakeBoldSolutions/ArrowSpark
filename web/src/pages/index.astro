@@ -1,0 +1,62 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import EntryCard from '../components/site/EntryCard.astro';
+import PromiseStrip from '../components/site/PromiseStrip.astro';
+import Eyebrow from '../components/ui/Eyebrow.astro';
+---
+<BaseLayout
+  title="ArrowSpark"
+  description="Try the game, then see how it was built. A Make Bold Spark experiment in game design and spec-driven development."
+>
+  <section class="page hero">
+    <Eyebrow>A Make Bold Spark experiment</Eyebrow>
+    <h1 class="hero__title">ArrowSpark</h1>
+    <p class="hero__claim">Try the Game.<br />See How It Was Built.</p>
+    <p class="lede hero__framing">
+      Two things are on show here, and we want your honest opinion of both: the game, and the way it was built.
+    </p>
+  </section>
+
+  <section class="page entries" aria-label="Choose where to start">
+    <EntryCard href="/play/" tone="rust" eyebrow="The artifact" title="Try the Game">
+      Untangle a board of arrows. There is always a way out. Mistakes cost score, not play.
+    </EntryCard>
+    <EntryCard href="/devspark/" tone="ink" eyebrow="The method" title="Built with DevSpark">
+      We wrote down what we believed, built the smallest thing that could prove us wrong, and let the evidence pick the next step.
+    </EntryCard>
+  </section>
+  <p class="page entries__note muted">
+    Two independent entry points. You can start with either, and the <a href="/journey/">Journey</a> is where they meet.
+  </p>
+
+  <PromiseStrip />
+</BaseLayout>
+
+<style>
+  .hero { padding-block: clamp(var(--space-12), 8vw, var(--space-24)) var(--space-12); }
+  .hero__title {
+    font-size: var(--fs-display);
+    line-height: var(--lh-tight);
+    letter-spacing: var(--ls-tighter);
+    color: var(--brand);
+    margin: var(--space-4) 0 0;
+  }
+  .hero__claim {
+    margin: var(--space-5) 0 0;
+    font-family: var(--font-display);
+    font-weight: var(--fw-bold);
+    font-size: var(--fs-h2);
+    line-height: var(--lh-snug);
+    letter-spacing: var(--ls-tighter);
+    color: var(--text-strong);
+    max-width: 20ch;
+  }
+  .hero__framing { margin-top: var(--space-6); }
+  .entries {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 21rem), 1fr));
+    gap: var(--space-6);
+    padding-bottom: var(--space-6);
+  }
+  .entries__note { padding-bottom: var(--space-16); font-size: var(--fs-sm); }
+</style>

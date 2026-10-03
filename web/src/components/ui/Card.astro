@@ -1,0 +1,36 @@
+---
+// Make Bold card: white surface on cream, hairline warm border, low-spread shadow.
+interface Props {
+  padding?: 'none' | 'sm' | 'md' | 'lg' | 'xl';
+  interactive?: boolean;
+  accent?: 'none' | 'brand' | 'accent' | 'positive' | 'top-brand' | 'top-positive';
+  as?: 'div' | 'section' | 'article' | 'li';
+  class?: string;
+}
+const { padding = 'md', interactive = false, accent = 'none', as: Tag = 'div', class: className } = Astro.props;
+const classes = ['card', `card--pad-${padding}`, interactive && 'card--interactive', accent !== 'none' && `card--${accent}`, className]
+  .filter(Boolean)
+  .join(' ');
+---
+<Tag class={classes}><slot /></Tag>
+
+<style>
+  .card {
+    background: var(--surface-card);
+    border: var(--border-hairline) solid var(--border-default);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+  }
+  .card--pad-none { padding: 0; }
+  .card--pad-sm { padding: var(--space-4); }
+  .card--pad-md { padding: var(--space-5); }
+  .card--pad-lg { padding: var(--space-8); }
+  .card--pad-xl { padding: clamp(var(--space-6), 4vw, var(--space-10)); }
+  .card--interactive { transition: box-shadow var(--dur-base) var(--ease-standard); }
+  .card--interactive:hover { box-shadow: var(--shadow-md); }
+  .card--brand { border-left: var(--border-accent) solid var(--brand); }
+  .card--accent { border-left: var(--border-accent) solid var(--accent); }
+  .card--positive { border-left: var(--border-accent) solid var(--positive); }
+  .card--top-brand { border-top: var(--border-accent) solid var(--brand); }
+  .card--top-positive { border-top: var(--border-accent) solid var(--positive); }
+</style>

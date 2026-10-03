@@ -1,0 +1,41 @@
+---
+import Eyebrow from '../ui/Eyebrow.astro';
+
+const items = [
+  { label: 'The game', text: 'Untangle a board of arrows.' },
+  { label: 'The promise', text: 'There is always a way out.' },
+  { label: 'The cost', text: 'Mistakes cost score, not play.' },
+  { label: 'The method', text: 'Belief, evidence, next decision.' },
+];
+---
+<section class="section--sunken" aria-label="At a glance">
+  <ul class="promise">
+    {items.map((item) => (
+      <li>
+        <Eyebrow>{item.label}</Eyebrow>
+        <p class="promise__text">{item.text}</p>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<style>
+  .promise {
+    list-style: none;
+    margin: 0 auto;
+    max-width: var(--container-max);
+    padding: var(--space-12) var(--gutter);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+    gap: var(--space-8);
+  }
+  .promise__text {
+    margin-top: var(--space-2);
+    font-family: var(--font-display);
+    font-weight: var(--fw-bold);
+    font-size: var(--fs-xl);
+    line-height: var(--lh-snug);
+    letter-spacing: var(--ls-tight);
+    color: var(--text-strong);
+  }
+</style>

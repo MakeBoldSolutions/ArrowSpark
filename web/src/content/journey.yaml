@@ -1,0 +1,53 @@
+# The shared Journey: where the game path and the method path meet. Spoiler-light and
+# reachable before play, so it never names how the Reference Knot is put together.
+
+- n: 1
+  title: First playable
+  changed: A written rule contract and plain rule classes produced an eight-arrow board you could clear.
+  learned: Keep the rules apart from the screen, so they can be tested without one.
+  chapter: first-game-loop
+- n: 2
+  title: Arrows with tails, and a proof
+  changed: Arrows gained bent tails, and a solver began proving that every puzzle can be finished.
+  learned: Removing an arrow can only free cells, so you can never get stuck by playing.
+  chapter: provably-solvable
+- n: 3
+  title: Arrows that unwind
+  changed: Arrows became continuous lines that leave along their own path instead of sliding off.
+  learned: How an arrow leaves turned out to be part of the game, not polish.
+  chapter: making-it-feel-right
+- n: 4
+  title: A catalog and Level Select
+  changed: Eight hand-built puzzles, a Level Select menu, Replay and Next Puzzle.
+  learned: A menu that looks right can still leave a keyboard player with nothing selected.
+  chapter: playtest-beat-the-dashboard
+- n: 5
+  title: The analyzer and the 2/5 playtest
+  changed: An analyzer measured each board's structure, and six experiments hit every target.
+  learned: A human rated them 2 out of 5 for challenge. Structure is not what makes a puzzle feel hard.
+  chapter: playtest-beat-the-dashboard
+- n: 6
+  title: Open Move and the player contract
+  changed: “Show Me an Open Move” arrived, with a score cost and no limit on use.
+  learned: Harder puzzles need a safety valve before they need more arrows.
+  chapter: contract-before-difficulty
+- n: 7
+  title: A canvas bigger than the screen
+  changed: Zoom, pan and Fit Puzzle, by mouse, keyboard and gamepad.
+  learned: The puzzle should define the world; the screen is only a window into it.
+  chapter: contract-before-difficulty
+- n: 8
+  title: Six experiments
+  changed: Six hand-built experiments with long, bent arrows, and an audit of the project's own rules.
+  learned: They gave a vocabulary, not a recipe. And a rule you don't audit is a wish.
+  chapter: pulling-the-thread
+- n: 9
+  title: The Reference Knot
+  changed: One level composed by hand through three versions and played to the end by its designer.
+  learned: Green checks were not enough, and one tester is not outside validation.
+  chapter: the-reference-knot
+- n: 10
+  title: This showcase
+  changed: The game in a browser, the story beside it, and a way to tell us what you think.
+  learned: What independent players make of it is the next thing to find out.
+  chapter: now-its-your-turn

@@ -1,0 +1,29 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Eyebrow from '../../components/ui/Eyebrow.astro';
+import ChapterList from '../../components/story/ChapterList.astro';
+
+const chapters = (await getCollection('chapters', (entry) => entry.data.status === 'published')).sort(
+  (a, b) => a.data.part - b.data.part,
+);
+---
+<BaseLayout
+  title="Read the Story"
+  description="The development series: how ArrowSpark was built with DevSpark, chapter by chapter, with the commits and pull requests behind every claim."
+  current="story"
+>
+  <section class="page page--narrow section">
+    <Eyebrow>Read the Story</Eyebrow>
+    <h1 class="page-title">The development series.</h1>
+    <p class="lede story-intro">
+      How ArrowSpark was built with DevSpark, told in order by the developer who built it. Every timing claim links to
+      the commit behind it. Chapters that discuss how the level was designed say so before you start.
+    </p>
+    <ChapterList chapters={chapters} />
+  </section>
+</BaseLayout>
+
+<style>
+  .story-intro { margin: var(--space-5) 0 var(--space-10); }
+</style>

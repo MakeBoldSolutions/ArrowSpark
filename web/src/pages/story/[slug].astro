@@ -1,0 +1,36 @@
+---
+import { getCollection, render } from 'astro:content';
+import ArticleLayout from '../../layouts/ArticleLayout.astro';
+
+export async function getStaticPaths() {
+  const chapters = (await getCollection('chapters', (entry) => entry.data.status === 'published')).sort(
+    (a, b) => a.data.part - b.data.part,
+  );
+  return chapters.map((chapter, index) => {
+    const previous = chapters[index - 1];
+    const next = chapters[index + 1];
+    return {
+      params: { slug: chapter.data.slug },
+      props: {
+        chapter,
+        previous: previous ? { title: previous.data.title, slug: previous.data.slug } : undefined,
+        next: next ? { title: next.data.title, slug: next.data.slug } : undefined,
+      },
+    };
+  });
+}
+
+const { chapter, previous, next } = Astro.props;
+const { Content } = await render(chapter);
+---
+<ArticleLayout
+  title={chapter.data.title}
+  description={chapter.data.description}
+  part={chapter.data.part}
+  spoiler={chapter.data.spoiler}
+  sources={chapter.data.sources}
+  previous={previous}
+  next={next}
+>
+  <Content />
+</ArticleLayout>

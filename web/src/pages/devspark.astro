@@ -1,0 +1,189 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Eyebrow from '../components/ui/Eyebrow.astro';
+import Button from '../components/ui/Button.astro';
+import Icon from '../components/ui/Icon.astro';
+import BeatList from '../components/story/BeatList.astro';
+import LessonsPair from '../components/story/LessonsPair.astro';
+import FactTiles from '../components/story/FactTiles.astro';
+import EvidenceCallout from '../components/story/EvidenceCallout.astro';
+import SpoilerGate from '../components/site/SpoilerGate.astro';
+import StoryReactionForm from '../components/play/StoryReactionForm.astro';
+
+const beats = (await getCollection('beats')).map((entry) => entry.data).sort((a, b) => a.n - b.n);
+const openBeats = beats.filter((beat) => !beat.spoiler);
+const spoilerBeats = beats.filter((beat) => beat.spoiler);
+const lessons = (await getEntry('lessons', 'main'))!.data;
+const facts = (await getEntry('facts', 'main'))!.data;
+---
+<BaseLayout
+  title="Built with DevSpark"
+  description="How ArrowSpark was built: what we believed, what the evidence said, and what we did next, including where the evidence said the process was wrong."
+  current="devspark"
+>
+  <section class="page intro">
+    <Eyebrow>Built with DevSpark</Eyebrow>
+    <h1 class="intro__title">
+      We wrote down what we believed, built the smallest thing that could prove us wrong, and let the evidence pick the next step.
+    </h1>
+    <p class="intro__aside">Sometimes the evidence showed the game was wrong. Sometimes it showed the process was wrong.</p>
+    <p class="lede intro__what">
+      DevSpark is a spec-driven way of building software: each change starts as a short written specification, goes
+      through adversarial review before any code exists, and ends with the lasting record in code, tests and written
+      knowledge, while the spec itself is temporary. ArrowSpark is the evidence. The repository is public, so every
+      claim below links to the commit or pull request that shows it.
+    </p>
+  </section>
+
+  <section class="page legend" aria-label="How to read the beats">
+    <span class="legend__belief">Belief</span>
+    <Icon name="arrow-right" />
+    <span class="legend__evidence">Evidence</span>
+    <Icon name="arrow-right" />
+    <span class="legend__decision">Next decision</span>
+    <span class="legend__note">Every beat below follows this order.</span>
+  </section>
+
+  <section class="page beats-section" aria-label="Evidence beats">
+    <BeatList beats={openBeats} />
+    {spoilerBeats.length > 0 && (
+      <>
+        <SpoilerGate />
+        <BeatList beats={spoilerBeats} />
+      </>
+    )}
+    <EvidenceCallout eyebrow="Convergence rule">
+      A spec is complete when its objective is resolved, not when every possible observation has been eliminated.
+      <Fragment slot="more">
+        <p>
+          Only a finding that blocks the objective becomes more work. Everything else is classified (an accepted
+          limitation, deferred work, or something learned) and carried forward with its reason.
+          <a href="/story/now-its-your-turn/">How the project learned this</a>
+        </p>
+      </Fragment>
+    </EvidenceCallout>
+  </section>
+
+  <section class="section--sunken" aria-labelledby="durable-truth">
+    <div class="page durable">
+      <div>
+        <Eyebrow>Durable truth</Eyebrow>
+        <h2 id="durable-truth">Code, Tests, Knowledge.</h2>
+        <p><strong>Code</strong> says what the system does.</p>
+        <p><strong>Tests</strong> prove the behaviours that matter.</p>
+        <p><strong>Knowledge</strong> explains the current architecture, product rules and decisions.</p>
+        <p class="muted">Specs are temporary. Once a change ships, the lasting truth lives in these three places.</p>
+      </div>
+      <svg class="durable__diagram" viewBox="0 0 420 340" role="img" aria-labelledby="durable-diagram-title">
+        <title id="durable-diagram-title">Code at the top, tests and knowledge below, each joined to the others</title>
+        <g class="durable__lines"><path d="M210 82L72 244" /><path d="M210 82L346 244" /><path d="M134 270H276" /></g>
+        <rect class="durable__code" x="140" y="30" width="140" height="52" rx="8" />
+        <text class="durable__label durable__label--light" x="210" y="63">CODE</text>
+        <rect class="durable__tests" x="10" y="244" width="124" height="52" rx="8" />
+        <text class="durable__label" x="72" y="277">TESTS</text>
+        <rect class="durable__knowledge" x="276" y="244" width="140" height="52" rx="8" />
+        <text class="durable__label durable__label--light" x="346" y="277">KNOWLEDGE</text>
+        <text class="durable__caption" x="210" y="106">what it does</text>
+        <text class="durable__caption" x="72" y="320">what is proven</text>
+        <text class="durable__caption" x="346" y="320">why it is this way</text>
+      </svg>
+    </div>
+  </section>
+
+  <section class="page section" aria-labelledby="worked-didnt">
+    <Eyebrow>Worked and didn’t</Eyebrow>
+    <h2 id="worked-didnt" class="section-title">What worked. What didn’t.</h2>
+    <LessonsPair lessons={lessons} />
+  </section>
+
+  <section class="section--sunken" aria-labelledby="reference-knot">
+    <div class="page section">
+      <Eyebrow>Reference Knot</Eyebrow>
+      <h2 id="reference-knot" class="section-title">The current showcase level.</h2>
+      <SpoilerGate />
+      <FactTiles facts={facts.referenceKnot} />
+    </div>
+  </section>
+
+  <section class="cta" aria-label="Play the game">
+    <div class="page cta__inner">
+      <p class="cta__text">Now form your own opinion of the game.</p>
+      <Button href="/play/" variant="secondary" size="lg">Try the Game <Icon name="arrow-right" /></Button>
+    </div>
+  </section>
+
+  <section class="page section" aria-label="More">
+    <p class="more">
+      Continue with the <a href="/journey/">Journey</a>, the <a href="/evidence/">Evidence</a>, or
+      <a href="/story/">read the whole story</a>.
+    </p>
+    <StoryReactionForm />
+  </section>
+</BaseLayout>
+
+<style>
+  .intro { padding-block: clamp(var(--space-10), 7vw, var(--space-20)) var(--space-10); }
+  .intro__title { font-size: var(--fs-h1); max-width: 22ch; margin-top: var(--space-4); }
+  .intro__aside {
+    font-size: var(--fs-xl);
+    max-width: 50ch;
+    margin-top: var(--space-6);
+    color: var(--ink-700);
+    border-left: var(--border-accent) solid var(--brand);
+    padding-left: var(--space-5);
+  }
+  .intro__what { margin-top: var(--space-6); max-width: 62ch; }
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3) var(--space-5);
+    align-items: center;
+    font-weight: var(--fw-bold);
+    font-size: var(--fs-sm);
+    letter-spacing: var(--ls-eyebrow);
+    text-transform: uppercase;
+    color: var(--ink-300);
+    padding-bottom: var(--space-6);
+  }
+  .legend__belief { color: var(--brand); }
+  .legend__evidence { color: var(--text-strong); }
+  .legend__decision { color: var(--accent-strong); }
+  .legend__note { letter-spacing: var(--ls-normal); text-transform: none; font-weight: var(--fw-medium); color: var(--ink-600); }
+  .beats-section { padding-bottom: var(--space-16); }
+  .durable {
+    padding-block: var(--space-16);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+    gap: var(--space-10);
+    align-items: center;
+  }
+  .durable p { margin-bottom: var(--space-2); }
+  .durable__diagram { width: 100%; max-width: 28rem; justify-self: center; }
+  .durable__lines path { stroke: var(--ink-900); stroke-width: 2; fill: none; }
+  .durable__code { fill: var(--brand); }
+  .durable__tests { fill: var(--white); stroke: var(--ink-900); stroke-width: 2; }
+  .durable__knowledge { fill: var(--ink-900); }
+  .durable__label { font-family: var(--font-display); font-weight: var(--fw-extrabold); font-size: var(--fs-lg); text-anchor: middle; fill: var(--ink-900); }
+  .durable__label--light { fill: var(--cream); }
+  .durable__caption { font-family: var(--font-body); font-size: var(--fs-sm); text-anchor: middle; fill: var(--ink-600); }
+  .section-title { font-size: var(--fs-h2); margin: var(--space-3) 0 var(--space-8); }
+  .cta { background: var(--brand); color: var(--text-on-brand); }
+  .cta__inner {
+    padding-block: var(--space-12);
+    display: flex;
+    gap: var(--space-5) var(--space-8);
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .cta__text {
+    font-family: var(--font-display);
+    font-weight: var(--fw-extrabold);
+    font-size: var(--fs-h3);
+    line-height: var(--lh-snug);
+    max-width: 24ch;
+    margin: 0;
+  }
+  .more { font-size: var(--fs-lg); }
+</style>

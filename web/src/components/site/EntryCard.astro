@@ -1,0 +1,60 @@
+---
+import Icon from '../ui/Icon.astro';
+
+interface Props {
+  href: string;
+  tone: 'rust' | 'ink';
+  eyebrow: string;
+  title: string;
+}
+const { href, tone, eyebrow, title } = Astro.props;
+---
+<a class={`entry entry--${tone}`} href={href}>
+  <span class="entry__eyebrow">{eyebrow}</span>
+  <span class="entry__title">{title}</span>
+  <span class="entry__text"><slot /></span>
+  <span class="entry__cta"><span>{title}</span><Icon name="arrow-right" /></span>
+</a>
+
+<style>
+  .entry {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    min-height: calc(var(--space-32) * 2.3);
+    padding: var(--space-8);
+    border-radius: var(--radius-lg);
+    color: var(--text-on-dark);
+    box-shadow: var(--shadow-sm);
+    transition: background var(--dur-base) var(--ease-standard);
+  }
+  .entry:hover { text-decoration: none; color: var(--text-on-dark); }
+  .entry--rust { background: var(--brand); }
+  .entry--rust:hover { background: var(--brand-strong); }
+  .entry--ink { background: var(--surface-dark); }
+  .entry--ink:hover { background: var(--surface-dark-2); }
+  .entry__eyebrow { font-size: var(--fs-xs); font-weight: var(--fw-semibold); letter-spacing: var(--ls-eyebrow); text-transform: uppercase; }
+  .entry--rust .entry__eyebrow { color: var(--rust-100); }
+  .entry--ink .entry__eyebrow { color: var(--ember-300); }
+  .entry__title {
+    font-family: var(--font-display);
+    font-weight: var(--fw-extrabold);
+    font-size: var(--fs-h2);
+    line-height: var(--lh-tight);
+    letter-spacing: var(--ls-tighter);
+  }
+  .entry__text { font-size: var(--fs-lg); max-width: 38ch; }
+  .entry--rust .entry__text { color: var(--rust-50); }
+  .entry--ink .entry__text { color: var(--ink-200); }
+  .entry__cta {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: var(--fw-bold);
+    font-size: var(--fs-sm);
+    letter-spacing: var(--ls-eyebrow);
+    text-transform: uppercase;
+  }
+  .entry__cta :global(.icon) { font-size: var(--fs-2xl); }
+</style>

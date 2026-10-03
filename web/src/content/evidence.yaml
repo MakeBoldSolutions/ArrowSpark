@@ -1,0 +1,55 @@
+# What we can show, and what we can't. Counts are taken at the Spec 010 merge (6e60e11).
+
+automated:
+  - title: Over 4,000 passing checks
+    detail: "4,109 PASS lines across the two required regression gates at the Spec 010 merge: 4,031 in the puzzle gate and 78 in the save and input gate, with every failure counter at zero."
+    source: https://github.com/MakeBoldSolutions/ArrowSpark/blob/6e60e117acc175a47feb55f52a3a8da1c6cedaab/tests/README.md
+    command: "At 6e60e11: python tests/run_puzzle_regressions.py --godot <godot-4.4> | grep -c '^PASS:' and python tests/run_regressions.py --godot <godot-4.4> | grep -c '^PASS:'"
+  - title: Solver validation
+    detail: Every shipped puzzle is proven solvable and its mistake-free solution is replayed. Order independence is checked at every branching state, and at every sixth one for the densest board.
+    source: https://github.com/MakeBoldSolutions/ArrowSpark/blob/6e60e117acc175a47feb55f52a3a8da1c6cedaab/tests/puzzle_catalog_check.gd
+  - title: Real-scene completion
+    detail: Every catalog puzzle is played to the end inside the real game scene in a headless run.
+    source: https://github.com/MakeBoldSolutions/ArrowSpark/blob/6e60e117acc175a47feb55f52a3a8da1c6cedaab/tests/puzzle_layout_check.gd
+  - title: Viewport and presentation
+    detail: Coordinate conversion, zoom, pan and Fit, departure geometry, layout and focus order.
+    source: https://github.com/MakeBoldSolutions/ArrowSpark/blob/6e60e117acc175a47feb55f52a3a8da1c6cedaab/tests/puzzle_canvas_check.gd
+  - title: Scoring
+    detail: Score, mistakes, Open Move cost, session best and the overall session score.
+    source: https://github.com/MakeBoldSolutions/ArrowSpark/blob/6e60e117acc175a47feb55f52a3a8da1c6cedaab/tests/puzzle_scoreboard_check.gd
+  - title: Saves and input
+    detail: Settings recovery, input remapping and the guarantee that starting a puzzle never resets saved progress.
+    source: https://github.com/MakeBoldSolutions/ArrowSpark/blob/6e60e117acc175a47feb55f52a3a8da1c6cedaab/tests/save_input_regression.gd
+
+human:
+  baseline: One human tester. The tester designed the level. No independent player has validated it yet.
+  sources:
+    - label: Reference Puzzle design report
+      url: https://github.com/MakeBoldSolutions/ArrowSpark/blob/6e60e117acc175a47feb55f52a3a8da1c6cedaab/.knowledge/reference/reference-puzzle-design-report.md
+    - label: Fresh-player check deferred to this showcase (commit)
+      url: https://github.com/MakeBoldSolutions/ArrowSpark/commit/4aba5e71bd7b72284a0c7841f945b9890a8253cf
+
+notClaimed:
+  - No claim that the analyzer's measurements say whether a puzzle is fun.
+  - No claim that the Reference Knot is hard for everyone, or good for everyone.
+  - No claim of support on phones, tablets or touch screens.
+  - No claim of tested gamepad play in the browser.
+  - No speed-up multiple. Elapsed time is not effort, and there is no stated baseline to compare against.
+  - No claim that DevSpark is finished or right in every case.
+
+limitations:
+  - item: "The Web-readiness gate the project set itself (three levels worth keeping and an outside tester) was not met. This showcase is how the outside tester arrives."
+    class: accepted-limitation
+    source: https://github.com/MakeBoldSolutions/ArrowSpark/commit/b859b4bf8c3dde72bc124f55d7b894b3fd8714a8
+  - item: Mid-level, around ten moves can be obvious at once. Recorded at the boundary of excess, not redesigned.
+    class: accepted-limitation
+    source: https://github.com/MakeBoldSolutions/ArrowSpark/commit/69414148c6a1e0c89adc3548c496e92281910677
+  - item: Whether a first-time player finds the ArrowSpark Levels group in Level Select unaided.
+    class: deferred
+    source: https://github.com/MakeBoldSolutions/ArrowSpark/commit/4aba5e71bd7b72284a0c7841f945b9890a8253cf
+  - item: A recorded desktop smoke run and physical keyboard and gamepad traversal for the Reference Knot release.
+    class: not-performed
+    source: https://github.com/MakeBoldSolutions/ArrowSpark/commit/313d5e636b2dd0083a20ef4b7956fbcb45a44cc1
+  - item: The six earlier experiments were judged in one aggregate session; per-puzzle results are unknown, not zero.
+    class: accepted-limitation
+    source: https://github.com/MakeBoldSolutions/ArrowSpark/blob/6e60e117acc175a47feb55f52a3a8da1c6cedaab/.knowledge/reference/gordian-knot-experiments.md

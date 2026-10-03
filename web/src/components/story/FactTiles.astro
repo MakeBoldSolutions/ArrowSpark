@@ -1,0 +1,59 @@
+---
+// Reference Knot board facts. They describe the board; they do not judge it.
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  facts: CollectionEntry<'facts'>['data']['referenceKnot'];
+  contentVersion?: { value: string; source: string } | undefined;
+}
+const { facts, contentVersion } = Astro.props;
+---
+<div>
+  <ul class="facts">
+    {facts.map((fact) => (
+      <li class="facts__tile">
+        <span class="facts__value">{fact.value}</span>
+        <span class="facts__label">{fact.label}</span>
+      </li>
+    ))}
+  </ul>
+  <p class="facts__note">
+    These are structural facts about the board. They describe it; they do not judge it. The project learned that
+    structural measurements do not say whether a puzzle is fun.
+    <a href={facts[0]?.source}>Source</a>
+  </p>
+  {contentVersion && (
+    <p class="facts__version">
+      Puzzle content version: <code>{contentVersion.value}</code>. This names the board’s exact geometry, independent of the
+      app version; every reaction and observed session refers to it. <a href={contentVersion.source}>Source</a>
+    </p>
+  )}
+</div>
+
+<style>
+  .facts {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+    gap: var(--space-4);
+  }
+  .facts__tile {
+    background: var(--surface-card);
+    border: var(--border-hairline) solid var(--border-default);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4) var(--space-5);
+    display: flex;
+    flex-direction: column;
+  }
+  .facts__value {
+    font-family: var(--font-display);
+    font-weight: var(--fw-extrabold);
+    font-size: var(--fs-h3);
+    letter-spacing: var(--ls-tighter);
+    color: var(--brand);
+  }
+  .facts__label { font-size: var(--fs-sm); color: var(--ink-600); }
+  .facts__note, .facts__version { margin-top: var(--space-5); max-width: 70ch; color: var(--ink-700); }
+</style>
