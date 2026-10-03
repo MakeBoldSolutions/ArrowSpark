@@ -7,6 +7,7 @@ Auto-generated from all feature plans. Last updated: 2026-09-27
 ## Active Technologies
 
 - GDScript / Godot 4.4, Maaack's Game Template addon; Python 3.11+ headless regression launchers
+- Static showcase site in `web/`: Astro + strict TypeScript (static output), Node/npm, Vitest; Godot Web export (no threads)
 
 ## Project Structure
 
@@ -16,6 +17,7 @@ scripts/             # PuzzleSession and other project scripts
 scenes/              # presentation/menus (Godot scenes)
 tests/               # GDScript headless checks + Python launchers (run_*.py)
 addons/              # Maaack's Game Template
+web/                 # static showcase site (Astro + TypeScript); vendored Make Bold theme in web/theme/
 .knowledge/          # durable architecture/product/governance docs
 .devspark.work/      # temporary specs/plans/tasks (ephemeral, never referenced by durable code)
 ```
@@ -25,7 +27,8 @@ addons/              # Maaack's Game Template
 `python tests/run_puzzle_regressions.py --godot <executable>` and
 `python tests/run_regressions.py --godot <executable>` — the two required headless regression
 gates. Godot validation (`--headless --editor --quit`) and a desktop smoke test are also required
-for gameplay changes (constitution Principle V).
+for gameplay changes (constitution Principle V); web builds also need a browser smoke test.
+Site: `cd web && npm ci && npm run check && npm run build`.
 
 ## Code Style
 
