@@ -1,4 +1,4 @@
-# Spike Record — Google Pixel 7 Pro / Microsoft Edge Beta (Android, Chromium) — NOT yet Chrome
+# Spike Record — Google Pixel 7 Pro / Google Chrome 154 (plus Microsoft Edge Beta 155, supplemental)
 
 **Date**: · **Tester**: · **Build id**: · **Real hardware**: yes (required; otherwise this is a supplemental note, not a record)
 
@@ -6,7 +6,7 @@
 |---|---|
 | Device model | Google Pixel 7 Pro (per edge://version: `Pixel 7 Pro Build/CP3A.260905.009`) |
 | OS version | Android 17 (SDK 37) per edge://version; the reduced user agent string reports `Android 10; K` and must not be used |
-| Browser and version | **Microsoft Edge (Beta) 155.0.4283.25, 64-bit, Chromium 155.0.8059.12** (user agent contains `EdgA/155.0.0.0`); evidence/pixel7pro-edge-version.png. This is not Google Chrome. |
+| Browser and version | **Google Chrome 154.0.8037.126 (Official Build, 64-bit)** per chrome://version (evidence/pixel7pro-chrome-version.png); first round was Microsoft Edge Beta 155.0.4283.25 / Chromium 155.0.8059.12 (evidence/pixel7pro-edge-version.png), supplemental only. |
 | Landscape CSS viewport (chrome shown / hidden) | |
 | devicePixelRatio | |
 | Canvas-to-CSS scale | |
@@ -101,3 +101,19 @@ The earlier observations above were first described as "Pixel 7 / Android Chrome
 - The device is a Pixel 7 Pro, not a Pixel 7. The probe's 2.625 devicePixelRatio and 411 x 891 CSS portrait viewport are what this device reported in its current display setting (inference: the Pro's FHD+ mode; unconfirmed).
 - The required target is **current Android Chrome**. These readings are Chromium-on-Android evidence from Edge Beta and **may not be claimed as Android Chrome support**. A repeat in Google Chrome (version from `chrome://version`) is still needed, and an Edge Beta result should not become a matrix row on its own.
 - The shared Chromium engine makes the findings likely to transfer, but that is an expectation to test, not evidence.
+
+## Google Chrome run on the same phone (owner screenshots; evidence/pixel7pro-chrome-landscape-probe.png, pixel7pro-chrome-version.png)
+
+Identity confirmed: **Google Chrome 154.0.8037.126 (Official Build, 64-bit), Android 17 (SDK 37), Pixel 7 Pro, build CP3A.260905.009**.
+
+| Item | Value |
+|---|---|
+| Viewport | 850 x 411 CSS px, landscape (same black strip at the left edge as the Edge run) |
+| devicePixelRatio / canvas | 2.625 / 2231 x 1078 px (canvas>css 0.381) |
+| pointer:fine / hover / maxTouchPoints | no / no / 5 |
+| Browser-level event counts (session) | touchstart 37, touchend 37, pointerdown 37, mousedown 0, click 0 |
+| Game state | Remaining 100, Mistakes 6, board zoomed in |
+
+Owner report: Chrome behaves the same as Edge (pinch and one-finger drag do not work; the Zoom/Fit/Pan buttons work; tapping works). Probe readings in landscape are identical to the Edge run. This satisfies the "current Android Chrome" identity requirement for these particular observations; the device-class claim is still limited to this one Pixel 7 Pro.
+
+Still unrecorded for Android (both browsers): press-vs-release timing, page scroll/zoom leakage during gestures, audio start, Back/Results/Replay/Level Select flow, engine-level touch+mouse emission, premature selection and double-fire counts, and whether the left black strip hides game area.
