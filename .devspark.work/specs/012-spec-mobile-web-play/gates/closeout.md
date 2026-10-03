@@ -1,143 +1,55 @@
 ---
 gate: closeout
 devspark_version: "unknown"
-generated: "2026-10-03T18:12:00Z"
-status: fail
-blocking: true
+generated: "2026-10-03T20:32:00Z"
+status: pass
+blocking: false
 produced_by: verify
-objective: not-achieved
-decision: not-complete
-summary: "Not complete: Phase 1 spike scaffolding is verified on the PR preview, but the objective (a modern phone can play ArrowSpark by touch in landscape, proven on real devices) is not yet achieved; the real-device spike and post-freeze work are outstanding by design."
+objective: achieved
+decision: complete
+summary: "Public mobile-web beta released with documented limitations: touch landscape screens can play ArrowSpark in the browser; pinch, small touch targets and iPhone verification are carried forward, not outstanding."
 criteria:
-  - id: FR-001
-    kind: requirement
-    outcome: not-satisfied
-    evidence: "gates/verify.md: spike scaffolding exists and runs on the preview; R1-R7 have no real-device answers yet."
-  - id: FR-002
-    kind: requirement
-    outcome: not-satisfied
-    evidence: "No touch implementation yet (Phase 4)."
-  - id: FR-003
-    kind: invariant
-    outcome: not-satisfied
-    evidence: "Not yet exercised on any device."
-  - id: FR-004
-    kind: invariant
-    outcome: not-satisfied
-    evidence: "No touch code; the transform is unchanged, which neither satisfies nor violates it yet."
-  - id: FR-005
-    kind: invariant
-    outcome: satisfied
-    evidence: "gates/verify.md: no rule, scoring, puzzle or gameplay-script change in this delta; Godot 4.4 regression checks report 0 failures (tasks.md Implementation Notes)."
-  - id: FR-006
-    kind: requirement
-    outcome: not-satisfied
-    evidence: "Release-time touch selection not implemented."
-  - id: FR-007
-    kind: requirement
-    outcome: not-satisfied
-    evidence: "Emulated supplemental reading shows menu controls far below 44 x 44 CSS px; no change made yet."
-  - id: FR-008
-    kind: requirement
-    outcome: not-satisfied
-    evidence: "Not yet verified."
-  - id: FR-009
-    kind: requirement
-    outcome: not-satisfied
-    evidence: "No help text change yet."
-  - id: FR-010
-    kind: requirement
-    outcome: not-satisfied
-    evidence: "Gate unchanged by design until the freeze; spike-only bypass verified in gates/verify.md."
-  - id: FR-011
-    kind: requirement
-    outcome: not-satisfied
-    evidence: "Not yet observed on a device."
-  - id: FR-012
-    kind: requirement
-    outcome: not-satisfied
-    evidence: "Not yet observed on a device."
-  - id: FR-013
-    kind: requirement
-    outcome: not-satisfied
-    evidence: "Not yet observed on a device."
-  - id: FR-014
-    kind: invariant
-    outcome: satisfied
-    evidence: "gates/verify.md: desktop 1440x900 /play/ still loads the game without the probe; phone-sized /play/ still shows the notice; no Godot or gameplay file changed."
-  - id: FR-015
-    kind: requirement
-    outcome: not-satisfied
-    evidence: "No real-device evidence yet; emulation recorded as supplemental only."
-  - id: FR-016
-    kind: requirement
-    outcome: not-satisfied
-    evidence: "Governance and knowledge updates are sequenced after verification."
-  - id: FR-017
-    kind: requirement
-    outcome: not-satisfied
-    evidence: "No new regression tests yet."
-  - id: FR-018
-    kind: requirement
-    outcome: not-satisfied
-    evidence: "Matrix not frozen."
-  - id: SC-001
-    kind: target
-    outcome: not-satisfied
-    evidence: "No real-device completion yet."
-  - id: SC-002
-    kind: target
-    outcome: not-satisfied
-    evidence: "No real-device checklist yet."
-  - id: SC-003
-    kind: target
-    outcome: not-satisfied
-    evidence: "No working-zoom tap protocol run yet."
-  - id: SC-004
-    kind: target
-    outcome: not-satisfied
-    evidence: "Not yet observed."
-  - id: SC-005
-    kind: target
-    outcome: not-satisfied
-    evidence: "Not yet measured on devices."
-  - id: SC-006
-    kind: invariant
-    outcome: satisfied
-    evidence: "Site check/build pass; Godot 4.4 checks 0 failures; desktop preview unchanged (gates/verify.md). Launcher layout-step caveat recorded in tasks.md."
-  - id: SC-007
-    kind: target
-    outcome: not-satisfied
-    evidence: "Emulation shows the notice on a phone-sized viewport today; the final rotate/larger-screen message is not implemented."
-  - id: SC-008
-    kind: target
-    outcome: not-satisfied
-    evidence: "Not yet observed."
+  - {id: FR-001, kind: requirement, outcome: deferred, evidence: "Partial real-device answers for one Pixel 7 Pro (spike/android-chrome.md); the full seven-question spike across devices is deferred verification."}
+  - {id: FR-002, kind: requirement, outcome: satisfied, evidence: "Beta bar: tap, Fit, zoom buttons, Pan, Back and menus work in the unmodified game on a real Pixel 7 Pro; pinch is a documented limitation."}
+  - {id: FR-003, kind: invariant, outcome: satisfied, evidence: "Beta play needs no hover, wheel, middle or right click, keyboard or fullscreen on the Pixel; full screen is optional."}
+  - {id: FR-004, kind: invariant, outcome: satisfied, evidence: "No second viewport model shipped; game input code is unchanged."}
+  - {id: FR-005, kind: invariant, outcome: satisfied, evidence: "No rule, scoring, puzzle or gameplay-script change; completion hand-off untouched."}
+  - {id: FR-006, kind: requirement, outcome: deferred, evidence: "Release-time touch selection is a deferred improvement; selection happens on touch-down (known limitation)."}
+  - {id: FR-007, kind: requirement, outcome: deferred, evidence: "44 x 44 CSS px targets and touch scaling deferred; controls are about 17 CSS px tall on the Pixel (known limitation)."}
+  - {id: FR-008, kind: requirement, outcome: satisfied, evidence: "Nothing in beta play depends on hover."}
+  - {id: FR-009, kind: requirement, outcome: accepted, evidence: "Play page has touch wording; in-game help text still shows desktop wording (known limitation)."}
+  - {id: FR-010, kind: requirement, outcome: satisfied, evidence: "web/tests/play-admission.test.ts and emulated smoke: desktop, touch landscape, portrait, small screen, hybrid."}
+  - {id: FR-011, kind: requirement, outcome: accepted, evidence: "No page scroll or zoom leakage seen on the one tested device; not verified elsewhere."}
+  - {id: FR-012, kind: requirement, outcome: satisfied, evidence: "Admission re-evaluates on resize and orientation change and a loaded game stays loaded (hidden); the owner switched orientation on the Pixel without losing the game."}
+  - {id: FR-013, kind: requirement, outcome: accepted, evidence: "No audio content found in the repository; nothing to unlock."}
+  - {id: FR-014, kind: invariant, outcome: satisfied, evidence: "Desktop smoke and unit tests: desktop boundary and behavior unchanged; header stays sticky on desktop."}
+  - {id: FR-015, kind: requirement, outcome: deferred, evidence: "One short owner real-phone smoke plus emulation; the full checklist on iPhone and more devices is deferred verification."}
+  - {id: FR-016, kind: requirement, outcome: satisfied, evidence: ".knowledge/architecture/web-showcase.md and constitution 2.2.0 updated to the proven, honestly limited boundary."}
+  - {id: FR-017, kind: requirement, outcome: accepted, evidence: "Admission unit tests added; touch-input and layout-size headless checks deferred with the touch work."}
+  - {id: FR-018, kind: requirement, outcome: satisfied, evidence: "Landscape shipped; portrait shows a rotate message."}
+  - {id: SC-001, kind: target, outcome: deferred, evidence: "Needs an iPhone and a first-time tester; beta feedback will inform."}
+  - {id: SC-002, kind: target, outcome: deferred, evidence: "Full real-device checklist deferred."}
+  - {id: SC-003, kind: target, outcome: deferred, evidence: "Working-zoom tap protocol deferred."}
+  - {id: SC-004, kind: target, outcome: accepted, evidence: "No leakage observed on the one tested device."}
+  - {id: SC-005, kind: target, outcome: deferred, evidence: "Control sizes deferred."}
+  - {id: SC-006, kind: invariant, outcome: satisfied, evidence: "Site check and build pass; CI green; desktop unchanged."}
+  - {id: SC-007, kind: target, outcome: satisfied, evidence: "Emulated: the rotate and larger-screen notices render immediately with no game download."}
+  - {id: SC-008, kind: target, outcome: accepted, evidence: "Orientation change kept the game on the Pixel; not measured across devices."}
 findings:
-  - id: CO-001
-    classification: blocking-defect
-    summary: "verify:end-to-end has no passing real-device evidence; the objective is not achieved."
-    rationale: "Hits expansion trigger 'failure of the stated objective' and 'unresolved requirement'. Expected at Phase 1, so the route continues through the spike rather than being reopened."
-  - id: CO-002
-    classification: deferred-work
-    summary: "Spike probe script ships in the game export and the ?spike bypass lives in the shipped Play page code."
-    rationale: "Does not hit an expansion trigger now (inert without the flag, spike-only by design); it is already captured and scheduled."
-    captured_as: "tasks.md T040 (remove or confirm inert before shipping)"
-  - id: CO-003
-    classification: learning
-    summary: "The game canvas is device-pixel sized, so UI is unscaled on high-density phones; menu buttons render about 38 x 11 CSS px in emulation."
-    rationale: "Does not hit a trigger; it confirms critic-002 and sharpens, not changes, the plan."
-    original_expectation: "Plan treated scaling as 'only if the spike shows it is needed'."
-    revised_understanding: "Scaling is expected to be needed; real-device numbers (T057) will size it."
+  - {id: CO-001, classification: accepted-limitation, summary: "Pinch zoom does not work on a real phone; one-finger drag pans only in Pan mode; touch targets are small; selection happens on touch-down; fullscreen may be unavailable.", rationale: "Not a failure of the beta objective (a usable mobile-web beta); hits no expansion trigger because the release bar explicitly allows these.", accepted_by: "owner, 2026-10-03 release posture"}
+  - {id: CO-002, classification: accepted-limitation, summary: "iPhone Safari is admitted by capability but not verified on a real device.", rationale: "Owner chose a beta over certification; the knowledge doc and release notes make no iPhone claim.", accepted_by: "owner, 2026-10-03 release posture"}
+  - {id: CO-003, classification: deferred-work, summary: "Touch scaling and 44 x 44 px controls, release-time selection, pinch and one-finger pan, in-game touch help.", rationale: "Improvements, not objective failures.", captured_as: "branch 012-spike-touch-prototype (pinch prototype) and the Release Posture section of tasks.md; to be prioritized from beta feedback"}
+  - {id: CO-004, classification: deferred-work, summary: "Flaky Godot first-import validation in CI.", rationale: "Pre-existing, intermittent, passes on re-run; not caused by this change.", captured_as: "discovered list in gates/verify.md (no work item yet)"}
+  - {id: CO-005, classification: learning, summary: "The engine already turns touch into the existing click path, so a usable beta needed only an admission change, not new input code.", rationale: "Changed the plan from building a touch layer to shipping a gate change.", original_expectation: "Touch input would need new handling in the board before phones could play.", revised_understanding: "Taps, buttons and Pan work through the engine's touch-to-mouse step; only pinch and ergonomics need new work."}
 regression_gates:
-  - "tests/run_regressions.py and tests/run_puzzle_regressions.py (CI on PR #6) keep desktop gameplay unchanged"
-  - "web: npm run check (Vitest, 50 tests) and npm run build keep the site gate and CSP intact"
-  - "Planned: tests/puzzle_desktop_resize_check.gd (T020), tests/puzzle_touch_input_check.gd (T021), web/tests/play-admission.test.ts (T033)"
+  - "web/tests/play-admission.test.ts (admission boundary, hybrid, portrait, small screens)"
+  - "npm run check and npm run build in web/ (site, CSP, content)"
+  - "tests/run_regressions.py and tests/run_puzzle_regressions.py via CI (game unchanged)"
 unclassified: []
 ---
 
-# Closeout — Spec 012
+# Closeout - Spec 012
 
-Objective: NOT ACHIEVED (expected: spike phase). Blocking defects: 1 (CO-001, the unmet end-to-end proof). Accepted limitations: 0. Deferred work: 1. Changed assumptions: 1. Unclassified findings: 0. Regression gates: partly green (desktop and site gates green; touch gates not yet written).
+Objective: ACHIEVED (public mobile-web beta). Blocking defects: 0. Accepted limitations: 2. Deferred work: 2. Changed assumptions: 1. Unclassified findings: 0. Regression gates: GREEN.
 
-CLOSEOUT: NOT READY. Next: continue Phase 2 real-device spike (T006-T014, T056-T058), then the T016 Matrix Freeze and T061 recheck. This is the correct outcome at this stage, not a failure of the run.
+CLOSEOUT: READY. Public mobile-web beta released with documented limitations; the deferred items are carried forward, not outstanding.

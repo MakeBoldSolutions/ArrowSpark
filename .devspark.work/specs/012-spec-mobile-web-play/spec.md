@@ -21,7 +21,7 @@ participants:
 
 **Feature Branch**: `012-spec-mobile-web-play`
 **Created**: 2026-10-03
-**Status**: In Progress <!-- Valid: Draft | In Progress | Complete -->
+**Status**: Complete <!-- Valid: Draft | In Progress | Complete -->
 **Input**: User description: "Make the existing ArrowSpark browser game genuinely playable on touch-primary devices (iOS Safari, Android Chrome; landscape primary) without redesigning the game or changing its rules. Follow-on to Spec 011."
 
 > This spec is temporary working state under `.devspark.work/specs/`. It remains there until
