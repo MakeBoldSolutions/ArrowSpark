@@ -93,7 +93,7 @@ From the notes I kept along the way, here's what the method took from a game:
 
 - **One person has played the Reference Knot to the end, and it's the person who designed it.** No independent player has validated it. That's the most important open fact in this whole series.
 - **Nobody new has tried to find it.** Whether a first-time player opens Level Select and finds the ArrowSpark Levels group without help was deferred to this showcase.
-- **The game runs on desktops only.** There is no touch model yet, so phones and tablets get the story, not the game.
+- **Mobile web is a beta.** The game now plays on phones and tablets in landscape, with taps and the on-screen zoom, Fit and Pan controls. Pinch to zoom is not reliable yet, touch targets are small, and it has been tried on very few real devices. Desktop is still the best way to play.
 - **Generation is deliberately last.** The order is: rules, contract, viewport, hand-authored knots, human evidence, *then* maybe a generator that encodes what people actually enjoyed. Otherwise I'd teach a machine to optimize numbers no human cares about.
 - **"Hard but never unsolvable" is a claim I can prove. "Satisfying" is one I can only test on people.**
 

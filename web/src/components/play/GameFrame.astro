@@ -41,7 +41,7 @@ const gameSrc = build ? `/game/${build}/index.html` : undefined;
 <script>
   import { startGameBridge } from '../../scripts/game-bridge';
   import { guardFrameChrome } from '../../scripts/page-zoom-guard';
-  import { DESKTOP_QUERY } from '../../scripts/desktop-query';
+  import { decidePlay, isTouchFirst, readCapabilities } from '../../scripts/play-admission';
 
   const host = document.querySelector<HTMLElement>('[data-game-host]');
   const iframe = document.querySelector<HTMLIFrameElement>('iframe[data-game-frame]');
@@ -56,19 +56,25 @@ const gameSrc = build ? `/game/${build}/index.html` : undefined;
     iframe.addEventListener('load', () => {
       if (iframe.getAttribute('src')) loading?.setAttribute('hidden', '');
     });
-    // Load the game only on screens it supports, so phones never download the engine.
-    // Spike mode (real-device checks only): ?spike admits any viewport and turns on the game's probe overlay.
-    const spike = new URLSearchParams(window.location.search).has('spike');
-    if (spike) document.documentElement.dataset.spike = '';
-    const desktop = window.matchMedia(DESKTOP_QUERY);
-    const loadIfDesktop = () => {
-      if ((spike || desktop.matches) && !iframe.getAttribute('src')) {
-        iframe.setAttribute('src', spike ? `${src}?spike` : src);
-        if (fullscreen) fullscreen.disabled = !document.fullscreenEnabled;
-      }
+    // Admit the game only on screens it supports (see play-admission.ts), so unsupported
+    // screens never download the engine. Re-checked whenever the window changes; a game
+    // that is already loaded stays loaded (hidden) so an attempt survives a rotation.
+    if (fullscreen) {
+      fullscreen.hidden = !document.fullscreenEnabled;
+      fullscreen.disabled = !document.fullscreenEnabled;
+    }
+    const root = document.documentElement;
+    const admit = () => {
+      const capabilities = readCapabilities();
+      const verdict = decidePlay(capabilities);
+      root.dataset.play = verdict;
+      if (isTouchFirst(capabilities)) root.dataset.touch = '';
+      else delete root.dataset.touch;
+      if (verdict === 'play' && !iframe.getAttribute('src')) iframe.setAttribute('src', src);
     };
-    loadIfDesktop();
-    desktop.addEventListener('change', loadIfDesktop);
+    admit();
+    window.addEventListener('resize', admit);
+    window.addEventListener('orientationchange', admit);
 
     fullscreen?.addEventListener('click', () => {
       void iframe.requestFullscreen?.().then(() => iframe.focus()).catch(() => undefined);

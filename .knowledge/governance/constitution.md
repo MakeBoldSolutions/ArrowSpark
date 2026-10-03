@@ -15,6 +15,23 @@ appliesTo:
 
 <!--
 Sync Impact Report
+Version: 2.1.0 -> 2.2.0
+Rationale: MINOR. The showcase now offers the game on mobile web as a beta, so
+Principle V's browser verification extends beyond desktop browsers.
+Modified principles:
+- V. Practical Gameplay Verification: browser verification covers supported
+  desktop browsers and the mobile web beta; an untested device or browser is
+  not claimed as supported.
+Sync validation:
+- Updated: .knowledge/architecture/web-showcase.md (play admission, beta
+  evidence and limitations).
+- Reviewed: README.md (no claim affected).
+Follow-up TODOs: verify on a real iPhone; replace the beta with a full support
+statement once more devices have been tested.
+-->
+
+<!--
+Sync Impact Report
 Version: 2.0.1 -> 2.1.0
 Rationale: MINOR. The project now ships a static showcase website alongside the
 game, so the Technology section names its stack, and Principle V extends
@@ -114,6 +131,9 @@ No platform-specific frame-rate target or frame-time budget is mandated.
 - Web builds MUST also be verified in a browser: the affected gameplay is
   smoke-tested in each supported desktop browser, and the results, including
   checks not performed, are recorded the same way.
+- The mobile web beta is verified on at least one real phone in a mobile
+  browser. A device or browser that was not tested is not claimed as
+  supported, and emulation never substitutes for a real device.
 
 ### VI. Preserve Saved Progress and Settings
 
@@ -160,4 +180,4 @@ reasoned exception; MUST rules require compliance with their stated alternatives
 
 No recurring review schedule, automated CI gate, or test coverage threshold is mandated.
 
-**Version**: 2.1.0 | **Ratified**: 2026-09-26 | **Last Amended**: 2026-10-02
+**Version**: 2.2.0 | **Ratified**: 2026-09-26 | **Last Amended**: 2026-10-03

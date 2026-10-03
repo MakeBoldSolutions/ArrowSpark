@@ -37,6 +37,11 @@ prefer explicit types where they aid clarity; keep changes small and justify new
 
 ## Recent Changes
 
+- Mobile web beta on the showcase Play page: `web/src/scripts/play-admission.ts` decides from viewport
+  and input capabilities (not the user agent) whether the game shows (desktop: fine pointer and
+  at least 960 × 540; touch: landscape and at least 640 × 320), the game itself is unchanged, and
+  the beta is verified on one real Android phone only (iPhone not yet verified).
+
 - Puzzle catalog now has purpose groups (Foundations, Puzzle Lab, ArrowSpark Levels) driving
   Level Select sections, group-relative numbering and group-scoped Next Puzzle, plus a
   hand-composed Reference Knot that Play starts — metadata only, no rule changes.
