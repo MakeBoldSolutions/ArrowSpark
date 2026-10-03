@@ -117,3 +117,10 @@ Identity confirmed: **Google Chrome 154.0.8037.126 (Official Build, 64-bit), And
 Owner report: Chrome behaves the same as Edge (pinch and one-finger drag do not work; the Zoom/Fit/Pan buttons work; tapping works). Probe readings in landscape are identical to the Edge run. This satisfies the "current Android Chrome" identity requirement for these particular observations; the device-class claim is still limited to this one Pixel 7 Pro.
 
 Still unrecorded for Android (both browsers): press-vs-release timing, page scroll/zoom leakage during gestures, audio start, Back/Results/Replay/Level Select flow, engine-level touch+mouse emission, premature selection and double-fire counts, and whether the left black strip hides game area.
+
+## Owner follow-up answers (Pixel 7 Pro, Chrome)
+
+- Tapping an arrow removes it, and gameplay "works just like on desktop" (R1 supported by experience on this device; arrows leave when tapped).
+- **Press vs release was not distinguished** by the owner's answer. The unmodified code emits selection on press (`puzzle_board.gd` left-press branch), so press-time selection is the expected behavior; not yet observed as such. Premature selection and double-fire counts remain unmeasured.
+- The owner played with the game in **full screen** (the page's Fullscreen button), so page scroll/zoom leakage could not be judged; the leakage check (R4) still has to be run with the game embedded in the page, not full screen.
+- **R7 (partial):** entering the page's fullscreen mode on Android Chrome worked (the owner played in it). Audio start not yet reported.
