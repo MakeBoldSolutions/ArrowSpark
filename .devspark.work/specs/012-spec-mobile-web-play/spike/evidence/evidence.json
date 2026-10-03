@@ -1,0 +1,103 @@
+{
+  "base": "https://green-bay-09bdc1010-6.centralus.5.azurestaticapps.net",
+  "generated": "2026-10-03T18:04:14.354Z",
+  "runs": [
+    {
+      "name": "desktop-normal",
+      "path": "/play/",
+      "status": 200,
+      "https": true,
+      "errors": [],
+      "gate": {
+        "spikeAttr": false,
+        "gameVisible": true,
+        "noticeVisible": false,
+        "iframeSrc": "/game/76ee3e9/index.html"
+      },
+      "engine": "started",
+      "probe": null,
+      "canvas": {
+        "width": 1229,
+        "height": 691,
+        "clientWidth": 1229,
+        "clientHeight": 691
+      }
+    },
+    {
+      "name": "desktop-spike",
+      "path": "/play/?spike",
+      "status": 200,
+      "https": true,
+      "errors": [],
+      "gate": {
+        "spikeAttr": true,
+        "gameVisible": true,
+        "noticeVisible": false,
+        "iframeSrc": "/game/76ee3e9/index.html?spike"
+      },
+      "engine": "started",
+      "probe": "viewport  1229 x 691 CSS px\ndpr       1\norient    landscape\ncanvas    1229 x 691 px\ncanvas>css 1.000\npointer:fine yes  hover yes\ntouch pts 0\nevents    ts 0 te 0 pd 0 md 0 clk 0",
+      "canvas": {
+        "width": 1229,
+        "height": 691,
+        "clientWidth": 1229,
+        "clientHeight": 691
+      }
+    },
+    {
+      "name": "phone-landscape-normal",
+      "path": "/play/",
+      "status": 200,
+      "https": true,
+      "errors": [],
+      "gate": {
+        "spikeAttr": false,
+        "gameVisible": false,
+        "noticeVisible": true,
+        "iframeSrc": null
+      }
+    },
+    {
+      "name": "phone-landscape-spike",
+      "path": "/play/?spike",
+      "status": 200,
+      "https": true,
+      "errors": [],
+      "gate": {
+        "spikeAttr": true,
+        "gameVisible": true,
+        "noticeVisible": false,
+        "iframeSrc": "/game/76ee3e9/index.html?spike"
+      },
+      "engine": "started",
+      "probe": "viewport  761 x 428 CSS px\ndpr       3\norient    landscape\ncanvas    2283 x 1284 px\ncanvas>css 0.333\npointer:fine no  hover no\ntouch pts 1\nevents    ts 0 te 0 pd 0 md 0 clk 0",
+      "canvas": {
+        "width": 2283,
+        "height": 1284,
+        "clientWidth": 761,
+        "clientHeight": 428
+      }
+    },
+    {
+      "name": "pixel-landscape-spike",
+      "path": "/play/?spike",
+      "status": 200,
+      "https": true,
+      "errors": [],
+      "gate": {
+        "spikeAttr": true,
+        "gameVisible": true,
+        "noticeVisible": false,
+        "iframeSrc": "/game/76ee3e9/index.html?spike"
+      },
+      "engine": "started",
+      "probe": "viewport  826 x 465 CSS px\ndpr       2.625\norient    landscape\ncanvas    2168 x 1220 px\ncanvas>css 0.381\npointer:fine no  hover no\ntouch pts 1\nevents    ts 0 te 0 pd 0 md 0 clk 0",
+      "canvas": {
+        "width": 2168,
+        "height": 1220,
+        "clientWidth": 826,
+        "clientHeight": 465
+      }
+    }
+  ]
+}
