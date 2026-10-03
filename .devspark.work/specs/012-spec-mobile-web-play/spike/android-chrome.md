@@ -129,3 +129,9 @@ Still unrecorded for Android (both browsers): press-vs-release timing, page scro
 
 - **R4 gesture leakage (positive on this device):** gestures inside the game window affect only the game; the page behind does not scroll or zoom. The page moves only when the gesture starts outside the game window. Consistent with `touch-action: none` in the game shell; observed on this one device and browser only, with one-finger drags (pinch inside the game does nothing in the game, and the owner reports no page zoom either).
 - **Audio:** the owner heard **no sound**. A repository check found no `.ogg`, `.wav` or `.mp3` files outside `node_modules` and the site tree (`find` over the repo), so the game may have no audio content at all; if so, "no sound" is expected and the audio-start question has nothing to unlock. To confirm with a desktop baseline (does the desktop build ever make sound?) before drawing any R7 conclusion.
+
+## Owner follow-up, round 3 (Pixel 7 Pro, Chrome, full screen)
+
+- In the page's full-screen mode, **Back, Zoom In, Zoom Out, Pan and the menus all function well**, and the owner finds play "more fun on mobile since you can click the arrows faster" than with a mouse (qualitative, one tester, unmodified game).
+- Pinch zoom and Pan-off one-finger drag remain unimplemented in the unmodified build; a throwaway prototype (branch `012-spike-touch-prototype`, PR #7) now tries them for the next device round.
+
