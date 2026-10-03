@@ -1,12 +1,12 @@
-# Spike Record — Google Pixel 7 / Android Chrome
+# Spike Record — Google Pixel 7 Pro / Microsoft Edge Beta (Android, Chromium) — NOT yet Chrome
 
 **Date**: · **Tester**: · **Build id**: · **Real hardware**: yes (required; otherwise this is a supplemental note, not a record)
 
 | Item | Value |
 |---|---|
-| Device model | |
-| OS version | |
-| Browser and version | |
+| Device model | Google Pixel 7 Pro (per edge://version: `Pixel 7 Pro Build/CP3A.260905.009`) |
+| OS version | Android 17 (SDK 37) per edge://version; the reduced user agent string reports `Android 10; K` and must not be used |
+| Browser and version | **Microsoft Edge (Beta) 155.0.4283.25, 64-bit, Chromium 155.0.8059.12** (user agent contains `EdgA/155.0.0.0`); evidence/pixel7pro-edge-version.png. This is not Google Chrome. |
 | Landscape CSS viewport (chrome shown / hidden) | |
 | devicePixelRatio | |
 | Canvas-to-CSS scale | |
@@ -94,3 +94,10 @@ Observations (not conclusions):
 - Chrome of the game (HUD plus toolbar) uses about 57 of 411 CSS px of height (about 14%); raising both rows to 44 CSS px would use about 88 px (about 21%) by simple arithmetic, an estimate to confirm in the prototype, not a finding.
 - Mistakes 17 after 10 arrows removed (portrait session: 11 mistakes after 7): consistent with the earlier reading; cause (precision at small cells, press-time selection or deliberate blocked taps) still not attributable.
 - Still unrecorded: press vs release timing, page scroll/zoom leakage, audio, Android and Chrome versions, Back/Results/Replay/Level Select flow, orientation-change behavior (the owner did switch between portrait and landscape and the game kept running).
+
+## Correction: which device and browser were actually tested (owner's edge://version screenshot)
+
+The earlier observations above were first described as "Pixel 7 / Android Chrome". The version page shows the browser was **Microsoft Edge Beta 155 (Chromium 155.0.8059.12) on a Google Pixel 7 Pro running Android 17**. Consequences:
+- The device is a Pixel 7 Pro, not a Pixel 7. The probe's 2.625 devicePixelRatio and 411 x 891 CSS portrait viewport are what this device reported in its current display setting (inference: the Pro's FHD+ mode; unconfirmed).
+- The required target is **current Android Chrome**. These readings are Chromium-on-Android evidence from Edge Beta and **may not be claimed as Android Chrome support**. A repeat in Google Chrome (version from `chrome://version`) is still needed, and an Edge Beta result should not become a matrix row on its own.
+- The shared Chromium engine makes the findings likely to transfer, but that is an expectation to test, not evidence.
