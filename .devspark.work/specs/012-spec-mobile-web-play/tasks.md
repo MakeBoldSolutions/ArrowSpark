@@ -49,9 +49,9 @@ Check the freeze task is a real human gate, post-freeze tasks match the frozen m
 **Purpose**: Make the spike runnable on real devices without touching the shipped gate.
 
 - [ ] T001 Run both regression gates and the site build on the unmodified branch to record the desktop baseline (`python tests/run_puzzle_regressions.py --godot <exe>`, `python tests/run_regressions.py --godot <exe>`, `cd web && npm ci && npm run check && npm run build`) and note results in the spike notes (Implements: FR-014) (code_ref: pending | knowledge_ref: pending)
-- [ ] T002 [P] Add a flag-gated spike mode to the Play page (admits any viewport only on an explicit spike URL; shipped gate untouched) in web/src/pages/play.astro and web/src/components/play/GameFrame.astro (Implements: FR-001) (code_ref: pending | knowledge_ref: pending)
-- [ ] T003 [P] Add a spike-only probe overlay reporting innerWidth/innerHeight, devicePixelRatio, orientation, `pointer`/`hover` media features, touch availability and canvas-to-CSS scale, enabled only by the spike flag, in web/game-shell/shell.html (Implements: FR-001) (code_ref: pending | knowledge_ref: pending)
-- [ ] T004 Create the spike working folder with one copy of contracts/spike-record-template.md per device at .devspark.work/specs/012-spec-mobile-web-play/spike/ (Implements: FR-001, FR-015) (code_ref: pending | knowledge_ref: pending)
+- [X] T002 [P] Add a flag-gated spike mode to the Play page (admits any viewport only on an explicit spike URL; shipped gate untouched) in web/src/pages/play.astro and web/src/components/play/GameFrame.astro (Implements: FR-001) (code_ref: web/src/components/play/GameFrame.astro, web/src/pages/play.astro, web/src/components/play/DesktopOnlyNotice.astro | knowledge_ref: n/a (spike scaffolding; durable knowledge updated at Phase 8))
+- [X] T003 [P] Add a spike-only probe overlay reporting innerWidth/innerHeight, devicePixelRatio, orientation, `pointer`/`hover` media features, touch availability and canvas-to-CSS scale, enabled only by the spike flag, in web/game-shell/shell.html (Implements: FR-001) (code_ref: web/game-shell/spike-probe.js, web/game-shell/shell.css, web/game-shell/shell.html, web/scripts/export-game.mjs | knowledge_ref: n/a (spike scaffolding; durable knowledge updated at Phase 8))
+- [X] T004 Create the spike working folder with one copy of contracts/spike-record-template.md per device at .devspark.work/specs/012-spec-mobile-web-play/spike/ (Implements: FR-001, FR-015) (code_ref: n/a (working notes only; .devspark.work/specs/012-spec-mobile-web-play/spike/) | knowledge_ref: n/a (spike records are temporary working state))
 - [ ] T005 Export the Web build and publish the spike build over HTTPS in the same-origin iframe shape used in production (human/hosting step; record the build id and URL in the spike notes) (Implements: FR-001) (code_ref: pending | knowledge_ref: pending)
 
 **Checkpoint**: A spike URL loads the game in the iframe on a desktop browser with the probe overlay.
@@ -234,3 +234,21 @@ FR-001 T002–T015 · FR-002 T018, T023, T025, T028–T029 · FR-003 T013, T030,
 
 - [ ] T059 [US2] In scenes/puzzle/puzzle_board.gd, ignore emulated mouse events while a real touch sequence owns the board, using the smallest safe mechanism the spike supports, and keep real mouse press-time behavior unchanged; depends on T023 (same file) (resolves: critic-001) (Implements: FR-006, FR-014) (code_ref: pending | knowledge_ref: pending)
 - [ ] T060 Update `.knowledge/architecture/game-visual-system.md` with touch control sizing (44 x 44 CSS px for required controls, not applied to puzzle cells), the capability-conditioned runtime scaling approach, the touch-capability helpers on GameVisualStyle, and the extended validation scope (touch devices in addition to desktop checks); only after T048-T049 (resolves: critic-003) (Implements: FR-016) (code_ref: pending | knowledge_ref: pending)
+
+## Gate Acknowledgements
+
+### 2026-10-03 — stale Analyze and Critic gates (explicit owner override)
+
+- **Failing gate**: Gate freshness. `gates/analyze.md` and `gates/critic.md` were written before the remediation edits, so their `reviewed_artifacts` hashes no longer match `spec.md`, `plan.md` and `tasks.md`.
+- **Unresolved finding**: critic-001 (touch selection semantics), the only open critical finding in the stale Critic report. It is resolved by owner decision and incorporated into the current artifacts: desktop mouse selection stays press-time; touch selection is release-time; a pending tap is cancelled by movement, a second finger, pan, pinch, focus loss, pause, visibility change or results; emulated mouse events do not trigger board selection while a real touch sequence owns the board; T056-T059 record and implement the evidence and behavior. The stale report does not reflect these edits.
+- **Owner decision**: the owner acknowledges the stale gate state and authorizes Phase 1 and Phase 2 (real-device spike work) to proceed. No post-freeze implementation may begin until T061 re-runs Analyze and Critic against the remediated artifacts and passes the freeze gate. This acknowledgement does not waive T061 or any real-device evidence requirement.
+- **Recorded**: 2026-10-03 (UTC date), not auto-selected.
+
+## Implementation Notes
+
+### Phase 1 progress (2026-10-03)
+
+- **T002/T003/T004 done.** Spike mode: `?spike` on the Play page bypasses the desktop gate (CSS and load) and passes `?spike` to the game iframe, which shows the probe overlay from `web/game-shell/spike-probe.js` (inert without the flag; copied by `web/scripts/export-game.mjs`). The production CSP build still passes (one inline script, hash unchanged); `npm run check` and `npm run build` pass. T040 removes or confirms the flag inert before shipping.
+- **T001 partly done.** Site check/build baseline: `npm run check` (0 errors, 50 tests pass) and `npm run build` (15 pages, CSP step ok) pass. The two Godot regression gates are NOT run: the Godot on PATH is 4.7.2 and the repo pins 4.4-stable (tests/README.md). Needs the 4.4 executable path.
+- **T005 not started.** Needs the Web export (4.4 executable) and a push/PR for the Azure preview URL, both pending the owner's go-ahead.
+- **Baseline finding for the spike**: `web/game-shell/shell.css` already sets `touch-action: none` on `body`, so the critic obligation's remark that no touch-action rule exists was wrong; the page-scroll/zoom leak risk in R4 still has to be observed on real devices.

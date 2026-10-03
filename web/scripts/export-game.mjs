@@ -41,4 +41,5 @@ if (!existsSync(join(outDir, 'index.wasm'))) {
   process.exit(1);
 }
 copyFileSync(join(webDir, 'game-shell', 'shell.css'), join(outDir, 'shell.css'));
+copyFileSync(join(webDir, 'game-shell', 'spike-probe.js'), join(outDir, 'spike-probe.js'));
 console.log(build);

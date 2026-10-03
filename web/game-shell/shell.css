@@ -85,3 +85,18 @@ body {
 	text-align: center;
 	z-index: 1;
 }
+
+/* Spike-only probe overlay (spike-probe.js); present only when the URL carries ?spike. */
+#spike-probe {
+	position: fixed;
+	left: 4px;
+	bottom: 4px;
+	margin: 0;
+	padding: 4px 6px;
+	font: 11px/1.3 monospace;
+	color: #f8f6f2;
+	background: rgba(30, 30, 30, 0.8);
+	pointer-events: none;
+	z-index: 10;
+	white-space: pre;
+}

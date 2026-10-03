@@ -101,4 +101,6 @@ import ReactionForm from '../components/play/ReactionForm.astro';
   @media not all and (pointer: fine), (max-width: 59.9375rem), (max-height: 33.6875rem) {
     .play__game { display: none; }
   }
+  /* Spike mode (?spike): real-device checks bypass the desktop gate. */
+  :global(html[data-spike]) .play__game { display: block; }
 </style>

@@ -57,10 +57,13 @@ const gameSrc = build ? `/game/${build}/index.html` : undefined;
       if (iframe.getAttribute('src')) loading?.setAttribute('hidden', '');
     });
     // Load the game only on screens it supports, so phones never download the engine.
+    // Spike mode (real-device checks only): ?spike admits any viewport and turns on the game's probe overlay.
+    const spike = new URLSearchParams(window.location.search).has('spike');
+    if (spike) document.documentElement.dataset.spike = '';
     const desktop = window.matchMedia(DESKTOP_QUERY);
     const loadIfDesktop = () => {
-      if (desktop.matches && !iframe.getAttribute('src')) {
-        iframe.setAttribute('src', src);
+      if ((spike || desktop.matches) && !iframe.getAttribute('src')) {
+        iframe.setAttribute('src', spike ? `${src}?spike` : src);
         if (fullscreen) fullscreen.disabled = !document.fullscreenEnabled;
       }
     };
