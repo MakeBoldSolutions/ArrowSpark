@@ -124,3 +124,8 @@ Still unrecorded for Android (both browsers): press-vs-release timing, page scro
 - **Press vs release was not distinguished** by the owner's answer. The unmodified code emits selection on press (`puzzle_board.gd` left-press branch), so press-time selection is the expected behavior; not yet observed as such. Premature selection and double-fire counts remain unmeasured.
 - The owner played with the game in **full screen** (the page's Fullscreen button), so page scroll/zoom leakage could not be judged; the leakage check (R4) still has to be run with the game embedded in the page, not full screen.
 - **R7 (partial):** entering the page's fullscreen mode on Android Chrome worked (the owner played in it). Audio start not yet reported.
+
+## Owner follow-up answers, round 2 (Pixel 7 Pro, Chrome, game embedded in the page, not full screen)
+
+- **R4 gesture leakage (positive on this device):** gestures inside the game window affect only the game; the page behind does not scroll or zoom. The page moves only when the gesture starts outside the game window. Consistent with `touch-action: none` in the game shell; observed on this one device and browser only, with one-finger drags (pinch inside the game does nothing in the game, and the owner reports no page zoom either).
+- **Audio:** the owner heard **no sound**. A repository check found no `.ogg`, `.wav` or `.mp3` files outside `node_modules` and the site tree (`find` over the repo), so the game may have no audio content at all; if so, "no sound" is expected and the audio-start question has nothing to unlock. To confirm with a desktop baseline (does the desktop build ever make sound?) before drawing any R7 conclusion.
