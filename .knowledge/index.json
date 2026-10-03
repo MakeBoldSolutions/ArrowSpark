@@ -1,7 +1,7 @@
 {
   "generated": {
     "by": "build-knowledge-index",
-    "at": "2026-10-03T00:50:32Z"
+    "at": "2026-10-03T02:50:19Z"
   },
   "roots": [
     {
@@ -173,7 +173,7 @@
       "appliesTo": [
         "web/**",
         "export_presets.cfg",
-        ".github/workflows/showcase.yml"
+        ".github/workflows/azure-static-web-apps-green-bay-09bdc1010.yml"
       ],
       "headings": [
         "ArrowSpark Web Showcase (Static Site and Browser Build)",

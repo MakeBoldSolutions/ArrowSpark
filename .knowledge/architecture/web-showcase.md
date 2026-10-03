@@ -5,7 +5,7 @@ title: ArrowSpark Web Showcase (Static Site and Browser Build)
 appliesTo:
   - web/**
   - export_presets.cfg
-  - .github/workflows/showcase.yml
+  - .github/workflows/azure-static-web-apps-green-bay-09bdc1010.yml
 ---
 
 # ArrowSpark Web Showcase (Static Site and Browser Build)
@@ -295,8 +295,10 @@ to it.
 
 ## Continuous integration and the synthetic check
 
-`.github/workflows/showcase.yml` downloads Godot 4.4-stable and its export
-templates from the official release, verifies both against the release's
+`.github/workflows/azure-static-web-apps-green-bay-09bdc1010.yml` (the
+workflow Azure generated when the Static Web App was linked to the
+repository, kept under its generated name and job names) downloads Godot
+4.4-stable and its export templates from the official release, verifies both against the release's
 SHA-512 sums, caches them by version, runs both regression launchers,
 validates an editor import on a fresh copy without `.godot`, exports the
 game, then runs `npm ci`, `npm audit --audit-level=high`, `npm run check`
@@ -313,15 +315,14 @@ it got. If the runner cannot create a WebGL2 context at all, the result is
 never a failure or an outage. CI runs it against a local preview of each
 build, then again against the deployment itself.
 
-**Deployment.** After the build job, the same workflow uploads `web/dist` to
-Azure Static Web Apps with the official deploy action (secret
+**Deployment.** The same job then uploads the prebuilt `web/dist` to Azure
+Static Web Apps with the official deploy action (`skip_app_build`, because
+the Godot export and Astro build must run first; secret
 `AZURE_STATIC_WEB_APPS_API_TOKEN_GREEN_BAY_09BDC1010`, the deploy token Azure
 created for this Static Web App; `PUBLIC_REACTIONS_URL` comes from a
-repository variable). This is the only deploy workflow: the build-less
-workflow Azure generates when the app is linked to the repository is
-deleted, because it would upload the repository root instead of
-`web/dist`. Each same-repository pull request gets a preview
-environment, closed when the pull request closes, and `main` deploys
+repository variable). It is the only workflow that deploys the site. Fork
+pull requests and manual runs build and check without deploying. Each same-repository pull request to `main` gets a
+preview environment, closed when the pull request closes, and `main` deploys
 production at `https://arrow.makeboldspark.com`. The synthetic check runs
 against every deployment; a failure on a preview blocks the pull request. A
 scheduled daily run checks production, but only while the repository

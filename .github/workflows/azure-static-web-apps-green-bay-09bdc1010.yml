@@ -1,4 +1,11 @@
-name: Showcase
+name: Azure Static Web Apps CI/CD
+
+# The only workflow that deploys the ArrowSpark showcase to Azure Static Web Apps.
+# Azure generated this file when the Static Web App was linked to the repository; it is kept
+# under its generated name and job names, but builds the site itself: the Godot Web export and
+# the Astro build must run before upload, so the deploy action uploads the prebuilt web/dist
+# and skips its own build. Each same-repository pull request to main gets a preview
+# environment, closed when the pull request closes; main deploys production.
 
 on:
   push:
@@ -6,6 +13,8 @@ on:
       - main
   pull_request:
     types: [opened, synchronize, reopened, closed]
+    branches:
+      - main
   workflow_dispatch:
   schedule:
     # Daily production load check; does nothing unless SYNTHETIC_DAILY is 'true' (learning window only).
@@ -13,19 +22,23 @@ on:
 
 permissions:
   contents: read
+  pull-requests: write # the deploy action comments the preview URL on the pull request
 
 jobs:
-  build:
-    if: github.event_name != 'schedule' && !(github.event_name == 'pull_request' && github.event.action == 'closed')
+  build_and_deploy_job:
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
+    name: Build and Deploy Job
     env:
       GODOT_VERSION: "4.4-stable"
       GODOT_DIR: ${{ github.workspace }}/../godot
     outputs:
-      game_build: ${{ steps.export.outputs.game_build }}
+      url: ${{ steps.builddeploy.outputs.static_web_app_url }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          lfs: false
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -87,10 +100,8 @@ jobs:
           if grep -E "SCRIPT ERROR|Parse Error" editor.log; then exit 1; fi
 
       - name: Export the game for the Web
-        id: export
         run: |
           BUILD="$(node web/scripts/export-game.mjs --godot "$GODOT_BIN" | tail -n 1)"
-          echo "game_build=$BUILD" >> "$GITHUB_OUTPUT"
           echo "PUBLIC_GAME_BUILD=$BUILD" >> "$GITHUB_ENV"
 
       - name: Install site dependencies
@@ -127,46 +138,32 @@ jobs:
             exit "$code"
           fi
 
-      - name: Upload site
-        uses: actions/upload-artifact@v4
-        with:
-          name: site
-          path: web/dist
-          retention-days: 7
-
-  # Deploys the built site: a preview environment for each pull request, production on main.
-  # Needs the AZURE_STATIC_WEB_APPS_API_TOKEN_GREEN_BAY_09BDC1010 secret (created by Azure for this Static Web App); PUBLIC_REACTIONS_URL is a repository variable.
-  deploy:
-    needs: build
-    if: >-
-      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
-    runs-on: ubuntu-latest
-    outputs:
-      url: ${{ steps.deploy.outputs.static_web_app_url }}
-    steps:
-      - name: Download site
-        uses: actions/download-artifact@v4
-        with:
-          name: site
-          path: dist
-
-      - name: Deploy to Azure Static Web Apps
-        id: deploy
+      # Fork pull requests have no access to the deploy token, so they build and check only.
+      # A manual run only builds: the deploy action would treat it as a production deploy.
+      - name: Build And Deploy
+        id: builddeploy
+        if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_GREEN_BAY_09BDC1010 }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          action: upload
-          app_location: dist
+          repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)
+          action: "upload"
+          ###### Repository/Build Configurations ######
+          # The site is built above (Godot export + Astro), so upload web/dist as-is.
+          app_location: "web/dist" # Prebuilt site
+          api_location: "" # No API in this repository
+          output_location: ""
           skip_app_build: true
           skip_api_build: true
+          ###### End of Repository/Build Configurations ######
 
   # One synthetic load check against the deployment that was just made. A failure blocks the PR;
   # "inconclusive" (no WebGL2 in the runner) is a warning naming the cause, never an outage.
-  synthetic-preview:
-    needs: deploy
+  synthetic_preview_job:
+    needs: build_and_deploy_job
+    if: needs.build_and_deploy_job.outputs.url != ''
     runs-on: ubuntu-latest
+    name: Synthetic Check (deployment)
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -177,7 +174,7 @@ jobs:
       - name: Synthetic load check
         working-directory: web
         env:
-          TARGET_URL: ${{ needs.deploy.outputs.url }}
+          TARGET_URL: ${{ needs.build_and_deploy_job.outputs.url }}
         run: |
           npm ci
           npx playwright install --with-deps chromium
@@ -191,20 +188,23 @@ jobs:
             exit "$code"
           fi
 
-  close-preview:
+  close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
+    name: Close Pull Request Job
     steps:
-      - name: Close the pull request's preview environment
+      - name: Close Pull Request
+        id: closepullrequest
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_GREEN_BAY_09BDC1010 }}
-          action: close
+          action: "close"
 
   # Daily check of production during the learning window only (repository variable SYNTHETIC_DAILY).
-  synthetic-daily:
+  synthetic_daily_job:
     if: github.event_name == 'schedule' && vars.SYNTHETIC_DAILY == 'true'
     runs-on: ubuntu-latest
+    name: Synthetic Check (production, daily)
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
