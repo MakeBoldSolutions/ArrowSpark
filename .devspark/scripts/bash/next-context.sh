@@ -96,6 +96,7 @@ CRITIC_GATE="false"
 CHECKLIST_GATE="false"
 VERIFY_REQUIRED="false"
 VERIFY_PASSED="false"
+CLOSEOUT_DECISION=""
 if [[ "$SPEC_EXISTS" == "true" ]]; then
     [[ -f "$SPEC_DIR/plan.md" ]] && PLAN_EXISTS="true"
     if [[ -f "$SPEC_DIR/tasks.md" ]]; then
@@ -122,6 +123,9 @@ if [[ "$SPEC_EXISTS" == "true" ]]; then
     [[ -f "$SPEC_DIR/gates/critic.md" ]] && CRITIC_GATE="true"
     [[ -f "$SPEC_DIR/gates/checklist.md" ]] && CHECKLIST_GATE="true"
     if [[ -f "$SPEC_DIR/gates/verify.md" ]] && grep -qE '^status:[[:space:]]*pass' "$SPEC_DIR/gates/verify.md" 2>/dev/null; then VERIFY_PASSED="true"; fi
+    if [[ -f "$SPEC_DIR/gates/closeout.md" ]]; then
+        CLOSEOUT_DECISION=$(grep -m1 -E '^decision:' "$SPEC_DIR/gates/closeout.md" 2>/dev/null | sed -E 's/^decision:[[:space:]]*//; s/[[:space:]]*$//')
+    fi
 fi
 
 # Advisory gates that are required but whose artifact is missing/unmet (never block progress)
@@ -131,6 +135,7 @@ if [[ "$SPEC_EXISTS" == "true" ]]; then
     [[ "$REQUIRE_ANALYZE" == "true" && "$ANALYZE_GATE" == "false" ]] && PENDING_GATES="${PENDING_GATES:+$PENDING_GATES, }analyze"
     [[ "$REQUIRE_CRITIC" == "true" && "$CRITIC_GATE" == "false" ]] && PENDING_GATES="${PENDING_GATES:+$PENDING_GATES, }critic"
     [[ "$VERIFY_REQUIRED" == "true" && "$VERIFY_PASSED" == "false" ]] && PENDING_GATES="${PENDING_GATES:+$PENDING_GATES, }verify"
+    [[ "$CLOSEOUT_DECISION" == "not-complete" ]] && PENDING_GATES="${PENDING_GATES:+$PENDING_GATES, }closeout (blocking defects open)"
 fi
 
 QUICKFIX_EXISTS="false"
@@ -283,6 +288,7 @@ if [[ "$JSON_MODE" == true ]]; then
   "TASKS_COMPLETE": $TASKS_COMPLETE,
   "VERIFY_REQUIRED": $VERIFY_REQUIRED,
   "VERIFY_PASSED": $VERIFY_PASSED,
+  "CLOSEOUT_DECISION": "$CLOSEOUT_DECISION",
   "PENDING_GATES": $(echo "$PENDING_GATES" | jq -R -s '.' 2>/dev/null || echo '""'),
   "QUICKFIX_EXISTS": $QUICKFIX_EXISTS,
   "QUICKFIX_COMPLETE": $QUICKFIX_COMPLETE,

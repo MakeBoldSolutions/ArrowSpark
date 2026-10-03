@@ -1,0 +1,63 @@
+---
+// The published story chapters, in order.
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  chapters: CollectionEntry<'chapters'>[];
+}
+const { chapters } = Astro.props;
+---
+<ol class="chapters">
+  {chapters.map((chapter) => (
+    <li>
+      <a class="chapters__item" href={`/story/${chapter.data.slug}/`}>
+        <span class="chapters__n" aria-hidden="true">{String(chapter.data.part).padStart(2, '0')}</span>
+        <span>
+          <span class="chapters__title">{chapter.data.title}</span>
+          <span class="chapters__description">{chapter.data.description}</span>
+          <span class="chapters__meta">
+            Part {chapter.data.part}{chapter.data.spoiler ? ' · Discusses the level’s design: play first' : ''}
+          </span>
+        </span>
+      </a>
+    </li>
+  ))}
+</ol>
+
+<style>
+  .chapters { list-style: none; margin: 0; padding: 0; }
+  .chapters__item {
+    display: grid;
+    grid-template-columns: var(--space-16) minmax(0, 1fr);
+    gap: var(--space-2) var(--space-5);
+    padding-block: var(--space-6);
+    border-top: var(--border-hairline) solid var(--border-default);
+    color: var(--text-strong);
+  }
+  .chapters__item:hover { text-decoration: none; color: var(--brand); }
+  .chapters__n {
+    font-family: var(--font-display);
+    font-weight: var(--fw-extrabold);
+    font-size: var(--fs-h3);
+    color: var(--accent);
+    letter-spacing: var(--ls-tighter);
+  }
+  .chapters__title {
+    display: block;
+    font-family: var(--font-display);
+    font-weight: var(--fw-extrabold);
+    font-size: var(--fs-2xl);
+    line-height: var(--lh-snug);
+    letter-spacing: var(--ls-tight);
+  }
+  .chapters__description { display: block; margin-top: var(--space-2); color: var(--ink-700); }
+  .chapters__meta {
+    display: block;
+    margin-top: var(--space-2);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-semibold);
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+</style>

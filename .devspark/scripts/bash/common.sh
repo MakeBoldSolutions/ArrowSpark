@@ -30,6 +30,35 @@ resolve_knowledge_engine() {
     fi
 }
 
+# Canonical installed-version lookup. Every artifact that records its own DevSpark provenance
+# resolves the version here instead of re-implementing stamp parsing.
+get_devspark_version() {
+    local repo_root="${1:-$(get_repo_root)}"
+    local version="unknown"
+    local candidate
+
+    for candidate in "$repo_root/.devspark/BSW.DevSpark.version" "$repo_root/.documentation/DEVSPARK_VERSION"; do
+        [[ -f "$candidate" ]] || continue
+        version="$(sed -n 's/^[[:space:]]*version:[[:space:]]*\([^[:space:]]\{1,\}\).*/\1/p' "$candidate" | head -n 1)"
+        if [[ -z "$version" ]]; then
+            # Legacy stamps may hold a bare semver with no key.
+            local bare
+            bare="$(head -n 1 "$candidate" | tr -d '[:space:]')"
+            if [[ "$bare" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+                version="$bare"
+            fi
+        fi
+        [[ -n "$version" ]] && break
+    done
+
+    echo "${version:-unknown}"
+}
+
+get_devspark_revision() {
+    local repo_root="${1:-$(get_repo_root)}"
+    git -C "$repo_root" rev-parse --short HEAD 2>/dev/null || true
+}
+
 get_default_doc_taxon() {
     local relative_path="$1"
     local content="${2:-}"

@@ -13,7 +13,9 @@ Nine independent checks run, in execution order:
    puzzles, six structural experiments, one large-canvas fixture, six
    Gordian Knot experiments and the Reference Knot, plus the three purpose
    groups (Foundations, Puzzle Lab, ArrowSpark Levels) and their queries; preserves the original 14-entry fingerprint
-   baseline and checks session selection and advancement.
+   baseline, pins the Reference Knot's puzzle content version
+   (scripts/puzzle/puzzle_content_version.gd), and checks session selection
+   and advancement.
 4. Pure scoreboard checks (tests/puzzle_scoreboard_check.gd) against the
    same bare project. PuzzleScoreboard operates on result Dictionaries
    independently of PuzzleState, PuzzleDefinition, scenes and fonts.
@@ -60,7 +62,7 @@ def run_rule_regressions(godot: str, repo: Path) -> None:
         (root / "project.godot").write_text(
             f'config_version=5\n[application]\nconfig/name="{name}"\n', encoding="utf-8"
         )
-        for script in ("puzzle_definition", "puzzle_state", "puzzle_solver", "puzzle_analyzer", "puzzle_feedback", "puzzle_results_format", "puzzle_catalog"):
+        for script in ("puzzle_definition", "puzzle_state", "puzzle_solver", "puzzle_analyzer", "puzzle_feedback", "puzzle_results_format", "puzzle_catalog", "puzzle_content_version"):
             shutil.copyfile(
                 repo / "scripts/puzzle" / f"{script}.gd",
                 root / f"{script}.gd",

@@ -45,8 +45,13 @@ REL_INVERSE_LABELS = {
     "constrained_by": "constrains",
     "references": "referenced_by",
     "referenced_by": "references",
+    "has-layer": "layer-of",
+    "layer-of": "has-layer",
 }
 GOVERNANCE_RELATIONS = {"constrains", "constrained_by"}
+# Composition edges the builder materializes from the entity model. Kept separate in provenance so
+# Plan can tell "this is part of that entity" from "someone authored a dependency between them".
+STRUCTURAL_RELATIONS = {"has-layer", "layer-of"}
 
 
 def repository_root() -> Path:
@@ -88,7 +93,9 @@ def candidate_type(node_id: str, entity_ids: set[str], node_by_id: dict[str, dic
     if node_id in entity_ids:
         return "entity"
     node = node_by_id.get(node_id)
-    if node and node.get("type") == "governance-decision":
+    # Structural questions read `form`. `type` answers the same question for a decision only by
+    # coincidence of the compatibility encoding, and falls back for pre-7.8 index files.
+    if node and (node.get("form") or node.get("type")) == "governance-decision":
         return "governance"
     return "current-knowledge"
 
@@ -123,7 +130,12 @@ def project_context(
         next_frontier: list[str] = []
         for node_id in sorted(frontier):
             for neighbor, rel in adjacency.get(node_id, []):
-                reason_type = "governance_constraint" if rel in GOVERNANCE_RELATIONS else "graph_relation"
+                if rel in GOVERNANCE_RELATIONS:
+                    reason_type = "governance_constraint"
+                elif rel in STRUCTURAL_RELATIONS:
+                    reason_type = "structural_composition"
+                else:
+                    reason_type = "graph_relation"
                 reason = {
                     "type": reason_type,
                     "seed": seed_of(node_id),

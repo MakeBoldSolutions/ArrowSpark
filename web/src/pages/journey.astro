@@ -1,0 +1,57 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Eyebrow from '../components/ui/Eyebrow.astro';
+import Icon from '../components/ui/Icon.astro';
+import JourneyList from '../components/story/JourneyList.astro';
+
+const steps = (await getCollection('journey')).map((entry) => entry.data).sort((a, b) => a.n - b.n);
+const publishedSlugs = (await getCollection('chapters', (entry) => entry.data.status === 'published')).map(
+  (entry) => entry.data.slug,
+);
+---
+<BaseLayout
+  title="Journey"
+  description="Ten milestones in building ArrowSpark: what changed at each step and what we learned. Where the game and the method meet."
+  current="journey"
+>
+  <section class="page section">
+    <Eyebrow>Journey</Eyebrow>
+    <h1 class="page-title">Ten milestones, one lesson each.</h1>
+    <p class="lede journey-intro">
+      Where the game and the method meet. Each milestone says what changed and what we learned from it.
+    </p>
+    <JourneyList steps={steps} publishedSlugs={publishedSlugs} />
+    <div class="rejoin">
+      <a class="rejoin__card rejoin__card--rust" href="/play/">Try the Game <Icon name="arrow-right" /></a>
+      <a class="rejoin__card rejoin__card--ink" href="/devspark/">Built with DevSpark <Icon name="arrow-right" /></a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .journey-intro { margin: var(--space-5) 0 var(--space-12); }
+  .rejoin {
+    border-top: var(--border-hairline) solid var(--border-default);
+    padding-top: var(--space-8);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr));
+    gap: var(--space-4);
+  }
+  .rejoin__card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    font-family: var(--font-display);
+    font-weight: var(--fw-extrabold);
+    font-size: var(--fs-2xl);
+    color: var(--text-on-dark);
+  }
+  .rejoin__card:hover { text-decoration: none; color: var(--text-on-dark); }
+  .rejoin__card--rust { background: var(--brand); }
+  .rejoin__card--rust:hover { background: var(--brand-strong); }
+  .rejoin__card--ink { background: var(--surface-dark); }
+  .rejoin__card--ink:hover { background: var(--surface-dark-2); }
+</style>

@@ -52,7 +52,7 @@ If `/.knowledge/governance/constitution.md` exists, load it before drafting. The
 
 ## Early Knowledge Grounding
 
-Before drafting, check whether the feature area is already described in `.knowledge/` (an entity under `.knowledge/entities/`, a flat doc, or a `.knowledge/governance/decisions/` entry — match by `appliesTo`, path, or an obvious keyword/id overlap with the feature description). This is a cheap, best-effort check, not the full multi-hop traversal `/devspark.plan` owns later.
+Before drafting, check whether the feature area is already described in `.knowledge/` (a flat doc, an entity under `.knowledge/entities/`, or a `.knowledge/governance/decisions/` entry — match by `appliesTo`, path, or an obvious keyword/id overlap with the feature description). This is a cheap, best-effort check, not the bounded projection `/devspark.plan` owns later.
 
 - If an existing node or decision appears to **contradict** what the user is asking for, surface it under `## Open Questions` or `## Constitution Conflicts`-style callout before drafting further — don't silently draft a spec that `/devspark.analyze` will later reject as a `DELTA1`/`context_resolved` failure. The user may confirm the change is intentional (and the knowledge node needs updating later) or revise the request.
 - If nothing relevant exists, say so briefly and proceed — this is not a gate, and `/devspark.plan`'s Context Resolution step remains the authoritative pass.
@@ -115,7 +115,8 @@ Route-specific `verify:<mode>` requirements:
 
 - `refactor` route defaults to `verify:snapshot-neutral`
 - `prompt-change` route defaults to `verify:golden, verify:end-to-end`
-- other routes may add verify modes when risk warrants it, but must document why
+- **Any route** adds the indicated mode when the change exhibits a verify-sensitive shape from §2.1 of the verification contract — runtime configuration, environment-dependent behavior, an external contract, datastore semantics, mock-substituted behavior, or a deployed-state assumption. Route label and `risk_level` are not the switch; observable change shape is.
+- Report the decision and its reason in the two-line form defined by §2.2 of that contract, whether the answer is required or not required. Exhibiting no shape is a normal outcome and is stated as such, not padded with a mode.
 
 This workflow MUST also validate the document against the shared specification validation contract in `/.devspark/templates/spec-validation-contract.md` for installed repos, or `templates/spec-validation-contract.md` in source repos.
 

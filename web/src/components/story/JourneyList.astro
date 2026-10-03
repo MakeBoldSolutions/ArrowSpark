@@ -1,0 +1,47 @@
+---
+// The shared Journey: numbered milestones with what changed and what was learned.
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  steps: CollectionEntry<'journey'>['data'][];
+  publishedSlugs: string[];
+}
+const { steps, publishedSlugs } = Astro.props;
+---
+<ol class="journey">
+  {steps.map((step) => (
+    <li class="journey-item">
+      <div class="journey-item__head">
+        <span class="journey-item__n" aria-hidden="true">{String(step.n).padStart(2, '0')}</span>
+        <h2 class="journey__title">{step.title}</h2>
+      </div>
+      <div>
+        <p class="journey__label">What changed</p>
+        <p class="journey__text">{step.changed}</p>
+      </div>
+      <div>
+        <p class="journey__label journey__label--learned">What we learned</p>
+        <p class="journey__text">{step.learned}</p>
+        {step.chapter && publishedSlugs.includes(step.chapter) && (
+          <p class="journey__more"><a href={`/story/${step.chapter}/`}>Read the chapter</a></p>
+        )}
+      </div>
+    </li>
+  ))}
+</ol>
+
+<style>
+  .journey { list-style: none; margin: 0; padding: 0; }
+  .journey__title { font-size: var(--fs-xl); line-height: var(--lh-snug); margin: 0; }
+  .journey__label {
+    margin: 0;
+    font-weight: var(--fw-bold);
+    font-size: var(--fs-xs);
+    letter-spacing: var(--ls-eyebrow);
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .journey__label--learned { color: var(--accent-strong); }
+  .journey__text { margin: var(--space-2) 0 0; }
+  .journey__more { margin: var(--space-2) 0 0; font-size: var(--fs-sm); font-weight: var(--fw-semibold); }
+</style>

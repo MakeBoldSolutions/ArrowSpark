@@ -1,0 +1,109 @@
+---
+import Icon from '../ui/Icon.astro';
+
+interface Props {
+  current?: 'play' | 'devspark' | 'journey' | 'evidence' | 'story' | undefined;
+}
+const { current } = Astro.props;
+const links = [
+  { key: 'play', label: 'Play', href: '/play/' },
+  { key: 'devspark', label: 'Built with DevSpark', href: '/devspark/' },
+  { key: 'journey', label: 'Journey', href: '/journey/' },
+  { key: 'evidence', label: 'Evidence', href: '/evidence/' },
+  { key: 'story', label: 'Read the Story', href: '/story/' },
+] as const;
+---
+<header class="site-header">
+  <div class="site-header__inner">
+    <a class="brand" href="/">
+      <img class="brand__mark" src="/brand/logo-mark.svg" alt="" width="56" height="28" />
+      <span class="brand__name">ArrowSpark</span>
+      <span class="brand__family">Make Bold Spark</span>
+    </a>
+    <nav class="site-nav" aria-label="Main">
+      <ul class="site-nav__list">
+        {links.map((link) => (
+          <li><a class="site-nav__link" href={link.href} aria-current={current === link.key ? 'page' : undefined}>{link.label}</a></li>
+        ))}
+      </ul>
+    </nav>
+    <details class="mobile-nav">
+      <summary class="mobile-nav__toggle"><Icon name="menu" /><span>Menu</span></summary>
+      <nav aria-label="Main (compact)">
+        <ul class="mobile-nav__list">
+          {links.map((link) => (
+            <li><a class="site-nav__link" href={link.href} aria-current={current === link.key ? 'page' : undefined}>{link.label}</a></li>
+          ))}
+        </ul>
+      </nav>
+    </details>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--surface-page);
+    border-bottom: var(--border-hairline) solid var(--border-default);
+  }
+  .site-header__inner {
+    max-width: var(--container-max);
+    margin-inline: auto;
+    padding: var(--space-3) var(--gutter);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4) var(--space-8);
+    flex-wrap: wrap;
+  }
+  .brand { display: flex; align-items: center; gap: var(--space-3); color: var(--text-strong); }
+  .brand:hover { text-decoration: none; }
+  .brand__mark { height: var(--space-8); width: auto; }
+  .brand__name {
+    font-family: var(--font-display);
+    font-weight: var(--fw-extrabold);
+    font-size: var(--fs-xl);
+    letter-spacing: var(--ls-tight);
+  }
+  .brand__family {
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-semibold);
+    letter-spacing: var(--ls-eyebrow);
+    text-transform: uppercase;
+    color: var(--text-muted);
+    border-left: var(--border-hairline) solid var(--border-strong);
+    padding-left: var(--space-3);
+  }
+  .site-nav__list, .mobile-nav__list { list-style: none; margin: 0; padding: 0; display: flex; gap: var(--space-1) var(--space-6); flex-wrap: wrap; }
+  .site-nav__link {
+    display: inline-block;
+    padding-block: var(--space-2);
+    font-weight: var(--fw-semibold);
+    font-size: var(--fs-sm);
+    color: var(--text-strong);
+    border-bottom: var(--border-thick) solid transparent;
+  }
+  .site-nav__link:hover { text-decoration: none; color: var(--brand); }
+  .site-nav__link[aria-current="page"] { color: var(--brand); border-bottom-color: var(--brand); }
+  .mobile-nav { display: none; }
+  .mobile-nav__toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    cursor: pointer;
+    font-weight: var(--fw-semibold);
+    padding: var(--space-2);
+    list-style: none;
+  }
+  .mobile-nav__toggle::-webkit-details-marker { display: none; }
+  .mobile-nav__list { flex-direction: column; padding-top: var(--space-2); }
+
+  @media (max-width: 52rem) {
+    .site-nav { display: none; }
+    .brand__family { display: none; }
+    .mobile-nav { display: block; }
+    .mobile-nav[open] { flex-basis: 100%; }
+  }
+</style>

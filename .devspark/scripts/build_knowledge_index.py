@@ -30,7 +30,26 @@ from pathlib import Path, PurePath
 from typing import Any
 
 import yaml
-ALLOWED_TYPES = {
+
+# --- Canonical ontology (form vs role) -------------------------------------------------------
+# A Knowledge artifact carries two independent classifications. `form` is the structural kind of
+# artifact and is derived from where/what the file is -- never configurable. `role` is the kind of
+# truth it contains, and is the only axis the taxonomy registry may assign. Collapsing the two
+# into a single `type` is what made a valid entity layer permanently unclassifiable: its form is
+# `entity-layer` while its role is the layer it documents, and one field cannot hold both.
+FORM_FLAT = "flat-document"
+FORM_ENTITY_LAYER = "entity-layer"
+FORM_GOVERNANCE_DECISION = "governance-decision"
+FORMS = {FORM_FLAT, FORM_ENTITY_LAYER, FORM_GOVERNANCE_DECISION}
+
+# A file that indexes a directory is navigation, not a member of it. Recognizing that by filename
+# keeps form structural: without it the only way to exempt a decisions/ README is to let
+# frontmatter declare its own form, which would let any file misreport what it structurally is.
+NAVIGATION_FILENAMES = {"README.md", "index.md"}
+
+# Roles assignable to a flat document. This set is the published taxonomy vocabulary and MUST stay
+# identical to taxonomy-registry.schema.json's `nodeType` enum (proven by contract test).
+FLAT_ROLES = {
     "authoritative-reference",
     "engineering-pattern",
     "reference-data",
@@ -38,10 +57,30 @@ ALLOWED_TYPES = {
     "research-or-context",
     "architecture",
     "governance",
-    "governance-decision",
-    "entity-layer",
 }
 ALLOWED_LAYERS = {"architecture", "business", "integration", "operations", "pattern", "plan"}
+DECISION_ROLE = "governance"
+# Each form draws its role from its own domain: a flat doc from the taxonomy vocabulary, an entity
+# layer from the layer vocabulary, a decision from governance. No new role names were invented.
+FORM_ROLES = {
+    FORM_FLAT: FLAT_ROLES,
+    FORM_ENTITY_LAYER: ALLOWED_LAYERS,
+    FORM_GOVERNANCE_DECISION: {DECISION_ROLE},
+}
+ALLOWED_ROLES = set().union(*FORM_ROLES.values())
+
+# Controlled entity vocabulary. Semantic classification only: it never mandates that a layer
+# exist, because layer coverage is evidence-driven (see AUXILIARY_LAYERS/coverage_overrides).
+ENTITY_TYPES = {
+    "subsystem": "An internal capability of the system this repository builds.",
+    "domain": "A business/problem-space concept whose rules originate outside the code.",
+    "integration": "A boundary with an external system, protocol, or third-party service.",
+    "tooling": "Developer-facing automation that supports delivery rather than being shipped.",
+}
+
+# Compatibility only. 7.7.x consumers read `node["type"]`; it stays in the index and keeps its
+# exact historical values (role for flat documents, form otherwise). `form`/`role` are canonical.
+ALLOWED_TYPES = FLAT_ROLES | {FORM_ENTITY_LAYER, FORM_GOVERNANCE_DECISION}
 # Coverage counts only layers every entity is expected to carry. `pattern` and `plan` are authored
 # when they apply, so counting them as gaps makes `fully_covered` unreachable rather than honest.
 AUXILIARY_LAYERS = {"pattern", "plan"}
@@ -415,7 +454,6 @@ DEFAULT_MAPPINGS = (
     (".knowledge/legal/**", "authoritative-reference"),
     (".knowledge/plans/**", "research-or-context"),
     (".knowledge/architecture/**", "architecture"),
-    (".knowledge/governance/decisions/**", "governance-decision"),
     (".knowledge/governance/**", "governance"),
 )
 ROOTS = (
@@ -452,15 +490,89 @@ def load_registry(root: Path) -> list[dict[str, Any]]:
 
 
 def infer_type(relative_path: str, mappings: list[dict[str, Any]]) -> str:
+    """Compatibility wrapper: the taxonomy assigns a *role*, which for a flat document is also its
+    historical `type`."""
+    return infer_role(relative_path, mappings)
+
+
+GLOB_CHARS_RE = re.compile(r"[*?\[]")
+DEFAULT_ROLE = "authoritative-reference"
+
+
+def _pattern_specificity(pattern: str) -> tuple[int, int, int]:
+    """Rank a path pattern so a more specific mapping always wins regardless of declaration order.
+
+    Ordered by: exact path beats any glob, then more literal segments, then longer pattern. This
+    is what makes `.knowledge/governance/decisions/**` beat `.knowledge/governance/**` without
+    depending on which list happened to be scanned first.
+    """
+    segments = pattern.split("/")
+    literal_segments = sum(1 for segment in segments if not GLOB_CHARS_RE.search(segment))
+    return (0 if GLOB_CHARS_RE.search(pattern) else 1, literal_segments, len(pattern))
+
+
+def resolve_role(relative_path: str, mappings: list[dict[str, Any]]) -> tuple[str, str | None]:
+    """Resolve a flat document's semantic role from the taxonomy, most-specific mapping first.
+
+    Returns the role and the pattern that produced it (`None` when nothing matched and the default
+    applies). The pattern matters to callers that need to know *how firmly* the taxonomy spoke: a
+    broad glob is a default for a directory, while an exact path is a statement about one file.
+
+    Registry mappings outrank built-in defaults only as a tiebreak at equal specificity, so an
+    explicit repository override still works while a broad override can no longer shadow a more
+    specific rule. Two mappings of the same origin, same specificity and different roles are
+    genuinely ambiguous and fail loudly rather than resolving by list position.
+    """
+    candidates: list[tuple[tuple[int, int, int], int, str, str]] = []
     for mapping in mappings:
         pattern = mapping.get("pathPattern")
-        node_type = mapping.get("nodeType")
-        if pattern and node_type and fnmatch.fnmatchcase(relative_path, pattern):
-            return str(node_type)
-    for pattern, node_type in DEFAULT_MAPPINGS:
+        role = mapping.get("nodeType")
+        if pattern and role and fnmatch.fnmatchcase(relative_path, str(pattern)):
+            candidates.append((_pattern_specificity(str(pattern)), 1, str(role), str(pattern)))
+    for pattern, role in DEFAULT_MAPPINGS:
         if fnmatch.fnmatchcase(relative_path, pattern):
-            return node_type
-    return "authoritative-reference"
+            candidates.append((_pattern_specificity(pattern), 0, role, pattern))
+    if not candidates:
+        return DEFAULT_ROLE, None
+
+    best = max(candidates, key=lambda item: (item[0], item[1]))
+    ambiguous = {
+        (item[2], item[3]) for item in candidates if item[0] == best[0] and item[1] == best[1]
+    }
+    if len({role for role, _pattern in ambiguous}) > 1:
+        detail = ", ".join(f"{pattern} -> {role}" for role, pattern in sorted(ambiguous))
+        raise ValueError(
+            f"{relative_path}: taxonomy mappings are ambiguous at equal specificity ({detail}); "
+            f"make one pattern more specific or remove the conflict"
+        )
+    return best[2], best[3]
+
+
+def infer_role(relative_path: str, mappings: list[dict[str, Any]]) -> str:
+    return resolve_role(relative_path, mappings)[0]
+
+
+def infer_form(relative_path: str) -> str:
+    """Structural kind of a Knowledge artifact, derived from its location and filename.
+
+    Never registry-assigned and never author-assigned: form is a fact about where the file sits,
+    not an editorial choice.
+    """
+    if relative_path.startswith(".knowledge/entities/"):
+        return FORM_ENTITY_LAYER
+    filename = relative_path.rsplit("/", 1)[-1]
+    if (
+        relative_path.startswith(".knowledge/governance/decisions/")
+        and filename not in NAVIGATION_FILENAMES
+    ):
+        return FORM_GOVERNANCE_DECISION
+    return FORM_FLAT
+
+
+def compat_type(form: str, role: str) -> str:
+    """Historical single-field `type` 7.7.x consumers still read: the role for a flat document,
+    the form otherwise. Preserves every pre-7.8 value exactly."""
+    return role if form == FORM_FLAT else form
 
 
 def validate_current(path: Path, metadata: dict[str, Any], body: str) -> None:
@@ -587,6 +699,13 @@ def validate_entity_layer_doc(
     layer = metadata.get("layer")
     if layer not in ALLOWED_LAYERS:
         raise ValueError(f"{path}: layer must be one of {sorted(ALLOWED_LAYERS)}")
+    # Graph topology belongs to the entity, not its facets. Accepting `links` here produced an
+    # edge-less field that looked authored but never reached the graph; refuse it instead.
+    if metadata.get("links"):
+        raise ValueError(
+            f"{path}: entity-layer docs cannot declare 'links' — express relationships as "
+            f"`relations` in the entity's _entity.yaml"
+        )
     sources = metadata.get("source_of_truth")
     if not isinstance(sources, list) or not sources or not all(
         isinstance(s, str) or isinstance(s, dict) for s in sources
@@ -642,6 +761,12 @@ def load_entity_node(path: Path) -> dict[str, Any]:
     entity_id = str(data["id"])
     if entity_id != path.parent.name:
         raise ValueError(f"{path}: id '{entity_id}' must match folder name '{path.parent.name}'")
+    entity_type = str(data["type"])
+    if entity_type not in ENTITY_TYPES:
+        raise ValueError(
+            f"{path}: type '{entity_type}' is not a known entity type; expected one of "
+            f"{sorted(ENTITY_TYPES)}"
+        )
     return data
 
 
@@ -723,7 +848,9 @@ def build_entities(
                     "id": node_id,
                     "entity": entity_id,
                     "layer": layer,
-                    "type": "entity-layer",
+                    "type": FORM_ENTITY_LAYER,
+                    "form": FORM_ENTITY_LAYER,
+                    "role": layer,
                     "path": relative,
                     "title": str(metadata.get("title") or node_id),
                     "source_of_truth": metadata["source_of_truth"],
@@ -798,13 +925,30 @@ def build_index(root: Path, timestamp: str | None = None) -> dict[str, Any]:
             if node_id in seen:
                 raise ValueError(f"{path}: duplicate knowledge id '{node_id}'")
             seen.add(node_id)
-            node_type = str(metadata.get("type") or infer_type(relative, mappings))
-            if node_type not in ALLOWED_TYPES:
-                raise ValueError(f"{path}: prohibited knowledge type '{node_type}'")
+            declared = str(metadata.get("type") or "")
+            form = infer_form(relative)
+            # `type` may restate the form but never choose it. An author may say what kind of truth
+            # a document carries; whether it *is* an entity layer is a fact about where it lives.
+            if declared in FORMS and declared != form:
+                raise ValueError(
+                    f"{path}: declares form '{declared}' but its location makes it '{form}'; "
+                    f"form is structural and cannot be set in frontmatter"
+                )
+            if form == FORM_GOVERNANCE_DECISION:
+                role = DECISION_ROLE
+            else:
+                role = (declared if declared not in FORMS else "") or infer_role(relative, mappings)
+                if role not in FLAT_ROLES:
+                    raise ValueError(
+                        f"{path}: '{role}' is not a document role; expected one of {sorted(FLAT_ROLES)}"
+                    )
+            node_type = compat_type(form, role)
             title = str(metadata.get("title") or next((line[2:].strip() for line in body.splitlines() if line.startswith("# ")), node_id))
             node: dict[str, Any] = {
                 "id": node_id,
                 "type": node_type,
+                "form": form,
+                "role": role,
                 "path": relative,
                 "title": title,
             }
@@ -815,7 +959,7 @@ def build_index(root: Path, timestamp: str | None = None) -> dict[str, Any]:
                 if any(_is_forbidden_reference(item) for item in applies_to):
                     raise ValueError(f"{path}: appliesTo cannot target .devspark.work/ or .archive/ paths")
                 node["appliesTo"] = applies_to
-            if node_type == "governance-decision":
+            if form == FORM_GOVERNANCE_DECISION:
                 decision_constrains[node_id] = validate_decision_doc(path, metadata, set(entity_by_id))
             node.update(search_fields(path, metadata, body))
             nodes.append(node)
@@ -827,6 +971,14 @@ def build_index(root: Path, timestamp: str | None = None) -> dict[str, Any]:
             raise ValueError(f"{layer_node['path']}: duplicate knowledge id '{layer_node['id']}'")
         seen.add(layer_node["id"])
     nodes.extend(layer_nodes)
+
+    # Composition, not an authored architectural relationship. An entity *is* its layers, so this
+    # adjacency is inherent in the entity model and is materialized here rather than being
+    # something an author has to restate in `relations[]`.
+    for layer_node in layer_nodes:
+        edges.append(
+            {"from": str(layer_node["entity"]), "to": str(layer_node["id"]), "rel": "has-layer"}
+        )
 
     # An unresolved relation is a dead edge in the graph every command traverses, and the entity
     # schema requires a resolvable entity id, so it fails the build. A `links.references` target

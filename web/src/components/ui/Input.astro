@@ -1,0 +1,42 @@
+---
+// Labelled text input or textarea with optional hint and error text.
+interface Props {
+  id: string;
+  name: string;
+  label: string;
+  as?: 'input' | 'textarea';
+  hint?: string;
+  error?: string;
+  maxlength?: number;
+  placeholder?: string;
+}
+const { id, name, label, as = 'input', hint, error, maxlength, placeholder } = Astro.props;
+const describedBy = [hint && `${id}-hint`, error && `${id}-error`].filter(Boolean).join(' ') || undefined;
+const invalid = error ? 'true' : undefined;
+---
+<div class="field">
+  <label class="field__label" for={id}>{label}</label>
+  {as === 'textarea'
+    ? <textarea class="field__control field__control--area" id={id} name={name} maxlength={maxlength} placeholder={placeholder} aria-describedby={describedBy} aria-invalid={invalid}></textarea>
+    : <input class="field__control" id={id} name={name} maxlength={maxlength} placeholder={placeholder} aria-describedby={describedBy} aria-invalid={invalid} />}
+  {hint && <p class="field__hint" id={`${id}-hint`}>{hint}</p>}
+  {error && <p class="field__error" id={`${id}-error`}>{error}</p>}
+</div>
+
+<style>
+  .field { display: flex; flex-direction: column; gap: var(--space-2); }
+  .field__label { font-weight: var(--fw-bold); font-size: var(--fs-base); color: var(--text-strong); }
+  .field__control {
+    width: 100%;
+    border: var(--border-hairline) solid var(--border-strong);
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
+    font: inherit;
+    background: var(--surface-page);
+    color: var(--text-strong);
+  }
+  .field__control--area { min-height: var(--space-24); resize: vertical; }
+  .field__control[aria-invalid="true"] { border-color: var(--critical); }
+  .field__hint { margin: 0; font-size: var(--fs-sm); color: var(--text-muted); }
+  .field__error { margin: 0; font-size: var(--fs-sm); color: var(--critical); }
+</style>

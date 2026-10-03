@@ -1,0 +1,86 @@
+---
+// The optional game reaction: at most five questions, offered after play, never required.
+import Eyebrow from '../ui/Eyebrow.astro';
+import Button from '../ui/Button.astro';
+import ReactionFields from './ReactionFields.astro';
+import FeedbackClosed from './FeedbackClosed.astro';
+
+const closed = import.meta.env.PUBLIC_FEEDBACK_CLOSED === 'true';
+---
+{closed ? <FeedbackClosed /> : (
+  <section class="reaction" aria-labelledby="game-reaction-title">
+    <Eyebrow>After play · all optional</Eyebrow>
+    <h2 class="reaction__title" id="game-reaction-title">What did you think of the game?</h2>
+    <form class="reaction__form" data-reaction-form data-reaction-kind="game" novalidate>
+      <div class="reaction__grid">
+        <ReactionFields name="finished" legend="Did you finish?" options={[
+          { value: 'finished', label: 'Finished' },
+          { value: 'partway', label: 'Stopped partway' },
+          { value: 'notStarted', label: 'Didn’t really start' },
+        ]} />
+        <ReactionFields name="satisfaction" legend="How satisfying was it? (1 low, 5 high)" options={[
+          { value: '1', label: '1' }, { value: '2', label: '2' }, { value: '3', label: '3' }, { value: '4', label: '4' }, { value: '5', label: '5' },
+        ]} />
+        <ReactionFields name="playAnother" legend="Would you play another one like it?" options={[
+          { value: 'yes', label: 'Yes' }, { value: 'maybe', label: 'Maybe' }, { value: 'no', label: 'No' },
+        ]} />
+        <ReactionFields name="readStoryFirst" legend="Did you read how it was built before playing?" options={[
+          { value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' },
+        ]} />
+      </div>
+      <div class="reaction__comment">
+        <label class="reaction__label" for="game-comment">What did you notice?</label>
+        <textarea id="game-comment" name="comment" maxlength="1000" placeholder="Anything that stood out, good or bad." aria-describedby="game-comment-notice"></textarea>
+        <p class="reaction__notice" id="game-comment-notice">Comments are anonymous and may be quoted publicly in the project write-up.</p>
+      </div>
+      <p class="reaction__attempt">If you finished the puzzle on this visit, your result (mistakes, Open Move uses, score and time) is sent with it. Nothing else is.</p>
+      <div class="reaction__actions">
+        <Button type="submit" data-reaction-submit>Send</Button>
+        <p class="reaction__status" data-reaction-status role="status" aria-live="polite"></p>
+      </div>
+      <p class="reaction__pending" data-reaction-pending hidden>
+        <span data-reaction-count>Some reactions are</span> saved on this device, not sent yet.
+        <button type="button" class="reaction__discard" data-reaction-discard>Discard unsent feedback</button>
+      </p>
+    </form>
+  </section>
+)}
+
+<script>
+  import { initReactionForm } from '../../scripts/reaction-form-controller';
+  for (const form of document.querySelectorAll<HTMLFormElement>('form[data-reaction-form][data-reaction-kind="game"]')) {
+    initReactionForm(form);
+  }
+</script>
+
+<style>
+  .reaction {
+    margin-top: var(--space-16);
+    background: var(--surface-card);
+    border: var(--border-hairline) solid var(--border-default);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: clamp(var(--space-6), 4vw, var(--space-10));
+  }
+  .reaction__title { font-size: var(--fs-h3); margin: var(--space-2) 0 var(--space-6); }
+  .reaction__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); gap: var(--space-6) var(--space-10); }
+  .reaction__comment { margin-top: var(--space-6); display: flex; flex-direction: column; gap: var(--space-2); }
+  .reaction__label { font-weight: var(--fw-bold); color: var(--text-strong); }
+  .reaction__comment textarea {
+    width: 100%;
+    min-height: var(--space-24);
+    border: var(--border-hairline) solid var(--border-strong);
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
+    font: inherit;
+    background: var(--surface-page);
+    color: var(--text-strong);
+    resize: vertical;
+  }
+  .reaction__notice, .reaction__attempt { margin: 0; font-size: var(--fs-sm); color: var(--ink-600); }
+  .reaction__attempt { margin-top: var(--space-4); }
+  .reaction__actions { margin-top: var(--space-6); display: flex; flex-wrap: wrap; gap: var(--space-4) var(--space-6); align-items: center; }
+  .reaction__status { margin: 0; font-size: var(--fs-sm); color: var(--ink-700); }
+  .reaction__pending { margin-top: var(--space-4); font-size: var(--fs-sm); color: var(--ink-700); }
+  .reaction__discard { background: none; border: 0; padding: 0; margin-left: var(--space-2); color: var(--text-link); font: inherit; font-weight: var(--fw-semibold); cursor: pointer; text-decoration: underline; }
+</style>

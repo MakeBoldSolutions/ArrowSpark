@@ -1,5 +1,11 @@
 # Save and Input Regression Checks
 
+**Pinned engine: Godot 4.4-stable** (`4.4.stable.official.4c311cbee`), downloaded from the
+official GitHub release with SHA-512 verification. Both gates, `--headless --editor --quit`,
+CI and the Web export all use this version; pass its executable as `--godot`. A newer local
+editor does not establish compatibility with the pin. If the repository's `.godot/` cache was
+written by a newer editor, run 4.4 from a copy of the project without `.godot/`.
+
 Run `python tests/run_regressions.py` (Python 3 and Godot on PATH), or use
 `python tests/run_regressions.py --godot C:/path/to/godot.exe`.
 
@@ -9,9 +15,9 @@ requires exit code zero and `REGRESSION_FAILURES=0`. Each Godot process has a
 45-second timeout. This suite also asserts that opening the arrow puzzle from
 Play/New Game, or selecting a puzzle from Level Select, does not call
 `GlobalState.reset()` or `GameState.start_game()` (the no-reset guarantee for
-existing saved progress), and that New Game always resets `PuzzleSession` to
-catalog position 0 regardless of a prior Level Select choice earlier in the
-same session. The isolated project also carries `scripts/puzzle/puzzle_definition.gd`,
+existing saved progress), and that New Game always sets `PuzzleSession` to
+the Reference Knot (`reference_knot`) regardless of a prior Level Select choice
+earlier in the same session. The isolated project also carries `scripts/puzzle/puzzle_definition.gd`,
 `scripts/puzzle/puzzle_catalog.gd` and `scripts/puzzle_session.gd`, since
 `main_menu_with_animations.gd`'s `new_game()`/Level Select handler now
 reference `PuzzleCatalog`/`PuzzleSession` directly. The launcher also copies the
@@ -81,7 +87,12 @@ This runs nine independent headless checks, in execution order:
    `PuzzleDefinition.is_valid()`; solver-confirmed solvability via
    `PuzzleSolver.analyze()`; the returned witness replays against a fresh
    `PuzzleState` clearing with zero mistakes; and no difficulty-tier wording in
-   any title. Also asserts each of the six structural experimental entries meets
+   any title. Checks order independence along each entry's witness: at every
+   branching state, forcing any other legal arrow still reaches a mistake-free
+   completion; for the densest board, `reference_knot`, every sixth branching
+   state is sampled to stay within the launcher's time limit. Pins the Reference
+   Knot's puzzle content version (`PuzzleContentVersion`) to a literal value, so
+   any geometry change fails here. Also asserts each of the six structural experimental entries meets
    its own exact `PuzzleAnalyzer`-derived threshold (dependency depth, cascade
    fan-out, density, bent-tail dependency, blocker distance, board/edge count
    — see `.knowledge/architecture/arrow-puzzle.md`'s "Structural Analysis"

@@ -1,6 +1,6 @@
 # Document Manifest
 
-Generated: 2026-09-28 (updated: Specs 001--007 complete, Spec 008 in progress)
+Generated: 2026-09-28 (updated 2026-10-01: Specs 001--010 complete). Byte counts below were recorded 2026-09-28 and are stale for files edited since; 01, 08, 09, 10, 13, 03, 04 and README have changed.
 
 Files:
 

@@ -1,0 +1,82 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Eyebrow from '../components/ui/Eyebrow.astro';
+import Card from '../components/ui/Card.astro';
+
+const notices = [
+  {
+    name: 'Godot Engine',
+    licence: 'MIT',
+    detail:
+      'The game runs on the Godot Engine 4.4 Web runtime. Copyright (c) 2014-present Godot Engine contributors; (c) 2007-2014 Juan Linietsky, Ariel Manzur. Godot also bundles third-party components (for example FreeType, HarfBuzz, ICU, libpng, mbedTLS, zlib and Zstandard) under their own permissive licences, listed in its copyright notice.',
+    links: [
+      { label: 'Godot licence', url: 'https://godotengine.org/license/' },
+      { label: 'Godot third-party notices (4.4-stable)', url: 'https://github.com/godotengine/godot/blob/4.4-stable/COPYRIGHT.txt' },
+    ],
+  },
+  {
+    name: "Maaack's Game Template",
+    licence: 'MIT',
+    detail: 'Menus, scene loading, options and audio scaffolding for the game. Copyright (c) 2022-present Marek Belski and contributors.',
+    links: [{ label: 'Repository and licence', url: 'https://github.com/Maaack/Godot-Game-Template' }],
+  },
+  {
+    name: 'Godot Engine logo',
+    licence: 'CC BY 4.0',
+    detail: 'Shown on the game’s opening screen. By Andrea Calabró.',
+    links: [{ label: 'Logo licence', url: 'https://github.com/godotengine/godot/blob/master/LOGO_LICENSE.txt' }],
+  },
+  {
+    name: 'Lucide icons',
+    licence: 'ISC',
+    detail: 'Outline icons used on this site (lucide-static). Copyright (c) Lucide Contributors; portions (c) Cole Bemis (Feather, MIT).',
+    links: [{ label: 'Lucide licence', url: 'https://lucide.dev/license' }],
+  },
+  {
+    name: 'Be Vietnam Pro',
+    licence: 'SIL Open Font License 1.1',
+    detail: 'Display typeface on this site and in the game. Copyright 2021 The Be Vietnam Pro Project Authors.',
+    links: [{ label: 'Licence text', url: '/fonts/licenses/OFL-BeVietnamPro.txt' }],
+  },
+  {
+    name: 'Inter Tight',
+    licence: 'SIL Open Font License 1.1',
+    detail: 'Body typeface on this site and in the game. Copyright 2022 The Inter Project Authors.',
+    links: [{ label: 'Licence text', url: '/fonts/licenses/OFL-InterTight.txt' }],
+  },
+  {
+    name: 'Astro',
+    licence: 'MIT',
+    detail: 'Builds this static site. No Astro code runs on a server.',
+    links: [{ label: 'Astro licence', url: 'https://github.com/withastro/astro/blob/main/LICENSE' }],
+  },
+];
+---
+<BaseLayout title="Licences" description="Licences and notices for the software and fonts the ArrowSpark showcase redistributes.">
+  <section class="page section">
+    <Eyebrow>Licences</Eyebrow>
+    <h1 class="page-title">Licences and notices.</h1>
+    <p class="lede">ArrowSpark and this site redistribute the software and fonts below. Each keeps its own licence.</p>
+    <ul class="notices">
+      {notices.map((notice) => (
+        <li>
+          <Card padding="lg">
+            <h2 class="notice__name">{notice.name}</h2>
+            <p class="notice__licence">{notice.licence}</p>
+            <p>{notice.detail}</p>
+            <ul class="notice__links">
+              {notice.links.map((link) => <li><a href={link.url}>{link.label}</a></li>)}
+            </ul>
+          </Card>
+        </li>
+      ))}
+    </ul>
+  </section>
+</BaseLayout>
+
+<style>
+  .notices { list-style: none; margin: var(--space-10) 0 0; padding: 0; display: grid; gap: var(--space-4); }
+  .notice__name { font-size: var(--fs-h4); margin: 0; }
+  .notice__licence { color: var(--accent-strong); font-weight: var(--fw-semibold); font-size: var(--fs-sm); margin: var(--space-1) 0 var(--space-3); }
+  .notice__links { list-style: none; padding: 0; margin: var(--space-3) 0 0; display: flex; gap: var(--space-2) var(--space-6); flex-wrap: wrap; }
+</style>

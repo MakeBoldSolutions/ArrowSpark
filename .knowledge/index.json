@@ -1,7 +1,7 @@
 {
   "generated": {
     "by": "build-knowledge-index",
-    "at": "2026-10-01T16:29:43Z"
+    "at": "2026-10-03T03:01:37Z"
   },
   "roots": [
     {
@@ -29,6 +29,8 @@
     {
       "id": "arrow-puzzle",
       "type": "architecture",
+      "form": "flat-document",
+      "role": "architecture",
       "path": ".knowledge/architecture/arrow-puzzle.md",
       "title": "Arrow Puzzle Rules, Presentation and Menu Integration",
       "appliesTo": [
@@ -39,6 +41,8 @@
         "scripts/puzzle/puzzle_results_format.gd",
         "scripts/puzzle/puzzle_catalog.gd",
         "scripts/puzzle/puzzle_analyzer.gd",
+        "scripts/puzzle/puzzle_content_version.gd",
+        "scripts/presentation/web_attempt_emitter.gd",
         "scripts/puzzle_session.gd",
         "scripts/puzzle_scoreboard.gd",
         "scripts/presentation/arrow_departure_geometry.gd",
@@ -53,6 +57,7 @@
         "scenes/menus/main_menu/main_menu.tscn",
         "scenes/menus/main_menu/main_menu_with_animations.tscn",
         "scenes/menus/main_menu/main_menu_with_animations.gd",
+        "scenes/menus/main_menu/puzzle_select_menu.gd",
         "tests/puzzle_regression.gd",
         "tests/puzzle_catalog_check.gd",
         "tests/puzzle_analyzer_check.gd",
@@ -77,6 +82,8 @@
         "Solvability Analysis",
         "Puzzle Catalog and Session-Scoped Selection",
         "Level groups",
+        "Puzzle content version",
+        "Attempt timing and the Web completion hand-off",
         "Open Move Assistance and Session Scoring",
         "Structural Analysis (PuzzleAnalyzer)",
         "Puzzle-design vocabulary (provisional)",
@@ -91,6 +98,8 @@
     {
       "id": "game-visual-system",
       "type": "architecture",
+      "form": "flat-document",
+      "role": "architecture",
       "path": ".knowledge/architecture/game-visual-system.md",
       "title": "Game Visual System",
       "appliesTo": [
@@ -120,6 +129,8 @@
     {
       "id": "save-progression",
       "type": "architecture",
+      "form": "flat-document",
+      "role": "architecture",
       "path": ".knowledge/architecture/save-progression.md",
       "title": "Save Progression and Input Settings",
       "appliesTo": [
@@ -148,12 +159,42 @@
         "Canvas Actions and Transient Camera State",
         "Session-Only Puzzle Entry vs. Preserved Legacy Storage",
         "Level Select",
+        "Web builds",
         "Validation and Limits"
+      ]
+    },
+    {
+      "id": "web-showcase",
+      "type": "architecture",
+      "form": "flat-document",
+      "role": "architecture",
+      "path": ".knowledge/architecture/web-showcase.md",
+      "title": "ArrowSpark Web Showcase (Static Site and Browser Build)",
+      "appliesTo": [
+        "web/**",
+        "export_presets.cfg",
+        ".github/workflows/azure-static-web-apps-green-bay-09bdc1010.yml"
+      ],
+      "headings": [
+        "ArrowSpark Web Showcase (Static Site and Browser Build)",
+        "Authorities",
+        "Stack and build",
+        "Visual foundation",
+        "The game in the page",
+        "Completion bridge",
+        "Reactions (client side)",
+        "Content model",
+        "Publication checks",
+        "Hosting headers, caching and the Content-Security-Policy",
+        "Licences",
+        "Continuous integration and the synthetic check"
       ]
     },
     {
       "id": "arrowgame-constitution",
       "type": "governance",
+      "form": "flat-document",
+      "role": "governance",
       "path": ".knowledge/governance/constitution.md",
       "title": "ArrowSpark Constitution",
       "appliesTo": [
@@ -162,7 +203,9 @@
         "scenes/**",
         "resources/**",
         "assets/**",
-        "addons/**"
+        "addons/**",
+        "export_presets.cfg",
+        "web/**"
       ],
       "headings": [
         "ArrowSpark Constitution",
@@ -181,6 +224,8 @@
     {
       "id": "guides-repo-story-repo-story-2026-09-30",
       "type": "authoritative-reference",
+      "form": "flat-document",
+      "role": "authoritative-reference",
       "path": ".knowledge/guides/repo-story/repo-story-2026-09-30.md",
       "title": "Repository Story: ArrowGame (ArrowSpark)",
       "headings": [
@@ -211,6 +256,8 @@
     {
       "id": "product-branding",
       "type": "authoritative-reference",
+      "form": "flat-document",
+      "role": "authoritative-reference",
       "path": ".knowledge/product/branding.md",
       "title": "Product Identity and Branding Hierarchy",
       "appliesTo": [
@@ -219,16 +266,21 @@
         "CLAUDE.md",
         "ATTRIBUTION.md",
         "scenes/menus/main_menu/main_menu_with_animations.tscn",
-        "scenes/credits/credits.tscn"
+        "scenes/credits/credits.tscn",
+        "web/src/components/site/SiteHeader.astro",
+        "web/src/components/site/SiteFooter.astro"
       ],
       "headings": [
         "Product Identity and Branding Hierarchy",
+        "The playable showcase",
         "Presentation principle"
       ]
     },
     {
       "id": "gameplay-contract",
       "type": "authoritative-reference",
+      "form": "flat-document",
+      "role": "authoritative-reference",
       "path": ".knowledge/product/gameplay-contract.md",
       "title": "ArrowSpark Core Gameplay Contract",
       "appliesTo": [
@@ -248,6 +300,8 @@
     {
       "id": "gordian-knot-experiments",
       "type": "authoritative-reference",
+      "form": "flat-document",
+      "role": "authoritative-reference",
       "path": ".knowledge/reference/gordian-knot-experiments.md",
       "title": "Gordian Knot Experiments",
       "appliesTo": [
@@ -279,6 +333,8 @@
     {
       "id": "reference-puzzle-design-report",
       "type": "authoritative-reference",
+      "form": "flat-document",
+      "role": "authoritative-reference",
       "path": ".knowledge/reference/reference-puzzle-design-report.md",
       "title": "Reference Puzzle Design Report",
       "appliesTo": [

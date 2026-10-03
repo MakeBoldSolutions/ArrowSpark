@@ -1,0 +1,45 @@
+---
+// Inline outline icon from the pinned lucide-static set (stroke width 2, currentColor).
+import arrowRight from 'lucide-static/icons/arrow-right.svg?raw';
+import check from 'lucide-static/icons/check.svg?raw';
+import x from 'lucide-static/icons/x.svg?raw';
+import maximize from 'lucide-static/icons/maximize.svg?raw';
+import menu from 'lucide-static/icons/menu.svg?raw';
+import minus from 'lucide-static/icons/minus.svg?raw';
+import copy from 'lucide-static/icons/copy.svg?raw';
+import mail from 'lucide-static/icons/mail.svg?raw';
+import externalLink from 'lucide-static/icons/external-link.svg?raw';
+import info from 'lucide-static/icons/info.svg?raw';
+
+const icons = {
+  'arrow-right': arrowRight,
+  check,
+  x,
+  maximize,
+  menu,
+  minus,
+  copy,
+  mail,
+  'external-link': externalLink,
+  info,
+} as const;
+
+export type IconName = keyof typeof icons;
+
+interface Props {
+  name: IconName;
+  label?: string;
+  class?: string;
+}
+const { name, label, class: className } = Astro.props;
+const svg = icons[name]
+  .replace(/<!--[\s\S]*?-->/, '')
+  .replace('<svg', `<svg aria-hidden="true" focusable="false" class="icon ${className ?? ''}"`)
+  .replace(/\swidth="24"\s+height="24"/, ' width="1em" height="1em"')
+  .replace(/class="lucide[^"]*"\s*/, '');
+---
+<Fragment set:html={svg} />{label && <span class="visually-hidden">{label}</span>}
+
+<style is:global>
+  .icon { display: inline-block; flex: none; vertical-align: -0.125em; }
+</style>

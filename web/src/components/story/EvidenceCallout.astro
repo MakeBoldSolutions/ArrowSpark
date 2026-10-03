@@ -1,0 +1,32 @@
+---
+// A highlighted statement on a dark or ember surface (the convergence rule, the human baseline).
+import Eyebrow from '../ui/Eyebrow.astro';
+
+interface Props {
+  eyebrow: string;
+  tone?: 'dark' | 'ember';
+}
+const { eyebrow, tone = 'dark' } = Astro.props;
+---
+<div class={`callout callout--${tone}`}>
+  <Eyebrow tone={tone === 'dark' ? 'onDark' : 'accent'}>{eyebrow}</Eyebrow>
+  <div class="callout__body"><slot /></div>
+  <div class="callout__more"><slot name="more" /></div>
+</div>
+
+<style>
+  .callout { border-radius: var(--radius-lg); padding: clamp(var(--space-6), 4vw, var(--space-10)); }
+  .callout--dark { background: var(--surface-dark); color: var(--text-on-dark); }
+  .callout--ember { background: var(--accent-soft); border: var(--border-thick) solid var(--accent); color: var(--text-strong); }
+  .callout__body {
+    margin-top: var(--space-3);
+    font-family: var(--font-display);
+    font-weight: var(--fw-bold);
+    font-size: var(--fs-h3);
+    line-height: var(--lh-snug);
+    letter-spacing: var(--ls-tight);
+    max-width: 34ch;
+  }
+  .callout__more { margin-top: var(--space-4); max-width: 62ch; }
+  .callout--dark .callout__more :global(a) { color: var(--ember-200); }
+</style>

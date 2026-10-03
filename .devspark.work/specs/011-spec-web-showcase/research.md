@@ -1,0 +1,182 @@
+# Phase 0 Research: ArrowSpark Web Showcase
+
+**Written:** 2026-10-02 by `/devspark.plan`. Temporary planning material; nothing durable may cite it.
+**Builds on:** [showcase-research.md](showcase-research.md) §1-16 (pre-spec research, content-source map, theme analysis). This file resolves only the remaining technical dependencies. Fixed decisions from the spec (Astro + TypeScript, static-first, the Make Bold theme, Azure Static Web Apps at `arrow.makeboldspark.com`, Godot Web, the existing MakeBoldSpark API, anonymous reactions, durable MD/MDX, desktop-first) are not re-opened.
+
+**Status:** no `NEEDS CLARIFICATION` remains. One item (R1) is desk-confirmed and has a gated empirical check as the first implementation task.
+
+---
+
+## R1. Godot version
+
+**Decision:** pin **Godot 4.4-stable**, the exact build CI already downloads and SHA-512-verifies in `.github/workflows/godot-regression-tests.yml`, for the web export, both regression launchers and the documented build. The local 4.7.2 editor is not used for anything that produces evidence or a release artifact.
+
+**Rationale (desk evidence, 2026-10-02):**
+- `project.godot` declares `config/features = 4.4` and `rendering_method = gl_compatibility`. That is the renderer the Web platform requires, already set for desktop and mobile.
+- No C# project, no GDExtension, and no `Thread`/`Mutex`/`WorkerThreadPool` use in `scripts/`, `scenes/` or `addons/`, so a **single-threaded ("no threads") web export** is possible. That variant needs no cross-origin isolation headers, so Azure Static Web Apps serves it without special COOP/COEP configuration.
+- The Maaack template already branches on `OS.has_feature("web")` for Quit, fullscreen, video options and the loading screen.
+- The one web-relevant risk is the template's `SceneLoader`, which uses `ResourceLoader.load_threaded_request`. A single-threaded web build runs threaded loading on the main thread. This should work, but it must be observed.
+- Pinning 4.4-stable changes nothing for CI and nothing for the constitution's declared target.
+
+**Empirical confirmation:** not yet performed. No 4.4 editor or export templates are installed locally.
+
+**Gate (first implementation task, S-1):** install the 4.4-stable editor and export templates from the official release, verifying the SHA-512 sums. Export the Web/no-threads preset, serve it locally, and play the Reference Knot through to the results screen.
+- **Pass:** 4.4 is confirmed.
+- **Fail with a concrete engine defect:** stop. A version change becomes an explicit prerequisite under FR-023, with its own task, a regression run on the new version and a constitution Technology update. Game/Web-integration work does not merge on an unconfirmed engine. S-1 is a branch gate, and site, content and client work proceed in parallel.
+
+**Alternatives considered:**
+- **4.4.1-stable:** a patch release, but no concrete web-export reason to move has been found, and it would change CI.
+- **4.7.2:** the local editor. Moving would be an engine upgrade, which the spec rules out without a blocker.
+
+---
+
+## R2. Godot → page bridge
+
+**Decision:**
+
+- **Hosting:** the Godot Web export is served under `/game/` on the same origin as the site and embedded in the Play page in a **same-origin `<iframe>`**.
+- **Sending:** on attempt completion, a small web-only GDScript emitter posts one message to the parent window:
+
+  ```gdscript
+  # web-only; no-op on every other platform
+  if OS.has_feature("web"):
+      var window := JavaScriptBridge.get_interface("window")
+      if window != null and window.parent != null:
+          window.parent.postMessage(JSON.stringify(payload), window.location.origin)
+  ```
+
+  - `payload` is a Dictionary built by a pure, headless-testable function.
+  - The message is a **JSON string**, because Godot's `JavaScriptObject` does not marshal Dictionaries into JS objects.
+  - `targetOrigin` is the frame's own origin, so the message can only be delivered to a same-origin parent.
+  - The call is fire-and-forget: there is no return value, no await and no listener in the game.
+- **Receiving:** the TypeScript bridge (`game-bridge.ts`) listens for `message` events and accepts one only when all of these hold:
+  1. `event.origin === window.location.origin`;
+  2. `event.source` is the game iframe's `contentWindow`;
+  3. `event.data` is a string of at most 1 KB;
+  4. it parses as JSON matching the `attemptCompleted` v1 schema exactly (contracts/attempt-completed-event.md).
+  Anything else is ignored silently. The bridge keeps only the most recent valid event, in a module variable for the page visit; no browser storage is used.
+- **Where the emitter is called:**
+  - `scenes/puzzle/arrow_puzzle.gd` `_show_results()`, after `PuzzleScoreboard.record_attempt(...)`, in the presentation/controller layer.
+  - `_start_new_attempt()` records `Time.get_ticks_msec()`, and the REMOVED branch that sets `_awaiting_completion` records the completion tick. `elapsedSeconds` = whole seconds between them (wall clock, pauses included, as the spec says).
+  - `PuzzleState`, `PuzzleSolver`, `PuzzleAnalyzer` and the scoring rules are not touched.
+- **Puzzle content version:** a new pure static helper, `scripts/puzzle/puzzle_content_version.gd`, `PuzzleContentVersion.of(definition) -> String`.
+  - It serializes the geometry canonically: width, height, then every head sorted by (y, x) with its direction and ordered tail.
+  - It returns `"g1-"` plus the first 12 hex characters of the SHA-256 of that text.
+  - It changes if and only if geometry changes, and is independent of the app version.
+  - `tests/puzzle_catalog_check.gd` pins the Reference Knot's value as a literal constant (FR-009).
+
+**Rationale:**
+- Godot's documented `JavaScriptBridge` is part of the standard 4.x web templates.
+- `postMessage` with an exact target origin, plus an origin/source check on receipt, is the standard browser contract between frames.
+- The iframe keeps Godot's generated loader and canvas intact, isolates engine globals from the site, gives a natural fullscreen target, and matches the "click inside the game once" focus model.
+- **Desktop builds are unchanged:** the emitter returns immediately when `OS.has_feature("web")` is false.
+- **No page-to-game path exists:** the game never registers a callback or reads anything from the page.
+
+**Alternatives considered:**
+- **Embed the canvas directly in the page:** the engine's globals and keyboard capture would leak into site pages, and fullscreen and focus are harder to scope.
+- **`JavaScriptBridge.eval` of a dispatch string:** works, but evaluating string code is broader than needed.
+- **A `CustomEvent` on the iframe document:** needs parent code to reach into the frame, which is a page-to-game coupling.
+- **Polling the game for results:** that would be a page-to-game dependency.
+
+**Test boundary:**
+- The payload builder and content-version helper are covered by headless GDScript checks in the existing launchers.
+- The bridge's validation is covered by TypeScript unit tests.
+- The real `postMessage` hop is observed in the browser smoke test.
+
+---
+
+## R3. API deployment model → storage
+
+**Finding:**
+- The API README documents **Azure App Service Linux B1** and SQLite at `/home/data/makeboldspark.db`.
+- The repository contains **no infrastructure-as-code or configuration that guarantees a single instance**: no instance count, no scale lock.
+- App Service can also run **two worker processes briefly during restarts and deployments** (overlapped recycling). An in-process single-writer lock therefore cannot be relied on.
+- The single-instance condition is **not guaranteed**.
+
+**Decision (revised 2026-10-02 by owner clarification, superseding the SQLite choice below):** store **one JSON file per reaction** in a dedicated directory on the API host's persistent storage. The directory is outside the web root and outside any repository, and is never checked in anywhere. Each file is written under a temporary name and renamed into place. Every file, and every private local copy, is purged after the closeout. No database is used.
+
+*Why this resolves the concurrency finding:* every request creates its own uniquely named file, so overlapping processes never share a file and no lock is needed.
+
+*Original planning decision, kept for the record:* use the **existing SQLite mechanism**, exactly as the spec's fallback (FR-031) required.
+- One new append-only table in the existing `MakeBoldSparkDbContext`, added by an EF Core migration through that repository's established migration and backup procedure (the WAL convention, `bold-docs/system/decisions/0002-sqlite-default.md`; the deployment steps used in `bold-docs/system/family-memories-api.md`).
+- The table holds the same record shape the JSONL design specified: `RecordId` (random GUID, primary key), `SchemaVersion`, `ReceivedUtc` (truncated to the minute), `ReactionType`, and `Payload` (the validated, canonically re-serialized reaction JSON).
+- Insert-only. No public read, update, delete, list or export endpoint.
+- The owner reads the table directly with SQLite tooling for the closeout, using the API repo's backup procedure.
+
+**Rationale:** SQLite handles concurrent writers itself; WAL mode is already the platform default. No new database or platform is introduced. JSONL in a shared `/home` file with overlapping processes would need cross-process locking, which the spec forbids building.
+
+**Alternatives considered:**
+- **JSONL with an in-process lock:** unsafe under overlapped recycling.
+- **JSONL with file locking:** this is "distributed file locking", which is excluded.
+- **A new storage account or database:** a new platform, which is excluded.
+
+---
+
+## R4. Cross-repo API work
+
+> **Revised 2026-10-02 (owner clarification):** the endpoint, its storage and purge are a **separate API project with its own spec**, not Spec 011 work. Spec 011 delivers only the client: forms, contract-valid requests, the unavailable state and the local pending queue (spec FR-032). It must be complete and verifiable with no endpoint deployed. The text below stays as context for that separate spec.
+
+**Owning repository:** `MakeBoldSolutions/MakeBoldSpark.com`. That repo uses its own **Bold** workflow (`AGENTS.md`, `bold-docs/backbone.md`, `bold-docs/features/NNNN-*`). The endpoint is planned and built there as its own feature, expected to be `0007-arrowspark-reactions`, through `/bold-plan`. It is **not** built from this repository, and no MakeBoldSpark code is committed here.
+
+**Contract first:** [contracts/reactions-api.md](contracts/reactions-api.md) is the single contract both repositories implement against. Its version is `schemaVersion` 1.
+
+**Base URL:** `https://makeboldspark.com`, confirmed by the owner 2026-10-02. The full endpoint is `https://makeboldspark.com/api/public/arrowspark/reactions`.
+- The site reads it from a **build-time** setting (`PUBLIC_REACTIONS_URL`), following the API repo's documented consumer pattern ("build-time setting; changing it requires rebuilding").
+- The API's own docs also name `api.markhazleton.com`. Which hostname serves the API at deploy time belongs to that repo's deployment, so the site depends only on the build-time setting.
+
+**Implementation order:**
+1. Contract (this plan). Both sides now build independently.
+2. **ArrowSpark side**, unblocked from day one: the reaction UI and client against the contract, tested with
+   - (a) a contract-fake mode in unit tests,
+   - (b) a local mock server script used only in development (`web/scripts/mock-reactions.mjs`: validates per the contract and returns 202, 400 or 503 on demand), and
+   - (c) the **unavailable** path, where an unset `PUBLIC_REACTIONS_URL` or an unreachable endpoint saves the reaction to the local pending queue (spec FR-032).
+3. **MakeBoldSpark side** (feature 0007 in that repo): the endpoint, CORS policy, rate-limit policy, validation, migration and tests, built and deployed on that repo's schedule.
+4. **Integration:** after 0007 is deployed, the showcase is built with `PUBLIC_REACTIONS_URL` set, and the browser smoke test submits one game and one story reaction from `https://arrow.makeboldspark.com`. The owner confirms the rows exist with the expected fields only.
+
+**Integration test boundary:**
+- ArrowSpark proves its client sends contract-valid requests and handles each response class.
+- MakeBoldSpark proves its endpoint enforces the contract (its own test suite, `dotnet test`).
+- Only the final smoke test crosses the boundary.
+- Neither repository's CI calls the other's.
+
+**Publication does not wait on the API:** the site may go public before the endpoint exists. Reactions written meanwhile are kept in each visitor's browser and sent when that visitor returns after the endpoint is live (FR-032). The learning window still opens on publication (FR-020). Observed sessions count regardless. Reactions from visitors who never return are lost, which is an accepted limitation.
+
+---
+
+## R5. Safari environment
+
+**Finding:** the owner confirmed (2026-10-02) that a **macOS machine with current Safari is available**.
+
+**Decision:** the release smoke test runs on three browsers: a Chromium-based desktop browser (on Windows), Firefox desktop (on Windows), and Safari on that Mac. Each is recorded separately, with its browser and OS version. If the Mac is not available on release day, Safari is recorded as **not performed**, never inferred.
+
+---
+
+## R6. Supporting decisions (no open questions)
+
+| Topic | Decision | Rationale |
+|---|---|---|
+| Node / package manager | Node 22 LTS and npm with a committed lockfile; CI pins Node 22 | Matches the API repo's CI (`setup-node` 22); local Node 26 is compatible with Astro's supported range |
+| Astro version | Current stable Astro major at implementation time, exact version pinned by the lockfile; static output (`output: 'static'`); no SSR adapter | FR-024, FR-028 |
+| Islands | Plain TypeScript `<script>` modules in Astro components; no UI-framework integration | FR-028 (no React); the islands are small |
+| Content | Astro content collections (`chapters`) with a Zod schema; YAML data collections for `beats`, `journey`, `evidence`, `facts`, `lessons` | FR-029; one source per fact |
+| Icons | Lucide icons as inline SVG via the pinned `lucide-static` package, imported at build time; no CDN | Theme chose Lucide; FR-027 pins it; no runtime JS |
+| Fonts | Theme TTFs converted to WOFF2 once with a documented command, self-hosted with their OFL licence texts; TTF originals kept in the durable theme copy | Web performance; licence compliance |
+| Site tests | `astro check` (types), `vitest` for the bridge/client/validators, and a Node content-validation script (`web/scripts/check-content.mjs`) run in CI | Smallest set covering the spec's automated checks |
+| Deployment | GitHub Actions in this repo (authority: tasks T014, T071): run both Godot gates on 4.4-stable, export the Web build with 4.4-stable templates to the build-unique `/game/<commit-short-sha>/` path, run `npm ci && npm audit --audit-level=high && npm run check && npm run build`, and deploy to Azure Static Web Apps with its official deploy action (preview per PR, production on `main`). One synthetic headless check (pinned software WebGL; inconclusive, not failed, when the runner has no WebGL2) runs on each preview and daily against production during the window. The SWA resource, deploy token secret and custom-domain DNS are created by the owner | FR-023 (one pinned version everywhere); FR-025; static hosting |
+| SWA config | `staticwebapp.config.json`: MIME types for `.wasm`/`.pck`; each export deployed under `/game/<commit-short-sha>/` with `Cache-Control: public, max-age=31536000, immutable`; HTML `no-cache`; a production CSP compatible with Godot and Astro with every directive explicit (authority: task T068; `script-src 'self' 'wasm-unsafe-eval'` plus the SHA-256 of the shell's inline bootstrap, computed at build; `style-src 'self'` with no inline styles; `connect-src 'self'` plus the origin of `PUBLIC_REACTIONS_URL`, generated from the same setting; `frame-ancestors 'self'`); no cookies. Verified on an SWA preview environment carrying the production headers | Correct engine serving, no stale engine assets, privacy |
+| Trackpad / page zoom | Ctrl+wheel (pinch) and Ctrl/Cmd +/- inside the game are suppressed by listeners in a **custom Godot Web HTML shell**, because those events never reach the host page. The Astro page handles only its surrounding chrome. Per-browser results are recorded, and suppression a browser disallows is an accepted limitation | Spec edge case; verified in the browser smoke |
+| Spoiler-word scan | Scope, visible-text rule and word list are defined authoritatively in contracts/site-content.md R-4 | SC-003 automated |
+| Permanent links | Authorities: spec FR-013 and contracts/site-content.md R-1/R-2. Evidence follows the FR-013 hierarchy in order of preference: durable knowledge, code and tests, merged PRs, commit-pinned durable files (`https://github.com/MakeBoldSolutions/ArrowSpark/(blob|tree|commit)/<40-hex sha>/…`), then short quotations of temporary evidence backed by the durable commit or PR. No `.devspark.work` substring appears anywhere in content or build output in any form, commit-pinned paths included | FR-013, FR-029, SC-004 |
+| "4,000+ assertions" (mockup) | Replaced by a figure produced by a documented command over launcher output, or omitted | FR-013 |
+
+## R7. Findings classified (convergence rule)
+
+| Finding | Class |
+|---|---|
+| R1: 4.4 web export not yet observed | **Prerequisite** (S-1 gate) |
+| R3: single instance not guaranteed. SQLite was chosen at first; the owner's clarification then chose one JSON file per reaction, never in a repo, purged after closeout | **Learning / Changed Assumption** (FR-031 rewritten) |
+| R4: API repo has its own workflow (Bold) and host naming | **Learning**; dependency recorded, no scope change |
+| R4: publication may precede API deployment | **Accepted Limitation** if it happens |
+| `SceneLoader` threaded loading on single-threaded web | Risk checked in S-1; **Blocking Defect** only if observed failing |
+| Constitution Technology lacks Astro/TypeScript | **Prerequisite** P1 |
+| No new blockers | none |

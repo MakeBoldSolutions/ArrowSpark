@@ -454,8 +454,54 @@ func _check_puzzle_session_defaults_and_navigation() -> void:
 	check(PuzzleSession.get_current_id() == PuzzleCatalog.id_at(0),
 		"an invalid current id falls back to the first catalog entry on next read")
 
+## The Reference Knot is the showcase level: every observed session and every
+## reaction names this exact geometry. A change to its board must fail here.
+const REFERENCE_KNOT_CONTENT_VERSION := "g1-7ce0942d4a5e"
+
+func _check_reference_knot_content_version() -> void:
+	var definition: PuzzleDefinition = PuzzleCatalog.get_definition("reference_knot")
+	var version := PuzzleContentVersion.of(definition)
+	print("Reference Knot content version: ", version)
+	check(version == REFERENCE_KNOT_CONTENT_VERSION,
+		"the Reference Knot's content version is pinned at %s (got %s)" % [REFERENCE_KNOT_CONTENT_VERSION, version])
+	var pattern := RegEx.create_from_string("^g1-[0-9a-f]{12}$")
+	check(pattern.search(version) != null, "a content version is 'g1-' plus 12 lowercase hex digits")
+	check(PuzzleContentVersion.of(PuzzleCatalog.get_definition("reference_knot")) == version,
+		"the content version is stable across calls and fresh definitions")
+
+	# Same geometry rebuilt outside the catalog (no id, title or group): same value.
+	var rebuilt := PuzzleDefinition.new(definition.width, definition.height,
+		definition.duplicate_arrows(), definition.duplicate_tails())
+	check(PuzzleContentVersion.of(rebuilt) == version,
+		"the content version depends on geometry only, not on catalog id, title or group")
+
+	# One tail cell moved in a synthetic copy: a different value.
+	var tails := definition.duplicate_tails()
+	var heads: Array = tails.keys()
+	heads.sort()
+	var altered_head: Vector2i = heads.filter(func(h: Vector2i) -> bool: return not tails[h].is_empty())[0]
+	var cells: Array = tails[altered_head]
+	cells[cells.size() - 1] = cells[cells.size() - 1] + Vector2i(1, 0)
+	var moved_tail := PuzzleDefinition.new(definition.width, definition.height, definition.duplicate_arrows(), tails)
+	check(PuzzleContentVersion.of(moved_tail) != version, "moving one tail cell changes the content version")
+
+	# One direction changed: a different value.
+	var arrows := definition.duplicate_arrows()
+	var turned_head: Vector2i = arrows.keys()[0]
+	arrows[turned_head] = (int(arrows[turned_head]) + 1) % 4
+	var turned := PuzzleDefinition.new(definition.width, definition.height, arrows, definition.duplicate_tails())
+	check(PuzzleContentVersion.of(turned) != version, "changing one arrow's direction changes the content version")
+
+	var resized := PuzzleDefinition.new(definition.width + 1, definition.height,
+		definition.duplicate_arrows(), definition.duplicate_tails())
+	check(PuzzleContentVersion.of(resized) != version, "changing the board size changes the content version")
+
+	var other: PuzzleDefinition = PuzzleCatalog.get_definition("intro")
+	check(PuzzleContentVersion.of(other) != version, "a different puzzle has a different content version")
+
 func _initialize() -> void:
 	_check_full_catalog_solvable()
+	_check_reference_knot_content_version()
 	_check_original_entries_unchanged()
 	_check_canvas_validation_fixture()
 	_check_knot_entries()

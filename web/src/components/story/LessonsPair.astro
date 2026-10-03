@@ -1,0 +1,57 @@
+---
+// What worked and what didn't, side by side at equal weight, each item with its source.
+import type { CollectionEntry } from 'astro:content';
+import Icon from '../ui/Icon.astro';
+
+interface Props {
+  lessons: CollectionEntry<'lessons'>['data'];
+}
+const { lessons } = Astro.props;
+const columns = [
+  { key: 'worked', title: 'What worked', icon: 'check' as const, items: lessons.worked },
+  { key: 'didnt', title: 'What didn’t', icon: 'x' as const, items: lessons.didnt },
+];
+---
+<div class="lessons">
+  {columns.map((column) => (
+    <section class={`lessons__card lessons__card--${column.key}`} aria-labelledby={`lessons-${column.key}`}>
+      <h3 class="lessons__title" id={`lessons-${column.key}`}>{column.title}</h3>
+      <ul class="lessons__list">
+        {column.items.map((item) => (
+          <li>
+            <span class="lessons__icon"><Icon name={column.icon} /></span>
+            <span>{item.text} <a class="lessons__source" href={item.source}>Source</a></span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  ))}
+</div>
+
+<style>
+  .lessons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr));
+    gap: var(--space-6);
+  }
+  .lessons__card {
+    background: var(--surface-card);
+    border: var(--border-hairline) solid var(--border-default);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+  }
+  .lessons__card--worked { border-top: var(--border-accent) solid var(--positive); }
+  .lessons__card--didnt { border-top: var(--border-accent) solid var(--brand); }
+  .lessons__title { font-size: var(--fs-2xl); margin-bottom: var(--space-3); }
+  .lessons__list { list-style: none; margin: 0; padding: 0; }
+  .lessons__list li {
+    display: flex;
+    gap: var(--space-3);
+    padding-block: var(--space-3);
+    border-top: var(--border-hairline) solid var(--border-subtle);
+  }
+  .lessons__icon { flex: none; padding-top: var(--space-1); }
+  .lessons__card--worked .lessons__icon { color: var(--positive); }
+  .lessons__card--didnt .lessons__icon { color: var(--brand); }
+  .lessons__source { font-size: var(--fs-sm); white-space: nowrap; }
+</style>

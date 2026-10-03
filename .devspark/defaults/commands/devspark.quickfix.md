@@ -25,7 +25,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 Alternative entry point to authoring: `[user request] → route decision → { specify → clarify → plan → tasks | quickfix } → implement`. Use **instead of** `/devspark.specify` for bug fixes, config tweaks, docs updates, hotfixes, or minor features under ~4 hours. `/devspark.specify` recommends this command automatically for `one-off-fix` classification.
 
-- **Owns**: classification, targeted constitution check, a dedicated quickfix branch (`NNN-fix-<slug>`), a temporary product-owner change record (`NNN-fix-<slug>` with WHAT/WHY/HOW), a minimal `## Context Resolution` (whatever `.knowledge/` entities/decisions the fix touches, if any), and complete `code_ref`/`knowledge_ref` linkage on the Validation Checklist. Before checking an item complete, record every affected production-code, test, and current `.knowledge/` path there; never reference the temporary quickfix record from a durable file.
+- **Owns**: classification, targeted constitution check, a dedicated quickfix branch (`NNN-fix-<slug>`), a temporary product-owner change record (`NNN-fix-<slug>` with WHAT/WHY/HOW), a minimal `## Context Resolution` (whatever `.knowledge/` content the fix touches — flat documents, entities, entity layers, or decisions — if any), and complete `code_ref`/`knowledge_ref` linkage on the Validation Checklist. Before checking an item complete, record every affected production-code, test, and current `.knowledge/` path there; never reference the temporary quickfix record from a durable file.
 - **Does NOT own**: multi-file architectural changes, new user-facing features, or API/schema changes (→ `/devspark.specify`); interactive ambiguity resolution (→ `/devspark.clarify`); design artifacts (→ `/devspark.plan`); story-organized task lists (→ `/devspark.tasks`); adversarial risk review (→ `/devspark.critic`, `/devspark.analyze`) — quickfix's lightweight contract deliberately skips both gates entirely rather than running a lighter version of either; escalate to `/devspark.specify` if the change turns out to need them.
 - **If scope expands during implementation**: halt and recommend `/devspark.specify {original problem}` rather than stretching the quickfix.
 
@@ -272,7 +272,7 @@ required_gates: { Leave blank for low risk; otherwise checklist }
 
 ## Context Resolution
 
-{One line per `.knowledge/` entity or `governance/decisions/` doc this fix touches, e.g. `- entities/token_service (direct)`. Leave as "None — no existing knowledge touched" if genuinely none apply; do not fabricate entries.}
+{One line per `.knowledge/` item this fix touches — a flat document, an entity, an entity layer, or a `governance/decisions/` doc, e.g. `- token-service (entity, direct)` or `- azure-devops-work-tracking (knowledge, direct)`. Flat documents count exactly as much as entities here. Leave as "None — no existing knowledge touched" if genuinely none apply; do not fabricate entries.}
 
 ## Constitution Compliance
 
@@ -350,6 +350,8 @@ Record committed: {commit SHA} | not committed (git unavailable)
 
 ```yaml
 gate: quickfix
+devspark_version: "<installed version, or `unknown`>"
+generated: "<ISO-8601 timestamp of this run>"
 status: pass | warn | fail
 blocking: true | false
 severity: info | warning | error | showstopper
@@ -393,6 +395,37 @@ Consider upgrading to a full specification for better tracking:
 
 This ensures proper planning and documentation for larger changes.
 ```
+
+### Route Escalation on Discovered Scope
+
+A lightweight route may legitimately begin lightweight. What it may not do is carry architectural or governance-weight work through quickfix ceremony because the route was chosen before the scope was known.
+
+The signals above are about effort and what the developer *says*. These are about what the work turns out to **be** — surface the escalation decision when the fix is discovered to require any of:
+
+- a new architectural contract or interface
+- a new cross-subsystem dependency
+- a governance or constitution change
+- a public contract change (API, CLI, schema, or published output shape)
+- a persistent schema change with semantic effect on existing data
+- a security or trust-boundary issue
+- several unrelated remediation concerns bundled into one fix
+
+One signal is enough, but only when it is **material** — a genuinely new contract, not a renamed helper. Do not convert routinely; most quickfixes exhibit none of these and finish as quickfixes.
+
+When one fires, state the evidence and hand the decision over:
+
+```markdown
+Route Escalation Check
+
+This change has outgrown the assumptions of the quickfix route.
+Signal: {which signal, and the specific evidence for it}
+
+Continue as quickfix, or promote to a full spec?
+  - Continue: /devspark.quickfix complete {ID} when done
+  - Promote:  /devspark.specify {original problem statement}
+```
+
+The developer owns that decision. Record the outcome in the record's Implementation Notes so a later reader can see the route was examined and chosen, not merely inherited.
 
 ### Quickfix vs Full Spec Decision Guide
 

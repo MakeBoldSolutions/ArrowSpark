@@ -9,7 +9,26 @@ appliesTo:
   - resources/**
   - assets/**
   - addons/**
+  - export_presets.cfg
+  - web/**
 ---
+
+<!--
+Sync Impact Report
+Version: 2.0.1 -> 2.1.0
+Rationale: MINOR. The project now ships a static showcase website alongside the
+game, so the Technology section names its stack, and Principle V extends
+practical verification to web builds played in a browser.
+Modified principles:
+- V. Practical Gameplay Verification: adds browser verification for web builds.
+Modified sections:
+- Technology: adds the static showcase site (Astro, TypeScript, Node build) and
+  the Godot Web export.
+Sync validation:
+- Updated: CLAUDE.md and AGENTS.md Active Technologies.
+- Reviewed: README.md (no technology claims affected).
+Follow-up TODOs: none.
+-->
 
 <!--
 Sync Impact Report
@@ -92,6 +111,9 @@ No platform-specific frame-rate target or frame-time budget is mandated.
   automated tests are not mandatory for every new gameplay function.
 - Record checks performed and their results. If a required check cannot be run,
   disclose that limitation and leave it outstanding rather than claim completion.
+- Web builds MUST also be verified in a browser: the affected gameplay is
+  smoke-tested in each supported desktop browser, and the results, including
+  checks not performed, are recorded the same way.
 
 ### VI. Preserve Saved Progress and Settings
 
@@ -102,7 +124,11 @@ No platform-specific frame-rate target or frame-time budget is mandated.
 
 ## Technology
 
-- Godot 4.4 and GDScript; `.tscn` scenes and `.tres` resources.
+- Godot 4.4 and GDScript; `.tscn` scenes and `.tres` resources; the Godot Web
+  export (no threads) for the browser build.
+- A static showcase website in `web/`: Astro and strict TypeScript with static
+  output only, built with Node and npm (versions pinned by `package-lock.json`),
+  tested with Vitest. No server-side rendering and no application framework.
 - Maaack's Game Template under `addons/maaacks_game_template/`.
 - Git for source control; BSW.DevSpark for specification and development workflows.
 - Framework scripts are available for both PowerShell and Bash.
@@ -134,4 +160,4 @@ reasoned exception; MUST rules require compliance with their stated alternatives
 
 No recurring review schedule, automated CI gate, or test coverage threshold is mandated.
 
-**Version**: 2.0.1 | **Ratified**: 2026-09-26 | **Last Amended**: 2026-09-28
+**Version**: 2.1.0 | **Ratified**: 2026-09-26 | **Last Amended**: 2026-10-02

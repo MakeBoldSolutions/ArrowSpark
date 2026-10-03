@@ -1,0 +1,52 @@
+---
+// Make Bold button: variants primary | accent | secondary | ghost | dark, sizes sm | md | lg.
+// Renders a link when href is given, otherwise a button.
+import type { HTMLAttributes } from 'astro/types';
+
+type Props = {
+  variant?: 'primary' | 'accent' | 'secondary' | 'ghost' | 'dark';
+  size?: 'sm' | 'md' | 'lg';
+  href?: string;
+  type?: 'button' | 'submit' | 'reset';
+  class?: string;
+} & Omit<HTMLAttributes<'button'>, 'type' | 'class'>;
+
+const { variant = 'primary', size = 'md', href, type = 'button', class: className, ...rest } = Astro.props;
+const classes = ['btn', `btn--${variant}`, `btn--${size}`, className].filter(Boolean).join(' ');
+---
+{href
+  ? <a href={href} class={classes}><slot /></a>
+  : <button type={type} class={classes} {...rest}><slot /></button>}
+
+<style>
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    border: var(--border-hairline) solid transparent;
+    border-radius: var(--radius-md);
+    font-family: var(--font-body);
+    font-weight: var(--fw-bold);
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background var(--dur-fast) var(--ease-standard), color var(--dur-fast) var(--ease-standard);
+  }
+  .btn:hover { text-decoration: none; }
+  .btn:disabled { cursor: not-allowed; opacity: 0.6; }
+  .btn--sm { padding: var(--space-1) var(--space-3); font-size: var(--fs-xs); }
+  .btn--md { padding: var(--space-3) var(--space-5); font-size: var(--fs-sm); }
+  .btn--lg { padding: var(--space-4) var(--space-6); font-size: var(--fs-base); }
+  .btn--primary { background: var(--brand); color: var(--text-on-brand); }
+  .btn--primary:hover { background: var(--brand-strong); color: var(--text-on-brand); }
+  .btn--accent { background: var(--accent); color: var(--text-on-brand); }
+  .btn--accent:hover { background: var(--accent-strong); color: var(--text-on-brand); }
+  .btn--secondary { background: var(--surface-card); color: var(--text-strong); border-color: var(--text-strong); }
+  .btn--secondary:hover { background: var(--surface-sunken); color: var(--text-strong); }
+  .btn--ghost { background: transparent; color: var(--text-link); }
+  .btn--ghost:hover { background: var(--brand-soft); color: var(--text-link); }
+  .btn--dark { background: var(--surface-dark); color: var(--text-on-dark); }
+  .btn--dark:hover { background: var(--surface-dark-2); color: var(--text-on-dark); }
+</style>

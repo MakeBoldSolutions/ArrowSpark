@@ -61,6 +61,10 @@ func show_results(results: Dictionary, puzzle_id: String, has_next: bool,
 	_overall_session_score_label.text = "Overall Session Score: %d" % overall_session_score
 	_next_puzzle_button.visible = has_next
 	_level_select_button.visible = not has_next
+	# The panel is hidden while its parent is sized, and a hidden Control can miss
+	# that layout pass (the Web build starts at its final canvas size and never
+	# resizes), so fill the parent explicitly before showing.
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	show()
 	_replay_button.grab_focus()
 

@@ -20,6 +20,9 @@ extends Control
 @onready var _pause_menu_controller: Node = %PauseMenuController
 
 var _state: PuzzleState
+var _definition: PuzzleDefinition
+var _attempt_started_msec: int = 0
+var _attempt_completed_msec: int = 0
 var _pending_departures: int = 0
 var _awaiting_completion: bool = false
 
@@ -144,7 +147,9 @@ func _event_label(event: InputEvent) -> String:
 func _start_new_attempt() -> void:
 	var puzzle_id: String = PuzzleSession.get_current_id()
 	var definition: PuzzleDefinition = PuzzleCatalog.get_definition(puzzle_id)
+	_definition = definition
 	_state = PuzzleState.new(definition)
+	_attempt_started_msec = Time.get_ticks_msec()
 	_pending_departures = 0
 	_awaiting_completion = false
 	_results.hide()
@@ -180,6 +185,7 @@ func _on_cell_clicked(cell: Vector2i) -> void:
 			_update_hud()
 			_pending_departures += 1
 			if _state.completed:
+				_attempt_completed_msec = Time.get_ticks_msec()
 				_awaiting_completion = true
 			_board.play_removed(head)
 
@@ -206,6 +212,9 @@ func _show_results() -> void:
 	var results: Dictionary = _state.get_results()
 	var puzzle_id: String = PuzzleSession.get_current_id()
 	var comparison: String = PuzzleScoreboard.record_attempt(puzzle_id, results)
+	# Web builds hand the completed attempt to the hosting page; elsewhere a no-op.
+	WebAttemptEmitter.emit(WebAttemptEmitter.build_payload(puzzle_id, _definition, results,
+		_attempt_completed_msec - _attempt_started_msec))
 	_results.show_results(results, puzzle_id, PuzzleSession.has_next(),
 		comparison, PuzzleScoreboard.get_overall_score())
 

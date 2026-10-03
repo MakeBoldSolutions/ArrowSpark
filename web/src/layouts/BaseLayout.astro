@@ -1,0 +1,37 @@
+---
+import '../styles/global.css';
+import SiteHeader from '../components/site/SiteHeader.astro';
+import SiteFooter from '../components/site/SiteFooter.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  current?: 'play' | 'devspark' | 'journey' | 'evidence' | 'story' | undefined;
+}
+const { title, description, current } = Astro.props;
+const pageTitle = title === 'ArrowSpark' ? 'ArrowSpark · Make Bold Spark' : `${title} · ArrowSpark`;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" href="/brand/logo-mark.svg" type="image/svg+xml" />
+    <link rel="preload" href="/fonts/InterTight-VariableFont_wght.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/BeVietnamPro-ExtraBold.woff2" as="font" type="font/woff2" crossorigin />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <SiteHeader current={current} />
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <SiteFooter />
+    <script>
+      import { startPendingQueue } from '../scripts/page-start';
+      void startPendingQueue();
+    </script>
+  </body>
+</html>

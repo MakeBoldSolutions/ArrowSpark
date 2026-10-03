@@ -96,6 +96,7 @@ $criticGate = $false
 $checklistGate = $false
 $verifyRequired = $false
 $verifyPassed = $false
+$closeoutDecision = ""
 if ($specExists) {
     $planExists = Test-Path (Join-Path $specDir "plan.md")
     $tasksPath = Join-Path $specDir "tasks.md"
@@ -130,6 +131,13 @@ if ($specExists) {
             if ($vt -match '(?m)^status:\s*pass') { $verifyPassed = $true }
         } catch { $verifyPassed = $false }
     }
+    $closeoutGate = Join-Path $specDir "gates/closeout.md"
+    if (Test-Path $closeoutGate) {
+        try {
+            $ct = Get-Content $closeoutGate -Raw -ErrorAction SilentlyContinue
+            if ($ct -match '(?m)^decision:\s*(\S+)') { $closeoutDecision = $matches[1].Trim() }
+        } catch { $closeoutDecision = "" }
+    }
 }
 
 # Advisory gates that are required but whose artifact is missing/unmet (never block progress)
@@ -139,6 +147,7 @@ if ($specExists) {
     if ($requireAnalyze -and -not $analyzeGate) { $pendingGates += "analyze" }
     if ($requireCritic -and -not $criticGate) { $pendingGates += "critic" }
     if ($verifyRequired -and -not $verifyPassed) { $pendingGates += "verify" }
+    if ($closeoutDecision -eq "not-complete") { $pendingGates += "closeout (blocking defects open)" }
 }
 $pendingGatesStr = ($pendingGates -join ", ")
 
@@ -324,6 +333,7 @@ $result = [ordered]@{
     TASKS_COMPLETE      = $tasksComplete
     VERIFY_REQUIRED     = $verifyRequired
     VERIFY_PASSED       = $verifyPassed
+    CLOSEOUT_DECISION   = $closeoutDecision
     PENDING_GATES       = $pendingGatesStr
     QUICKFIX_EXISTS     = $quickfixExists
     QUICKFIX_COMPLETE   = $quickfixComplete

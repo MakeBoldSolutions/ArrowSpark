@@ -30,6 +30,49 @@ function Resolve-KnowledgeEngine {
     return $null
 }
 
+# Canonical installed-version lookup. Every artifact that records its own DevSpark provenance
+# resolves the version here instead of re-implementing stamp parsing.
+function Get-DevSparkVersion {
+    param(
+        [string]$RepoRoot,
+        [switch]$IncludeRevision
+    )
+
+    if (-not $RepoRoot) { $RepoRoot = Get-RepoRoot }
+
+    $version = 'unknown'
+    $stamp = Join-Path $RepoRoot '.devspark/BSW.DevSpark.version'
+    $legacy = Join-Path $RepoRoot '.documentation/DEVSPARK_VERSION'
+
+    foreach ($candidate in @($stamp, $legacy)) {
+        if (-not (Test-Path $candidate)) { continue }
+        foreach ($line in (Get-Content $candidate -ErrorAction SilentlyContinue)) {
+            if ($line -match '^\s*version:\s*(\S+)') { $version = $Matches[1]; break }
+        }
+        if ($version -eq 'unknown') {
+            # Legacy stamps may hold a bare semver with no key.
+            $bare = (Get-Content $candidate -Raw -ErrorAction SilentlyContinue)
+            if ($bare -and $bare.Trim() -match '^v?\d+\.\d+\.\d+') { $version = $bare.Trim() }
+        }
+        if ($version -ne 'unknown') { break }
+    }
+
+    $result = [ordered]@{ VERSION = $version }
+
+    if ($IncludeRevision) {
+        $revision = ''
+        try {
+            $revision = (git -C $RepoRoot rev-parse --short HEAD 2>$null)
+            if ($LASTEXITCODE -ne 0) { $revision = '' }
+        } catch {
+            $revision = ''
+        }
+        if ($revision) { $result['REVISION'] = $revision.Trim() }
+    }
+
+    return [pscustomobject]$result
+}
+
 function Get-DefaultDocTaxon {
     param(
         [string]$RelativePath,

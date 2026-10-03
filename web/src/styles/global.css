@@ -1,0 +1,53 @@
+/* Site entry stylesheet. The Make Bold theme is used unchanged from web/theme/make-bold/:
+   every token file and the base styles are imported as-is. Only the theme's font-face file is
+   replaced, by the WOFF2 faces below (same families, weights and styles), so the site serves
+   compressed fonts and never bundles the source TTFs. */
+@import '../../theme/make-bold/tokens/colors.css';
+@import '../../theme/make-bold/tokens/typography.css';
+@import '../../theme/make-bold/tokens/spacing.css';
+@import '../../theme/make-bold/tokens/effects.css';
+@import '../../theme/make-bold/tokens/base.css';
+@import './arrowspark.css';
+
+@font-face { font-family: "Be Vietnam Pro"; font-style: normal; font-weight: 400; font-display: swap; src: url("/fonts/BeVietnamPro-Regular.woff2") format("woff2"); }
+@font-face { font-family: "Be Vietnam Pro"; font-style: normal; font-weight: 500; font-display: swap; src: url("/fonts/BeVietnamPro-Medium.woff2") format("woff2"); }
+@font-face { font-family: "Be Vietnam Pro"; font-style: normal; font-weight: 600; font-display: swap; src: url("/fonts/BeVietnamPro-SemiBold.woff2") format("woff2"); }
+@font-face { font-family: "Be Vietnam Pro"; font-style: normal; font-weight: 700; font-display: swap; src: url("/fonts/BeVietnamPro-Bold.woff2") format("woff2"); }
+@font-face { font-family: "Be Vietnam Pro"; font-style: normal; font-weight: 800; font-display: swap; src: url("/fonts/BeVietnamPro-ExtraBold.woff2") format("woff2"); }
+@font-face { font-family: "Be Vietnam Pro"; font-style: normal; font-weight: 900; font-display: swap; src: url("/fonts/BeVietnamPro-Black.woff2") format("woff2"); }
+@font-face { font-family: "Inter Tight"; font-style: normal; font-weight: 100 900; font-display: swap; src: url("/fonts/InterTight-VariableFont_wght.woff2") format("woff2"); }
+@font-face { font-family: "Inter Tight"; font-style: italic; font-weight: 100 900; font-display: swap; src: url("/fonts/InterTight-Italic-VariableFont_wght.woff2") format("woff2"); }
+
+/* Accessibility defaults kept from the theme: visible ember focus, quick motion with no
+   bounce, and no motion at all when the visitor asks for less. */
+:focus-visible { outline: var(--border-thick) solid var(--accent); outline-offset: var(--border-thick); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.skip-link {
+  position: absolute;
+  left: var(--space-4);
+  top: calc(-1 * var(--space-16));
+  z-index: 100;
+  background: var(--surface-dark);
+  color: var(--text-on-dark);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+}
+.skip-link:focus { top: var(--space-4); }
+
+
+.page { max-width: var(--container-max); margin-inline: auto; padding-inline: var(--gutter); }
+.page--narrow { max-width: var(--container-prose); }
+.section { padding-block: var(--space-16); }
+.section--sunken { background: var(--surface-sunken); border-block: var(--border-hairline) solid var(--border-default); }
+.lede { font-size: var(--fs-lg); color: var(--ink-700); max-width: 54ch; }
+.muted { color: var(--ink-600); }
+.page-title { font-size: var(--fs-h1); color: var(--brand); max-width: 18ch; margin-block: var(--space-3) 0; }

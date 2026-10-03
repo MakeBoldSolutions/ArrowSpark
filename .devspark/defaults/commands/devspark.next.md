@@ -54,6 +54,7 @@ Run `{SCRIPT}` from the repository root and parse the JSON. The script does the 
 - `CONSTITUTION_EXISTS`, `DIRTY`, `HAS_REMOTE`, `BRANCH_PUSHED`, `BEHIND_TARGET`
 - `SPEC_EXISTS`, `PLAN_EXISTS`, `TASKS_EXISTS`, `TASKS_DONE`/`TASKS_TOTAL`, `TASKS_COMPLETE`
 - `VERIFY_REQUIRED`, `VERIFY_PASSED`
+- `CLOSEOUT_DECISION` — `complete`, `not-complete`, or empty when the route has no closeout gate yet. `/devspark.verify` writes this gate itself as its second phase, so this is normally settled by the same command that produced the evidence. A `not-complete` decision means blocking defects are open: the next step is `/devspark.implement` **for those defects only**, never a re-run of everything, and never a separate closeout command.
 - `QUICKFIX_EXISTS`, `QUICKFIX_COMPLETE`
 - `PR_EXISTS`, `PR_NUMBER`, `PR_STATE`, `REVIEW_FILE_EXISTS`, `REVIEW_OPEN`
 - `PENDING_GATES` — required-but-unmet advisory gates (checklist / analyze / critic / verify) surfaced for awareness; these never block forward progress. Note the gate order this implies: `plan` (produces `context_resolved`) → `tasks` (adds `code_ref`/`knowledge_ref` placeholders) → `analyze` (validates `context_resolved` resolves) → `critic` (judges whether it's sufficient) → `implement` (consumes it, never re-traverses more than one hop). A `tasks-need-analyze`/`tasks-need-critic` state with an empty `## Context Resolution` in `plan.md` is worth a plain-language nudge back to `/devspark.plan`, not just forward to analyze/critic.
@@ -122,6 +123,8 @@ After dispatching (or instructing), state clearly what was done or what the user
 - **One step at a time (default).** Without `--auto`, `/devspark.next` recommends exactly one action and stops. It is meant to be run repeatedly — after each step, run it again to get the next one. With `--auto`, it chains forward until a stop condition (§3a).
 - **Trust the script.** Detection lives in `next-context.*` to save tokens and stay deterministic. Don't re-scan git or the filesystem yourself unless the script failed to run.
 - **Surface, don't block, on advisory gates.** `PENDING_GATES` lists required-but-unmet gates (checklist / analyze / critic / verify). Mention them, but never let them stop forward progress toward the PR.
+- **Never recommend `/devspark.closeout`.** Closeout is a phase of `/devspark.verify`, not a step the developer orchestrates. Name it only if the user explicitly asks to reassess completion without re-running verification.
+- **A classified finding is not outstanding work.** Accepted limitations, deferred work, and learnings recorded in `gates/closeout.md` are converged, not pending — do not present them as reasons the route is unfinished or as candidates for the next step.
 - **Never merge or force.** The router stops at the portal boundary for merges and never bypasses a command's own gates or confirmations.
 - **Respect explicit user intent.** If the user says what they want in `$ARGUMENTS`, honor it over the default recommendation and explain the difference.
 

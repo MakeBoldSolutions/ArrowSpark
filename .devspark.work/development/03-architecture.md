@@ -92,7 +92,7 @@ Spec 006 demonstrated the importance of that distinction.
 PuzzleBoard translates logical puzzle geometry into visual cells and
 manages the collection of ArrowViews.
 
-The Spec 008 work (in progress) should preserve PuzzleBoard's logical
+The Spec 008 work (complete since 2026-09-28; `PuzzleViewportTransform` is the coordinate authority, see `.knowledge/architecture/`) was to preserve PuzzleBoard's logical
 rendering role while introducing a clear viewport/camera transform
 around or within the presentation layer.
 
@@ -213,7 +213,7 @@ application/template concerns.
 The presence of a persistence mechanism is not permission to persist new
 gameplay state.
 
-## Viewport Architecture Constraints (Spec 008, in progress)
+## Viewport Architecture Constraints (Spec 008, complete; written as pre-implementation constraints)
 
 Spec 008 should research whether the best implementation is: - a
 camera-like wrapper; - a transformed board container; - direct

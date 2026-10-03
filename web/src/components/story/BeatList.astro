@@ -1,0 +1,75 @@
+---
+// Built with DevSpark beats: a numbered rail of Belief → Evidence → Next decision cards.
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  beats: CollectionEntry<'beats'>['data'][];
+}
+const { beats } = Astro.props;
+---
+<ol class="beats">
+  {beats.map((beat) => (
+    <li class="beat">
+      <div class="beat__rail" aria-hidden="true">
+        <span class="beat__marker">{beat.n}</span>
+        <span class="beat__line"></span>
+      </div>
+      <div class="beat__body">
+        <h3 class="beats__title">{beat.title}</h3>
+        <div class="beat__cols">
+          {beat.belief && (
+            <div class="beats__col beats__col--belief">
+              <p class="beats__label">Belief</p>
+              <p>{beat.belief}</p>
+            </div>
+          )}
+          <div class="beats__col beats__col--evidence">
+            <p class="beats__label">Evidence</p>
+            <p>{beat.evidence}</p>
+          </div>
+          <div class="beats__col beats__col--decision">
+            <p class="beats__label">Next decision</p>
+            <p>{beat.decision}</p>
+          </div>
+        </div>
+        <ul class="beats__sources" aria-label={`Sources for beat ${beat.n}`}>
+          {beat.sources.map((source) => <li><a href={source.url}>{source.label}</a></li>)}
+        </ul>
+      </div>
+    </li>
+  ))}
+</ol>
+
+<style>
+  .beats { list-style: none; margin: 0; padding: 0; }
+  .beats__title { font-size: var(--fs-h3); margin: var(--space-1) 0 var(--space-4); }
+  .beats__col {
+    border: var(--border-hairline) solid var(--border-default);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4) var(--space-5);
+    color: var(--text-strong);
+  }
+  .beats__col p:last-child { margin: var(--space-2) 0 0; }
+  .beats__col--belief { background: var(--rust-50); border-color: var(--rust-100); }
+  .beats__col--evidence { background: var(--surface-card); }
+  .beats__col--decision { background: var(--ember-50); border-color: var(--ember-100); }
+  .beats__label {
+    margin: 0;
+    font-weight: var(--fw-bold);
+    font-size: var(--fs-xs);
+    letter-spacing: var(--ls-eyebrow);
+    text-transform: uppercase;
+  }
+  .beats__col--belief .beats__label { color: var(--brand); }
+  .beats__col--evidence .beats__label { color: var(--ink-600); }
+  .beats__col--decision .beats__label { color: var(--ember-700); }
+  .beats__sources {
+    list-style: none;
+    margin: var(--space-3) 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-5);
+    font-size: var(--fs-sm);
+  }
+</style>

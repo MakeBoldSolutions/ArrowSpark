@@ -1,0 +1,104 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Eyebrow from '../components/ui/Eyebrow.astro';
+import Icon from '../components/ui/Icon.astro';
+import GameFrame from '../components/play/GameFrame.astro';
+import DesktopOnlyNotice from '../components/play/DesktopOnlyNotice.astro';
+import ReactionForm from '../components/play/ReactionForm.astro';
+---
+<BaseLayout
+  title="Try the Game"
+  description="Play ArrowSpark in a desktop browser: untangle a board of arrows. No install, no account."
+  current="play"
+>
+  <div class="page play">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">ArrowSpark</a><span aria-hidden="true">/</span><span>Try the Game</span></nav>
+
+    <div class="play__intro">
+      <div>
+        <Eyebrow>Try the Game</Eyebrow>
+        <h1 class="play__title">Untangle the board.</h1>
+      </div>
+      <div class="play__rules">
+        <p>Click an arrow to send it off the board. An arrow can leave only when the path in front of its head is clear.</p>
+        <p>A blocked arrow stays put and counts as a mistake. Mistakes cost score, never play: there are no lives and no game over.</p>
+        <p class="muted">Stuck? <strong>Show Me an Open Move</strong> points to one arrow that can leave right now. Using it costs five times a mistake.</p>
+      </div>
+    </div>
+
+    <div class="play__game">
+      <GameFrame />
+      <ul class="play__notes">
+        <li><strong>Click inside the game once</strong> to use the keyboard. Scroll the mouse wheel over the board to zoom; drag with the middle button, or use Pan, to move.</li>
+        <li>Designed for desktop browsers with a mouse or trackpad and a keyboard.</li>
+        <li>Scores last only for this visit. Reloading starts fresh.</li>
+      </ul>
+    </div>
+    <DesktopOnlyNotice />
+
+    <ReactionForm />
+
+    <aside class="privacy">
+      <h2 class="privacy__title">What this page keeps</h2>
+      <p>
+        No account, no tracking and no visitor ID. The game may keep its settings in this browser, and nothing it stores here
+        is sent anywhere. The short reaction form is optional and anonymous. Like any website, the hosting and network
+        services that deliver this page may keep their own short-lived request logs, outside the game and this site.
+      </p>
+    </aside>
+
+    <div class="play__next">
+      <a class="play__next-link" href="/devspark/">See how it was built <Icon name="arrow-right" /></a>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .play { padding-block: var(--space-6) var(--space-16); max-width: var(--container-wide); }
+  .crumbs { display: flex; gap: var(--space-2); flex-wrap: wrap; font-size: var(--fs-sm); font-weight: var(--fw-semibold); color: var(--text-muted); }
+  .crumbs span:last-child { color: var(--text-strong); }
+  .play__intro {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr));
+    gap: var(--space-6) var(--space-12);
+    margin-block: var(--space-6);
+    align-items: end;
+  }
+  .play__title { font-size: var(--fs-h1); color: var(--brand); margin: var(--space-3) 0 0; }
+  .play__rules { color: var(--ink-700); }
+  .play__rules p { margin-bottom: var(--space-2); }
+  .play__notes {
+    list-style: none;
+    padding: 0;
+    margin: var(--space-4) 0 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+    gap: var(--space-3) var(--space-10);
+    font-size: var(--fs-sm);
+    color: var(--ink-600);
+  }
+  .play__notes strong { color: var(--text-strong); }
+  .privacy {
+    margin-top: var(--space-12);
+    padding: var(--space-5) var(--space-6);
+    border-left: var(--border-accent) solid var(--accent);
+    background: var(--surface-card);
+    border-radius: var(--radius-md);
+    max-width: var(--container-prose);
+  }
+  .privacy__title { font-size: var(--fs-lg); margin-bottom: var(--space-2); }
+  .privacy p { font-size: var(--fs-sm); color: var(--ink-700); }
+  .play__next { margin-top: var(--space-10); display: flex; justify-content: flex-end; }
+  .play__next-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-family: var(--font-display);
+    font-weight: var(--fw-bold);
+    font-size: var(--fs-lg);
+  }
+
+  @media not all and (pointer: fine), (max-width: 59.9375rem), (max-height: 33.6875rem) {
+    .play__game { display: none; }
+  }
+</style>

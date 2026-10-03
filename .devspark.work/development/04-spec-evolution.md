@@ -1,4 +1,6 @@
-# Specification Evolution: 001--008
+# Specification Evolution: 001--010
+
+> Updated 2026-10-01: Specs 008, 009 and 010 are complete. Specs 009 and 010 are summarized in [01-project-history.md](01-project-history.md) sections 13 and 15; the 008 section below was written before implementation.
 
 ## Why This History Matters
 
@@ -257,7 +259,7 @@ line.
 
 ------------------------------------------------------------------------
 
-## Spec 008 --- Large Zoomable Puzzle Canvas (in progress)
+## Spec 008 --- Large Zoomable Puzzle Canvas (complete; merged 2026-09-28)
 
 Status: specified, planned, and tasked; checklist, analyze, and critic
 gates pass; no implementation task executed yet.

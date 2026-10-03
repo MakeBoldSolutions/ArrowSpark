@@ -1,0 +1,43 @@
+---
+// A play-first note above content that discusses how the Reference Knot was designed.
+// It never blocks reading: the content below it is always present and readable.
+import Button from '../ui/Button.astro';
+
+interface Props {
+  headline?: string;
+}
+const { headline = 'Haven’t played yet?' } = Astro.props;
+---
+<aside class="spoiler-gate" aria-label="Play first">
+  <div class="spoiler-gate__text">
+    <p class="spoiler-gate__title">{headline}</p>
+    <p>What follows discusses how the puzzle was designed. Knowing what to look for changes the experience, so you may want to play first.</p>
+  </div>
+  <div class="spoiler-gate__actions">
+    <Button href="/play/">Play first</Button>
+  </div>
+</aside>
+
+<style>
+  .spoiler-gate {
+    background: var(--surface-card);
+    border: var(--border-hairline) solid var(--border-default);
+    border-left: var(--border-accent) solid var(--accent);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    display: flex;
+    gap: var(--space-4) var(--space-8);
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-8);
+  }
+  .spoiler-gate__text { max-width: 56ch; }
+  .spoiler-gate__title {
+    font-family: var(--font-display);
+    font-weight: var(--fw-extrabold);
+    font-size: var(--fs-xl);
+    color: var(--text-strong);
+    margin: 0 0 var(--space-2);
+  }
+</style>

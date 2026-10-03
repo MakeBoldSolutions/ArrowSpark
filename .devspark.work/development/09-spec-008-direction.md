@@ -1,6 +1,6 @@
 # Spec 008 Direction --- Large Zoomable Puzzle Canvas
 
-> **Status (2026-09-28):** in progress. The spec, plan, and tasks exist and
+> **Status (2026-10-01):** complete; merged as PR #1 on 2026-09-28. This is the pre-implementation direction note and is kept as history. Original status line: in progress. The spec, plan, and tasks exist and
 > have passed the checklist, analyze, and critic gates; implementation has not
 > started. This file is the original direction brief. Where it differs from
 > `.devspark.work/specs/008-spec-large-zoomable-canvas/`, the spec bundle wins.

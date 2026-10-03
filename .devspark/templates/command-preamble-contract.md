@@ -198,3 +198,66 @@ This table is a starting point, not a substitute for judgment — a smell not li
 ### 9.2 Citing a Constitution Principle
 
 If the project constitution (`/.knowledge/governance/constitution.md`) declares a genuine-fix / intent-over-metrics principle, a gate command (`/devspark.critic`, `/devspark.analyze`, `/devspark.pr-review`, `/devspark.site-audit`) that flags a gamed fix SHOULD cite that principle ID in the finding, escalating it from process guidance to a constitution violation (which those gates already treat as their highest severity). If no such principle exists, §9 still stands on its own as a non-negotiable process rule — the citation is an escalation hook, not a precondition.
+
+## 10. Convergence Discipline (finding classification)
+
+Generating findings is easy; recognizing that work is finished is not. A command that treats every new observation as new work inside the active route creates a loop — verify, discover, implement, verify again — in which the specification silently expands and never converges.
+
+> **A spec is complete when its stated objective has been resolved and every remaining finding has been classified — not when every observation generated during the work has been eliminated.**
+>
+> **Verification may discover work, but discovery alone does not expand the current specification.**
+
+A finding creates mandatory work **inside the active route** only when it demonstrates one of five **expansion triggers**: failure of the stated objective, an unresolved requirement, a violated invariant, a correctness defect, or a regression caused by this change. Every other finding is classified — **Accepted Limitation**, **Deferred Work**, or **Learning / Changed Assumption** — and the route converges.
+
+This binds every command that produces findings (`/devspark.analyze`, `/devspark.critic`, `/devspark.verify`, `/devspark.checklist`, `/devspark.explain`, `/devspark.site-audit`, `/devspark.pr-review`) and every command that consumes them (`/devspark.implement`, `/devspark.create-pr`). A finding command still reports everything it sees — reporting is not expansion. What it MUST NOT do is convert a non-triggering observation into required work on its own authority, or imply the route is unfinished because observations remain.
+
+**Timing matters.** Before implementation begins, a gate that reshapes the spec is *authoring*, not expansion — `/devspark.analyze` and `/devspark.critic` exist precisely to change the plan while changing it is still cheap, and a finding that tightens a requirement there is the system working. The expansion rule binds from the moment implementation starts: after that point, a non-triggering observation is classified and carried, not folded into the route.
+
+The rule is symmetric, and the second half matters as much as the first: a finding that **does** hit an expansion trigger is a Blocking Defect and cannot be classified away. Classification is how a route converges honestly, not how a failed requirement is retired quietly.
+
+The four classifications, the acceptance-criterion kinds (`requirement` / `invariant` / `hypothesis` / `target`) that decide which findings can block, the experimental rule for a disproven hypothesis, the `gates/closeout.md` artifact, and the rule that scope expands only on explicit developer intent are defined in `/.devspark/templates/closeout-contract.md` (installed repos) or `templates/closeout-contract.md` (source repos).
+
+**Closeout is a phase, not a command.** `/devspark.verify` runs it automatically as its second half and emits the completion decision in the same invocation; `/devspark.closeout` is an advanced reassessment entry point, and no command may present it as a routine next step. See §11.
+
+If the project constitution declares a convergence principle, a gate command that flags an unclassified finding at completion, a laundered requirement, or an unjustified mid-route expansion SHOULD cite that principle ID, per the same escalation hook as §9.2.
+
+## 11. Orchestration Discipline (how many commands a developer must know)
+
+> **Minimize required developer orchestration. DevSpark may use rich internal lifecycle states and specialist capabilities, but the normal developer path exposes only meaningful human decision boundaries.**
+>
+> **A new lifecycle responsibility does not automatically justify a new mandatory command.**
+
+Internal rigor is supposed to *reduce* a developer's cognitive load, not transfer it to them as orchestration ceremony. A framework that answers every new responsibility with a new required prompt eventually requires a workflow cheat sheet to complete ordinary work, and at that point it has traded adoption for tidiness.
+
+**The test for a new user-facing command.** Before adding one, answer: *does meaningful human judgment or authorization need to occur between these phases?* If yes, the boundary is real and deserves an entry point. If no, orchestrate it automatically inside the command that already owns the preceding phase.
+
+Worked examples: evidence → closeout is mechanical (automatic, inside `/devspark.verify`); closeout → PR is a real boundary (the developer inspects the decision before opening a PR); a proposal becoming authoritative Knowledge requires a human; pushing, tagging, or publishing requires human authorization.
+
+**The converse also binds — do not over-automate.** Simplification is not an excuse for an opaque command that silently specifies, plans, implements, accepts limitations, revises hypotheses, approves, and publishes. The target is: **automate mechanical transitions; expose consequential decisions.**
+
+**Capabilities and entry points are different things.** A new internal state does not need to surface as a command. Where an advanced or recovery entry point is genuinely useful, it is documented as optional and shares one implementation with its automatic caller — a simple default path plus explicit advanced commands, never two implementations of the same rules that can drift apart. The durable statement of this principle, with its command classification, lives in `.knowledge/governance/devspark-philosophy.md` and `.knowledge/governance/devspark-prompt-mapping.md`.
+
+## 12. Artifact Version Provenance
+
+> **Every DevSpark-generated lifecycle artifact records the DevSpark version that produced that artifact instance.**
+
+Without this, evaluating whether a framework change actually improved outcomes requires reconstructing framework versions from Git dates and upgrade commits — an inference that is both laborious and easy to get wrong.
+
+**Resolution.** Commands resolve the installed version through the shared helper (`Get-DevSparkVersion` / `get_devspark_version` in `common.ps1` / `common.sh`), which reads `.devspark/BSW.DevSpark.version`. No prompt or template invents its own version detection. When the version cannot be determined, write `unknown` — never guess, and never block on it.
+
+**Artifact-local, not centralized.** Each artifact describes its own producer. DevSpark does not maintain a lifecycle ledger, and a spec MUST NOT accumulate `planned_with:` / `analyzed_with:` / `verified_with:` fields — that would turn the spec into a mutable database of its own history.
+
+**Two meanings, one field name.**
+
+| Artifact | `devspark_version` means |
+|---|---|
+| `spec.md`, `plan.md`, `tasks.md` | the version under which the artifact was **authored** |
+| `gates/*.md`, PR-review records | the version that produced **this specific instance** |
+
+**Provenance stays truthful.** A command writes `devspark_version` only into artifacts it is legitimately creating or regenerating. Upgrading the framework does not rewrite existing artifacts, and running a later-phase command never restamps an earlier artifact. A route may therefore legitimately show `spec.md` at one version and `gates/verify.md` at a newer one — that is information, not inconsistency.
+
+**Optional revision.** When the installed version is a development build (a `-dev` suffix, or a source-dogfood stamp) and a commit is readily available, a command MAY additionally record `devspark_revision: <short-sha>`. Version is the field that matters; revision is never required.
+
+**Backward compatible.** The field is additive. Artifacts without it remain valid, every consumer tolerates its absence, and no historical artifact is migrated.
+
+**Why it is here.** Historical effectiveness analysis MUST use artifact-recorded versions when present and infer from repository history only as a fallback. This is observability for the methodology itself, not an analytics subsystem — no command collects, aggregates, or reports these values.

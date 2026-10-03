@@ -1,6 +1,6 @@
 ---
 source: "BSW.DevSpark — © 2026 Baylor Scott & White Health. Source: https://bsw-devspark.bswhive.com"
-description: Non-destructive cross-artifact consistency, coverage, and traceability analysis across spec.md, plan.md, and tasks.md. Pairs with /devspark.critic as the dual pre-implement gate (analyze = are the artifacts internally aligned? critic = will the system survive production?).
+description: Non-destructive cross-artifact consistency, coverage, and traceability analysis across spec.md, plan.md, and tasks.md. The closed-world half of planning assurance — proves the planning artifacts are internally sound; /devspark.critic challenges whether that sound plan is wrong about the real system.
 handoffs:
   - label: Implement Project
     agent: devspark.implement
@@ -25,21 +25,27 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 Load and obey the shared preamble contract at `/.devspark/templates/command-preamble-contract.md` (installed repos) or `templates/command-preamble-contract.md` (source repos) before step 1.
 
-Identify inconsistencies, duplications, ambiguities, underspecified items, and traceability gaps across the three core artifacts (`spec.md`, `plan.md`, `tasks.md`) before implementation. This command MUST run only after `/devspark.tasks` has successfully produced a complete `tasks.md`.
+Load and obey the shared assurance contract at `/.devspark/templates/assurance-contract.md` (installed repos) or `templates/assurance-contract.md` (source repos). It is the canonical source for lane ownership, deduplication, finding quality, and verdict discipline. This command implements that contract; it does not restate it.
 
-`/devspark.analyze` and `/devspark.critic` are the **dual pre-implement gates** with deliberately separated scope:
+> **Analyze establishes that the planning artifacts are internally sound. `/devspark.critic` challenges whether that internally sound plan is wrong about the real system it will run in.**
 
-| Concern                                         | Owner                      |
-| ----------------------------------------------- | -------------------------- |
-| Internal consistency across the three artifacts | `/devspark.analyze` (here) |
-| Coverage of stated requirements by stated tasks | `/devspark.analyze` (here) |
-| Ambiguity of **wording** (vague, untestable)    | `/devspark.analyze` (here) |
-| Rationale / Core-Problem drift spec→plan        | `/devspark.analyze` (here) |
-| Whether stated NFR **targets** are achievable   | `/devspark.critic`         |
-| What operational tasks are **missing entirely** | `/devspark.critic`         |
-| Failure modes, archetype-specific traps, scale  | `/devspark.critic`         |
+Analyze is the **closed-world** half of planning assurance. Its test is mechanical: if something can be shown wrong solely because the planning artifacts contradict themselves or fail their declared structural contract, Analyze owns it. If establishing it requires knowing how the running system actually behaves, Analyze does not.
 
-When a finding could land in either lane, prefer the gate that owns it above and add a brief cross-reference rather than duplicating the check.
+Analyze **owns** (assurance-contract.md §2): spec↔plan↔tasks consistency; requirement coverage and requirement↔task traceability; duplicate, contradictory, or unanchored requirements; terminology drift and wording precision; task dependency and ordering validity; missing task anchors; tasks citing requirement ids that do not exist; completed tasks with no supporting linkage; identifier and field names contradicting a declared contract or schema; Rationale Summary completeness and spec→plan Core-Problem drift; `context_resolved` **validity**; artifact and schema conformance; planning bookkeeping correctness.
+
+Analyze does **NOT** own, and MUST NOT emit findings for (assurance-contract.md §4.1):
+
+| Not Analyze's                                                        | Owner               |
+| -------------------------------------------------------------------- | ------------------- |
+| Whether stated NFR **targets** are achievable                        | `/devspark.critic`  |
+| What operational tasks are **missing entirely** (no requirement asked) | `/devspark.critic`  |
+| Failure modes, archetype-specific traps, scale, concurrency hazards  | `/devspark.critic`  |
+| Whether the baseline system can actually produce a stated condition  | `/devspark.critic`  |
+| `context_resolved` **sufficiency** (is the resolved set complete?)    | `/devspark.critic`  |
+| Implementation correctness, runtime proof                            | `/devspark.verify`  |
+| Diff review, acceptance of the resulting delta                       | `/devspark.pr-review` |
+
+Noticing one of these anyway is normal. Route it under `routed_findings:` per assurance-contract.md §4.2 — never as an Analyze finding. Do not duplicate a concern another capability already owns.
 
 ## Operating Constraints
 
@@ -91,7 +97,7 @@ Load only the minimal necessary context from each artifact:
 - Data Model references
 - Phases
 - Technical constraints
-- `## Context Resolution` (`context_resolved` list of entity/decision ids and traversal paths)
+- `## Context Resolution` (`context_resolved` list of knowledge ids with their `kind`, `via`, and `hop`)
 
 **From tasks.md:**
 
@@ -146,15 +152,19 @@ Focus on high-signal findings. Limit to 50 findings total; aggregate remainder i
 - Requirements with zero associated tasks
 - Tasks with no mapped requirement/story
 - **Traceability hallucination**: a task whose `Implements: FR-###` directive references a requirement ID that does not exist in `spec.md` (CRITICAL — the task claims to satisfy an invented requirement)
+- **Missing requirement anchor**: a normative statement in `spec.md` that other artifacts must be able to cite, written without a stable `FR-###`/`SC-###` anchor — or an anchor duplicated across two different statements. An uncitable or ambiguous requirement makes every downstream traceability claim unverifiable (HIGH; CRITICAL when a task already cites the ambiguous anchor).
+- **Completion bookkeeping**: a task marked complete whose `code_ref`/`knowledge_ref` is still `pending`, empty, or an unexplained `n/a` — the task claims work that no recorded edit supports (HIGH). Likewise a task marked complete whose cited paths do not exist.
 - Non-functional requirements not reflected in tasks (e.g., performance, security)
-- **Scope**: this pass only checks whether *stated* requirements have *stated* tasks. Whether the spec is *missing* operational tasks (observability, rollback, backups, runbooks) that no requirement called for is `/devspark.critic`'s responsibility.
+- **Scope**: this pass only checks whether *stated* requirements have *stated* tasks, and whether the task record is internally honest. Whether the spec is *missing* operational tasks (observability, rollback, backups, runbooks) that no requirement called for is `/devspark.critic`'s responsibility.
 
 #### F. Inconsistency
 
 - Terminology drift (same concept named differently across files)
 - Data entities referenced in plan but absent in spec (or vice versa)
-- Task ordering contradictions (e.g., integration tasks before foundational setup tasks without dependency note)
+- **Declared-contract conformance**: an identifier, field name, enum member, status value, or type used in `spec.md`/`plan.md`/`tasks.md` that contradicts the contract the artifacts themselves declare — `data-model.md`, an API contract, a schema, or a controlled vocabulary named in the plan. A field the artifacts both define and then cite under a different name is a closed-world contradiction (HIGH; CRITICAL when a task would be implemented against the wrong name).
+- **Task sequencing validity**: a task whose declared prerequisite runs later in the ordering, a declared dependency on a task id that does not exist, a cycle among declared dependencies, or a task marked parallel-safe (`[P]`) that writes a file another parallel task in the same group also writes. Integration or polish tasks ordered before the foundational setup they require, with no dependency note, remain a finding.
 - Conflicting requirements (e.g., one requires Next.js while other specifies Vue)
+- **Scope**: these checks are closed-world — they compare the artifacts against each other and against the contracts the artifacts declare. Whether a *correctly declared* contract matches what the running system actually provides is `/devspark.critic`'s responsibility.
 
 #### G. Rationale & Traceability
 
@@ -172,8 +182,10 @@ Focus on high-signal findings. Limit to 50 findings total; aggregate remainder i
 
 #### I. Context Resolution Validity
 
-- **Mechanical, hard-stop** — the same class of check already applied to `relations[].object` in the knowledge index. For every entry in plan.md's `## Context Resolution` `context_resolved` list, verify the cited id actually resolves against the current `.knowledge/` ontology (an existing entity under `.knowledge/entities/`, a document in the flat type-folders, or a decision under `.knowledge/governance/decisions/`).
-- A `context_resolved` entry citing an id that does not exist, or a `via` relation that isn't actually present on that entity/decision, is a **stale or hallucinated reference** — CRITICAL, same severity class as traceability hallucination in §E.
+- **Mechanical, hard-stop** — the same class of check already applied to `relations[].object` in the knowledge index. For every entry in plan.md's `## Context Resolution` `context_resolved` list, verify the cited id actually resolves against the current `.knowledge/` corpus. All four kinds resolve equally: a flat document in the type-folders (`kind: knowledge`), an entity under `.knowledge/entities/` (`kind: entity`), one layer document of an entity (`kind: entity-layer`), or a decision under `.knowledge/governance/decisions/` (`kind: decision`).
+- A `context_resolved` entry citing an id that does not exist, or a `via` relation that isn't actually present on the cited item, is a **stale or hallucinated reference** — CRITICAL, same severity class as traceability hallucination in §E.
+- Check the declared `kind` against what the id actually is, and check that `hop` is 0, 1, or 2 — planning's projection budget is 2 hops, so a recorded hop above 2 is a budget violation (HIGH), not a resolution failure. An entry whose `kind` contradicts the resolved id is MEDIUM: the item is real, its provenance record is wrong.
+- **Never treat a flat document as second-class.** A `context_resolved` list containing only `kind: knowledge` entries is valid and complete; failing it for "no entities resolved" is itself a non-conformance.
 - **Scope**: this pass only checks that what `/devspark.plan` claims to have resolved actually resolves. Whether the resolved set is *sufficient* for the delta (nothing obviously relevant was skipped) is `/devspark.critic`'s responsibility — do not duplicate.
 - If `plan.md` has no `## Context Resolution` section at all (pre-v4 plan), report it as a MEDIUM finding recommending a `/devspark.plan` re-run, not CRITICAL — this preserves backward compatibility with plans authored before this section existed.
 
@@ -189,7 +201,19 @@ Focus on high-signal findings. Limit to 50 findings total; aggregate remainder i
   never from durable `.knowledge/` documents).
 - This pass never blocks: knowledge-document coverage gaps are advisory (fail-soft, per FR-006), not CRITICAL/constitution findings.
 
-### 5. Severity Assignment
+### 5. Consolidate and Route
+
+Run this pass over the candidate findings **before** assigning severity.
+
+**Deduplicate across capabilities** (assurance-contract.md §5.1). Discard any candidate whose substantive concern is already explicitly recognized and appropriately handled by the artifacts themselves or by an open `/devspark.critic` finding. Reference it in narrative if useful; never mint a second id to restate it.
+
+**Deduplicate within Analyze** (assurance-contract.md §5.2). One root concern yields one finding. A single terminology drift that shows up in four files is one finding with four locations, not four findings.
+
+**Route what is not Analyze's** (assurance-contract.md §4.2). Move any candidate that requires knowing how the running system actually behaves — NFR achievability, absent operational controls, baseline behavior, `context_resolved` sufficiency, failure modes — into `routed_findings:` with `owner: critic`. It does not count as an Analyze finding and never affects the gate status.
+
+**Apply the quality bar** (assurance-contract.md §6). Every remaining finding must answer: what is wrong; why it is material to *this* change; what evidence in the artifacts supports it; why Analyze owns it; and what change resolves it.
+
+### 6. Severity Assignment
 
 Use this heuristic to prioritize findings:
 
@@ -198,12 +222,14 @@ Use this heuristic to prioritize findings:
 - **MEDIUM**: Terminology drift, missing non-functional task coverage, underspecified edge case
 - **LOW**: Style/wording improvements, minor redundancy not affecting execution order
 
-### 6. Produce Compact Analysis Report
+### 7. Produce Compact Analysis Report
 
 Output a Markdown report with the following structure and write the same content to `FEATURE_DIR/gates/analyze.md` (create `FEATURE_DIR/gates/` if needed, replace the prior analyze gate artifact if it exists):
 
 ```yaml
 gate: analyze
+devspark_version: "<installed version, or `unknown`>"
+generated: "<ISO-8601 timestamp of this run>"
 status: pass | warn | fail
 blocking: true | false
 severity: info | warning | error | showstopper
@@ -246,7 +272,7 @@ reviewed_artifacts:
 - Duplication Count
 - Critical Issues Count
 
-### 7. Provide Next Actions
+### 8. Provide Next Actions
 
 At end of report, output a concise Next Actions block:
 
@@ -254,13 +280,13 @@ At end of report, output a concise Next Actions block:
 - If only LOW/MEDIUM: User may proceed, but provide improvement suggestions
 - Provide explicit command suggestions: e.g., "Run /devspark.specify with refinement", "Run /devspark.plan to adjust architecture", "Manually edit tasks.md to add coverage for 'performance-metrics'"
 
-### 8. Offer Remediation
+### 9. Offer Remediation
 
 Ask the user: "Would you like me to suggest concrete remediation edits for the top N issues?" (Do NOT apply them automatically.)
 
 **Autonomy override**: if `--auto` (or a standing autonomy instruction) is in effect, skip the ask. Instead, recommend re-running `/devspark.tasks` — its Gate Remediation Merge step (§2a) reads this report's `findings:` block directly, merges it with `/devspark.critic`'s, and appends concrete fix tasks without an extra round-trip through this command.
 
-### 9. Persist Gate Artifact
+### 10. Persist Gate Artifact
 
 Before producing the report, compute `reviewed_artifacts`: for each artifact actually read (typically `spec.md`, `plan.md`, `tasks.md`), run `git hash-object <path>` and record the `path`/`hash` pair. This is mechanical -- do not skip it even when findings are empty.
 
@@ -300,6 +326,7 @@ When emitting findings (review observations, issues, recommendations), structure
 ```yaml
 findings:
   - finding_id: <stable-id-unique-within-this-command-output> # e.g., analyze-001, clarify-002
+    owner: analyze
     severity: critical | high | medium | low
     description: <1-3 sentence problem statement>
     intent_cue: <REQUIRED for ambiguity/underspecification findings that cite a vague adjective, placeholder, or missing measurable outcome: one sentence naming what the requirement must express to be actionable, per command-preamble-contract.md §9.1 (e.g. "'fast' must state a measurable latency target"). Empty string otherwise.>
@@ -307,6 +334,15 @@ findings:
     execution_mode: auto | selective | manual
     status: open # set to `resolved` after remediation
     outcome: "" # populated post-resolution by address-pr-review
+
+# Observations belonging to another assurance capability (assurance-contract.md §4.2).
+# These are NOT Analyze findings: they never affect gate status and are addressed by
+# re-running the owning capability. Omit the block when empty.
+routed_findings:
+  - routed_id: analyze-routed-001
+    owner: critic | verify | pr-review
+    description: <what was noticed>
+    rationale: <why that lane owns it>
 ```
 
 `finding_id` MUST be stable across re-runs when the underlying issue is unchanged. `execution_mode` MUST be one of: `auto` (safe to apply automatically), `selective` (apply with reviewer approval), `manual` (requires human implementation). The `status` and `outcome` fields are written by `/devspark.address-pr-review` (FR-028).

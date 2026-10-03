@@ -27,6 +27,50 @@ A spec declares which proof mode(s) it requires via `required_gates: verify:<mod
 
 A spec MAY require more than one mode (e.g., a migration might need both `regression-pinned` and `shadow-agreement`). List all required modes; the gate is not satisfied until every declared mode has its own evidence block.
 
+## 2.1 When Empirical Proof Is Warranted
+
+Ordinary deterministic validation — the test suite, the linters, the type checker — answers *"does the code do what the code says?"* Empirical verification answers a different question:
+
+> **Does this change depend on something the test suite cannot observe?**
+
+That is a property of the **change shape**, not of the route label or the authored `risk_level`. Routes named `refactor` and `prompt-change` carry a default mode (see `specify.md`) because their shape is known in advance, but a change on any route can exhibit a verify-sensitive shape, and such a change should receive the matching mode regardless of its route.
+
+The vocabulary is deliberately small and technology-neutral. Each shape names something the tests can be green about while reality disagrees:
+
+| Change shape | Why tests can be green and reality wrong | Indicated mode |
+|---|---|---|
+| **runtime-configuration** | Defaults, flags, and settings resolve at runtime from state the tests supply themselves | `end-to-end` |
+| **environment-dependent-behavior** | Behavior varies by deployed environment, platform, locale, clock, or identity | `end-to-end` |
+| **external-contract** | An outside service or payload shape is asserted by a fixture the outside world never signed | `end-to-end` or `shadow-agreement` |
+| **datastore-semantics** | Query, index, transaction, or collation behavior differs between the real engine and the test double | `end-to-end` or `regression-pinned` |
+| **mock-substituted-behavior** | The component under test is replaced in every test that covers it | `end-to-end` |
+| **deployment-state-assumption** | Correctness depends on the shape of data or configuration already deployed | `end-to-end` or `snapshot-neutral` |
+| **behavior-preservation-claim** | The change asserts nothing observable changed | `snapshot-neutral` |
+| **output-shape-contract** | The rendered or generated output *is* the contract | `golden` |
+| **defect-recurrence** | A fix must be provably absent before and provably present after | `regression-pinned` |
+
+These are indications, not an engine. A shape makes a mode **recommended**; declaring it in `required_gates` is what makes it required. Absence of every shape is a legitimate and common result — a contained local change with no environment-dependent behavior does not need empirical proof, and manufacturing a mode for it is waste.
+
+Do not extend this table with repository-specific technologies. If a new shape is genuinely general, generalize it before adding it.
+
+## 2.2 The Applicability Decision Is Reported, Not Hidden
+
+Whichever command decides whether empirical verification is warranted — `/devspark.specify` at route classification, `/devspark.plan` when the design makes the shape visible, or `/devspark.verify` itself — states the decision and its reason in two lines:
+
+```text
+Empirical verification: REQUIRED (end-to-end)
+Reason: runtime-configuration — behavior depends on the shape of already-deployed configuration
+```
+
+```text
+Empirical verification: NOT REQUIRED
+Reason: no verify-sensitive change shape — contained local refactor with no environment-dependent behavior
+```
+
+Keep it to those two lines. Classification may be automatic; the reasoning may not be invisible.
+
+**Consequential proof stays a human decision.** A mode that needs resources or authority the command does not already hold — live traffic, a production-like environment, a replay corpus, credentials, or anything with a cost — is proposed, not assumed. State what the proof requires and ask. Automate the classification; never hide the commitment.
+
 ## 3. Frontmatter Contract
 
 Specs that require verification MUST include `verify` in `required_gates`, qualified by mode:
@@ -48,6 +92,8 @@ Validation rules:
 
 ```yaml
 gate: verify
+devspark_version: "<installed version, or `unknown`>"
+generated: "<ISO-8601 timestamp of this run>"
 status: pass | warn | fail
 blocking: true | false
 summary: "<concise outcome>"
@@ -56,10 +102,24 @@ modes:
     status: pass | fail
     evidence: |
       <actual commands run and actual output/results — not a plan to run them>
+discovered:
+  - "<observation surfaced while running the proof, carried to closeout for classification>"
 ```
+
+The `discovered:` list is the overflow channel for everything the run surfaced that is not a proof result. It never affects any mode's `status`, and it is not a to-do list for this route — the closeout phase classifies each entry (see §6).
 
 ## 5. Non-Negotiables
 
 - **Never fabricate evidence.** If a proof mode can't be executed in this environment (no test runner, no traffic sample, no baseline artifact), the gate status is `fail` with the reason stated — not a hypothetical pass.
 - **Re-run on drift.** Like `analyze`/`critic` (see the gate-staleness convention in those commands), `verify` evidence is tied to the code state it was captured against; if the implementation changes materially after verification, re-run before `/devspark.create-pr`.
 - **Evidence over narration.** A finding that says "this should work because X" is not evidence. A finding that shows the command, its output, and the pass/fail conclusion is.
+
+## 6. Closeout: The Convergence Phase of Verification
+
+Gathering evidence answers **"what does the evidence say?"** It does not answer **"is this work finished?"** That second question is the **closeout phase**, defined by the Closeout Contract (`templates/closeout-contract.md`) and run by `/devspark.verify` itself, in the same invocation, immediately after the evidence phase. Two phases, two artifacts (`gates/verify.md` and `gates/closeout.md`), one developer interaction.
+
+The phases stay distinct because their incentives differ: the evidence phase optimizes for finding things, the closeout phase optimizes for converging. Collapsing them would quietly bias verification toward noticing less, since every observation would arrive already priced as work.
+
+A failing proof mode is a blocking defect and routes back to `/devspark.implement`. Every other observation that surfaces during the run is recorded under `discovered:` and classified in the closeout phase as an Accepted Limitation, Deferred Work, or a Learning / Changed Assumption. Turning such an observation into new work inside the current spec, on verification's own authority, is the convergence failure that contract exists to prevent.
+
+`/devspark.closeout` re-runs the closeout phase alone — same contract, same artifact — and is an advanced reassessment entry point, never a required next step after this command.

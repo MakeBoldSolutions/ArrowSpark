@@ -1,0 +1,29 @@
+---
+// Make Bold badge in one of seven tones.
+interface Props {
+  tone?: 'neutral' | 'brand' | 'accent' | 'positive' | 'caution' | 'critical' | 'info';
+}
+const { tone = 'neutral' } = Astro.props;
+---
+<span class={`badge badge--${tone}`}><slot /></span>
+
+<style>
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-semibold);
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+  }
+  .badge--neutral { background: var(--ink-100); color: var(--ink-700); }
+  .badge--brand { background: var(--brand-soft); color: var(--brand-strong); }
+  .badge--accent { background: var(--accent-soft); color: var(--ember-700); }
+  .badge--positive { background: var(--positive-soft); color: var(--positive); }
+  .badge--caution { background: var(--caution-soft); color: var(--ember-800); }
+  .badge--critical { background: var(--critical-soft); color: var(--critical); }
+  .badge--info { background: var(--info-soft); color: var(--info); }
+</style>

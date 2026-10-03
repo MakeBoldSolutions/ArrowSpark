@@ -1,0 +1,27 @@
+{
+  "$comment": "Template. scripts/build-csp.mjs fills the Content-Security-Policy and writes the deployed copy to dist/staticwebapp.config.json.",
+  "globalHeaders": {
+    "Content-Security-Policy": "{{CSP}}",
+    "Cache-Control": "no-cache",
+    "X-Content-Type-Options": "nosniff",
+    "Referrer-Policy": "no-referrer"
+  },
+  "routes": [
+    {
+      "route": "/game/*",
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable"
+      }
+    },
+    {
+      "route": "/_astro/*",
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable"
+      }
+    }
+  ],
+  "mimeTypes": {
+    ".wasm": "application/wasm",
+    ".pck": "application/octet-stream"
+  }
+}

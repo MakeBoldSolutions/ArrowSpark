@@ -1,6 +1,7 @@
 extends Control
 ## Minimal, catalog-driven Level Select content: accordion group sections. Each
-## purpose group has a header button that collapses or expands its entries;
+## purpose group has a header button that collapses or expands its entries,
+## followed by one line saying what the group is for (never a ranking);
 ## entries are keyboard/gamepad focus-navigable buttons numbered within their
 ## group, emitting puzzle_selected(id) on selection. Collapsed entries are
 ## hidden, so focus skips them. Every group starts expanded. No locked/unlocked states —
@@ -9,11 +10,19 @@ extends Control
 
 signal puzzle_selected(id: String)
 
+## One honest line per purpose group. Shown even when the group is collapsed.
+const GROUP_DESCRIPTIONS := {
+	PuzzleCatalog.GROUP_ARROWSPARK_LEVELS: "The intended ArrowSpark experience.",
+	PuzzleCatalog.GROUP_FOUNDATIONS: "Small boards that teach the rule.",
+	PuzzleCatalog.GROUP_PUZZLE_LAB: "Development experiments, some deliberately over-tangled.",
+}
+
 @onready var _list_container: VBoxContainer = %PuzzleListContainer
 
 var _first_button: Button
 var _header_buttons: Array[Button] = []
 var _entry_buttons: Array[Button] = []
+var _description_labels: Array[Label] = []
 
 func _ready() -> void:
 	for group_id in PuzzleCatalog.group_ids():
@@ -26,6 +35,13 @@ func _ready() -> void:
 		header.theme_type_variation = &"SecondaryButton"
 		_list_container.add_child(header)
 		_header_buttons.append(header)
+		var description := Label.new()
+		description.text = String(GROUP_DESCRIPTIONS.get(group_id, ""))
+		description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		description.theme_type_variation = &"SupportingText"
+		description.focus_mode = Control.FOCUS_NONE
+		_list_container.add_child(description)
+		_description_labels.append(description)
 		var section := VBoxContainer.new()
 		section.add_theme_constant_override("separation", 8)
 		_list_container.add_child(section)
@@ -54,6 +70,10 @@ func entry_buttons() -> Array[Button]:
 
 func header_buttons() -> Array[Button]:
 	return _header_buttons
+
+## The group description lines, in group order.
+func description_labels() -> Array[Label]:
+	return _description_labels
 
 func _on_entry_pressed(id: String) -> void:
 	puzzle_selected.emit(id)

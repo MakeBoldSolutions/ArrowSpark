@@ -1,0 +1,128 @@
+/* ArrowSpark extensions to the Make Bold theme. This is the only site file allowed to hold
+   literal sizes; colors still come from theme tokens. Each block is a documented extension
+   (see web/THEME.md): accessibility utility, game frame, evidence beat rail, Journey list. */
+
+/* Accessibility utility: content for screen readers only. */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Game frame: dark frame and title bar around the 16:9 game iframe. */
+.game-frame {
+  background: var(--surface-dark);
+  border-radius: var(--radius-lg);
+  padding: var(--space-2) var(--space-2) var(--space-3);
+  box-shadow: var(--shadow-lg);
+}
+.game-frame__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: 2px var(--space-2) var(--space-2);
+  color: var(--ink-300);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+}
+.game-frame__stage {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: var(--cream);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.game-frame__stage iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+.game-frame__loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  background: var(--cream);
+  color: var(--ink-900);
+  text-align: center;
+  pointer-events: none;
+}
+.game-frame__loading[hidden] { display: none; }
+.game-frame__mark { height: 44px; width: auto; }
+.game-frame__bar-mark { height: 14px; width: auto; filter: grayscale(1) brightness(1.8); }
+.game-frame__track {
+  width: 220px;
+  height: 4px;
+  background: var(--ink-200);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.game-frame__track span {
+  display: block;
+  width: 40%;
+  height: 100%;
+  background: var(--brand);
+  animation: game-frame-progress 1.6s var(--ease-standard) infinite alternate;
+}
+@keyframes game-frame-progress {
+  from { transform: translateX(-40%); }
+  to { transform: translateX(190%); }
+}
+
+/* Evidence beat rail: numbered markers joined by a vertical line. */
+.beat {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 0 var(--space-4);
+}
+.beat__rail { display: flex; flex-direction: column; align-items: center; }
+.beat__marker {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--brand);
+  color: var(--text-on-brand);
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.beat__line { flex: 1; width: 2px; background: var(--border-default); margin-top: 6px; }
+.beat__body { padding-bottom: var(--space-10); }
+.beat__cols {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+  gap: var(--space-3);
+}
+
+/* Journey list: two-digit number, title, then "what changed" and "what we learned". */
+.journey-item {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: var(--space-3) var(--space-10);
+  padding-block: var(--space-6);
+  border-top: var(--border-hairline) solid var(--border-default);
+}
+.journey-item__head { display: flex; gap: var(--space-4); align-items: baseline; }
+.journey-item__n {
+  min-width: 48px;
+  font-family: var(--font-display);
+  font-weight: var(--fw-extrabold);
+  font-size: var(--fs-2xl);
+  color: var(--accent);
+  letter-spacing: var(--ls-tighter);
+}

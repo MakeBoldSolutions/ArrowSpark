@@ -1,0 +1,30 @@
+---
+---
+<footer class="site-footer">
+  <div class="site-footer__inner">
+    <span class="site-footer__brand">
+      <img src="/brand/logo-mark.svg" alt="" width="44" height="22" />
+      <span>A Make Bold Spark experiment · Wichita, Kansas</span>
+    </span>
+    <span>Scores last only for this visit. Reloading starts fresh.</span>
+    <a href="/licenses/">Licences</a>
+  </div>
+</footer>
+
+<style>
+  .site-footer { border-top: var(--border-hairline) solid var(--border-default); background: var(--surface-page); }
+  .site-footer__inner {
+    max-width: var(--container-max);
+    margin-inline: auto;
+    padding: var(--space-6) var(--gutter);
+    display: flex;
+    gap: var(--space-3) var(--space-8);
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    font-size: var(--fs-sm);
+    color: var(--ink-600);
+  }
+  .site-footer__brand { display: flex; gap: var(--space-3); align-items: center; }
+  .site-footer__brand img { height: var(--space-5); width: auto; }
+</style>

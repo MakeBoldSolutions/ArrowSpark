@@ -5,8 +5,9 @@ part: outline
 status: first-draft
 author: Mark Hazleton
 date_drafted: 2026-09-30
+date_facts_refreshed: 2026-10-01
 theme: "A business-software developer with no game experience uses spec-driven development to fill a gap in arcade puzzle apps, and learns what the game actually is by testing his own assumptions."
-description: "Index, story arc, and editorial notes for a seven-part series on the development of ArrowSpark, a Godot puzzle game built with DevSpark between 2026-09-26 and 2026-09-30."
+description: "Index, story arc, and editorial notes for an eight-chapter series (plus a closing chapter) on the development of ArrowSpark, a Godot puzzle game built with DevSpark between 2026-09-26 and 2026-10-01."
 purpose: "Give the author one page to steer the series: what each article is for, how the story escalates, which evidence backs each claim, and what the author still has to supply."
 ---
 
@@ -33,9 +34,9 @@ The series is a look over the author's shoulder. Nothing in it should need to be
 - **Show the misses.** The 2/5 playtest, the leaked review IDs, the stale test README, the verify gate that finished as *warn* all stay in.
 - **Reproducible.** A reader can rerun `git log --reverse --format='%h %ad %s' --date=format:'%Y-%m-%d %H:%M'` and get the same table.
 
-Receipts already in the repo besides commits: `.devspark.work/specs/*/gates/` (analyze, critic, verify), `.devspark.work/pr-review/`, `.devspark.work/audit/`, `.devspark.work/research/spec-006-report.md`, `.knowledge/reference/gordian-knot-experiments.md`, and `.knowledge/guides/repo-story/`.
+Receipts already in the repo besides commits: `.devspark.work/specs/*/gates/` (analyze, critic, verify), `.devspark.work/pr-review/`, `.devspark.work/audit/`, `.devspark.work/research/spec-006-report.md`, `.knowledge/reference/gordian-knot-experiments.md`, `.knowledge/reference/reference-puzzle-design-report.md`, and `.knowledge/guides/repo-story/`.
 
-### Wall-clock evidence (from `git log`, local time, 2026-09-26 to 2026-09-29)
+### Wall-clock evidence (from `git log`, local time, 2026-09-26 to 2026-10-01)
 
 | Milestone | Timestamp | Elapsed since first commit |
 |---|---|---|
@@ -50,11 +51,14 @@ Receipts already in the repo besides commits: `.devspark.work/specs/*/gates/` (a
 | Spec 008 zoomable canvas merged (PR #1) | 09-28 15:45 | 53h 04m |
 | Spec 009 Gordian Knot experiments merged (PR #2) | 09-29 09:17 | 70h 36m |
 | Spec 010 specified | 09-29 20:59 | 82h 18m |
-| Last commit | 09-29 21:07 | 82h 26m |
+| Spec 010 implementation (groups, Reference Knot) | 09-30 15:38 | 100h 57m |
+| Spec 010 human playtest recorded | 10-01 07:51 | 117h 10m |
+| Spec 010 merged (PR #4), last commit | 10-01 11:51 | 121h 10m |
 
-- Nine specs merged in about **70.5 hours of elapsed time** (roughly 2 days 22 hours), including overnight gaps.
-- Splitting the log into sessions (a new session starts after a gap over 90 minutes) gives 13 sessions totalling about **19 hours of commit-bracketed activity**. Day one alone was two long sessions (8.2h and 2.4h).
-- 70 commits, 41 of which touch tests; three merged PRs.
+- Nine specs merged in about **70.5 hours of elapsed time** (roughly 2 days 22 hours), including overnight gaps. All ten were merged at **121 hours** (about 5 days).
+- Splitting the log into sessions (a new session starts after a gap over 90 minutes) gives **17 sessions totalling about 22.9 hours of commit-bracketed activity** (13 sessions and about 19 hours up to 2026-09-29). Day one alone was two long sessions (8.2h and 2.4h).
+- 91 commits; four merged GitHub PRs. 19 commits touch files under `tests/` (13 up to 2026-09-29).
+- **Correction (2026-10-01):** earlier drafts said "41 of which touch tests". Neither `git log -- tests` (19) nor counting any path containing "test" (24) reproduces 41, so the figure is withdrawn. Most commits bundle code and tests together, so this count says little about test discipline; the line counts below say more.
 
 ### Reading these numbers honestly
 
@@ -71,9 +75,10 @@ Receipts already in the repo besides commits: `.devspark.work/specs/*/gates/` (a
 | II. Craft | 3–4 | The rules become provable; the game starts to feel like something | Verification |
 | III. Reversal | 5 | Every metric is green and a human says "too easy" | Surprise, correction |
 | IV. Contract | 6 | The game earns the right to be hard | Discipline |
-| V. Synthesis | 7 | The knot metaphor, honest evidence, process lessons, what is next | Reflection |
+| V. Composition | 7–8 | Knot ingredients, the audit, then one composed level judged by a human | Honesty under a human bar |
+| VI. Invitation | Closing | The whole clock, the lessons, and the ask: play it | Reflection, then a request |
 
-## The seven articles
+## The chapters
 
 | # | Working title | Theme | Specs / evidence | File |
 |---|---|---|---|---|
@@ -83,7 +88,9 @@ Receipts already in the repo besides commits: `.devspark.work/specs/*/gates/` (a
 | 4 | Making It Feel Right: Unwinding Arrows and What Tests Can't See | Feel, presentation, manual verification | Specs 003, 004, branding | [04](04-making-it-feel-right.md) |
 | 5 | The Playtest That Beat the Dashboard | Evidence overturns metrics | Specs 005, 006 | [05](05-playtest-beat-the-dashboard.md) |
 | 6 | The Contract Before the Difficulty, the Canvas Before the Content | Sequencing and player trust | Specs 007, 008 | [06](06-contract-before-difficulty.md) |
-| 7 | Pulling the Thread: Knots, Audits, and What DevSpark Learned | Synthesis, honest evidence, lessons | Specs 009, 010, audit | [07](07-pulling-the-thread.md) |
+| 7 | Pulling the Thread: Knots, Audits, and What DevSpark Learned | Ingredients and honest evidence | Spec 009, audit | [07](07-pulling-the-thread.md) (to be split: Spec 010 and closing sections move out) |
+| 8 | The Reference Knot: A Level Judged by a Human | Composition, a human definition of done, recorded failure | Spec 010, PR #4 | [08](08-the-reference-knot.md) |
+| Close | Now It's Your Turn | The whole clock, lessons, the request to play | All; `12-devspark-lessons.md` | not yet written |
 
 ## Recurring motifs (use consistently)
 
@@ -97,13 +104,13 @@ Receipts already in the repo besides commits: `.devspark.work/specs/*/gates/` (a
 
 ## Facts the series can rely on (from the repo)
 
-- Repository: 70 commits, first at 2026-09-26 10:41, latest 2026-09-29. Commits per day: 34 / 15 / 11 / 10.
-- Nine specs complete (001–009); Spec 010 (Reference Puzzle) specified but not implemented as of 2026-09-30.
-- Three merged GitHub PRs (#1 Spec 008, #2 Spec 009, #3 site-audit chore); earlier specs merged locally.
-- Catalog grew 1 puzzle → 8 → 14 → 15 → 21.
+- Repository: 91 commits, first at 2026-09-26 10:41, latest 2026-10-01 11:51. Commits per day: 34 / 15 / 11 / 10 / 9 / 12.
+- Ten specs complete (001–010). Spec 010 closed on 2026-10-01 with documented limitations.
+- Four merged GitHub PRs (#1 Spec 008, #2 Spec 009, #3 site-audit chore, #4 Spec 010); earlier specs merged locally.
+- Catalog grew 1 puzzle → 8 → 14 → 15 → 21 → 22, now in three groups (Foundations 8, Puzzle Lab 13, ArrowSpark Levels 1).
 - Two required headless regression launchers plus a non-gating structural report; CI runs both on push/PR.
-- Roughly 3,470 lines of GDScript in `scripts/` and `scenes/` against roughly 5,040 lines in `tests/*.gd` (counted 2026-09-30; approximate, excludes the addon).
-- One human playtest quote, verbatim, in [`spec-006-report.md`](../../../.devspark.work/research/spec-006-report.md).
+- 3,820 lines of GDScript in `scripts/` and `scenes/` against 5,340 lines in `tests/*.gd` (counted 2026-10-01 with `cat $(git ls-files 'scripts/*.gd' 'scenes/*.gd') | wc -l` and the same for `tests/*.gd`; excludes the addon). The 2026-09-30 count was about 3,470 and 5,040.
+- One human playtest quote, verbatim, in [`spec-006-report.md`](../../research/spec-006-report.md).
 
 ## What the author must supply (nothing here was invented on your behalf)
 
@@ -116,10 +123,11 @@ Receipts already in the repo besides commits: `.devspark.work/specs/*/gates/` (a
 
 ## Editorial cautions
 
-- The whole history spans about 3.4 days (82 hours first-to-last commit). Say so early and plainly, and lead with the clock; it is the case for DevSpark.
+- The whole history spans about 5 days (121 hours first commit to the Spec 010 merge). Say so early and plainly, and lead with the clock; it is the case for DevSpark. Articles 1–7 still say "three and a half days" and "82 hours"; update them in the light pass.
 - Never describe the work as improvised. Show the discipline: constitution first, tests first, gates before code, humans accepting the result.
 - Do not claim a speed-up multiple unless you supply the baseline yourself.
 - Spec 009's human evidence is **one aggregate author session**, per-puzzle detail *unknown, not zero*. Do not upgrade it to "playtesting proved".
 - Spec 004's visual acceptance and Spec 008's verify gate contain **user-reported or explicitly outstanding** items. The drafts say so; keep that.
-- The Spec 010 article describes work in progress. Update it when the Reference Puzzle passes (or fails) its human bar.
+- Spec 010 passed its human bar with **one familiar tester** (the designer). SC-005 failed its original wording and was amended; SC-009 (a fresh player finding the level) was not performed. Chapter 8 must keep all three facts in the body.
+- Chapter 8 discusses the Reference Knot's design (neighborhoods, bridge arrows, beats). On the website it goes behind a "play first" note so it cannot spoil a fresh player's first exposure.
 - Any time a draft says "I", check it against what you actually did.
