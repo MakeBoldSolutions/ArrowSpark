@@ -63,8 +63,40 @@ func _check_geometry() -> void:
 			view.free()
 	check(definition.get_cell_owners() == before, "decorative geometry never changes domain occupancy")
 
+## The Web completion message: exactly eight keys, integer counts, whole
+## seconds, and nothing that could identify a player, visit or moment.
+func _check_web_attempt_payload() -> void:
+	var definition: PuzzleDefinition = PuzzleCatalog.get_definition("reference_knot")
+	var results := {"total_arrows": 115, "mistakes": 2, "open_move_assists": 3, "score": 103, "accuracy": 0.98}
+	var payload := WebAttemptEmitter.build_payload("reference_knot", definition, results, 1_260_400)
+	var expected_keys := ["type", "contractVersion", "puzzleId", "puzzleVersion", "mistakes", "openMoveAssists", "score", "elapsedSeconds"]
+	var keys: Array = payload.keys()
+	keys.sort()
+	expected_keys.sort()
+	check(keys == expected_keys, "the completion payload has exactly the eight contract keys (got %s)" % [keys])
+	check(payload["type"] == "arrowspark.attemptCompleted" and payload["contractVersion"] == 1,
+		"the payload names its type and contract version 1")
+	check(payload["puzzleId"] == "reference_knot", "the payload carries the completed puzzle's id")
+	check(payload["puzzleVersion"] == PuzzleContentVersion.of(definition),
+		"the payload carries the puzzle content version, not the app version")
+	for key in ["contractVersion", "mistakes", "openMoveAssists", "score", "elapsedSeconds"]:
+		check(typeof(payload[key]) == TYPE_INT, "payload field %s is an integer" % key)
+	check(payload["mistakes"] == 2 and payload["openMoveAssists"] == 3 and payload["score"] == 103,
+		"the payload copies mistakes, Open Move assists and score unchanged")
+	check(payload["elapsedSeconds"] == 1260, "1,260.4 s of play is reported as 1260 whole seconds")
+	check(WebAttemptEmitter.build_payload("reference_knot", definition, results, 1_260_500)["elapsedSeconds"] == 1261,
+		"elapsed time rounds to the nearest whole second")
+	check(WebAttemptEmitter.build_payload("reference_knot", definition, results, -5)["elapsedSeconds"] == 0,
+		"elapsed time is never negative")
+	var text := JSON.stringify(payload)
+	for forbidden in ["accuracy", "total_arrows", "player", "visitor", "session", "device", "timestamp", "date"]:
+		check(not text.to_lower().contains(forbidden), "the payload carries no '%s' data" % forbidden)
+	check(text.length() <= 1024, "the serialized payload fits the 1,024-character limit")
+	check(not WebAttemptEmitter.emit(payload), "emit() does nothing outside a Web build")
+
 func _run() -> void:
 	_check_geometry()
+	_check_web_attempt_payload()
 	_check_effects()
 	_check_departure_geometry()
 	var puzzle: Control = load("res://scenes/puzzle/arrow_puzzle.tscn").instantiate()

@@ -572,6 +572,52 @@ func _check_level_select_accordion() -> void:
 	menu.queue_free()
 	await process_frame
 
+## Each purpose group shows one honest line about what it is for, and none of
+## them reads as a quality ranking.
+func _check_level_select_group_descriptions() -> void:
+	var menu = load("res://scenes/menus/main_menu/main_menu_with_animations.tscn").instantiate()
+	get_root().add_child(menu)
+	await process_frame
+	await process_frame
+	var level_select = menu.level_select_scene
+	var labels: Array[Label] = level_select.description_labels()
+	check(labels.size() == PuzzleCatalog.group_ids().size(), "each Level Select group has one description line")
+	var expected := {
+		PuzzleCatalog.GROUP_ARROWSPARK_LEVELS: "The intended ArrowSpark experience.",
+		PuzzleCatalog.GROUP_FOUNDATIONS: "Small boards that teach the rule.",
+		PuzzleCatalog.GROUP_PUZZLE_LAB: "Development experiments, some deliberately over-tangled.",
+	}
+	var ranking := RegEx.create_from_string("(?i)\b(best|better|easy|easier|hard|harder|hardest|beginner|advanced|expert|basic|top|premium|bonus|real)\b")
+	for i in range(labels.size()):
+		var group_id: String = PuzzleCatalog.group_ids()[i]
+		check(labels[i].text == expected[group_id], "the %s group's description reads '%s'" % [group_id, expected[group_id]])
+		check(ranking.search(labels[i].text) == null, "the %s description uses no ranking words" % group_id)
+		check(labels[i].focus_mode == Control.FOCUS_NONE, "the %s description never takes focus" % group_id)
+	var headers: Array[Button] = level_select.header_buttons()
+	headers[0].button_pressed = false
+	await process_frame
+	check(labels[0].visible and not level_select.entry_buttons()[0].get_parent().visible,
+		"a collapsed group hides its entries but keeps its description line")
+	headers[0].button_pressed = true
+	menu.queue_free()
+	await process_frame
+
+## The results overlay fills the puzzle scene even when the window was never
+## resized after the scene loaded (the Web build starts at its final size).
+func _check_results_overlay_fills_scene_without_resize() -> void:
+	var packed: PackedScene = load("res://scenes/puzzle/arrow_puzzle.tscn")
+	var puzzle: Control = packed.instantiate()
+	get_root().add_child(puzzle)
+	await process_frame
+	var results: Control = puzzle.get_node("%PuzzleResults")
+	results.show_results({"total_arrows": 1, "mistakes": 0, "open_move_assists": 0, "score": 100, "accuracy": 1.0},
+		"intro", true, "established", 100)
+	await process_frame
+	check(results.size.is_equal_approx(puzzle.size) and results.position == Vector2.ZERO,
+		"the results overlay covers the whole puzzle scene (%s vs %s)" % [results.size, puzzle.size])
+	puzzle.queue_free()
+	await process_frame
+
 ## Collapse state survives closing and reopening Level Select, so the initial
 ## focus must go to something visible: the first visible entry, or the first
 ## header when every group is collapsed -- never a hidden entry.
@@ -854,6 +900,8 @@ func _initialize() -> void:
 	await _check_level_select_menu()
 	await _check_level_select_request_opens_level_select()
 	await _check_level_select_accordion()
+	await _check_level_select_group_descriptions()
+	await _check_results_overlay_fills_scene_without_resize()
 	await _check_level_select_focus_after_collapse()
 	await _check_back_button()
 	await _check_replay_restart_and_next_puzzle()
