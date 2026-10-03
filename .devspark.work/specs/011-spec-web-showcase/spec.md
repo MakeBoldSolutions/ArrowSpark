@@ -25,7 +25,7 @@ participants:
 
 **Feature Branch**: `011-spec-web-showcase`
 **Created**: 2026-10-02
-**Status**: Draft <!-- Valid: Draft | In Progress | Complete -->
+**Status**: In Progress <!-- Valid: Draft | In Progress | Complete -->
 **Input**: User description: "Create Spec 011: ArrowSpark Web Showcase — Try the Game / Built with DevSpark. Treat the game and the DevSpark methodology as two equal showcase subjects… The visitor should leave with two independent opinions: 'What did I think of the game?' and 'What did I think of the way it was built?'"
 
 > This specification is temporary working state. It remains in `.devspark.work/` until `/devspark.release` archives it, and durable code, tests, knowledge or published site content must never reference it. Pre-spec research, including the required content-source map, is in [showcase-research.md](showcase-research.md) in this bundle.
@@ -120,7 +120,7 @@ Check five things:
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - A fresh player plays the Reference Knot from a link (Priority: P1)
+### User Story 1 - A fresh player plays the Reference Knot from a link (Priority: P1) ✅ Complete
 
 Someone who has never heard of ArrowSpark opens the showcase on a desktop or laptop browser, chooses to play, and is playing within moments: no install, no account, no tutorial about what to look for. They untangle as much of the Reference Knot as they want, using zoom, pan, Fit Puzzle and Open Move if they choose. They can finish, or leave whenever they like.
 
@@ -155,7 +155,7 @@ Someone interested in spec-driven or AI-assisted development opens the showcase 
 
 ---
 
-### User Story 3 - Visitors leave short, anonymous reactions (Priority: P2)
+### User Story 3 - Visitors leave short, anonymous reactions (Priority: P2) ✅ Complete
 
 After playing, a player can say in under a minute how satisfying it was, whether they would play another, whether they read the story first, and what they noticed in their own words. After the story, a reader can say whether it made sense and whether they'd use a process like it. Nobody has to identify themselves, and nothing follows them.
 
@@ -192,7 +192,7 @@ The owner sends the link to people who have never seen the game or its design do
 
 ---
 
-### User Story 5 - The public baseline tells the truth (Priority: P3)
+### User Story 5 - The public baseline tells the truth (Priority: P3) ✅ Complete
 
 Before the showcase goes public, the player-visible text and durable project knowledge it cites agree with the actual game. The showcase can then honestly claim that code, tests and knowledge agree.
 

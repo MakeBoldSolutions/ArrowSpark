@@ -217,8 +217,8 @@ findings:
     effective_severity: high
     recommended_action: "Edit T006 to set Astro build.inlineStylesheets to 'never' and forbid is:inline scripts (or hash every inline block at build). Edit T001/T068 so the shell's inline <style> is moved to a file or hashed into style-src, and add explicit style-src/img-src/font-src/worker-src directives. Keep the T072 preview check for CSP console violations as the proof, and add any engine-required source it reveals (e.g. blob:) narrowly."
     execution_mode: selective
-    status: open
-    outcome: ""
+    status: resolved
+    outcome: "Applied in T006/T001/T068: inlining disabled (styles and scripts as files, markdown highlighting off), shell styles moved to shell.css, explicit style/img/font/worker/connect directives, and a build step that fails on any unhashed inline block. Local enforcement found and fixed two real cases (highlighter style attributes; Godot blob: images, allowed in img-src only). SWA-preview confirmation remains part of the browser smoke (2026-10-02)."
   - finding_id: critic-014
     category: testing_strategy
     archetype_applicable: true
@@ -229,8 +229,8 @@ findings:
     effective_severity: medium
     recommended_action: "In T014, launch the headless browser with an explicit software WebGL backend (e.g. ANGLE/SwiftShader flags for Chromium) and record in evidence which backend ran. Distinguish 'engine failed to start' from 'WebGL unavailable in runner'. Only the former fails the check; the latter is reported as inconclusive."
     execution_mode: selective
-    status: open
-    outcome: ""
+    status: resolved
+    outcome: "Applied in T014: synthetic-check.mjs launches Chromium with ANGLE/SwiftShader, logs the renderer, and exits 3 (inconclusive, CI warning) when no WebGL2 context exists; only an engine start failure with WebGL2 available, a console error or a CSP violation fails (2026-10-02)."
   - finding_id: critic-015
     category: testing_strategy
     archetype_applicable: true
@@ -241,8 +241,8 @@ findings:
     effective_severity: medium
     recommended_action: "Keep the unit test for the claim-before-send logic, and run the two-tab case once in a real browser: two pages of one browser context in the synthetic-check runner, or a manual step in the T072 smoke. Record the result."
     execution_mode: auto
-    status: open
-    outcome: ""
+    status: resolved
+    outcome: "Unit test kept for queue logic (lock and claim paths); a real two-tab flush run in Chromium (real Web Locks) against the mock delivered each of 4 entries exactly once in 3 runs, recorded in evidence/browser-smoke.md (2026-10-02)."
 ```
 
 ### High

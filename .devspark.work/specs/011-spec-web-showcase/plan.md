@@ -444,3 +444,10 @@ Humans are never asked to verify what the automated layers already prove.
 ## Complexity Tracking
 
 No constitution violations require justification. The P1 amendment is handled as a prerequisite, not a waiver.
+
+## Implementation Notes
+
+- **2026-10-02 (T002, S-1):** PASS on 4.4-stable; no version change. The spike found a project-side **Blocking Defect**: the results overlay was 0×0 in the Web build because a hidden full-rect Control never receives layout when the canvas never resizes. Fixed in `scenes/puzzle/puzzle_results.gd` (`PRESET_FULL_RECT` before `show()`); behaviour on desktop is unchanged. Evidence: `evidence/s1-export-spike.md`.
+- **2026-10-02 (T001):** `export_presets.cfg` was listed in `.gitignore`; that line was removed so the Web preset is committed. `web/.gdignore` keeps Godot from importing the site tree. The export helper `web/scripts/export-game.mjs` runs the export into `web/public/game/<build>/` and copies `shell.css`; the build id is passed to the site as `PUBLIC_GAME_BUILD`. The shell's service-worker branch was dropped (no PWA, no cross-origin isolation needed with threads off).
+- **2026-10-02 (T006/T007):** Astro 7.3.5 (current stable), TypeScript 6.0.3 (`@astrojs/check` 0.9.10 does not yet accept TypeScript 7), Vitest 5.0.3, all pinned exactly with `package-lock.json`. `global.css` imports the theme's token files and `base.css` individually rather than `styles.css`, because `styles.css` also pulls `tokens/fonts.css`, whose TTF `@font-face` rules would bundle ~2 MB of TTF into the build; the WOFF2 faces replace exactly that one file. Theme files stay byte-identical. Scripts and styles are never inlined (`inlineStylesheets: 'never'`, `assetsInlineLimit: 0`), and components use no `style` attributes, so the CSP needs no `'unsafe-inline'`.
+- **2026-10-02 (T013):** the publication checker is split into source checks (every `npm run check`) and `--dist` checks (run by `npm run build` after `astro build`), because R-1 on `dist/` and R-4 on built pages need the build output. The theme-literal check scopes to `web/src` (the Godot loader shell in `web/game-shell/` cannot load site tokens and is not site source).
