@@ -300,7 +300,10 @@ workflow Azure generated when the Static Web App was linked to the
 repository, kept under its generated name and job names) downloads Godot
 4.4-stable and its export templates from the official release, verifies both against the release's
 SHA-512 sums, caches them by version, runs both regression launchers,
-validates an editor import on a fresh copy without `.godot`, exports the
+validates an editor import on a fresh copy without `.godot` (one launch to
+build the import cache, then a second that fails on any script error except
+the template's known `opening.gd` "SceneLoader not declared" reports, which
+Godot 4.4 emits on headless Linux even on `main`), exports the
 game, then runs `npm ci`, `npm audit --audit-level=high`, `npm run check`
 and `npm run build` in `web/`.
 
