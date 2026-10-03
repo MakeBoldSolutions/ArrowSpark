@@ -75,3 +75,22 @@ Observations (not conclusions):
 - **Portrait:** the game loaded and was playable in portrait (with Pan mode), with the board fitted to the narrow width; the plan only promised landscape. Recorded as a supplemental observation for the freeze decision, not a scope change.
 - **Mistakes 11 vs 7 arrows removed:** consistent with imprecise taps on small Fit-zoom cells, premature selection, or deliberate blocked taps; cannot be attributed from this data.
 - Still unrecorded: device/Android/Chrome versions, landscape viewport, press-vs-release timing, page scroll/zoom leakage, audio, remaining flow checks.
+
+## Real-device probe reading, landscape (owner screenshot; evidence/pixel7-landscape-probe.png)
+
+| Item | Value |
+|---|---|
+| Viewport | 850 x 411 CSS px, landscape (browser chrome state not recorded; a black strip about 39 CSS px wide is visible at the left edge, possibly a display cutout or system inset; Pixel 7 landscape is 915 CSS px wide) |
+| devicePixelRatio | 2.625 |
+| Canvas | 2231 x 1078 px; canvas>css 0.381 |
+| pointer:fine / hover / maxTouchPoints | no / no / 5 |
+| Browser-level event counts (cumulative session) | touchstart 70, touchend 70, pointerdown 70, mousedown 0, click 0 |
+| Game state in the shot | Remaining 105, Mistakes 17, board zoomed in with the Zoom In button |
+
+Observations (not conclusions):
+- Same behavior as portrait per the owner: one-finger drag and pinch do nothing; Zoom In/Out/Fit/Pan buttons work; Pan mode then drag pans.
+- Browser-level counts again show touch and pointer events but no mouse or click events (R1a partial; engine-level emission still unmeasured).
+- Control sizes (estimated from the screenshot at about 2.35 screenshot px per CSS px): Back about 27 x 17 CSS px, Zoom Out about 43 x 17, Show Me an Open Move about 88 x 17; none reaches 44 high (R6).
+- Chrome of the game (HUD plus toolbar) uses about 57 of 411 CSS px of height (about 14%); raising both rows to 44 CSS px would use about 88 px (about 21%) by simple arithmetic, an estimate to confirm in the prototype, not a finding.
+- Mistakes 17 after 10 arrows removed (portrait session: 11 mistakes after 7): consistent with the earlier reading; cause (precision at small cells, press-time selection or deliberate blocked taps) still not attributable.
+- Still unrecorded: press vs release timing, page scroll/zoom leakage, audio, Android and Chrome versions, Back/Results/Replay/Level Select flow, orientation-change behavior (the owner did switch between portrait and landscape and the game kept running).
