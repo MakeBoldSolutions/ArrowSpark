@@ -315,8 +315,12 @@ build, then again against the deployment itself.
 
 **Deployment.** After the build job, the same workflow uploads `web/dist` to
 Azure Static Web Apps with the official deploy action (secret
-`AZURE_STATIC_WEB_APPS_API_TOKEN`; `PUBLIC_REACTIONS_URL` comes from a
-repository variable): each same-repository pull request gets a preview
+`AZURE_STATIC_WEB_APPS_API_TOKEN_GREEN_BAY_09BDC1010`, the deploy token Azure
+created for this Static Web App; `PUBLIC_REACTIONS_URL` comes from a
+repository variable). This is the only deploy workflow: the build-less
+workflow Azure generates when the app is linked to the repository is
+deleted, because it would upload the repository root instead of
+`web/dist`. Each same-repository pull request gets a preview
 environment, closed when the pull request closes, and `main` deploys
 production at `https://arrow.makeboldspark.com`. The synthetic check runs
 against every deployment; a failure on a preview blocks the pull request. A
