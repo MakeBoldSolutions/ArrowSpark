@@ -12,3 +12,8 @@ Applies only after the matrix freeze, and only to the extent the spike showed ne
 7a. **Capability source (game side).** Touch availability is a plain static query on `game_visual_style.gd`; it only conditions sizing, scaling and help text. Gesture handling reacts to the events that arrive and needs no mode flag.
 8. **Keyboard/gamepad.** Focused-board zoom/fit/pan actions and remapping continue to work (constitution III).
 9. **Out of contract.** Inertia, rotate gestures, double-tap zoom and other gesture features are not part of Spec 012.
+
+> **Superseded in part (2026-10-10).** Owner direction after beta feedback: touch is modeless.
+> Rule 3 no longer holds (a one-finger drag pans with Pan mode off) and the "Pan mode did not
+> take ownership" condition in rule 2 is dropped; the 24 px slop became 32 px. Everything else
+> stands. Implemented in commit c140776; current design: `.knowledge/reference/touch-gestures.md`.

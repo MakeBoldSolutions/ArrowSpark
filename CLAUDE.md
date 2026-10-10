@@ -39,8 +39,13 @@ prefer explicit types where they aid clarity; keep changes small and justify new
 
 - Mobile web beta on the showcase Play page: `web/src/scripts/play-admission.ts` decides from viewport
   and input capabilities (not the user agent) whether the game shows (desktop: fine pointer and
-  at least 960 × 540; touch: landscape and at least 640 × 320), the game itself is unchanged, and
+  at least 960 × 540; touch: landscape and at least 640 × 320), and
   the beta is verified on one real Android phone only (iPhone not yet verified).
+
+- Modeless touch gestures in `PuzzleBoard` (tap acts on release, one-finger drag pans, two-finger
+  pinch zooms, no Pan mode needed) plus `touch-action: none` on the Play page's game stage;
+  design and Godot practices in `.knowledge/reference/touch-gestures.md`. Not yet verified on a
+  real device (pinch failed on the Pixel before this change).
 
 - Puzzle catalog now has purpose groups (Foundations, Puzzle Lab, ArrowSpark Levels) driving
   Level Select sections, group-relative numbering and group-scoped Next Puzzle, plus a

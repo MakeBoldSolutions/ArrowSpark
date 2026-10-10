@@ -267,3 +267,10 @@ Supersedes the sequencing above for what must happen before publishing. Only Blo
 - *Deferred verification / post-release learning:* iPhone Safari verification, additional Android devices, the 20-tap working-zoom protocol, engine-level touch-plus-mouse counts, the full real-device checklist and the Matrix Freeze (T006-T017, T048, T049, T056-T058, T061). The beta claims only what is recorded: one Pixel 7 Pro (Chrome 154 and Edge Beta 155); iPhone is admitted by capability but not verified.
 - *Known limitations (shipped, documented):* pinch zoom does not work; touch targets are small; selection happens on touch-down; fullscreen may be unavailable; some viewport sizes are awkward; landscape is recommended.
 
+## Post-release update (2026-10-10)
+
+The deferred and known-limitation lines above were true at release. Afterward, modeless touch
+(release-time tap, one-finger drag pans without Pan mode, pinch zoom) and `touch-action: none` on
+the Play page's game stage landed in commit c140776, and the pinch-failure hypothesis is that the
+page, not the game, claimed the gesture. Real-device verification, 44 px controls and in-game
+touch help continue in spec 013.

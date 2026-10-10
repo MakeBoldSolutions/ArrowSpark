@@ -865,6 +865,15 @@ A middle press suppresses simultaneous primary presses; drags capture the
 button, motion changes presentation only, release anywhere (including outside
 the board) ends the gesture, and pause, hiding, window/board focus loss, results,
 setup, leaving Pan mode and a motion event reporting no held button cancel it.
+Touch is modeless and handled by the same board from raw `InputEventScreenTouch` /
+`InputEventScreenDrag` events (see `.knowledge/reference/touch-gestures.md`): a touch is
+a pending tap that emits one `cell_clicked` only on release, cancelled by a second finger
+or by movement past a 32 px slop; a one-finger drag past the slop pans (Pan mode not
+required); a two-finger pinch zooms about the midpoint and pans with the fingers; the
+finger left after a pinch is ignored until all lift. Mouse events the engine emulates
+from touch (`DEVICE_ID_EMULATION`) are dropped so one touch cannot select twice. Mouse
+behavior above is unchanged, and touch also routes only through the one transform.
+
 Navigation input is eligible only while navigation is enabled (the controller
 disables it while results cover the board and re-enables it on a new attempt),
 the layout is valid, the board is visible and the tree is not paused; the
