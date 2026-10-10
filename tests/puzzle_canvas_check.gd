@@ -683,6 +683,79 @@ func _check_pan_gestures_never_select() -> void:
 	check(clicked.size() == 1, "selection works again in Select mode after all gestures")
 	await _dispose(puzzle)
 
+func _touch(board: PuzzleBoard, index: int, pressed: bool, position: Vector2) -> void:
+	var event := InputEventScreenTouch.new()
+	event.index = index
+	event.pressed = pressed
+	event.position = position
+	board._gui_input(event)
+
+func _touch_drag(board: PuzzleBoard, index: int, position: Vector2, relative: Vector2) -> void:
+	var event := InputEventScreenDrag.new()
+	event.index = index
+	event.position = position
+	event.relative = relative
+	board._gui_input(event)
+
+func _check_modeless_touch() -> void:
+	var puzzle := await _spawn(LARGE_ID)
+	var board := _board(puzzle)
+	var clicked: Array[Vector2i] = []
+	board.cell_clicked.connect(func(cell: Vector2i): clicked.append(cell))
+	_working_view_at(board, Vector2(8, 4))
+	var start := _cell_center(board, Vector2i(1, 1))
+	check(not board.is_pan_mode(), "touch checks run with Pan mode off")
+
+	_touch(board, 0, true, start)
+	check(clicked.is_empty(), "a touch selects nothing on touch-down")
+	_touch(board, 0, false, start)
+	check(clicked == [Vector2i(1, 1)], "a tap selects exactly once, on release")
+	clicked.clear()
+
+	var center_before := board.view_transform.center_cells
+	_touch(board, 0, true, start)
+	_touch_drag(board, 0, start + Vector2(10, 0), Vector2(10, 0))
+	check(board.view_transform.center_cells == center_before, "movement under the slop does not pan")
+	_touch_drag(board, 0, start + Vector2(80, 40), Vector2(70, 40))
+	_touch(board, 0, false, start + Vector2(80, 40))
+	check(clicked.is_empty(), "a one-finger drag never selects")
+	check(board.view_transform.center_cells != center_before, "a one-finger drag pans without Pan mode")
+
+	var cell_pixels := board.view_transform.cell_pixels
+	var a := board.size / 2.0 + Vector2(-40, 0)
+	var b := board.size / 2.0 + Vector2(40, 0)
+	_touch(board, 0, true, a)
+	_touch(board, 1, true, b)
+	_touch_drag(board, 0, a + Vector2(-30, 0), Vector2(-30, 0))
+	_touch_drag(board, 1, b + Vector2(30, 0), Vector2(30, 0))
+	check(board.view_transform.cell_pixels > cell_pixels, "spreading two fingers zooms in without any mode")
+	var after_zoom := board.view_transform.cell_pixels
+	_touch(board, 1, false, b + Vector2(30, 0))
+	_touch_drag(board, 0, a + Vector2(-90, 20), Vector2(-60, 20))
+	_touch(board, 0, false, a + Vector2(-90, 20))
+	check(clicked.is_empty() and board.view_transform.cell_pixels == after_zoom,
+		"the finger left after a pinch neither selects nor zooms")
+	var fresh := _cell_center(board, Vector2i(1, 1))
+	if Rect2(Vector2.ZERO, board.size).has_point(fresh):
+		_touch(board, 0, true, fresh)
+		_touch(board, 0, false, fresh)
+		check(clicked == [Vector2i(1, 1)], "a fresh tap after a pinch selects normally")
+	else:
+		var visible_cell := board.view_transform.cell_at(board.size / 2.0)
+		_touch(board, 0, true, board.size / 2.0)
+		_touch(board, 0, false, board.size / 2.0)
+		check(clicked == [visible_cell], "a fresh tap after a pinch selects normally")
+	clicked.clear()
+
+	var emulated := InputEventMouseButton.new()
+	emulated.button_index = MOUSE_BUTTON_LEFT
+	emulated.pressed = true
+	emulated.position = start
+	emulated.device = InputEvent.DEVICE_ID_EMULATION
+	board._gui_input(emulated)
+	check(clicked.is_empty(), "touch-emulated mouse events never select")
+	await _dispose(puzzle)
+
 func _check_off_screen_open_move_reveal() -> void:
 	var puzzle := await _spawn(LARGE_ID)
 	var board := _board(puzzle)
@@ -1187,6 +1260,7 @@ func _initialize() -> void:
 	await _check_transformed_hits()
 	await _check_blocked_and_removed_selection_after_navigation()
 	await _check_pan_gestures_never_select()
+	await _check_modeless_touch()
 	await _check_off_screen_open_move_reveal()
 	await _check_completed_open_move_is_noop()
 	await _check_pending_reveal_after_invalid_area()

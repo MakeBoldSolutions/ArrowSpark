@@ -36,6 +36,9 @@
   background: var(--cream);
   border-radius: var(--radius-sm);
   overflow: hidden;
+  /* Chrome intersects touch-action across the iframe boundary; without this the page claims
+     a two-finger pinch as page zoom and the game only receives a cancel. */
+  touch-action: none;
 }
 .game-frame__stage iframe {
   position: absolute;

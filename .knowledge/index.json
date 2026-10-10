@@ -298,6 +298,28 @@
       ]
     },
     {
+      "id": "touch-gestures",
+      "type": "authoritative-reference",
+      "form": "flat-document",
+      "role": "authoritative-reference",
+      "path": ".knowledge/reference/touch-gestures.md",
+      "title": "Touch Gestures in Godot (Web and Mobile)",
+      "appliesTo": [
+        "scenes/puzzle/puzzle_board.gd",
+        "tests/puzzle_canvas_check.gd",
+        "web/src/styles/arrowspark.css",
+        "web/game-shell/shell.css"
+      ],
+      "headings": [
+        "Touch Gestures in Godot (Web and Mobile)",
+        "What the board does",
+        "Godot practices found in research",
+        "Web: the browser can take the gesture first",
+        "Libraries considered and not adopted",
+        "Open verification"
+      ]
+    },
+    {
       "id": "gordian-knot-experiments",
       "type": "authoritative-reference",
       "form": "flat-document",
