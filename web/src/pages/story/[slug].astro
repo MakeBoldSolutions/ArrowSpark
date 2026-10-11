@@ -22,11 +22,14 @@ export async function getStaticPaths() {
 
 const { chapter, previous, next } = Astro.props;
 const { Content } = await render(chapter);
+// The series length counts every chapter, so a draft still being reviewed does not change the denominator.
+const total = (await getCollection('chapters')).length;
 ---
 <ArticleLayout
   title={chapter.data.title}
   description={chapter.data.description}
   part={chapter.data.part}
+  total={total}
   spoiler={chapter.data.spoiler}
   sources={chapter.data.sources}
   previous={previous}

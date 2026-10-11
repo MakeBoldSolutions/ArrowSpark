@@ -1,6 +1,6 @@
 ---
 title: "Now It's Your Turn"
-part: 9
+part: 11
 slug: now-its-your-turn
 description: "The whole clock from first commit to the Reference Knot, what DevSpark learned from a game, the day verification kept creating work after the objective was met, what is still open, and one request: play it, then tell us what you think."
 spoiler: false
@@ -18,14 +18,14 @@ sources:
     url: https://github.com/MakeBoldSolutions/ArrowSpark/commit/72e52ead6ecea34f3bec402d16466d9189f084e7
   - label: "Spec 010 pull request"
     url: https://github.com/MakeBoldSolutions/ArrowSpark/pull/4
-updated: 2026-10-02
+updated: 2026-10-11
 ---
 
 In [the first chapter](/story/finding-the-gap/) I said ArrowSpark had two jobs: be a good puzzle, and be an honest test of a method. This last chapter grades both, and the honest grade is *partial, and here's precisely how.*
 
 ## The whole clock
 
-Here's the entire project on one page, from the first commit to the merge of the Reference Knot. Times are local, from the commit log.
+Here's the entire project on one page, from the first commit to the merge of the Reference Knot. Times are local, from the commit log. The clock stops there, at Spec 010; the two specs after it, the web showcase and the mobile beta, are told in [Part 9](/story/the-game-goes-online/) and [Part 10](/story/a-phone-in-landscape/) and are not counted in these figures.
 
 | Milestone | When | Elapsed since first commit |
 |---|---|---|
@@ -93,7 +93,7 @@ From the notes I kept along the way, here's what the method took from a game:
 
 - **One person has played the Reference Knot to the end, and it's the person who designed it.** No independent player has validated it. That's the most important open fact in this whole series.
 - **Nobody new has tried to find it.** Whether a first-time player opens Level Select and finds the ArrowSpark Levels group without help was deferred to this showcase.
-- **Mobile web is a beta.** The game now plays on phones and tablets in landscape, with taps and the on-screen zoom, Fit and Pan controls. Pinch to zoom is not reliable yet, touch targets are small, and it has been tried on very few real devices. Desktop is still the best way to play.
+- **Mobile web is a beta.** The game now plays on phones and tablets in landscape, with taps and the on-screen zoom, Fit and Pan controls. Pinch to zoom failed on the one real phone I tried; a later change made touch modeless (tap, one-finger drag, pinch) but I have not yet tested it on a phone. Touch targets are small, and it has been tried on very few real devices, none of them an iPhone. Desktop is still the best way to play.
 - **Generation is deliberately last.** The order is: rules, contract, viewport, hand-authored knots, human evidence, *then* maybe a generator that encodes what people actually enjoyed. Otherwise I'd teach a machine to optimize numbers no human cares about.
 - **"Hard but never unsolvable" is a claim I can prove. "Satisfying" is one I can only test on people.**
 

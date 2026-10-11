@@ -8,17 +8,18 @@ interface Props {
   title: string;
   description: string;
   part: number;
+  total: number;
   spoiler: boolean;
   sources: { label: string; url: string }[];
   previous?: { title: string; slug: string } | undefined;
   next?: { title: string; slug: string } | undefined;
 }
-const { title, description, part, spoiler, sources, previous, next } = Astro.props;
+const { title, description, part, total, spoiler, sources, previous, next } = Astro.props;
 ---
 <BaseLayout title={title} description={description} current="story">
   <article class="page article">
     <nav class="crumbs" aria-label="Breadcrumb"><a href="/story/">Read the Story</a><span aria-hidden="true">/</span><span>Part {part}</span></nav>
-    <Eyebrow>Part {part} of 9</Eyebrow>
+    <Eyebrow>Part {part} of {total}</Eyebrow>
     <h1 class="article__title">{title}</h1>
     <p class="article__description">{description}</p>
     {spoiler && <SpoilerGate />}

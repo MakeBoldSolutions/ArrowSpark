@@ -1,0 +1,75 @@
+---
+title: "The Game Goes Online"
+part: 9
+slug: the-game-goes-online
+description: "Spec 011 put ArrowSpark in a browser: a playable Web build, this story site and an anonymous reactions form, specified, gated and merged in thirteen hours, with the list of what had not yet been run written into the pull request."
+spoiler: false
+status: draft
+sources:
+  - label: "Spec 011 specified and planned"
+    url: https://github.com/MakeBoldSolutions/ArrowSpark/commit/546e6285db9d9e1e044544e864ad3b47ec4138ef
+  - label: "Constitution amended to 2.1.0"
+    url: https://github.com/MakeBoldSolutions/ArrowSpark/commit/96037a39fb5e1f05fff1275378da0fb297ea2ce2
+  - label: "Web export, content version and completion hand-off"
+    url: https://github.com/MakeBoldSolutions/ArrowSpark/commit/b69def888b355bbd60750b2c0b3dd9fba18ca348
+  - label: "The showcase site and reactions client"
+    url: https://github.com/MakeBoldSolutions/ArrowSpark/commit/575131c988dd16d297142feb61e03f441f68c81d
+  - label: "One build-and-deploy pipeline"
+    url: https://github.com/MakeBoldSolutions/ArrowSpark/commit/545f5852a8d11ffc9e5293c6aeaf226f50411b30
+  - label: "CI tolerates Godot 4.4's first-import parse noise"
+    url: https://github.com/MakeBoldSolutions/ArrowSpark/commit/bdb53523bd11a9d41195a2040482d019dba99f3f
+  - label: "Spec 011 pull request"
+    url: https://github.com/MakeBoldSolutions/ArrowSpark/pull/5
+updated: 2026-10-11
+---
+
+By the end of [Part 8](/story/the-reference-knot/) the project had a good level and one tester. The central risk, written down more than once, was that the only person who had ever played it was the person who designed it. The fix for that is a link anyone can open. This part is about building that link.
+
+## What Spec 011 had to do
+
+The spec asked for two halves of equal weight. **Try the Game** is the Godot project exported to the Web and running in the page. **Built with DevSpark** is this story, with the commits behind its claims. Visitors can leave an optional, anonymous reaction. There are no accounts, no cookies and no analytics, and the game itself never calls any API; the page does the talking.
+
+Nothing in that list changes a rule, a score or a puzzle. The interesting parts were all at the edges: an engine target the project had never exported to, a site with its own build, and a privacy promise that had to be true in the code, not just in the copy.
+
+## The same process, a longer paper trail
+
+The first commit of Spec 011 landed at 09:08 on October 2nd. The spec, plan and clarifications were committed through the morning, and the analyze and critic gates ran in the afternoon. The final plan covered **33 functional requirements and 14 success criteria**, and the task list was consolidated from 90 tasks to **80**. The third analyze run found full coverage and no constitution conflicts. The critic's verdict was *warn, proceed*, with three new risks it had found in the remediation itself:
+
+- a strict Content-Security-Policy (`default-src 'self'`) would also block the inline styles and scripts that Astro and the Godot shell emit, unless the build forbade or hashed them;
+- headless WebGL in CI could make a scheduled load check report outages that were not real;
+- a two-tab test of the reaction queue under a simulated DOM might prove only the simulation.
+
+The site was built the other way round from the obvious approach. Styles and scripts ship as files, nothing uses a `style` attribute, and syntax highlighting is off because highlighters emit styles the policy would block. The strict policy is not bolted on at the end; the code was written to fit it.
+
+## The gate that came first
+
+The most important task was not a feature. Gate **S-1** was the first implementation task: install the Godot 4.4 editor and export templates from the official release, verify their SHA-512 sums, export a Web build without threads, serve it locally, and play the Reference Knot through to the results screen. If that failed with a real engine defect, the plan said to stop. A version change would become its own prerequisite, with its own regression run and a constitution update, and no game or Web work would merge on an unconfirmed engine.
+
+It is a small idea with a large effect. The riskiest assumption in the plan, that the project's pinned engine could export and run in a browser at all, was tested before anything depended on it. It passed.
+
+## What it cost to merge
+
+The implementation arrived as a handful of large commits at 20:07: the constitution amendment to 2.1.0 so that a Web target is allowed, the game-side change (a Web export preset, a puzzle content version and a completion hand-off to the page), and the site. The pull request ended at 248 files and roughly 20,500 added lines, mostly the site, its tests and the vendored theme. The merge was at 22:17, **13 hours and 9 minutes** after the spec's first commit.
+
+The remaining two hours were the unglamorous kind. The repository's `main` already carried a deployment workflow generated by Azure that published the repository root unbuilt under a different secret name than the project's own. The branch first dropped the generated file, then reversed course and made it the single build-and-deploy pipeline, so the site is built and its checks run before anything is published. A separate commit made CI tolerate parse noise that Godot 4.4 prints on a first headless import on Linux. A related problem is still open: the first-import validation step in CI occasionally crashes or prints parse noise, and passes on a re-run. It is recorded as deferred work, not fixed.
+
+## What the pull request said it had not done
+
+I want to point at one section of the pull request, because it is the habit this whole series is trying to show. Under *Verification*, after the list of what ran, was a line beginning **Not yet run**: the browser smoke test on Chromium, Firefox and Safari, and the load-time measurement on the preview with production headers. Under *Notes*, the PR said it was not ready to merge until the preview smoke test, an owner review of the content and the production publish were done, and that this closing chapter would stay a draft.
+
+What did run: both Godot regression gates and editor validation with zero failures, a Web export whose Reference Knot clears in headless Chromium, `astro check` with zero errors, the Vitest suite, and browser tests of the reaction queue. That queue holds at most five unsent reactions, drops each after seven days, retries once per page load, and in a two-tab test sent each reaction exactly once in three runs out of three.
+
+## What this part does not claim
+
+- **It does not claim anyone has played it.** The site exists, but no independent player has been recorded, so the one-tester risk is unchanged. A link is a way to get evidence, not evidence.
+- **It does not claim the site works in every browser.** The cross-browser smoke test was on the not-yet-run list at merge.
+- **It does not report how fast it loads.** That measurement was also on the list.
+
+## What it taught us
+
+1. **Test the riskiest assumption first, and write down what stopping looks like.** S-1 did both.
+2. **Write the security policy before the code, not after.** The strict policy shaped how every page was built, so it never had to be retrofitted.
+3. **A framework's generated files are still your files.** Two pipelines for one site is a problem you find by reading `main`, not by running your own branch.
+4. **State what you did not run, in the PR.** It costs one line and it is the difference between a status report and a claim.
+
+The game was now online and playable on a desktop. The next question arrived within hours: what does a visitor on a phone see?
