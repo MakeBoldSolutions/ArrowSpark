@@ -124,10 +124,12 @@ narrow screens.
   works in the page's full-screen mode, and gestures inside the game do not
   scroll or zoom the page (`touch-action: none` on the game shell). **iPhone
   Safari has not been verified on a real device** and is admitted by the same
-  capability rule, not claimed as supported. Known limitations: pinch to zoom
-  does not work, one-finger drag moves the view only in Pan mode, controls are
-  small touch targets, selection happens on touch-down, and fullscreen may be
-  unavailable (the button is hidden when the browser refuses it). On touch
+  capability rule, not claimed as supported. Known limitations: controls are
+  small touch targets and fullscreen may be unavailable (the button is hidden
+  when the browser refuses it). Modeless touch (tap on release, one-finger drag
+  pans, pinch zooms; see `.knowledge/reference/touch-gestures.md`) is
+  implemented after this beta record and not yet verified on a real device;
+  before it, pinch did not work on the Pixel. On touch
   screens in landscape the frame is sized to fit the visible height and the
   site header scrolls away instead of covering the toolbar.
 

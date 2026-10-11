@@ -36,6 +36,15 @@ var _navigation_enabled: bool = true
 var _pan_mode: bool = false
 var _drag_button: int = 0 # 0 while no navigation drag is captured
 var _suppress_primary_until_release: bool = false
+# Touch is modeless: a tap acts on release, a one-finger drag pans, a two-finger pinch zooms.
+const _TOUCH_SLOP_PIXELS := 32.0
+var _touches: Dictionary = {} # touch index -> board-local position
+var _tap_pending: bool = false
+var _touch_panning: bool = false
+var _touch_locked: bool = false # a pinch ended; ignore the leftover finger until all lift
+var _tap_start := Vector2.ZERO
+var _pinch_distance: float = 0.0
+var _pinch_center := Vector2.ZERO
 
 func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
@@ -279,6 +288,10 @@ func _navigation_eligible() -> bool:
 func _cancel_drag() -> void:
 	_drag_button = 0
 	_suppress_primary_until_release = false
+	_touches.clear()
+	_tap_pending = false
+	_touch_panning = false
+	_touch_locked = false
 
 # --- Input --------------------------------------------------------------------
 
@@ -290,12 +303,104 @@ func _cancel_drag() -> void:
 ## zoom, drags, and the focused canvas actions only run while navigation is
 ## eligible.
 func _gui_input(event: InputEvent) -> void:
+	# Mouse events the engine synthesizes from touch never drive the board; real touch is
+	# handled below, so one touch can neither select twice nor select before release.
+	if event is InputEventMouse and event.device == InputEvent.DEVICE_ID_EMULATION:
+		accept_event()
+		return
+	if event is InputEventScreenTouch:
+		_handle_touch(event)
+		return
+	if event is InputEventScreenDrag:
+		_handle_touch_drag(event)
+		return
 	if event is InputEventMouseMotion:
 		_handle_motion(event)
 	elif event is InputEventMouseButton:
 		_handle_button(event)
 	elif _is_canvas_action_event(event):
 		_handle_canvas_action(event)
+
+## A touch is a pending tap. It selects only on release, and only if no second finger
+## appeared, it stayed under the slop, and it did not turn into a pan.
+func _handle_touch(event: InputEventScreenTouch) -> void:
+	if event.pressed:
+		_touches[event.index] = event.position
+		if _touches.size() == 1:
+			_tap_start = event.position
+			_tap_pending = true
+			_touch_panning = false
+			_touch_locked = false
+			clear_hover()
+			grab_focus()
+		else:
+			_tap_pending = false
+			_touch_panning = false
+			_touch_locked = true
+			_begin_pinch()
+		accept_event()
+		return
+	var was_tap: bool = _touches.size() == 1 and _tap_pending and not _touch_locked
+	_touches.erase(event.index)
+	if was_tap:
+		var cell := _cell_from_local(event.position)
+		if cell.x >= 0:
+			cell_clicked.emit(cell)
+	_tap_pending = false
+	_touch_panning = false
+	if _touches.size() == 2:
+		_begin_pinch()
+	elif _touches.is_empty():
+		_touch_locked = false
+	accept_event()
+
+func _handle_touch_drag(event: InputEventScreenDrag) -> void:
+	if not _touches.has(event.index):
+		return
+	var previous: Vector2 = _touches[event.index]
+	_touches[event.index] = event.position
+	if _touches.size() == 1 and not _touch_locked:
+		_drag_single_touch(event.position, previous)
+	elif _touches.size() == 2:
+		_update_pinch()
+	accept_event()
+
+func _drag_single_touch(position: Vector2, previous: Vector2) -> void:
+	if not _touch_panning:
+		if position.distance_to(_tap_start) <= _TOUCH_SLOP_PIXELS:
+			return
+		# Crossing the slop turns the touch into a pan and cancels the tap. Catch up from
+		# the touch-down point so the board does not jump or lose the first movement.
+		_tap_pending = false
+		_touch_panning = true
+		previous = _tap_start
+	if _navigation_eligible() and view_transform.pan_pixels(position - previous):
+		_apply_view_change()
+
+func _pinch_points() -> Array:
+	var keys := _touches.keys()
+	keys.sort()
+	return [_touches[keys[0]], _touches[keys[1]]]
+
+func _begin_pinch() -> void:
+	if _touches.size() != 2:
+		return
+	var points := _pinch_points()
+	_pinch_distance = (points[0] as Vector2).distance_to(points[1])
+	_pinch_center = ((points[0] as Vector2) + (points[1] as Vector2)) / 2.0
+
+func _update_pinch() -> void:
+	if not _navigation_eligible() or _pinch_distance <= 1.0:
+		return
+	var points := _pinch_points()
+	var distance := (points[0] as Vector2).distance_to(points[1])
+	var center := ((points[0] as Vector2) + (points[1] as Vector2)) / 2.0
+	var changed := view_transform.zoom_at(distance / _pinch_distance, center)
+	changed = view_transform.pan_pixels(center - _pinch_center) or changed
+	_pinch_distance = distance
+	_pinch_center = center
+	if changed:
+		_apply_view_change()
 
 func _handle_motion(event: InputEventMouseMotion) -> void:
 	if _drag_button == 0:
