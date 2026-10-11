@@ -1,6 +1,6 @@
 # ArrowSpark Development Documentation
 
-**Snapshot date:** 2026-10-01 (updated: Specs 001--010 complete, next spec not yet specified)\
+**Snapshot date:** 2026-10-11 (updated: Specs 001--012 complete, next spec not yet specified)\
 **Project:** ArrowSpark\
 **Family:** A Make Bold Spark Game\
 **Creator:** Make Bold Solutions\
@@ -82,6 +82,7 @@ The next architectural direction is:
 -   [14-showcase-story-plan.md](14-showcase-story-plan.md) --- plan to
     merge this folder and the `arrowspark-series/` articles into one
     story for the game's showcase website.
+-   [15-reactions-api-requirements.md](15-reactions-api-requirements.md) --- requirements for the makeboldspark.com reactions API that the showcase depends on.
 14. [source-spec-007.md](source-spec-007.md) --- captured Spec 007
     source document supplied during this development discussion.
 15. [source-analyze-007.md](source-analyze-007.md) --- captured Analyze
@@ -127,7 +128,11 @@ navigable through zoom, pan, and Fit Puzzle. Specs 009 and 010 then
 authored experimental knots, grouped the catalog by purpose and composed
 the Reference Knot.
 
-This documentation snapshot represents the state of `main` at `6e60e11`
-on 2026-10-01, after Spec 010 merged. Specs 001--010 are complete and
-there is no active feature branch. See [08-current-state.md](08-current-state.md)
+Spec 011 then put the game on the web (playable build, story site, anonymous
+reactions) and Spec 012 made it a mobile web beta with modeless touch.
+
+This documentation snapshot represents the state of `main` at `dece281`
+on 2026-10-11, after Spec 012 merged. Specs 001--012 are complete and
+there is no active feature branch. Modeless touch and iPhone are unverified on
+real devices, and no independent player has been recorded yet. See [08-current-state.md](08-current-state.md)
 for the 22-puzzle catalog, evidence quality and open limitations.

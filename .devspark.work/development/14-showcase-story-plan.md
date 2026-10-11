@@ -1,7 +1,7 @@
 # Showcase Story Plan: One Story for the ArrowSpark Website
 
 **Written:** 2026-10-01
-**Status:** in progress. 2026-10-01: section 5 facts applied to `arrowspark-series/00-series-outline.md`; Chapter 8 drafted as `arrowspark-series/08-the-reference-knot.md`. Remaining: split Article 7, write the closing chapter, light pass on Articles 1-7.
+**Status (2026-10-11):** the site shipped (Spec 011). It has eleven chapters: parts 1--8 published, parts 9 (Spec 011), 10 (Spec 012) and 11 (the closing chapter) drafted and awaiting owner review. Earlier status: in progress. 2026-10-01: section 5 facts applied to `arrowspark-series/00-series-outline.md`; Chapter 8 drafted as `arrowspark-series/08-the-reference-knot.md`. Remaining: split Article 7, write the closing chapter, light pass on Articles 1-7.
 **Goal:** merge the development history (this folder) and the article series (`arrowspark-series/`) into one story. That story becomes the content of the website that hosts the game for evaluation, and it shows what DevSpark development buys.
 
 ## 1. What exists today

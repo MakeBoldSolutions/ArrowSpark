@@ -385,21 +385,61 @@ SC-009 (fresh-player discovery of the ArrowSpark Levels group) **not
 performed** and deferred; desktop smoke test not run as a manual pass.
 PR review went three revisions to approve with no blocking findings.
 
-## 16. Current Moment
+## 16. Spec 011 --- Web Showcase
 
-At this documentation snapshot (2026-10-01, `main` at `6e60e11`, clean tree,
-91 commits):
+Merged as PR #5 on 2026-10-03 (UTC). The game gained a Web export, a puzzle
+content version and a completion hand-off to the host page. A static site in
+`web/` (Astro, strict TypeScript, no server code) hosts the playable game at
+`https://arrow.makeboldspark.com`, tells the build story in chapters, and
+carries a reactions client for anonymous feedback to a separate API. The
+constitution moved to 2.1.0 to allow the Web target. The deployment pipeline is
+a single Azure Static Web Apps workflow. A dependency audit runs in CI with a
+reasoned advisory allowlist. See `.knowledge/architecture/web-showcase.md`.
 
-- **Specs 001--010 are all complete and merged.** There is no active feature
+## 17. Spec 012 --- Mobile Web Play
+
+The plan was a real-device spike followed by touch controls sized to 44 px, but
+the work was cut to a beta by owner decision.
+
+- **PR #6, merged 2026-10-03 (UTC): mobile web beta.** The Play page decides
+  admission from viewport and input capability, not the user agent (desktop:
+  fine pointer and at least 960 x 540; touch: landscape and at least 640 x
+  320). The finding was that the engine already turns touch into the existing
+  click path, so a usable beta needed an admission change, not new input code.
+  Portrait shows a rotate message. The constitution moved to 2.2.0.
+- **PR #8, merged 2026-10-11 (UTC): modeless touch.** Pinch failed on a real
+  Pixel 7 Pro in the beta, so `PuzzleBoard` now handles touch directly: a tap
+  acts on release, one-finger drag pans (no Pan mode needed) and two-finger
+  pinch zooms. The Play stage also sets `touch-action: none`; the leading
+  explanation for the pinch failure is that Chrome combines `touch-action`
+  across the iframe boundary. That is a hypothesis. Design and Godot practices
+  are in `.knowledge/reference/touch-gestures.md`.
+
+Verified: one real Android phone (Pixel 7 Pro), emulated phones and tablets,
+the site check and build, and both Godot regression gates. **Not verified:**
+the modeless touch change on any real device, and any iPhone. Closed out as a
+public beta with documented limitations; 44 px touch targets, touch scaling
+and touch-appropriate in-game help are deferred.
+
+## 18. Current Moment
+
+At this documentation snapshot (2026-10-11, `main` at `dece281`, clean tree,
+140 commits):
+
+- **Specs 001--012 are complete and merged.** There is no active feature
   branch.
 - The catalog has **22 puzzles in three groups**.
-- Both regression gates and Godot validation were green at PR #4 review.
-- The next spec is expected to be a **Web Showcase & Playtest**, which also
-  inherits the deferred fresh-player validation protocol
-  (`.devspark.work/specs/010-spec-reference-puzzle/deferred-to-next-spec.md`).
-- A seven-part article series about the project lives in
-  `.devspark.work/development/arrowspark-series/` (parts 5--7, added 2026-09-30, cover
-  playtest findings, scoring and knot experiments).
+- The game is playable in a browser on desktop and, as a beta, on touch screens
+  in landscape. Both regression gates and Godot validation were green on
+  2026-10-11.
+- The deferred fresh-player validation protocol
+  (`.devspark.work/specs/010-spec-reference-puzzle/deferred-to-next-spec.md`)
+  is still not performed: no independent player has been recorded.
+- The article series lives on the site as eleven chapters
+  (`web/src/content/chapters/`): parts 1--8 are published; parts 9 (Spec 011),
+  10 (Spec 012) and 11 (the closing chapter) are drafts awaiting owner review.
+  The copies in `.devspark.work/development/arrowspark-series/` are the earlier
+  drafts of parts 1--8 and were not updated.
 
 The project has moved through four phases:
 
@@ -413,7 +453,10 @@ Specs 007 and 008.
 
 **Phase 4 --- Author content and find what a good knot is.** Specs 009 and 010.
 
+**Phase 5 --- Put it in front of people.** Specs 011 and 012: the web
+showcase and the mobile web beta.
+
 The eventual goal is still not simply "more levels." It is to understand what
 makes a knot satisfying enough that, only then, procedural generation might be
-worth attempting. The evidence base is still one tester, so the next phase has
-to bring in other people.
+worth attempting. The evidence base is still one tester; the site now exists to
+bring in other people, and that is the next thing to learn.

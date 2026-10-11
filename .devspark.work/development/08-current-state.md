@@ -1,4 +1,4 @@
-# Current State --- 2026-10-01
+# Current State --- 2026-10-11
 
 ## Summary
 
@@ -8,18 +8,20 @@
 | 008 Large Zoomable Puzzle Canvas | **Complete.** Merged as PR #1 (`faa4575`). |
 | 009 Gordian Knot Experiments | **Complete.** Merged as PR #2 (`8a00239`). |
 | 010 Reference Puzzle and Level Groups | **Complete, with documented limitations.** Merged as PR #4 (`6e60e11`). |
-| Next | **Not yet specified.** Expected: Web Showcase & Playtest. See [13-roadmap-008-010.md](13-roadmap-008-010.md). |
+| 011 Web Showcase | **Complete.** Merged as PR #5 (2026-10-03). Playable Web build, story site and reactions client at arrow.makeboldspark.com. |
+| 012 Mobile Web Play | **Complete as a public beta, with documented limitations.** PR #6 (2026-10-03) admitted touch landscape screens; PR #8 (2026-10-11) made touch modeless. |
+| Next | **Not yet specified.** Candidates: 44 px touch targets and in-game touch help, fresh-player validation, anonymous feedback review. See [13-roadmap-008-010.md](13-roadmap-008-010.md). |
 
 ## Repository State
 
-- Branch `main` at `6e60e11`, working tree clean, 91 commits. No active feature
+- Branch `main` at `dece281`, working tree clean, 140 commits. No active feature
   branch.
 - Repository: https://github.com/MakeBoldSolutions/ArrowSpark (local directory
-  `ArrowGame`). Four merged PRs: #1 (008), #2 (009), #3 (audit follow-up), #4
-  (010).
+  `ArrowGame`). Merged PRs: #1 (008), #2 (009), #3 (audit follow-up), #4
+  (010), #5 (011), #6 (012 beta), #8 (012 modeless touch).
 - Stack: Godot 4.4 target, GDScript, Maaack's Game Template. Python 3.11+
   launchers. Validation has also been run on Godot 4.7.2.
-- Constitution 2.0.1. BSW.DevSpark 7.7.1 at the last audit.
+- Constitution 2.2.0. BSW.DevSpark 7.8.0.
 
 ## Catalog: 22 puzzles in three groups
 
@@ -68,7 +70,8 @@ Next Puzzle stays within the group and never wraps.
   keyboard and gamepad, live scene changes, frame time).
 - Spec 008's gamepad hardware check and some other scenarios were accepted as
   outstanding by its verify gate.
-- Touch input does not exist. Deferred from 008, now due with the Web build.
+- **Touch is a beta.** Tap (on release), one-finger pan and pinch zoom exist but the modeless touch change (PR #8) has not been tried on a real device; pinch failed on the one real phone (Pixel 7 Pro) before it. iPhone Safari is admitted by capability but never verified. Controls are about 17 CSS px tall on the Pixel (44 px targets deferred), and in-game help still shows desktop wording.
+- Flaky Godot first-import validation in CI (intermittent, passes on re-run); no work item yet.
 - Saved progress is out of scope by design (see the session-memory boundary in
   README.md).
 - The Reference Knot's order-independence check samples every sixth branching
@@ -93,17 +96,17 @@ PR #4 re-review (2026-10-01).
 
 ## Durable knowledge (`.knowledge/`)
 
-Architecture: `arrow-puzzle`, `game-visual-system`, `save-progression`.
+Architecture: `arrow-puzzle`, `game-visual-system`, `save-progression`, `web-showcase`.
 Product: `branding`, `gameplay-contract`. Reference: `gordian-knot-experiments`,
-`reference-puzzle-design-report`. Governance: `constitution`.
+`reference-puzzle-design-report`, `touch-gestures`. Governance: `constitution`.
 
 ## Immediate Next Steps
 
-1. Run the post-010 checkpoint in [13-roadmap-008-010.md](13-roadmap-008-010.md).
-2. Specify the Web Showcase & Playtest spec, carrying the SC-009 protocol and
-   touch input with it.
-3. Recruit genuinely new players through that channel. The project's central
-   risk is a one-person evidence base.
+1. Test the modeless touch change on a real phone (pinch is the open question).
+2. Run the SC-009 fresh-player protocol with genuinely new players through the
+   live site. The project's central risk is still a one-person evidence base.
+3. Decide the next spec: touch ergonomics (44 px targets, in-game help) or
+   something the first outside players surface.
 
 ## Product Direction
 

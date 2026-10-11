@@ -8,8 +8,10 @@ Do not add systems merely because successful games often contain them.
 
 Each major step should remove one constraint or answer one uncertainty.
 
-> **Status note (2026-10-01):** Specs 001--010 are complete. The next spec is
-> expected to be a Web Showcase & Playtest. (2026-09-28 note: Specs 001--007
+> **Status note (2026-10-11):** Specs 001--012 are complete. The Web Showcase (011)
+> and the mobile web beta (012) have shipped; the next spec is not yet specified.
+> (2026-10-01 note: Specs 001--010 were complete and the next spec was
+> expected to be a Web Showcase & Playtest.) (2026-09-28 note: Specs 001--007
 > were complete and Spec 008 was in progress.) The detailed, living plan for Specs 008--010 is
 > [13-roadmap-008-010.md](13-roadmap-008-010.md); it supersedes this file where
 > they differ. This file remains the longer-range view.
@@ -46,10 +48,19 @@ Not in the original roadmap. Added purpose groups, accordion Level Select and a
 hand-composed Reference Knot. Complete with documented limitations; merged as
 PR #4 on 2026-10-01. See [08-current-state.md](08-current-state.md).
 
-## Now --- Web Showcase & Playtest (not yet specified)
+## Done --- Spec 011: Web Showcase and Spec 012: Mobile Web Play
 
-Get outside players, and with them the deferred fresh-player validation. See
-[13-roadmap-008-010.md](13-roadmap-008-010.md#checkpoint-after-spec-010).
+Spec 011 shipped the playable Web build, story site and anonymous reactions
+client (PR #5, 2026-10-03). Spec 012 made it a mobile web beta: PR #6
+(2026-10-03) admitted touch landscape screens, and PR #8 (2026-10-11) made touch
+modeless (tap, one-finger pan, pinch). Modeless touch and iPhone are unverified
+on real devices. See [08-current-state.md](08-current-state.md).
+
+## Now --- Get outside players (not yet specified)
+
+The site exists to bring in outside players and with them the deferred
+fresh-player validation (the SC-009 protocol). Touch ergonomics (44 px targets,
+in-game touch help) are the known deferred product work.
 
 ### Original Spec 009 plan (historical)
 
@@ -111,7 +122,7 @@ Purpose:
 
 Web should not become a large platform project.
 
-Initial acceptance: - modern desktop/mobile browser; - play catalog; -
+Initial acceptance (met for desktop; mobile web is a beta): - modern desktop/mobile browser; - play catalog; -
 zoom/pan where supported; - Open Move; - results; - session scoring; -
 no install; - no login.
 
