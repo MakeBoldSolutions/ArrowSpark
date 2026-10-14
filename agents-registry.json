@@ -9,10 +9,7 @@
       "requires_cli": false,
       "install_url": null,
       "release": {
-        "commands_dir": ".github/agents",
-        "extension": "agent.md",
-        "arg_format": "$ARGUMENTS",
-        "prompt_dir": ".github/prompts",
+        "skills_dir": ".github/skills",
         "support_files": [
           {
             "source": "templates/vscode-settings.json",

@@ -60,8 +60,11 @@
     },
     "release": {
       "type": "object",
-      "required": ["commands_dir", "extension", "arg_format"],
       "additionalProperties": false,
+      "oneOf": [
+        { "required": ["commands_dir", "extension", "arg_format"] },
+        { "required": ["skills_dir"] }
+      ],
       "properties": {
         "commands_dir": {
           "type": "string",
@@ -75,9 +78,10 @@
           "type": "string",
           "minLength": 1
         },
-        "prompt_dir": {
+        "skills_dir": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "Directory that receives native Agent Skills (devspark-<command>/SKILL.md). Mutually exclusive with the entry-point form."
         },
         "support_files": {
           "type": "array",

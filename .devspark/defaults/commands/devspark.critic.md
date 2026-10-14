@@ -3,15 +3,15 @@ source: "BSW.DevSpark — © 2026 Baylor Scott & White Health. Source: https://b
 description: Challenge whether an internally sound plan is wrong about the real system it will run in — unimplementable conditions, absent operational controls, and unexamined assumptions about code, dependencies, and failure.
 handoffs:
   - label: Fix Spec Showstoppers
-    agent: devspark.specify
+    agent: devspark-specify
     prompt: Revise spec to resolve vague requirements, missing edge cases, or undefined trust boundaries
     send: true
   - label: Fix Critical Issues
-    agent: devspark.plan
+    agent: devspark-plan
     prompt: Revise plan to address critical architectural risks
     send: true
   - label: Update Tasks
-    agent: devspark.tasks
+    agent: devspark-tasks
     prompt: Regenerate tasks with missing operational items
     send: true
 scripts:
@@ -29,13 +29,13 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Overview
 
-Load and obey the shared preamble contract at `/.devspark/templates/command-preamble-contract.md` (installed repos) or `templates/command-preamble-contract.md` (source repos) before step 1.
+Load and obey the shared preamble contract core at `/.devspark/templates/command-preamble-contract.md` (installed repos) or `templates/command-preamble-contract.md` (source repos) before step 1. Preamble modules: `finding-fix`, `convergence`, `provenance`.
 
 Load and obey the shared assurance contract at `/.devspark/templates/assurance-contract.md` (installed repos) or `templates/assurance-contract.md` (source repos). It is the canonical source for lane ownership, deduplication, finding quality, verdict derivation, bounded passes, and applicability. This command implements that contract; it does not restate it.
 
 > **Critic exists to find the places where a coherent plan is wrong about the system it will run in — unimplementable conditions, absent operational controls, and unexamined assumptions about code, dependencies, and failure — early enough that the plan can still change cheaply.**
 
-Critic is the **open-world** half of planning assurance. `/devspark.analyze` establishes that the artifacts are internally sound; Critic challenges that internally sound plan against repository and operating reality. The two are complementary, not two names for reviewing the work.
+Critic is the **open-world** half of planning assurance. `/devspark-analyze` establishes that the artifacts are internally sound; Critic challenges that internally sound plan against repository and operating reality. The two are complementary, not two names for reviewing the work.
 
 Critic **owns**: requirements resting on false assumptions about existing code; conditions the baseline can never produce; behavior removed as "redundant" that is a sole required path; hidden coupling to existing consumers; missing rollback/disable/kill-switch posture; missing observability needed to operate the proposed behavior; unexamined external-dependency behavior; persistent-data limits; state-machine failure modes; compatibility assumptions; concurrency and async hazards visible from the design; NFR achievability; `context_resolved` **sufficiency**; architectural assumptions unsupported by current source.
 
@@ -43,15 +43,15 @@ Critic does **NOT** own, and MUST NOT emit normal findings for (assurance-contra
 
 | Not Critic's | Owner |
 | ------------ | ----- |
-| Artifact consistency, duplication, terminology drift | `/devspark.analyze` |
-| Requirement ↔ task coverage, traceability, task bookkeeping and completion state | `/devspark.analyze` |
-| Missing task anchors; tasks citing requirement ids that do not exist | `/devspark.analyze` |
-| Requirement *wording* precision (vague adjectives, placeholders) | `/devspark.analyze` |
-| Rationale Summary completeness, spec↔plan Core-Problem drift | `/devspark.analyze` |
-| Documentation drift | `/devspark.analyze` |
-| `context_resolved` entries that simply fail to resolve (**validity**) | `/devspark.analyze` |
-| Implementation correctness, runtime proof | `/devspark.verify` |
-| Diff review, post-implementation code quality | `/devspark.pr-review` |
+| Artifact consistency, duplication, terminology drift | `/devspark-analyze` |
+| Requirement ↔ task coverage, traceability, task bookkeeping and completion state | `/devspark-analyze` |
+| Missing task anchors; tasks citing requirement ids that do not exist | `/devspark-analyze` |
+| Requirement *wording* precision (vague adjectives, placeholders) | `/devspark-analyze` |
+| Rationale Summary completeness, spec↔plan Core-Problem drift | `/devspark-analyze` |
+| Documentation drift | `/devspark-analyze` |
+| `context_resolved` entries that simply fail to resolve (**validity**) | `/devspark-analyze` |
+| Implementation correctness, runtime proof | `/devspark-verify` |
+| Diff review, post-implementation code quality | `/devspark-pr-review` |
 
 Noticing one of these anyway is normal. Route it under `routed_findings:` per assurance-contract.md §4.2 — never as a Critic risk finding.
 
@@ -76,6 +76,8 @@ Read YAML frontmatter from `spec.md` (or the quickfix record when `FEATURE_SPEC`
 Multi-app scope and script resolution are defined by the shared preamble contract.
 
 ### 1. Initialize Analysis Context
+
+**Planning Review hand-off.** When invoked by `/devspark-planning-review`, the invocation carries an already-resolved `FEATURE_DIR`, a `DEVSPARK_FEATURE` value, and a `PLANNING_REVIEW_RUN_ID`. Use them: do not re-resolve the feature from the branch name, run any script with `DEVSPARK_FEATURE` set to the handed-off value, and stamp the run id into the gate header as `planning_review.run_id`. Run the script below only when no hand-off was given.
 
 Run `{SCRIPT}` once from repo root, parse JSON for FEATURE_DIR and AVAILABLE_DOCS. Derive:
 
@@ -113,7 +115,7 @@ Read the spec/plan/tasks and the touched surface, then test for these five shape
 
 At least one signal → `applicable: true`. None → `applicable: false`; typical negative controls are a pure symbol rename, a local mechanical refactor with no behavioral surface, a documentation-only change, or formatting.
 
-`applicable: false` does **not** mean Critic refuses to run. When the developer invoked `/devspark.critic` explicitly, record `invoked: explicit`, state in one line that no change-shape signal was detected, and continue with a correspondingly narrow review rather than a full adversarial sweep.
+`applicable: false` does **not** mean Critic refuses to run. When the developer invoked `/devspark-critic` explicitly, record `invoked: explicit`, state in one line that no change-shape signal was detected, and continue with a correspondingly narrow review rather than a full adversarial sweep.
 
 Record the decision in the gate header exactly as assurance-contract.md §11.3 specifies — `applicable`, `signals`, `invoked`, and `reason` when not applicable. One line of reason; applicability is a routing decision, not another risk essay.
 
@@ -193,12 +195,14 @@ Extract failure-prone elements (skip sections whose artifact is absent):
 
 **plan.md**: bleeding-edge stack choices; over/under-engineering; persistent-storage access patterns without performance analysis; safe-release strategy gaps; testing strategy gaps.
 
-**tasks.md**: hidden contention in parallel tasks; optimistic estimates; missing operational tasks (monitoring, alerting, backups, DR, runbooks). Task *sequencing and dependency validity* belongs to `/devspark.analyze` — route it, do not emit it.
+**tasks.md**: hidden contention in parallel tasks; optimistic estimates; missing operational tasks (monitoring, alerting, backups, DR, runbooks). Task *sequencing and dependency validity* belongs to `/devspark-analyze` — route it, do not emit it.
 
 **Current knowledge and tests**: identify affected `.knowledge/` nodes through `appliesTo` and verify
 the plan includes changes to current truth and proportionate executable coverage. Treat omitted
 knowledge updates for changed behavior as HIGH and omitted tests according to runtime risk. Never
 create feature, requirement, task, decision, or rationale nodes from planning artifacts.
+
+When `qa-acceptance.md` exists, challenge it as open-world evidence: a scenario that depends on internals rather than observable behavior, duplication of an existing durable test without justification, an append-only regression disposition where `update` or `retire` fits, coverage disproportionate to the risk, and evidence that would not actually prove the requirement it traces to. Trace validity is Analyze's lane; do not emit it here.
 
 #### 6a. Baseline Evidence Pass (required before any claim about existing behavior)
 
@@ -219,9 +223,11 @@ Therefore:        the condition the requirement depends on cannot occur.
 
 A claim about the baseline with no cited evidence MUST NOT be emitted as a finding. If the baseline cannot be inspected, record it as a verification obligation (§9a) instead.
 
-This pass reads the **baseline being modified**, never the implementation being written. If implementation of this route has materially begun, do not trace it — route observations about the new delta to `/devspark.verify` or `/devspark.pr-review` (assurance-contract.md §3.2).
+This pass reads the **baseline being modified**, never the implementation being written. If implementation of this route has materially begun, do not trace it — route observations about the new delta to `/devspark-verify` or `/devspark-pr-review` (assurance-contract.md §3.2).
 
-**Context Resolution sufficiency** (judgment-based, not a hard stop — `/devspark.analyze` already
+The Plan's `expected_change_surface`, when present, is optional orientation for where to look first. It does not limit what you examine: a risk outside the listed paths is still yours to find.
+
+**Context Resolution sufficiency** (judgment-based, not a hard stop — `/devspark-analyze` already
 confirmed every entry *resolves*; this asks whether the resolved set is *complete*): does
 `plan.md`'s `## Context Resolution` list look like it's missing something the delta obviously
 touches — an entity or flat Knowledge document referenced in spec.md's requirements or data-model.md
@@ -233,12 +239,12 @@ kinds it contains — a set made entirely of flat documents can be perfectly suf
 Emit a sufficiency finding only when the omission is **demonstrably material**: name the specific
 missing item, and state the design consequence of having planned without it. "The list looks short",
 "consider adding more context", or an omission with no stated consequence are not findings. When
-useful, re-run Context Projection (`/devspark.context-projection --seed <id>`) against the same seeds
-`/devspark.plan` used, purely as a diagnostic cross-check — its candidate list is a hint for this
+useful, re-run Context Projection (`/devspark-context-projection --seed <id>`) against the same seeds
+`/devspark-plan` used, purely as a diagnostic cross-check — its candidate list is a hint for this
 judgment call, not a second authoritative source; an omitted candidate is never an automatic finding.
 An empty section on a delta that clearly touches existing knowledge is itself a finding (severity per
 §9). This is the natural place to ask "what did design time miss" — escalation past one hop during
-`/devspark.implement` on this same feature is a signal this check should have caught the gap here.
+`/devspark-implement` on this same feature is a signal this check should have caught the gap here.
 
 ### 7. Risk Category Registry (archetype-gated)
 
@@ -284,7 +290,7 @@ Apply only categories whose `archetypes` set includes the detected archetype (or
 - `auth_authz`: trust boundary enforcement on privileged operations; rate limiting on auth surfaces; session/credential lifecycle.
 - `input_validation`: untrusted input crossing trust boundaries unvalidated; injection vectors (SQL, command, template, deserialization); size/shape limits.
 - `observability`: no structured logs/metrics/traces; no liveness/readiness signal appropriate to the runtime; no alert thresholds; no error tracking.
-- `deployment_rollback`: no safe-release strategy for this artifact type; no migration plan; no rollback procedure; no staging/prod parity; no graceful shutdown.
+- `deployment_rollback`: no safe-release strategy for this artifact type; no migration plan; no rollback procedure; no staging/prod parity; no graceful shutdown. This concern stays CRITICAL and pre-merge: a `stage: post-deploy` deferral never waives a missing rollback or migration plan, and the plan itself must exist before merge.
 - `data_loss_continuity`: no backup/restore; destructive ops without confirmation; missing transactional boundaries; no DR plan.
 - `regulatory_privacy`: PII handling unspecified; retention/residency unaddressed; missing audit logging.
 - `api_compatibility`: undocumented public surface; missing semver discipline; no deprecation policy; breaking-change detection absent in CI.
@@ -341,7 +347,7 @@ Both base and effective severity must appear in each finding.
 
 Run this pass over the candidate findings **before** writing the report. It is what separates a short list of material defects from a long list of plausible observations.
 
-**Deduplicate across capabilities** (assurance-contract.md §5.1). Discard any candidate whose substantive concern is already explicitly recognized and appropriately handled by `spec.md`, `plan.md`, `tasks.md`, or an open `/devspark.analyze` finding. Reference it in narrative if useful; never mint a second id to restate it.
+**Deduplicate across capabilities** (assurance-contract.md §5.1). Discard any candidate whose substantive concern is already explicitly recognized and appropriately handled by `spec.md`, `plan.md`, `tasks.md`, or an open `/devspark-analyze` finding. Reference it in narrative if useful; never mint a second id to restate it.
 
 **Deduplicate within Critic** (assurance-contract.md §5.2). One root concern yields **one** finding. Do not serialize a root cause into a chain of consequences:
 
@@ -354,9 +360,17 @@ Split only when consequences require **independent decisions** by different owne
 
 **Apply the quality bar** (assurance-contract.md §6). Every remaining finding must answer: what is wrong; why it is material to *this* change; what evidence supports it; why Critic owns it; and what decision, mitigation, or proof resolves it. If all five cannot be answered, do not emit it. Generic advice — "consider scalability", "ensure observability", "think about security" — fails by construction.
 
+**Least-complex mitigation first** (Minimum Sufficient Change, command-preamble-contract.md §13).
+
+> **A Critic finding identifies a risk. It does not prescribe architecture.**
+>
+> **Critic should prefer the least-complex mitigation capable of preserving the requirement or invariant.**
+
+For every actionable finding, reason in this order before suggesting anything new: **Risk** → **least-complex viable mitigation** → **why it is or is not sufficient** → **additional machinery, only if the lighter option cannot preserve the requirement or invariant**. Prefer, lightest first: accept a bounded limitation; an operational procedure or human review; delete or simplify the behavior; reuse an existing capability; deterministic validation or a test; and only then new machinery (state, configuration, persistence, cache, endpoint, background process). Record the lightest viable option in `least_complex_mitigation` and its kind in `mitigation_kind`. Never say "risk, therefore add a mechanism". Correctness, security, safety, data integrity, and explicit contracts are not optional simplifications. Critic still does not decide scope: Judge does.
+
 **Route what is not Critic's** (assurance-contract.md §4.2). Move any candidate in another capability's lane into `routed_findings:`. It does not count as a Critic finding and never affects the verdict.
 
-**Convert uncertainty into proof, not into defects** (assurance-contract.md §7). When something cannot be known until execution, do not escalate it into a pseudo-defect. Record it as a verification obligation so `/devspark.verify` can settle it:
+**Convert uncertainty into proof, not into defects** (assurance-contract.md §7). When something cannot be known until execution, do not escalate it into a pseudo-defect. Record it as a verification obligation so `/devspark-verify` can settle it:
 
 ```yaml
 verification_obligations:
@@ -378,6 +392,8 @@ Output Markdown with this structure (omit empty sections — do not emit empty h
 gate: critic
 devspark_version: "<installed version, or `unknown`>"
 generated: "<ISO-8601 timestamp of this run>"
+planning_review:
+  run_id: "<PLANNING_REVIEW_RUN_ID from the hand-off; omit this block when not invoked by /devspark-planning-review>"
 status: pass | warn | fail
 blocking: true | false
 severity: info | warning | error | showstopper
@@ -385,7 +401,7 @@ summary: "<concise outcome>"
 reviewed_artifacts:
   # One entry per artifact this review actually read (spec.md, plan.md, tasks.md, etc.).
   # hash = `git hash-object <path>` (falls back to a sha256 of the file if git is unavailable).
-  # Downstream gate consumers (e.g. /devspark.implement) recompute this hash to detect drift
+  # Downstream gate consumers (e.g. /devspark-implement) recompute this hash to detect drift
   # since the review ran -- an open SHOWSTOPPER/CRITICAL against a changed artifact is STALE.
   - path: spec.md
     hash: "<git-hash-object-output>"
@@ -420,12 +436,14 @@ findings:
     location: <spec.md#section | plan.md#L42 | tasks.md#T07>
     description: <1–3 sentences>
     evidence: <REQUIRED when this finding claims anything about current system behavior: the file and symbol inspected that establishes the claim, per assurance-contract.md §3.1. Empty string when the finding is purely about the proposed design.>
-    root_cause: <shared root concern id when this finding was split from another; empty string otherwise>
+    root_cause: <short stable label naming the shared cause when this finding shares one with another finding or with a remediation, e.g. "unbounded-bulk-change"; empty string when no causal relationship is supported by evidence. Do not fabricate causal certainty — an empty value is legal and Judge does not depend on it.>
     intent_cue: <REQUIRED when this finding cites a structural smell, complexity/length metric, or lint rule: one sentence naming the behavioral intent the metric is a proxy for, per command-preamble-contract.md §9.1 (e.g. "this function should do one thing — what is it?"). Empty string otherwise.>
     base_severity: showstopper | critical | high | medium | low
     effective_severity: showstopper | critical | high | medium | low
     classification: blocking-defect | accepted-limitation | deferred-work | learning
-    recommended_action: <machine-actionable next step>
+    least_complex_mitigation: <the lightest viable mitigation that preserves the requirement or invariant, and why it is or is not sufficient; empty string only when the finding is purely informational>
+    mitigation_kind: accept | operational-procedure | delete | simplify | reuse | validation | new-machinery
+    recommended_action: <machine-actionable next step; names new machinery only when least_complex_mitigation explains why the lighter option is insufficient>
     execution_mode: auto | selective | manual
     status: open
     outcome: ""
@@ -440,7 +458,7 @@ routed_findings:
     rationale: <why that lane owns it>
 
 # Assumptions that cannot be settled before execution (assurance-contract.md §7).
-# These are obligations for /devspark.verify, not defects. Omit the block when empty.
+# These are obligations for /devspark-verify, not defects. Omit the block when empty.
 verification_obligations:
   - assumption: <what is being assumed>
     why_material: <what breaks if it is false>
@@ -473,7 +491,7 @@ _(Render from `high`. Drop if empty.)_
 ### Missing Critical Tasks
 
 _(FULL scope only. Omit empty buckets. Documentation is **not** a Critic bucket — documentation
-drift belongs to `/devspark.analyze`; route it.)_
+drift belongs to `/devspark-analyze`; route it.)_
 
 - **Observability / Operations / Testing / Security:** […]
 
@@ -525,12 +543,25 @@ Every table row MUST correspond to a `finding_id` in the YAML `findings:` list �
 
 Before writing the report, compute `reviewed_artifacts`: for each artifact actually read in this review (typically `spec.md`, and `plan.md`/`tasks.md` when scope is SPEC+PLAN or FULL), run `git hash-object <path>` and record the `path`/`hash` pair. This is a mechanical step (a hash, not a judgment) -- do not skip it even when findings are empty.
 
+For each supported planning artifact, also call `scripts/judge.py semantic-hash --path <path>`
+(installed: `.devspark/scripts/judge.py`) and record an available `sem1:` value as the additive
+`semantic_hash` on that reviewed entry. Retain raw hashes for every inspected source/test/Knowledge
+input. Missing helper/interpreter support or an unavailable fingerprint omits this optional field;
+it never justifies invented metadata or a review failure. Stamp only the newly produced gate.
+
+These raw input hashes preserve what Critic inspected; implementation does not refresh them.
+Judge distinguishes planning freshness from execution evidence: a changed source/test file within
+the approved Plan surface, after unchanged planning semantics and a recorded `PROCEED`, is visible
+as an execution change and does not by itself require Critic to rerun. Verify and PR Review retain
+execution correctness and diff-acceptance responsibility. An out-of-surface or governance change
+continues through the existing applicable recheck.
+
 After producing the report:
 
 - Ensure `FEATURE_DIR/gates/` exists.
 - Save report as `FEATURE_DIR/gates/critic.md` (replace, do not append).
-- The gate YAML block is authoritative for downstream commands (`/devspark.tasks`, `/devspark.implement`, `/devspark.create-pr`, `/devspark.pr-review`, `/devspark.address-pr-review`).
-- `reviewed_artifacts` hashes are what let `/devspark.implement`'s gate pre-flight detect a stale review (artifact changed since this gate ran) instead of trusting a point-in-time verdict forever.
+- The gate YAML block is authoritative for downstream commands (`/devspark-tasks`, `/devspark-implement`, `/devspark-create-pr`, `/devspark-pr-review`, `/devspark-address-pr-review`).
+- `reviewed_artifacts` hashes are what let `/devspark-implement`'s gate pre-flight detect a stale review (artifact changed since this gate ran) instead of trusting a point-in-time verdict forever.
 
 ## Guidelines
 
@@ -555,7 +586,7 @@ After producing the report:
 ### Ignore
 
 - Code style preferences (if linter configured)
-- Documentation drift and documentation-format inconsistencies (route to `/devspark.analyze`)
+- Documentation drift and documentation-format inconsistencies (route to `/devspark-analyze`)
 - **Low-probability AND low-impact** issues *(low-probability/high-impact events must still be surfaced)*
 - Micro-optimizations without proven bottlenecks
 - Any observation that would restate a concern the spec, plan, or tasks already handles
@@ -566,7 +597,7 @@ After producing the report:
 - **Cite locations**: spec/plan/task section or line.
 - **Cite baseline evidence**: name the file and symbol behind any claim about how the system behaves today.
 - **Quantify impact**: "N+1 access in list path → 1000+ round trips per 1000 items."
-- **Suggest fixes**: Concrete remediation, not complaints.
+- **Suggest fixes**: Concrete remediation, not complaints — the least-complex mitigation first, new machinery only with a reason the lighter option fails.
 - **Translate across stacks**: Pair every named tool with its capability.
 - **Challenge NFRs concretely**: name the specific target, the mechanism that makes it unreachable, and what would have to change — never "this may not scale."
 
@@ -594,11 +625,11 @@ Critic having run is not by itself a reason to interrupt the developer (assuranc
 - Prioritize showstoppers.
 - Report zero issues gracefully with a positive summary.
 
-## Key Differences from /devspark.analyze
+## Key Differences from /devspark-analyze
 
 The canonical boundary lives in `assurance-contract.md` §2–§4. This table is a summary of it, not a second definition.
 
-| Aspect       | /devspark.analyze                      | /devspark.critic                         |
+| Aspect       | /devspark-analyze                      | /devspark-critic                         |
 | ------------ | -------------------------------------- | ---------------------------------------- |
 | Core question | Are the planning artifacts internally sound? | Is this sound plan wrong about the real system? |
 | World        | Closed — the authored artifacts        | Open — artifacts plus code, tests, knowledge |
@@ -621,8 +652,8 @@ The `findings:` list gains `owner`, `evidence`, `root_cause`, and `classificatio
 
 ## Shared Review Resolution Contract
 
-Findings use the shared resolution contract so downstream tools (`/devspark.address-pr-review`, telemetry, release) can act deterministically.
+Findings use the shared resolution contract so downstream tools (`/devspark-address-pr-review`, telemetry, release) can act deterministically.
 
 - `finding_id` MUST be stable across re-runs when the underlying issue is unchanged.
 - `execution_mode` MUST be one of: `auto` (safe to apply automatically), `selective` (apply with reviewer approval), `manual` (requires human implementation).
-- `status` and `outcome` are written by `/devspark.address-pr-review` (FR-028).
+- `status` and `outcome` are written by `/devspark-address-pr-review` (FR-028).

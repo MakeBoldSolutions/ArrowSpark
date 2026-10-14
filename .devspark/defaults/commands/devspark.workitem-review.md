@@ -3,11 +3,8 @@ source: "BSW.DevSpark — © 2026 Baylor Scott & White Health. Source: https://b
 description: Review an Azure DevOps work item against the five-dimension standard and offer individually approvable improvements.
 handoffs:
   - label: Ground a Spec in This Item
-    agent: devspark.specify
+    agent: devspark-specify
     prompt: Draft a spec using the reviewed work item as source evidence
-  - label: Draft a Replacement Item
-    agent: devspark.workitem-create
-    prompt: The reviewed item is beyond repair; draft a properly formed one instead
 scripts:
   sh: .devspark/scripts/bash/workitem.sh --operation check --json
   ps: .devspark/scripts/powershell/workitem.ps1 -Operation check -Json
@@ -27,9 +24,9 @@ work item — a bare id (`4242`), an `AB#` reference, or a full work-item URL �
 Tell a developer whether a work item is ready to be worked on, and offer the specific edits that
 would make it ready. The grade is the product; writing is optional and always separately approved.
 
-Load and obey the shared preamble contract at `/.devspark/templates/command-preamble-contract.md`
+Load and obey the shared preamble contract core at `/.devspark/templates/command-preamble-contract.md`
 (installed repos) or `templates/command-preamble-contract.md` (source repos) before step 1 — it
-covers multi-app scope resolution and the 2-tier script override.
+covers multi-app scope resolution and the 2-tier script override. Preamble modules: `configuration`.
 
 ## Lifecycle Position
 

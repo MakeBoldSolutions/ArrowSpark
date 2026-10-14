@@ -57,7 +57,7 @@ Register a new application in the BSW.DevSpark multi-app registry at `.devspark.
 
 ## Removing an Application
 
-To reverse a registration, edit `.devspark.work/devspark.registry.json` directly and remove the app's entry (and any profile references that point only to it), or ask the agent to run `/devspark.add-application` in reverse ("remove app `<app-id>` from the registry").
+To reverse a registration, edit `.devspark.work/devspark.registry.json` directly and remove the app's entry (and any profile references that point only to it), or ask the agent to run `/devspark-add-application` in reverse ("remove app `<app-id>` from the registry").
 
 This removes only the registry entry. It reports, but never deletes, the app's `.devspark.work/`,
 `.knowledge/`, or `.knowledge/guides/` roots. It also refuses to remove an app that another registered

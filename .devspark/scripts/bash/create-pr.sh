@@ -300,20 +300,136 @@ collect_gate_acknowledgements_json() {
     fi
 }
 
+# The engine needs PyYAML and Python 3.11+, so an interpreter that cannot run it is "unavailable",
+# never a reason to report the Knowledge as broken.
+resolve_knowledge_python() {
+    local name
+    for name in python3 python; do
+        if command -v "$name" >/dev/null 2>&1 && "$name" -c 'import sys, yaml; sys.exit(0 if sys.version_info >= (3, 11) else 1)' >/dev/null 2>&1; then
+            printf '%s\n' "$name"
+            return 0
+        fi
+    done
+    return 1
+}
+
+# Args: readiness, index_fresh (JSON literal), summary, head, blockers (JSON array), untouched count, check output.
+knowledge_result_json() {
+    jq -n --arg readiness "$1" --argjson index_fresh "$2" --arg summary "$3" --arg head "$4" \
+        --argjson blockers "$5" --argjson untouched "$6" --arg output "$7" \
+        '{index_fresh: $index_fresh, gap_summary: (if $summary == "" then null else $summary end), readiness: $readiness, blockers: $blockers, stale_untouched_count: $untouched, checked_head: $head, check_output: (if $output == "" then null else $output end)}'
+}
+
+# Committed-state Knowledge readiness for the HEAD being submitted. Read-only: it never
+# regenerates, edits, or commits anything.
 collect_knowledge_json() {
-    local repo_root="$1" engine check_output check_exit gap_summary
+    local repo_root="$1" head="$2" changed_json="$3"
+    local engine python tracked check_output check_exit summary blockers_json parsed_json untouched
     engine=$(resolve_knowledge_engine "$repo_root")
     if [[ -z "$engine" ]]; then
-        jq -n '{index_fresh: null, gap_summary: "build_knowledge_index.py not found"}'
+        knowledge_result_json unknown null "build_knowledge_index.py not found" "$head" '[]' 0 ""
         return 0
     fi
-    check_output=$(python3 "$engine" --repo-root "$repo_root" --check 2>&1) && check_exit=0 || check_exit=$?
-    if [[ "$check_exit" -eq 0 ]]; then
-        jq -n '{index_fresh: true, gap_summary: null}'
-    else
-        gap_summary=$(printf '%s\n' "$check_output" | head -n 1)
-        jq -n --arg gap_summary "$gap_summary" '{index_fresh: false, gap_summary: $gap_summary}'
+    tracked=$(git -C "$repo_root" ls-tree -r --name-only HEAD -- .knowledge/index.json 2>/dev/null || true)
+    if [[ -z "$tracked" ]]; then
+        knowledge_result_json not-applicable null ".knowledge/index.json is not tracked at HEAD" "$head" '[]' 0 ""
+        return 0
     fi
+    if ! python=$(resolve_knowledge_python); then
+        knowledge_result_json unknown null "no usable Python interpreter (python3 or python with PyYAML, 3.11+) found" "$head" '[]' 0 ""
+        return 0
+    fi
+
+    check_output=$("$python" "$engine" --repo-root "$repo_root" --check 2>&1) && check_exit=0 || check_exit=$?
+
+    if [[ "$check_exit" -eq 0 ]]; then
+        parsed_json=$(jq -c --argjson changed "$changed_json" '
+            def touched: . as $e | (($e.source // "") | sub("/+$"; "")) as $s
+                | any($changed[]; . == $e.path or ($s != "" and (. == $s or startswith($s + "/"))));
+            (.stale_entities // []) as $stale
+            | {
+                blockers: [$stale[] | select(touched) | {kind: "stale-entity", path: .path, source: .source, source_date: .source_date, last_verified: .last_verified, message: null}],
+                untouched: ([$stale[] | select(touched | not)] | length)
+            }' "$repo_root/.knowledge/index.json")
+        blockers_json=$(jq -c '.blockers' <<< "$parsed_json")
+        untouched=$(jq -r '.untouched' <<< "$parsed_json")
+        if [[ "$blockers_json" != "[]" ]]; then
+            summary="$(jq 'length' <<< "$blockers_json") touched Knowledge document(s) are stale"
+            knowledge_result_json blocked true "$summary" "$head" "$blockers_json" "$untouched" "$check_output"
+        else
+            knowledge_result_json ready true "" "$head" '[]' "$untouched" "$check_output"
+        fi
+        return 0
+    fi
+
+    if [[ "$check_exit" -eq 1 ]]; then
+        summary=$(printf '%s\n' "$check_output" | head -n 1)
+        blockers_json=$(printf '%s\n' "$check_output" | jq -R -s -c '
+            split("\n") | map(select(startswith("DRIFT:")))
+            | map({kind: "drift", path: (if contains("coverage.json") then ".knowledge/ontology/coverage.json" else ".knowledge/index.json" end), source: null, source_date: null, last_verified: null, message: "Generated Knowledge does not match a fresh build of the committed HEAD"})')
+        if [[ "$blockers_json" == "[]" ]]; then
+            blockers_json=$(printf '%s\n' "$check_output" | jq -R -s -c '
+                split("\n") | map(gsub("\\s+$"; "") | select(length > 0))
+                | (.[-1] // "knowledge check failed") as $message
+                | [{kind: "build-error", path: null, source: null, source_date: null, last_verified: null, message: $message}]')
+        fi
+        knowledge_result_json blocked false "$summary" "$head" "$blockers_json" 0 "$check_output"
+        return 0
+    fi
+
+    knowledge_result_json unknown null "knowledge engine returned an unsupported result (exit $check_exit)" "$head" '[]' 0 "$check_output"
+}
+
+knowledge_blocked_error() {
+    local preflight_json="$1"
+    local knowledge_json head repo_root engine_rel message details line
+    knowledge_json=$(jq -c '.knowledge' <<< "$preflight_json")
+    head=$(jq -r '.checked_head' <<< "$knowledge_json")
+    repo_root=$(jq -r '.repo_root' <<< "$preflight_json")
+    if [[ -f "$repo_root/.devspark/scripts/build_knowledge_index.py" ]]; then
+        engine_rel=".devspark/scripts/build_knowledge_index.py"
+    else
+        engine_rel="scripts/build_knowledge_index.py"
+    fi
+    details="Committed HEAD: $head"
+
+    if [[ "$(jq '[.blockers[].kind] | index("build-error") != null' <<< "$knowledge_json")" == "true" ]]; then
+        message="CREATE PR BLOCKED — KNOWLEDGE INDEX CANNOT BE BUILT"
+        details+=$'\nKnowledge index: BUILD ERROR'
+        while IFS= read -r line; do details+=$'\n'"Error: $line"; done < <(jq -r '.blockers[] | select(.kind == "build-error") | .message' <<< "$knowledge_json")
+        details+=$'\nRequired action:'
+        details+=$'\n1. Fix the reported source or frontmatter problem.'
+        details+=$'\n2. Regenerate the Knowledge index: python '"$engine_rel"$' --repo-root .'
+        details+=$'\n3. Commit the .knowledge/** changes.'
+        details+=$'\n4. Push.'
+        details+=$'\n5. Rerun /devspark.create-pr.'
+    elif [[ "$(jq '[.blockers[].kind] | index("drift") != null' <<< "$knowledge_json")" == "true" ]]; then
+        message="CREATE PR BLOCKED — COMMITTED KNOWLEDGE FINALIZATION REQUIRED"
+        details+=$'\nKnowledge index: DRIFT'
+        while IFS= read -r line; do details+=$'\n'"$line"; done < <(jq -r '(.check_output // "") | split("\n") | map(select(startswith("STALE:"))) | .[]' <<< "$knowledge_json")
+        details+=$'\nRequired action:'
+        details+=$'\n1. Re-verify any genuinely stale Knowledge before changing last_verified.'
+        details+=$'\n2. Regenerate the Knowledge index: python '"$engine_rel"$' --repo-root .'
+        details+=$'\n3. Review the resulting derived files.'
+        details+=$'\n4. Commit the .knowledge/** changes.'
+        details+=$'\n5. Push.'
+        details+=$'\n6. Rerun /devspark.create-pr.'
+    else
+        message="CREATE PR BLOCKED — KNOWLEDGE RE-VERIFICATION REQUIRED"
+        details+=$'\nStale Knowledge touched by this PR:'
+        while IFS= read -r line; do details+=$'\n'"$line"; done < <(jq -r '.blockers[] | "- \(.path)\n  source: \(.source)\n  source date: \(.source_date)\n  last_verified: \(.last_verified)"' <<< "$knowledge_json")
+        details+=$'\nRequired action:'
+        details+=$'\n1. Confirm current truth, using /devspark-explain <topic> where appropriate.'
+        details+=$'\n2. Change last_verified only after genuine verification.'
+        details+=$'\n3. Regenerate: python '"$engine_rel"$' --repo-root .'
+        details+=$'\n4. Commit.'
+        details+=$'\n5. Push.'
+        details+=$'\n6. Rerun /devspark.create-pr.'
+    fi
+
+    jq -n --arg message "$message" --arg details "$details" --arg head "$head" \
+        --argjson blockers "$(jq -c '.blockers' <<< "$knowledge_json")" \
+        '{error: true, message: $message, details: $details, checked_head: $head, blockers: $blockers}'
 }
 
 collect_preflight() {
@@ -410,7 +526,6 @@ collect_preflight() {
     gate_acknowledgements_json=$(collect_gate_acknowledgements_json "$tasks_path")
     quickfix_path=$(find_quickfix_record_for_branch "$repo_root" "$current_branch")
     quickfix_json=$(build_quickfix_json "$quickfix_path")
-    knowledge_json=$(collect_knowledge_json "$repo_root")
 
     if [[ "$spec_exists" != true && "$quickfix_json" != "null" ]]; then
         classification=$(echo "$quickfix_json" | jq -r '.classification // ""')
@@ -438,6 +553,9 @@ collect_preflight() {
     commit_log_json=$(git log --format='%H%x1f%s%x1f%an%x1f%ai' -n 20 "$diff_ref" 2>/dev/null | \
         jq -R 'split("") | if length >= 4 then {hash: .[0], subject: .[1], author: .[2], date: .[3]} else empty end' | \
         jq -s '.' 2>/dev/null || printf '[]\n')
+
+    changed_paths_json=$(printf '%s' "$file_changes_json" | jq -c '[.[] | .path, (.from // empty)]')
+    knowledge_json=$(collect_knowledge_json "$repo_root" "$local_head" "$changed_paths_json")
 
     if [[ "$cli_available" == true && "$auth_ok" == true ]]; then
         if [[ "$DEVSPARK_PLATFORM_NAME" == "azdo" ]]; then
@@ -585,6 +703,10 @@ run_create_or_update() {
         json_error "Current branch is not pushed to remote" "$(echo "$preflight_json" | jq -r '.remote.details')"
         return 1
     fi
+    if [[ "$(echo "$preflight_json" | jq -r '.knowledge.readiness')" == "blocked" ]]; then
+        knowledge_blocked_error "$preflight_json"
+        return 1
+    fi
 
     if [[ "$(echo "$preflight_json" | jq -r '.creation_supported')" != "true" ]]; then
         json_error "Automated PR creation is not supported for platform '$DEVSPARK_PLATFORM_NAME'" "Supported: github (gh), azdo (az). Install and authenticate the platform CLI."
@@ -669,7 +791,7 @@ run_create_or_update() {
         pr_view_json=$(gh pr view "$pr_url" --json number,url,title,state,isDraft 2>/dev/null)
     fi
 
-    jq -n --arg action "$action" --arg title "$(echo "$pr_view_json" | jq -r '.title')" --arg url "$(echo "$pr_view_json" | jq -r '.url')" --arg state "$(echo "$pr_view_json" | jq -r '.state')" --argjson number "$(echo "$pr_view_json" | jq '.number')" --argjson draft "$(echo "$pr_view_json" | jq '.isDraft // false')" '{status: "ok", action: $action, pr_number: $number, url: $url, title: $title, state: $state, draft: $draft}'
+    jq -n --arg action "$action" --arg checked_head "$(echo "$preflight_json" | jq -r '.remote.local_head')" --arg title "$(echo "$pr_view_json" | jq -r '.title')" --arg url "$(echo "$pr_view_json" | jq -r '.url')" --arg state "$(echo "$pr_view_json" | jq -r '.state')" --argjson number "$(echo "$pr_view_json" | jq '.number')" --argjson draft "$(echo "$pr_view_json" | jq '.isDraft // false')" '{status: "ok", action: $action, checked_head: $checked_head, pr_number: $number, url: $url, title: $title, state: $state, draft: $draft}'
 }
 
 main() {

@@ -135,7 +135,7 @@ if ([string]::IsNullOrWhiteSpace($PrNumber)) {
     $PrNumber = Get-DetectedPrNumber
     if (-not $PrNumber) {
         Write-JsonError -Message "Unable to detect PR number" `
-            -Details "Please provide PR number explicitly: /devspark.pr-review #123"
+            -Details "Please provide PR number explicitly: /devspark-pr-review #123"
         exit 1
     }
 }
@@ -338,6 +338,22 @@ if ($knowledgeEngine -and $filesChangedTotal -gt 0) {
     }
 }
 
+# Deterministic risk digest (tiers, flags, score); null when the helper or Python is unavailable
+$riskDigest = $null
+$riskEngine = Join-Path (Split-Path $scriptPath -Parent) 'pr-risk.py'
+if ((Test-Path $riskEngine) -and $filesChangedTotal -gt 0) {
+    $riskPython = Get-Command python3 -ErrorAction SilentlyContinue
+    if (-not $riskPython) { $riskPython = Get-Command python -ErrorAction SilentlyContinue }
+    if ($riskPython) {
+        try {
+            $riskRange = @()
+            if ($sourceBranch -and $targetBranch) { $riskRange = @('--range', "origin/$targetBranch...origin/$sourceBranch") }
+            $riskJson = & $riskPython.Source $riskEngine --repo-root $repoRoot --lines-added $linesAdded --lines-deleted $linesDeleted @riskRange @allFilesChanged 2>$null
+            if ($LASTEXITCODE -eq 0 -and $riskJson) { $riskDigest = ($riskJson -join "`n") | ConvertFrom-Json }
+        } catch { $riskDigest = $null }
+    }
+}
+
 # Check for constitution
 $constitutionPath = Join-Path $repoRoot ".knowledge\governance\constitution.md"
 $constitutionExists = Test-Path $constitutionPath
@@ -396,6 +412,7 @@ $reviewDir = Join-Path $repoRoot ".devspark.work\pr-review"
 if ($Json) {
     $output = @{
         REPO_ROOT = $repoRoot
+        DEVSPARK_VERSION = (Get-DevSparkVersion -RepoRoot $repoRoot).VERSION
         PR_CONTEXT = @{
             enabled = $true
             pr_number = $prNumber_int
@@ -421,6 +438,7 @@ if ($Json) {
             include_all_files = [bool]$IncludeAllFiles
             merge_state_status = $mergeStateStatus
             is_behind_target = $isBehindTarget
+            risk = $riskDigest
         }
         CONSTITUTION_PATH = $constitutionPath
         CONSTITUTION_EXISTS = $constitutionExists

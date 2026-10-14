@@ -13,7 +13,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Purpose
 
-`devspark.json` historically did double duty as both repo facts/team policy (`platform`/`organization`/`policies`) and the multi-app registry (`version`/`mode`/`profiles`/`apps`) in one file. `/devspark.migrate-registry` moves the registry keys into a new, dedicated `devspark.registry.json`, leaving `devspark.json` for repo facts only.
+`devspark.json` historically did double duty as both repo facts/team policy (`platform`/`organization`/`policies`) and the multi-app registry (`version`/`mode`/`profiles`/`apps`) in one file. `/devspark-migrate-registry` moves the registry keys into a new, dedicated `devspark.registry.json`, leaving `devspark.json` for repo facts only.
 
 **This is entirely optional.** The legacy combined format keeps working forever via a permanent fallback — nothing requires migration, and no other command ever runs this automatically. Run it only if you want the clean split.
 

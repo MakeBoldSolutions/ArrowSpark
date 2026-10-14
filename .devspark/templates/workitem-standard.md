@@ -4,7 +4,7 @@
 
 **Calibrated against**: `tests/fixtures/workitem-review/calibration-corpus.json`, `corpus_version: 1`
 
-This is the rubric `/devspark.workitem-review` applies to a work item. It is deliberately a separate
+This is the rubric `/devspark-workitem-review` applies to a work item. It is deliberately a separate
 document from the command that uses it: the rubric is the thing being calibrated, and a calibration
 run is only meaningful if the artifact under test can change independently of the prompt that loads
 it.

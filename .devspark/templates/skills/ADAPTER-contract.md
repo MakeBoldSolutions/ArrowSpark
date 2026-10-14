@@ -93,7 +93,7 @@ BSW.DevSpark-governed path.
 | Skill output | Command action |
 | ------------ | -------------- |
 | Draft `spec.md` body | Written to `SPEC_FILE` resolved by the command |
-| `[NEEDS CLARIFICATION]` markers | Preserved; command may invoke `/devspark.clarify` |
+| `[NEEDS CLARIFICATION]` markers | Preserved; command may invoke `/devspark-clarify` |
 | `Assumptions` section | Preserved verbatim in the placed spec |
 
 The skill must not write directly to `SPEC_FILE` or any `.knowledge/` path.

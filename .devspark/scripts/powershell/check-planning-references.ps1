@@ -29,7 +29,7 @@ $script:AlwaysExcluded = @(
 )
 $script:AlwaysExcludedFiles = @('AGENTS.md', 'CHANGELOG.md')
 # templates/, .github/ (shims generated from templates/), and tests/ legitimately document or
-# exercise the ID conventions themselves (e.g. tasks-template.md's illustrative "T012 ... FR-001",
+# exercise the ID conventions themselves (e.g. tasks-template.md's illustrative task/requirement IDs,
 # a generated shim's example command invocation, or this repo's own tests asserting spec/task/
 # quickfix numbering and parsing behavior) -- excluded only from the generic-ID-pattern tier
 # below, never from the exact-branch-name tier, since a real feature's own branch name should
@@ -59,6 +59,9 @@ Push-Location $root
 try {
     if (-not $Branch) {
         $Branch = (git branch --show-current 2>$null)
+    }
+    if ($Branch -in @('main', 'master', 'trunk', 'develop', 'HEAD')) {
+        $Branch = ''
     }
 
     $files = git ls-files

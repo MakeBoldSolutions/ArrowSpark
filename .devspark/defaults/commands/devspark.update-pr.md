@@ -3,10 +3,10 @@ source: "BSW.DevSpark — © 2026 Baylor Scott & White Health. Source: https://b
 description: Update an existing pull request description with current branch delta, preserving linked work items and metadata
 handoffs:
   - label: Review Updated PR
-    agent: devspark.pr-review
+    agent: devspark-pr-review
     prompt: Run a re-review of the updated pull request
   - label: Create New PR
-    agent: devspark.create-pr
+    agent: devspark-create-pr
     prompt: Create a new pull request for this branch
 scripts:
   sh: .devspark/scripts/bash/get-pr-context.sh $ARGUMENTS --json
@@ -23,7 +23,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Overview
 
-This command updates an **existing** pull request description based on the current state of the branch. Unlike `/devspark.create-pr`, which is designed for initial PR creation and prompts for full context, `update-pr` focuses on the branch delta since the last review — rebuilding the PR body without re-prompting for work items or context already captured in the existing PR.
+This command updates an **existing** pull request description based on the current state of the branch. Unlike `/devspark-create-pr`, which is designed for initial PR creation and prompts for full context, `update-pr` focuses on the branch delta since the last review — rebuilding the PR body without re-prompting for work items or context already captured in the existing PR.
 
 **IMPORTANT**: This command **only updates the PR description** — it does not merge, approve, or modify code.
 
@@ -33,7 +33,7 @@ This command updates an **existing** pull request description based on the curre
 - You want to refresh the PR body after a rebase or additional commits
 - You want to regenerate the PR description without losing linked issues or work items
 
-**Use `/devspark.create-pr` instead when**:
+**Use `/devspark-create-pr` instead when**:
 
 - No PR exists yet for the branch
 - You want to start fresh with a new PR description
@@ -61,7 +61,7 @@ For Azure DevOps, resolve org/project/repo from `.devspark.work/devspark.json` (
 
 ### 1. Initialize PR Context
 
-Load and obey the shared preamble contract at `/.devspark/templates/command-preamble-contract.md` (installed repos) or `templates/command-preamble-contract.md` (source repos) before step 1 — it covers the 2-tier override check for scripts.
+Load and obey the shared preamble contract core at `/.devspark/templates/command-preamble-contract.md` (installed repos) or `templates/command-preamble-contract.md` (source repos) before step 1 — it covers the 2-tier override check for scripts. Preamble modules: `configuration`.
 
 Run `{SCRIPT}` and parse its JSON output for:
 
@@ -81,11 +81,11 @@ Detect the PR number in this order:
 **Error Handling**:
 If the script fails:
 
-- **PR not found**: Suggest `/devspark.create-pr` to create a new PR
+- **PR not found**: Suggest `/devspark-create-pr` to create a new PR
 - **Branch out of sync** (`is_behind_target: true`): **STOP immediately.**
   > "BLOCKED: The source branch `{source_branch}` is behind target branch `{target_branch}`. Sync it first before updating this PR."
   > Suggested fix: `gh pr update-branch {PR_NUMBER}` or `git fetch origin && git rebase origin/{target_branch}`
-- **Constitution missing**: Guide user to run `/devspark.constitution`
+- **Constitution missing**: Guide user to run `/devspark-constitution`
 - **GitHub CLI not installed**: Provide installation instructions
 
 ### 2. Load Existing PR Metadata
@@ -140,7 +140,7 @@ Using the delta:
 - Note verified code, test, knowledge, and documentation changes reflected in the new commits
 - For `.knowledge/` nodes touched by the new commits, note whether their evidence is test-verified
   (`verified_by: execution`) or code-only, and flag a code-only entry missing `fallback_reason` as a
-  reviewer note (mirrors `/devspark.create-pr`'s Knowledge Evidence bullet)
+  reviewer note (mirrors `/devspark-create-pr`'s Knowledge Evidence bullet)
 
 ### 4. Load Constitution for PR Template Context
 
@@ -202,7 +202,7 @@ What changed in this update:
 - [Summary of new changes incorporated]
 
 To re-review after this update:
-/devspark.pr-review #{NUMBER} re-review
+/devspark-pr-review #{NUMBER} re-review
 ```
 
 ## Guidelines

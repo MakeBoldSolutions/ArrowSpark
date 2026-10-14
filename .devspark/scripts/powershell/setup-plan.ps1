@@ -5,6 +5,7 @@
 [CmdletBinding()]
 param(
     [switch]$Json,
+    [switch]$Reset,
     [switch]$Help
 )
 
@@ -12,8 +13,9 @@ $ErrorActionPreference = 'Stop'
 
 # Show help if requested
 if ($Help) {
-    Write-Output "Usage: ./setup-plan.ps1 [-Json] [-Help]"
+    Write-Output "Usage: ./setup-plan.ps1 [-Json] [-Reset] [-Help]"
     Write-Output "  -Json     Output results in JSON format"
+    Write-Output "  -Reset    Explicitly replace the existing plan with the resolved template"
     Write-Output "  -Help     Show this help message"
     exit 0
 }
@@ -39,7 +41,11 @@ New-Item -ItemType Directory -Path $paths.FEATURE_DIR -Force | Out-Null
 
 # Copy plan template from override/stock fallback chain if it exists
 $template = Resolve-TemplatePath -RepoRoot $paths.REPO_ROOT -TemplateName 'plan-template.md'
-if ($template -and (Test-Path $template)) {
+$planExists = Test-Path $paths.IMPL_PLAN
+$planMode = if ($Reset) { 'reset' } elseif ($planExists) { 'revise' } else { 'create' }
+if ($planExists -and -not $Reset) {
+    if (-not $Json) { Write-Output "Preserved existing plan at $($paths.IMPL_PLAN)" }
+} elseif ($template -and (Test-Path $template)) {
     Copy-Item $template $paths.IMPL_PLAN -Force
     Write-Output "Copied plan template to $($paths.IMPL_PLAN)"
 } else {
@@ -80,8 +86,16 @@ try {
             }
             $featureTitle = $paths.CURRENT_BRANCH
             if ($specContent -match '(?m)^# Feature Specification:\s*(.+)$') { $featureTitle = $Matches[1].Trim() }
+            # Reference (never copy) the spec sections that carry consumed spec knowledge; a
+            # section the spec lacks is recorded as absent so no reference is left dangling.
+            $sectionPresent = @()
+            $sectionAbsent = @()
+            foreach ($section in @('Requirements', 'Key Entities', 'Clarifications', 'Success Criteria', 'Assumptions', 'Out of Scope', 'Minimum Sufficient Change')) {
+                if ($specContent -match ('(?mi)^#{2,3}\s+' + [regex]::Escape($section) + '(\s|$|\*)')) { $sectionPresent += $section } else { $sectionAbsent += $section }
+            }
             $wrote = New-KnowledgeDocument -FeatureDir $paths.FEATURE_DIR -Id 'feature' -Type 'feature' `
-                -Title $featureTitle -Status 'draft' -Links @{ requirements = $frIds } -GeneratedBy 'setup-plan'
+                -Title $featureTitle -Status 'draft' -GeneratedBy 'setup-plan' `
+                -Links @{ requirements = $frIds; spec_sections = $sectionPresent; spec_sections_absent = $sectionAbsent }
             if ($wrote -and $specHash -and (Test-Path $featureDocPath)) {
                 # Below the closing frontmatter delimiter: above it, the YAML block stops being
                 # recognised and markdownlint reads the delimiters as setext headings.
@@ -110,6 +124,8 @@ if ($Json) {
         SPECS_DIR = $paths.FEATURE_DIR
         BRANCH = $paths.CURRENT_BRANCH
         HAS_GIT = $paths.HAS_GIT
+        PLAN_EXISTS = $planExists
+        PLAN_MODE = $planMode
     }
     $result | ConvertTo-Json
 } else {
@@ -118,4 +134,6 @@ if ($Json) {
     Write-Output "SPECS_DIR: $($paths.FEATURE_DIR)"
     Write-Output "BRANCH: $($paths.CURRENT_BRANCH)"
     Write-Output "HAS_GIT: $($paths.HAS_GIT)"
+    Write-Output "PLAN_EXISTS: $planExists"
+    Write-Output "PLAN_MODE: $planMode"
 }

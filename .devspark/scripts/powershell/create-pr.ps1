@@ -237,20 +237,181 @@ function Get-GateArtifacts {
     return $results
 }
 
+# The engine needs PyYAML and Python 3.11+, so an interpreter that cannot run it is "unavailable",
+# never a reason to report the Knowledge as broken.
+function Resolve-KnowledgePython {
+    foreach ($name in @('python3', 'python')) {
+        $command = Get-Command $name -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
+        if (-not $command) { continue }
+        & $command.Source -c 'import sys, yaml; sys.exit(0 if sys.version_info >= (3, 11) else 1)' 2>$null | Out-Null
+        if ($LASTEXITCODE -eq 0) { return $command.Source }
+    }
+    return $null
+}
+
+function New-KnowledgeBlocker {
+    param([string]$Kind, $Path, $Source, $SourceDate, $LastVerified, $Message)
+    [PSCustomObject]@{
+        kind = $Kind
+        path = $Path
+        source = $Source
+        source_date = $SourceDate
+        last_verified = $LastVerified
+        message = $Message
+    }
+}
+
+function New-KnowledgeResult {
+    param(
+        [string]$Readiness,
+        $IndexFresh,
+        [string]$Summary,
+        [string]$Head,
+        [object[]]$Blockers = @(),
+        [int]$StaleUntouchedCount = 0,
+        [string]$CheckOutput
+    )
+    [PSCustomObject]@{
+        index_fresh = $IndexFresh
+        gap_summary = if ($Summary) { $Summary } else { $null }
+        readiness = $Readiness
+        blockers = @($Blockers)
+        stale_untouched_count = $StaleUntouchedCount
+        checked_head = $Head
+        check_output = if ($CheckOutput) { $CheckOutput } else { $null }
+    }
+}
+
+# ConvertFrom-Json turns an ISO date string into [datetime]; blockers carry the original text.
+function ConvertTo-DateText {
+    param($Value)
+    if ($Value -is [datetime]) { return $Value.ToString('yyyy-MM-dd', [Globalization.CultureInfo]::InvariantCulture) }
+    return [string]$Value
+}
+
+# Committed-state Knowledge readiness for the HEAD being submitted. Read-only: it never
+# regenerates, edits, or commits anything.
 function Get-KnowledgeConsistency {
-    param([string]$RepoRoot)
+    param([string]$RepoRoot, [string]$Head, [string[]]$ChangedPaths = @())
 
     $engine = Resolve-KnowledgeEngine -RepoRoot $RepoRoot
     if (-not $engine) {
-        return [PSCustomObject]@{ index_fresh = $null; gap_summary = 'build_knowledge_index.py not found' }
+        return New-KnowledgeResult -Readiness 'unknown' -IndexFresh $null -Summary 'build_knowledge_index.py not found' -Head $Head
     }
 
-    $output = & python3 $engine --repo-root $RepoRoot --check 2>&1
-    if ($LASTEXITCODE -eq 0) {
-        return [PSCustomObject]@{ index_fresh = $true; gap_summary = $null }
+    $tracked = @(git -C $RepoRoot ls-tree -r --name-only HEAD -- .knowledge/index.json 2>$null | Where-Object { $_ })
+    if ($tracked.Count -eq 0) {
+        return New-KnowledgeResult -Readiness 'not-applicable' -IndexFresh $null -Summary '.knowledge/index.json is not tracked at HEAD' -Head $Head
     }
-    $firstLine = ($output | Select-Object -First 1) -as [string]
-    return [PSCustomObject]@{ index_fresh = $false; gap_summary = $firstLine }
+
+    $python = Resolve-KnowledgePython
+    if (-not $python) {
+        return New-KnowledgeResult -Readiness 'unknown' -IndexFresh $null -Summary 'no usable Python interpreter (python3 or python with PyYAML, 3.11+) found' -Head $Head
+    }
+
+    $output = & $python $engine --repo-root $RepoRoot --check 2>&1
+    $exitCode = $LASTEXITCODE
+    $lines = @($output | ForEach-Object { "$_".TrimEnd() } | Where-Object { $_ })
+    $text = $lines -join "`n"
+
+    if ($exitCode -eq 0) {
+        $index = Get-Content -LiteralPath (Join-Path $RepoRoot '.knowledge/index.json') -Raw -Encoding utf8 | ConvertFrom-Json
+        $stale = @($index.stale_entities | Where-Object { $_ })
+        $changed = [System.Collections.Generic.HashSet[string]]::new([string[]]@($ChangedPaths))
+        $blockers = @()
+        $untouched = 0
+        foreach ($entry in $stale) {
+            $path = [string]$entry.path
+            $source = ([string]$entry.source).TrimEnd('/')
+            $beneath = @($ChangedPaths | Where-Object { $source -and $_.StartsWith("$source/", [StringComparison]::Ordinal) }).Count -gt 0
+            if ($changed.Contains($path) -or ($source -and $changed.Contains($source)) -or $beneath) {
+                $blockers += New-KnowledgeBlocker -Kind 'stale-entity' -Path $path -Source ([string]$entry.source) `
+                    -SourceDate (ConvertTo-DateText $entry.source_date) -LastVerified (ConvertTo-DateText $entry.last_verified) -Message $null
+            } else {
+                $untouched++
+            }
+        }
+        if ($blockers.Count -gt 0) {
+            return New-KnowledgeResult -Readiness 'blocked' -IndexFresh $true -Summary "$($blockers.Count) touched Knowledge document(s) are stale" `
+                -Head $Head -Blockers $blockers -StaleUntouchedCount $untouched -CheckOutput $text
+        }
+        return New-KnowledgeResult -Readiness 'ready' -IndexFresh $true -Head $Head -StaleUntouchedCount $untouched -CheckOutput $text
+    }
+
+    if ($exitCode -eq 1) {
+        $summary = if ($lines.Count -gt 0) { $lines[0] } else { 'knowledge check failed' }
+        $drift = @($lines | Where-Object { $_.StartsWith('DRIFT:') })
+        if ($drift.Count -gt 0) {
+            $blockers = @($drift | ForEach-Object {
+                $artifact = if ($_ -match 'coverage\.json') { '.knowledge/ontology/coverage.json' } else { '.knowledge/index.json' }
+                New-KnowledgeBlocker -Kind 'drift' -Path $artifact -Source $null -SourceDate $null -LastVerified $null `
+                    -Message 'Generated Knowledge does not match a fresh build of the committed HEAD'
+            })
+        } else {
+            $blockers = @(New-KnowledgeBlocker -Kind 'build-error' -Path $null -Source $null -SourceDate $null -LastVerified $null -Message $lines[-1])
+        }
+        return New-KnowledgeResult -Readiness 'blocked' -IndexFresh $false -Summary $summary -Head $Head -Blockers $blockers -CheckOutput $text
+    }
+
+    return New-KnowledgeResult -Readiness 'unknown' -IndexFresh $null -Summary "knowledge engine returned an unsupported result (exit $exitCode)" -Head $Head -CheckOutput $text
+}
+
+function Get-KnowledgeBlockedError {
+    param($Preflight)
+
+    $knowledge = $Preflight.knowledge
+    $dash = [string][char]0x2014
+    $kinds = @($knowledge.blockers | ForEach-Object { $_.kind })
+    $engineRelative = if (Test-Path (Join-Path $Preflight.repo_root '.devspark/scripts/build_knowledge_index.py')) { '.devspark/scripts/build_knowledge_index.py' } else { 'scripts/build_knowledge_index.py' }
+    $lines = New-Object System.Collections.Generic.List[string]
+    $lines.Add("Committed HEAD: $($knowledge.checked_head)")
+
+    if ($kinds -contains 'build-error') {
+        $message = "CREATE PR BLOCKED $dash KNOWLEDGE INDEX CANNOT BE BUILT"
+        $lines.Add('Knowledge index: BUILD ERROR')
+        foreach ($blocker in @($knowledge.blockers | Where-Object { $_.kind -eq 'build-error' })) { $lines.Add("Error: $($blocker.message)") }
+        $lines.Add('Required action:')
+        $lines.Add('1. Fix the reported source or frontmatter problem.')
+        $lines.Add("2. Regenerate the Knowledge index: python $engineRelative --repo-root .")
+        $lines.Add('3. Commit the .knowledge/** changes.')
+        $lines.Add('4. Push.')
+        $lines.Add('5. Rerun /devspark.create-pr.')
+    } elseif ($kinds -contains 'drift') {
+        $message = "CREATE PR BLOCKED $dash COMMITTED KNOWLEDGE FINALIZATION REQUIRED"
+        $lines.Add('Knowledge index: DRIFT')
+        foreach ($line in @($knowledge.check_output -split "`n" | Where-Object { $_.StartsWith('STALE:') })) { $lines.Add($line) }
+        $lines.Add('Required action:')
+        $lines.Add('1. Re-verify any genuinely stale Knowledge before changing last_verified.')
+        $lines.Add("2. Regenerate the Knowledge index: python $engineRelative --repo-root .")
+        $lines.Add('3. Review the resulting derived files.')
+        $lines.Add('4. Commit the .knowledge/** changes.')
+        $lines.Add('5. Push.')
+        $lines.Add('6. Rerun /devspark.create-pr.')
+    } else {
+        $message = "CREATE PR BLOCKED $dash KNOWLEDGE RE-VERIFICATION REQUIRED"
+        $lines.Add('Stale Knowledge touched by this PR:')
+        foreach ($blocker in @($knowledge.blockers)) {
+            $lines.Add("- $($blocker.path)")
+            $lines.Add("  source: $($blocker.source)")
+            $lines.Add("  source date: $($blocker.source_date)")
+            $lines.Add("  last_verified: $($blocker.last_verified)")
+        }
+        $lines.Add('Required action:')
+        $lines.Add('1. Confirm current truth, using /devspark-explain <topic> where appropriate.')
+        $lines.Add('2. Change last_verified only after genuine verification.')
+        $lines.Add("3. Regenerate: python $engineRelative --repo-root .")
+        $lines.Add('4. Commit.')
+        $lines.Add('5. Push.')
+        $lines.Add('6. Rerun /devspark.create-pr.')
+    }
+
+    [PSCustomObject]@{
+        error = $true
+        message = $message
+        details = ($lines -join "`n")
+        checked_head = $knowledge.checked_head
+        blockers = @($knowledge.blockers)
+    } | ConvertTo-Json -Depth 10 -EscapeHandling EscapeNonAscii
 }
 
 function Get-CreatePrPreflight {
@@ -335,7 +496,6 @@ function Get-CreatePrPreflight {
     $gateAcknowledgements = Get-GateAcknowledgements -TasksPath $tasksPath
     $quickfixRecordPath = Find-QuickfixRecordForBranch -RepoRoot $repoRoot -BranchName $currentBranch
     $quickfixRecord = Get-QuickfixRecordSummary -QuickfixPath $quickfixRecordPath
-    $knowledge = Get-KnowledgeConsistency -RepoRoot $repoRoot
 
     if (-not $specExists -and $quickfixRecord) {
         $specTitle = $quickfixRecord.title
@@ -387,6 +547,9 @@ function Get-CreatePrPreflight {
             }
         } | Where-Object { $_ -ne $null }
     )
+
+    $changedPaths = @($fileChanges | ForEach-Object { $_.path; $_.from } | Where-Object { $_ })
+    $knowledge = Get-KnowledgeConsistency -RepoRoot $repoRoot -Head $localHead -ChangedPaths $changedPaths
 
     $existingPr = [PSCustomObject]@{ exists = $false; number = $null; url = ''; title = ''; state = ''; draft = $false }
     if ($cliAvailable -and $authOk) {
@@ -484,6 +647,9 @@ function Invoke-CreateOrUpdatePr {
     if (-not $preflight.prerequisites.clean_worktree) {
         return (Get-JsonError -Message 'Working tree has unmanaged changes' -Details 'Commit, stash, or discard all changes before creating or updating a PR')
     }
+    if ($preflight.knowledge.readiness -eq 'blocked') {
+        return (Get-KnowledgeBlockedError -Preflight $preflight)
+    }
     if (-not $preflight.prerequisites.branch_pushed_to_remote) {
         return (Get-JsonError -Message 'Current branch is not pushed to remote' -Details $preflight.remote.details)
     }
@@ -559,6 +725,7 @@ function Invoke-CreateOrUpdatePr {
     return ([PSCustomObject]@{
         status = 'ok'
         action = $Action.ToLower()
+        checked_head = $preflight.remote.local_head
         pr_number = $view.number
         url = $view.url
         title = $view.title

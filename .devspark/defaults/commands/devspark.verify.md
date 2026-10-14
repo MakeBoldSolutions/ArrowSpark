@@ -3,14 +3,14 @@ source: "BSW.DevSpark — © 2026 Baylor Scott & White Health. Source: https://b
 description: Produce empirical proof-of-change evidence (not document review) for the declared verification proof mode(s), classify what it surfaced, and decide whether the work is finished.
 handoffs:
   - label: Create Pull Request
-    agent: devspark.create-pr
+    agent: devspark-create-pr
     prompt: Open a PR now that the route has converged
   - label: Fix Blocking Defects
-    agent: devspark.implement
+    agent: devspark-implement
     prompt: Address only the blocking defects recorded by closeout, then re-run verification
     send: true
   - label: Fix Failing Proof
-    agent: devspark.implement
+    agent: devspark-implement
     prompt: Address the verify gate failure before re-running verification
     send: true
 scripts:
@@ -28,7 +28,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Workflow Position
 
-Sits between `/devspark.implement` (code exists) and `/devspark.create-pr` (ship it). Produces empirical proof that the change works — distinct from `/devspark.analyze`/`/devspark.critic`, which review documents, not running code.
+Sits between `/devspark-implement` (code exists) and `/devspark-create-pr` (ship it). Produces empirical proof that the change works — distinct from `/devspark-analyze`/`/devspark-critic`, which review documents, not running code.
 
 This command runs **two phases in one invocation**, and they answer different questions:
 
@@ -37,10 +37,11 @@ This command runs **two phases in one invocation**, and they answer different qu
 | **Evidence** (steps 1–5) | What does the evidence say? | `gates/verify.md` |
 | **Closeout** (steps 6–7) | Given that evidence, is this work finished? | `gates/closeout.md` |
 
-The phases are separate on purpose (`closeout-contract.md` §6) — evidence optimizes for finding things, closeout optimizes for converging — but the developer pays for one interaction, not two. Do **not** end a run by telling the user to go run `/devspark.closeout`; that command is an advanced reassessment entry point, not a step on this path.
+The phases are separate on purpose (`closeout-contract.md` §6) — evidence optimizes for finding things, closeout optimizes for converging — but the developer pays for one interaction, not two. Do **not** end a run by telling the user to go run `/devspark-closeout`; that command is an advanced reassessment entry point, not a step on this path.
 
 - **Owns**: executing the proof mode(s) declared in `spec.md`'s `required_gates` (see `/.devspark/templates/verification-contract.md` or `templates/verification-contract.md` in source repos), recording actual commands + actual output as evidence, writing `FEATURE_DIR/gates/verify.md`, then classifying every open finding and writing the completion decision to `FEATURE_DIR/gates/closeout.md`.
-- **Does NOT own**: re-litigating spec/plan/tasks consistency (`/devspark.analyze`), adversarial risk hypotheses (`/devspark.critic`), writing new tests or code (`/devspark.implement`), the PR itself (`/devspark.create-pr`).
+- **Delta verification**: preserve existing behavior and compatibility where required; validate the intended delta and relevant regression risks. Verification evaluates the releasable change delivered by the specification, without requiring product release publication or deployment. Do not introduce a new future-changeability score, checklist, or gate.
+- **Does NOT own**: re-litigating spec/plan/tasks consistency (`/devspark-analyze`), adversarial risk hypotheses (`/devspark-critic`), writing new tests or code (`/devspark-implement`), the PR itself (`/devspark-create-pr`).
 
 ## Definition of Done
 
@@ -56,7 +57,7 @@ Running the real thing surfaces observations the document gates never could — 
 
 > Verification may discover work, but discovery alone does not expand the current specification.
 
-An observation becomes mandatory work in this route only if it demonstrates one of the five expansion triggers (preamble §10): failure of the stated objective, an unresolved requirement, a violated invariant, a correctness defect, or a regression caused by this change. A failing proof mode is, by definition, one of those — record it `fail` and route back to `/devspark.implement`.
+An observation becomes mandatory work in this route only if it demonstrates one of the five expansion triggers (preamble §10): failure of the stated objective, an unresolved requirement, a violated invariant, a correctness defect, or a regression caused by this change. A failing proof mode is, by definition, one of those — record it `fail` and route back to `/devspark-implement`.
 
 Everything else is carried into the closeout phase (step 6) and classified there. Record such observations under a `discovered:` list in the evidence artifact (step 5), and never let one change a mode's `status`.
 
@@ -64,9 +65,9 @@ The evidence phase keeps its own incentives clean by not being the phase that de
 
 ## Genuine Fix Guard (command-preamble-contract.md §9)
 
-Load and obey the shared preamble contract at `/.devspark/templates/command-preamble-contract.md` (installed repos) or `templates/command-preamble-contract.md` (source repos) — in particular §9 (Genuine Fix Discipline).
+Load and obey the shared preamble contract core at `/.devspark/templates/command-preamble-contract.md` (installed repos) or `templates/command-preamble-contract.md` (source repos) — in particular §9 (Genuine Fix Discipline). Preamble modules: `finding-fix`, `convergence`, `orchestration`, `provenance`.
 
-When the change under verification resolved a lint rule, complexity/length metric, or code-smell finding, a green linter run is **not** sufficient evidence of a genuine fix. The recorded evidence MUST also show the behavioral intent changed — e.g. the extracted unit is independently exercised by a probe, the previously swallowed error is now surfaced in output, the flattened path is covered by the same probe. A proof that only shows "the tool's number went down" while the probe's behavior is unchanged is a gamed fix: record that mode `status: fail` with the note "resolves the check, not the intent" and route back to `/devspark.implement`.
+When the change under verification resolved a lint rule, complexity/length metric, or code-smell finding, a green linter run is **not** sufficient evidence of a genuine fix. The recorded evidence MUST also show the behavioral intent changed — e.g. the extracted unit is independently exercised by a probe, the previously swallowed error is now surfaced in output, the flattened path is covered by the same probe. A proof that only shows "the tool's number went down" while the probe's behavior is unchanged is a gamed fix: record that mode `status: fail` with the note "resolves the check, not the intent" and route back to `/devspark-implement`.
 
 ## Outline
 
@@ -93,6 +94,8 @@ Multi-app scope and the 2-tier override check for scripts are defined by the sha
 
    If any mode cannot be executed (missing tooling, no traffic sample, no prior commit to diff against, etc.), record `status: fail` for that mode with the specific blocker — do not mark it `pass` and do not skip it silently.
 
+   **Record the `evidence_class` actually obtained** on each mode entry (`automated`, `local-integration`, `deployed`, `rollout`; default `automated`), per verification contract §2.3. A run against a development or local dependency is `local-integration`, never `deployed`. A required pre-merge mode that can only be proven in a deployed environment is a spec **authoring defect**: record it `fail` with that reason, run and record the local portion as `local-integration`, and return to the spec (`/devspark-specify`) to move the deployment-dependent half to a `post-deploy` obligation. Do not skip the mode and do not mark it `pass`. `post-deploy` obligations are never `verify:<mode>` entries; they are carried as deferred requirements in step 6.
+
 5. **Persist Gate Artifact**: Write `FEATURE_DIR/gates/verify.md` following the shape in verification-contract.md §4:
 
    ```yaml
@@ -113,7 +116,7 @@ Multi-app scope and the 2-tier override check for scripts are defined by the sha
 
    For every mode that passed by running a named, committed test (not an ad hoc probe), also record
    `test_ref: <path>::<test name>` alongside that mode's evidence. This is the citable pointer
-   `/devspark.implement`'s evidence-preference bullet consumes when it records `verified_by:
+   `/devspark-implement`'s evidence-preference bullet consumes when it records `verified_by:
    execution` on a `.knowledge/` node for this change — record it here, where the actual proof just
    ran, rather than leaving implement to reconstruct which test verified what.
 
@@ -148,15 +151,17 @@ Multi-app scope and the 2-tier override check for scripts are defined by the sha
 
    f. **Write `FEATURE_DIR/gates/closeout.md`** in the contract §7 shape with `produced_by: verify`. Replace any prior `closeout.md`; do not append.
 
+   **Post-deploy requirements.** A criterion declared `stage: post-deploy` (default is `pre-merge`) is recorded `outcome: deferred` with its `evidence_class` and a Deferred Work finding whose `captured_as` is an existing durable record (closeout contract §4.1) that verify never creates. A missing or hypothetical record leaves the finding unclassified and the decision `not-complete`; a high-risk deferral also needs `accepted_by`. Never record it `satisfied` on `automated` or `local-integration` evidence.
+
    **Classification is not a dodge.** A failed `requirement` or violated `invariant` is a Blocking Defect by definition, and choosing a softer classification because Blocking Defect is inconvenient is the same class of dishonesty as fabricating evidence in step 4. If it is genuinely acceptable to ship without the criterion, the criterion is amended through the authoring route — visibly, with its reason — never relabeled here.
 
    **Classify; do not re-discover.** This step reads findings that already exist. It MUST NOT open a new investigation, re-read the codebase hunting for problems, or widen the evidence search — that re-enters the loop this phase exists to stop. If a genuinely new blocking defect is noticed while reading, record it and stop looking.
 
 7. **Report once, for both phases.** Lead with the per-mode outcome, then the closeout summary in the contract §7 shape (objective, counts per classification, unclassified count, regression gates, decision). Do not restate every classified finding in chat — the artifacts carry the detail.
 
-   - `decision: complete` → recommend `/devspark.create-pr`. Name the accepted limitations, deferred work, and learnings as **carried forward, not outstanding** — they are not reasons this route is unfinished.
-   - `decision: not-complete` → route to `/devspark.implement` **for the blocking defects only**, and say so explicitly. Re-opening the classified findings on that return trip is the expansion loop.
-   - Never end by telling the user to run `/devspark.closeout`. The decision was just made here. Mention that command only if this run genuinely could not produce a decision, and say why.
+   - `decision: complete` → recommend `/devspark-create-pr`. Name the accepted limitations, deferred work, and learnings as **carried forward, not outstanding** — they are not reasons this route is unfinished. State that the change is ready to deploy, not deployed, and list any open `post-deploy` items with their `captured_as` records.
+   - `decision: not-complete` → route to `/devspark-implement` **for the blocking defects only**, and say so explicitly. Re-opening the classified findings on that return trip is the expansion loop.
+   - Never end by telling the user to run `/devspark-closeout`. The decision was just made here. Mention that command only if this run genuinely could not produce a decision, and say why.
 
    A non-blocking finding MUST NOT be turned into implementation work followed by another verification cycle in this route unless the developer explicitly asks for it (contract §8). If they do, record it as `promoted_by` — the distinction between "the agent discovered this" and "the developer decided to include this" is the whole point.
 

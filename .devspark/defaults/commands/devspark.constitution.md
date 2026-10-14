@@ -3,7 +3,7 @@ source: "BSW.DevSpark — © 2026 Baylor Scott & White Health. Source: https://b
 description: Create or update the project constitution from interactive or provided principle inputs, ensuring all dependent templates stay in sync.
 handoffs:
   - label: Build Specification
-    agent: devspark.specify
+    agent: devspark-specify
     prompt: Implement the feature specification based on the updated constitution. I want to build...
 ---
 
@@ -19,14 +19,14 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 **Single writer of record** for `/.knowledge/governance/constitution.md`. Two siblings feed in but never edit the constitution themselves:
 
-- `/devspark.discover-constitution` (brownfield bootstrap) → produces `constitution-draft.md`
-- `/devspark.evolve-constitution` (continuous improvement) → produces APPROVED CAPs in `proposals/`
+- `/devspark-discover-constitution` (brownfield bootstrap) → produces `constitution-draft.md`
+- `/devspark-evolve-constitution` (continuous improvement) → produces APPROVED CAPs in `proposals/`
 - Direct human edits via this command
 
 All three paths converge here → this command writes `constitution.md` and bumps the version.
 
 - **Owns**: collecting placeholder values, semver decisions, writing the constitution file, propagating impact to dependent templates, emitting the Sync Impact Report.
-- **Does NOT own**: reverse-engineering principles (→ `/devspark.discover-constitution`); generating amendment proposals (→ `/devspark.evolve-constitution`); reviewing/voting on proposals (out-of-band; this command only *applies* approved ones).
+- **Does NOT own**: reverse-engineering principles (→ `/devspark-discover-constitution`); generating amendment proposals (→ `/devspark-evolve-constitution`); reviewing/voting on proposals (out-of-band; this command only *applies* approved ones).
 
 ## Upstream Inputs to Check
 
@@ -63,7 +63,7 @@ game" (rarely changes, mutated in place, amended explicitly here); decisions ans
 choose and why not the alternatives" (mutated in place per topic, no chains); entities answer "what
 is true now." "Dependent templates staying in sync" (step 4 below) includes the decisions contract,
 not just prose templates — an amendment that contradicts an existing decision must correct that
-decision in place too (see `/devspark.evolve-constitution`).
+decision in place too (see `/devspark-evolve-constitution`).
 
 Follow this execution flow:
 
@@ -75,8 +75,8 @@ Follow this execution flow:
    - If user input (conversation) supplies a value, use it.
    - Otherwise infer from existing repo context (README, docs, prior constitution versions if embedded).
    - For governance dates: `RATIFICATION_DATE` is the original adoption date (if unknown ask or mark TODO), `LAST_AMENDED_DATE` is today if changes are made, otherwise keep previous.
-   - **Optional** `TEAM_EXPERIENCE` field in the Governance section (`**Team Experience**: expert | mixed | new-to-stack`): only set this if the user states it or it's already present from a prior version — never infer it. It calibrates `/devspark.critic`'s mindset paragraph (expert teams get less beginner-trap noise). Omitting it preserves `/devspark.critic`'s default pessimistic mindset.
-   - **Suggested principle** (offer, do not impose): if the project has none like it, propose a *genuine-fix / intent-over-metrics* principle — "Fixes MUST resolve the behavioral intent a check is a proxy for, not merely satisfy the metric." Declaring it lets gate commands cite its principle ID when flagging a gamed fix (see `command-preamble-contract.md` §9.2), escalating anti-gaming from process guidance to a constitution violation. Only add it with the user's agreement.
+   - **Optional** `TEAM_EXPERIENCE` field in the Governance section (`**Team Experience**: expert | mixed | new-to-stack`): only set this if the user states it or it's already present from a prior version — never infer it. It calibrates `/devspark-critic`'s mindset paragraph (expert teams get less beginner-trap noise). Omitting it preserves `/devspark-critic`'s default pessimistic mindset.
+   - **Suggested principle** (offer, do not impose): if the project has none like it, propose a *genuine-fix / intent-over-metrics* principle — "Fixes MUST resolve the behavioral intent a check is a proxy for, not merely satisfy the metric." Declaring it lets gate commands cite its principle ID when flagging a gamed fix (see the genuine-fix escalation hook in the shared preamble's `finding-fix` module), escalating anti-gaming from process guidance to a constitution violation. Only add it with the user's agreement.
    - `CONSTITUTION_VERSION` must increment according to semantic versioning rules:
      - MAJOR: Backward incompatible governance/principle removals or redefinitions.
      - MINOR: New principle/section added or materially expanded guidance.
@@ -97,7 +97,7 @@ Follow this execution flow:
    - Read runtime guidance docs (for example `README.md`, `/.knowledge/guides/Guide.md`, and agent-specific guidance files if present). Update references to principles changed.
    - Scan `/.knowledge/governance/decisions/*.md` for `constrains` entries or prose that assumes the
      principle being changed; a decision that contradicts the amended principle must be corrected in
-     place now, not left to drift until the next `/devspark.release` or `/devspark.site-audit` finds it.
+     place now, not left to drift until the next `/devspark-release` or `/devspark-site-audit` finds it.
 
 5. Produce a Sync Impact Report (prepend as an HTML comment at top of the constitution file after update):
    - Version change: old → new

@@ -145,7 +145,7 @@ main() {
     if [[ -z "$PR_NUMBER" ]]; then
         if ! PR_NUMBER=$(detect_pr_number); then
             log_error "Unable to detect PR number" \
-                "Please provide PR number explicitly: /devspark.pr-review #123"
+                "Please provide PR number explicitly: /devspark-pr-review #123"
             exit 1
         fi
     fi
@@ -319,6 +319,7 @@ main() {
     # Apply file sampling
     local files_changed_total
     files_changed_total=$(echo "$files_changed_json" | jq 'length')
+    local all_files_json="$files_changed_json"
     local files_changed_truncated="false"
     if [[ "$files_changed_total" -gt "$file_sample_limit" ]]; then
         files_changed_json=$(echo "$files_changed_json" | jq -c ".[0:$file_sample_limit]")
@@ -341,6 +342,22 @@ main() {
                 unmapped_files_available="true"
             else
                 unmapped_files_json="[]"
+            fi
+        fi
+    fi
+
+    # Deterministic risk digest (tiers, flags, score); null when the helper or Python is unavailable
+    local risk_json="null"
+    local risk_engine="$SCRIPT_DIR/../pr-risk.py"
+    if [[ -f "$risk_engine" && "$files_changed_total" -gt 0 ]]; then
+        local risk_python
+        risk_python=$(command -v python3 || command -v python || true)
+        if [[ -n "$risk_python" ]]; then
+            mapfile -t _risk_file_args < <(echo "$all_files_json" | jq -r '.[]')
+            local risk_out risk_range=()
+            if [[ -n "$source_branch" && -n "$target_branch" ]]; then risk_range=(--range "origin/$target_branch...origin/$source_branch"); fi
+            if risk_out=$("$risk_python" "$risk_engine" --repo-root "$REPO_ROOT" --lines-added "$lines_added" --lines-deleted "$lines_deleted" ${risk_range[@]+"${risk_range[@]}"} "${_risk_file_args[@]}" 2>/dev/null) && [[ -n "$risk_out" ]]; then
+                risk_json="$risk_out"
             fi
         fi
     fi
@@ -399,6 +416,7 @@ main() {
         cat <<EOF
 {
   "REPO_ROOT": "$REPO_ROOT",
+  "DEVSPARK_VERSION": $(get_devspark_version "$REPO_ROOT" | jq -R .),
   "PR_CONTEXT": {
     "enabled": true,
     "pr_number": $pr_number_int,
@@ -423,7 +441,8 @@ main() {
     "file_sample_limit": $file_sample_limit,
     "include_all_files": false,
     "merge_state_status": "$merge_state_status",
-    "is_behind_target": $is_behind_target
+    "is_behind_target": $is_behind_target,
+    "risk": $risk_json
   },
   "CONSTITUTION_PATH": "$constitution_path",
   "CONSTITUTION_EXISTS": $constitution_exists,

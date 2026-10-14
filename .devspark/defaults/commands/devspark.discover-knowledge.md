@@ -5,8 +5,8 @@
 description: Evidence-based `.knowledge` maintenance discovery — proposes gaps, weak mappings, relationship/alias candidates, contradictions, and historical leakage for human review
 handoffs:
   - label: Run Knowledge Integrity
-    agent: devspark.site-audit
-    prompt: Run `/devspark.site-audit --scope=knowledge` to validate structural integrity of `.knowledge` after acting on discovery findings
+    agent: devspark-site-audit
+    prompt: Run `/devspark-site-audit --scope=knowledge` to validate structural integrity of `.knowledge` after acting on discovery findings
 scripts:
   sh: .devspark/scripts/bash/discover-knowledge.sh $ARGUMENTS --json
   ps: .devspark/scripts/powershell/discover-knowledge.ps1 $ARGUMENTS -Json
@@ -21,8 +21,8 @@ $ARGUMENTS
 You **MUST** consider the user input before proceeding (if not empty). Supported forms:
 
 ```text
-/devspark.discover-knowledge
-/devspark.discover-knowledge <scope>
+/devspark-discover-knowledge
+/devspark-discover-knowledge <scope>
 ```
 
 Where `<scope>` is an already-known entity id, or a repository-relative path prefix, to narrow
@@ -37,7 +37,7 @@ test layout, and reports structured, evidence-backed findings for a human (or a 
 with confirmation) to act on.
 
 **Knowledge maintenance is continuous; knowledge discovery is periodic.** Most `.knowledge`
-authoring happens as a byproduct of `/devspark.plan`, `/devspark.implement`, and `/devspark.explain`
+authoring happens as a byproduct of `/devspark-plan`, `/devspark-implement`, and `/devspark-explain`
 already touching a delta — the best time to author knowledge is when the code makes the truth
 evident. This command is the periodic backstop for what that continuous path cannot catch by
 construction: gaps, weak mappings, and contradictions with no active delta to surface them.
@@ -49,7 +49,7 @@ of the two narrow, mechanical apply operations described below, and even then on
 approve the specific proposed change.
 
 **This is NOT**: agent memory, automatic documentation generation, historical reconstruction, a
-replacement for `/devspark.explain`, or a runtime retrieval mechanism. It never becomes the Plan
+replacement for `/devspark-explain`, or a runtime retrieval mechanism. It never becomes the Plan
 Context Resolution engine itself.
 
 ### Evidence sources
@@ -112,7 +112,7 @@ command never authors `.knowledge` content on its own initiative.
 
 ### 1. Initialize Discovery Context
 
-Load and obey the shared preamble contract at `/.devspark/templates/command-preamble-contract.md`
+Load and obey the shared preamble contract core at `/.devspark/templates/command-preamble-contract.md`
 (installed repos) or `templates/command-preamble-contract.md` (source repos) before step 1.
 
 Run `{SCRIPT}` and parse its JSON output. Expected top-level fields:
@@ -138,7 +138,7 @@ Additional CLI flags to narrow or shape output for large repositories:
   default so entity-scoped review does not bleed unrelated repository-wide findings).
 
 If the script reports `{"ERROR": ...}`, the `.knowledge` index itself failed to build — report
-this as a blocking issue and recommend running `/devspark.site-audit --scope=knowledge` (or
+this as a blocking issue and recommend running `/devspark-site-audit --scope=knowledge` (or
 `scripts/knowledge-integrity.py`) first, rather than attempting to interpret partial discovery.
 
 ### 2. Report Findings by Category

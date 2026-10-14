@@ -3,7 +3,7 @@ source: "BSW.DevSpark - (c) 2026 Baylor Scott & White Health. Source: https://bs
 description: Seal a release from the verified repository delta, sweep .devspark.work retention and archive-eligible work, and keep current knowledge accurate.
 handoffs:
   - label: Run Final Audit
-    agent: devspark.site-audit
+    agent: devspark-site-audit
     prompt: Run a final delta and documentation audit before release
 scripts:
   sh: .devspark/scripts/bash/release-context.sh $ARGUMENTS --json
@@ -29,7 +29,7 @@ into the one archive folder for the release being cut right now, regardless of w
 to be stamped with internally. Its sources are code, current `.knowledge/`, tests, verification
 results, Git history, merged PR metadata, and existing user-facing documentation.
 
-`/devspark.implement` deliberately leaves every completed spec and quickfix record live in
+`/devspark-implement` deliberately leaves every completed spec and quickfix record live in
 `.devspark.work/` — its populated `code_ref`/`knowledge_ref` linkage is what lets anyone validate the
 delta against code, tests, and knowledge for as long as it stays there, which can span more than one
 sprint. Release is what eventually archives it, and also runs the maintenance sweep: work-product
@@ -62,7 +62,7 @@ scans all run here.
    - changed behavior and current `.knowledge/` are complete and mutually consistent;
    - `.knowledge/index.json` is current;
    - `.knowledge/` structural completeness and knowledge/code mapping accuracy are clean — require a
-     current `/devspark.site-audit` result (full scope, or at least `--scope=knowledge`) covering
+     current `/devspark-site-audit` result (full scope, or at least `--scope=knowledge`) covering
      this release window with no open `KNOW1`–`KNOW6` findings. Re-run site-audit's knowledge scope
      now if the most recent result predates the window; release does not duplicate that check
      itself, only confirms it has run and passed;
@@ -75,7 +75,7 @@ scans all run here.
    - A bundle is **archive-eligible** when its own completion marker reads `Complete` (`spec.md`
      `**Status**`, or the quickfix record's completion marker) and every task/action-plan/checklist
      item's `code_ref`/`knowledge_ref` is populated (real path(s), or an explained `n/a`) — the same
-     linkage `/devspark.implement` populated and left in place. Confirm the linkage is still populated
+     linkage `/devspark-implement` populated and left in place. Confirm the linkage is still populated
      now; do not re-derive it.
    - Move every archive-eligible bundle into `.archive/{YYYY-MM-DD}/` (preserving its relative path
      minus the `.devspark.work/` prefix, e.g. `.devspark.work/specs/042-foo/` →
@@ -96,8 +96,8 @@ scans all run here.
    no longer exists — it was tied to the now-removed CLI; ignore any leftover copy as stray, not a
    category to sweep.)
 6. Check `.knowledge/` for obsolete, duplicate, historical, decision-log, rationale-archive,
-   lifecycle, or supersession content as a lighter, non-blocking backstop — `/devspark.pr-review` and
-   `/devspark.site-audit` are the authoritative checks for this; release only catches what they missed
+   lifecycle, or supersession content as a lighter, non-blocking backstop — `/devspark-pr-review` and
+   `/devspark-site-audit` are the authoritative checks for this; release only catches what they missed
    between runs. This includes `.knowledge/governance/decisions/` docs: flag any that have drifted
    into a numbered/ADR-style filename, a "superseded by" chain, or a `constrains`/`constrained_by`
    pointer that no longer matches an existing entity — correct in place or delete, never archive.

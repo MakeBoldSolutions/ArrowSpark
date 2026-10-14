@@ -16,7 +16,7 @@ get_repo_root() {
 
 # Single canonical resolver for build_knowledge_index.py. The framework-managed copy under
 # .devspark/scripts/ always wins when present, so every caller (CI, site-audit, create-pr,
-# get-pr-context, release-context, /devspark.explain) agrees on one implementation. The repo-root
+# get-pr-context, release-context, /devspark-explain) agrees on one implementation. The repo-root
 # copy is used only when .devspark/scripts/ has none -- BSW.DevSpark's own self-hosted repo, where
 # scripts/ IS the canonical source packaged into .devspark/scripts/ for every installed repository.
 resolve_knowledge_engine() {

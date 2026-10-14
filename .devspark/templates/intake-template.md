@@ -2,7 +2,7 @@
 
 <!-- BSW.DevSpark — © 2026 Baylor Scott & White Health. Source: https://bsw-devspark.bswhive.com -->
 
-Use this when starting `/devspark.specify` for non-trivial work. The goal is to provide grounded evidence up front so the spec maps facts instead of re-deriving them.
+Use this when starting `/devspark-specify` for non-trivial work. The goal is to provide grounded evidence up front so the spec maps facts instead of re-deriving them.
 
 ## Paste-Ready Format
 
@@ -33,7 +33,7 @@ ROLLOUT
 - How this will be introduced safely (phased, flag, migration, fallback)
 ```
 
-## Mapping Rules (used by /devspark.specify)
+## Mapping Rules (used by /devspark-specify)
 
 - `VERIFIED FINDINGS` are preserved verbatim in spec evidence/rationale sections.
 - `GOAL` and `ACCEPTANCE CRITERIA` map directly into requirements and success criteria.

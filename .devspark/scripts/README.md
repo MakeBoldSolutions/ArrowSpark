@@ -44,9 +44,9 @@ regressions even if Homebrew bash is installed and earlier on `PATH`.
 - scaffolds the type-appropriate artifact and prints JSON-only to stdout
   (diagnostics go to stderr).
 
-`create-new-feature.(sh|ps1)` (used by `/devspark.specify`) and the
+`create-new-feature.(sh|ps1)` (used by `/devspark-specify`) and the
 branch-creation step inside `quickfix-context.(sh|ps1)` (used by
-`/devspark.quickfix`) are thin shims that delegate to `new-branch` with
+`/devspark-quickfix`) are thin shims that delegate to `new-branch` with
 `--type spec|quick` / `--type fix` respectively, while preserving their own
 existing JSON contracts (`BRANCH_NAME`, `SPEC_FILE`/`ARTIFACT_PATH`,
 `FEATURE_NUM`/`NUMBER`, `HAS_GIT`) for backward compatibility. Legacy
@@ -59,9 +59,13 @@ continue to be counted by the allocator — only new branches adopt the
 Most scripts are invoked by a command prompt's `scripts:` frontmatter. One is
 standalone:
 
-- `generate-atomic-shims.(sh|ps1)` — maintainer tool that regenerates
-  `templates/prompts/atomic/*.md` shims from `templates/commands/*.md`. Run
-  with `--check` / `-Check` as the CI drift gate.
+- `generate-atomic-shims.(sh|ps1)` — maintainer tool that regenerates the
+  source-repository Agent Skills `.github/skills/devspark-*/SKILL.md` from
+  `templates/commands/*.md` (and, for the five source-only commands, the stop
+  bodies in `eng/skills/source-stop/`), plus the published consumer skills
+  `templates/consumer-skills/devspark-*/SKILL.md`. Run with `--check` / `-Check` as the
+  CI drift gate; it also reports orphaned `devspark-*` skill folders, which it
+  never deletes.
 
 Release packaging tooling is maintainer-only and lives in `eng/release/`, not
 here — nothing under `eng/` ships to consumer repositories.

@@ -3,8 +3,8 @@ source: "BSW.DevSpark — © 2026 Baylor Scott & White Health. Source: https://b
 description: Address open PR review findings with enforced commit isolation between code fixes and review-file updates
 handoffs:
   - label: Re-Review Updated PR
-    agent: devspark.pr-review
-    prompt: Run /devspark.pr-review UPDATE for this PR after fixes are committed
+    agent: devspark-pr-review
+    prompt: Run /devspark-pr-review UPDATE for this PR after fixes are committed
 scripts:
   sh: .devspark/scripts/bash/address-pr-review.sh --pr-id $ARGUMENTS --json
   ps: .devspark/scripts/powershell/address-pr-review.ps1 -PrId $ARGUMENTS -Json
@@ -20,9 +20,9 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Overview
 
-Load and obey the shared preamble contract at `/.devspark/templates/command-preamble-contract.md` (installed repos) or `templates/command-preamble-contract.md` (source repos) before Phase 0 — in particular §9 (Genuine Fix Discipline) during the Phase 2 fix loop.
+Load and obey the shared preamble contract core at `/.devspark/templates/command-preamble-contract.md` (installed repos) or `templates/command-preamble-contract.md` (source repos) before Phase 0 — in particular §9 (Genuine Fix Discipline) during the Phase 2 fix loop. Preamble modules: `finding-fix`, `convergence`, `configuration`.
 
-This command is the **author-side companion** to `/devspark.pr-review`. It helps you address open findings in `/.devspark.work/pr-review/pr-{PR_ID}.md` while enforcing commit isolation:
+This command is the **author-side companion** to `/devspark-pr-review`. It helps you address open findings in `/.devspark.work/pr-review/pr-{PR_ID}.md` while enforcing commit isolation:
 
 1. Commit code fixes first.
 2. Commit review-file updates second.
@@ -47,12 +47,7 @@ Done when: every selected finding is fixed and committed (Phase 4), the review f
 
 1. Run `{SCRIPT}` with the PR id and JSON output enabled (`-PrId {PR_ID} -Json` on PowerShell, `--pr-id {PR_ID} --json` on Bash).
 2. Fail fast if `/.devspark.work/pr-review/pr-{PR_ID}.md` is missing.
-3. Parse open findings from checklist lines matching:
-   - `- [ ] **C-##**`
-   - `- [ ] **H-##**`
-   - `- [ ] **M-##**`
-   - `- [ ] **L-##**`
-   - `- [ ] **CON-##**`
+3. Parse open findings from checklist lines for `C-##`, `H-##`, `M-##`, `L-##`, `CON-##` and `PRD{N}-##` ids (`- [ ] **ID**`). The helper reports each finding's `status`, `blocking`, `route`, `auto_eligible` and `reason`; use those values instead of inferring eligibility from an ID prefix.
 4. Confirm current branch equals the PR source branch. Refuse if mismatched.
 5. Capture `git status --short`.
 6. **Refuse to proceed** if any staged path matches `.devspark.work/pr-review/pr-*.md`.
@@ -62,7 +57,7 @@ If no open findings remain, print: `Nothing to address.` and stop.
 ### Phase 1 — Plan
 
 1. Render open findings as a checklist with severity badges.
-2. Ask which findings to address this iteration (`all` allowed). **Autonomy override**: if `--auto` (or a standing autonomy instruction) is in effect, skip the ask and select `all` open findings except any `C-NN` (Critical) finding whose fix is ambiguous enough to need a human judgment call — flag those specifically and proceed with the rest.
+2. Ask which findings to address this iteration (`all` allowed). **Autonomy override**: if `--auto` (or a standing autonomy instruction) is in effect, skip the ask and select only findings with `auto_eligible: true` (open critical/high or blocking PR-delta findings with no accepted, deferred, resolved or withdrawn disposition). Report every other open finding with its `reason` and leave it untouched: ordinary Medium/Low and non-blocking `PRD` findings need a human decision, and `CON` findings route to `/devspark-evolve-constitution` rather than product code. A selected `C-NN` finding whose fix is ambiguous enough to need a human judgment call is flagged and skipped.
 3. Build an internal todo list with one item per selected finding.
 
 ### Phase 2 — Fix loop (per finding)
@@ -71,8 +66,8 @@ For each selected finding:
 
 1. Read the cited file/lines and confirm the issue.
 2. If the finding cites a lint rule, complexity metric, or code smell, state in one sentence the behavioral intent behind it (command-preamble-contract.md §9) before writing the fix — do not react to the bare metric alone.
-3. Apply the recommended fix, or propose an alternative and show the diff. Confirm the fix addresses that intent (e.g., genuinely lowers branching/responsibility, genuinely names and surfaces an error) rather than merely satisfying the check mechanically.
-4. **Rule 1 check**: the fix stays subject to the same one-way reference gate `/devspark.pr-review` §6 enforces — do not introduce a spec ID, task ID, plan reference, or PR-thread ID into code or `.knowledge/` to "explain" what review comment this addresses. A commit message or the review file itself is the right place for that context, never a durable comment.
+3. A finding's suggested fix is evidence, not an architecture mandate. Choose the lightest sufficient remediation, in this order: clarify, remove, reuse something that exists, change an operational detail, make a small local change, and only then add machinery. If the fix needs something beyond the approved Plan's shape (a new state, endpoint, persisted record, cache, dependency, runtime setting, pattern or rollback design), stop and ask for explicit authority; `--auto` never grants it. Show the diff for any alternative to the suggested fix, and confirm the fix addresses that intent (e.g., genuinely lowers branching/responsibility, genuinely names and surfaces an error) rather than merely satisfying the check mechanically.
+4. **Rule 1 check**: the fix stays subject to the same one-way reference gate `/devspark-pr-review` §6 enforces — do not introduce a spec ID, task ID, plan reference, or PR-thread ID into code or `.knowledge/` to "explain" what review comment this addresses. A commit message or the review file itself is the right place for that context, never a durable comment.
 5. Stage **only** code paths touched by that fix.
 6. Never run `git add .`.
 7. Never stage `/.devspark.work/pr-review/pr-{PR_ID}.md` during this phase.
@@ -135,7 +130,7 @@ Parse the two commits and assert they share zero file paths.
 2. Suggest focused re-review:
 
 ```text
-Run `/devspark.pr-review UPDATE {PR_URL}` to trigger a focused re-review.
+Run `/devspark-pr-review UPDATE {PR_URL}` to trigger a focused re-review.
 ```
 
 ## Guidelines
@@ -167,7 +162,7 @@ $ARGUMENTS
 
 ## Shared Review Resolution Contract Output
 
-When emitting findings (review observations, issues, recommendations), structure each entry to include the shared resolution contract fields so downstream tools (/devspark.address-pr-review, telemetry, release) can act on them deterministically:
+When emitting findings (review observations, issues, recommendations), structure each entry to include the shared resolution contract fields so downstream tools (/devspark-address-pr-review, telemetry, release) can act on them deterministically:
 
 ```yaml
 findings:
@@ -180,4 +175,4 @@ findings:
     outcome: ""                                                  # populated post-resolution by address-pr-review
 ```
 
-inding_id MUST be stable across re-runs when the underlying issue is unchanged. xecution_mode MUST be one of: `auto` (safe to apply automatically), `selective` (apply with reviewer approval), `manual` (requires human implementation). The `status` and `outcome` fields are written by `/devspark.address-pr-review` (FR-028).
+inding_id MUST be stable across re-runs when the underlying issue is unchanged. xecution_mode MUST be one of: `auto` (safe to apply automatically), `selective` (apply with reviewer approval), `manual` (requires human implementation). The `status` and `outcome` fields are written by `/devspark-address-pr-review` (FR-028).

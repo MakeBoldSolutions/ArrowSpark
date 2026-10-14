@@ -5,6 +5,7 @@ set -e
 
 # Parse command line arguments
 JSON_MODE=false
+RESET=false
 ARGS=()
 
 for arg in "$@"; do
@@ -12,9 +13,13 @@ for arg in "$@"; do
         --json)
             JSON_MODE=true
             ;;
+        --reset)
+            RESET=true
+            ;;
         --help|-h)
-            echo "Usage: $0 [--json]"
+            echo "Usage: $0 [--json] [--reset]"
             echo "  --json    Output results in JSON format"
+            echo "  --reset   Explicitly replace the existing plan with the resolved template"
             echo "  --help    Show this help message"
             exit 0
             ;;
@@ -50,13 +55,19 @@ mkdir -p "$FEATURE_DIR"
 
 # Copy plan template from override/stock fallback chain if it exists
 TEMPLATE="$(resolve_template_path "$REPO_ROOT" "plan-template.md" || true)"
-if [[ -n "$TEMPLATE" && -f "$TEMPLATE" ]]; then
+PLAN_EXISTS=false
+PLAN_MODE=create
+if [[ -e "$IMPL_PLAN" ]]; then PLAN_EXISTS=true; PLAN_MODE=revise; fi
+if $RESET; then PLAN_MODE=reset; fi
+if $PLAN_EXISTS && ! $RESET; then
+    if ! $JSON_MODE; then echo "Preserved existing plan at $IMPL_PLAN"; fi
+elif [[ -n "$TEMPLATE" && -f "$TEMPLATE" ]]; then
     cp "$TEMPLATE" "$IMPL_PLAN"
     echo "Copied plan template to $IMPL_PLAN"
 else
     echo "[devspark] Warning: No plan-template.md found in fallback chain; creating empty plan.md"
     # Create a basic plan file if template doesn't exist
-    touch "$IMPL_PLAN"
+    : > "$IMPL_PLAN"
 fi
 
 # Knowledge documents: parse
@@ -99,7 +110,22 @@ fi
             EXTRACTED_TITLE="$(grep -m1 -E '^# Feature Specification:' "$FEATURE_SPEC" 2>/dev/null | sed -E 's/^# Feature Specification:\s*//' || true)"
             [[ -n "$EXTRACTED_TITLE" ]] && FEATURE_TITLE="$EXTRACTED_TITLE"
 
-            LINKS_JSON="$(jq -cn --argjson reqs "$FR_IDS_JSON" '{requirements:$reqs}' 2>/dev/null || echo '{"requirements":[]}')"
+            # Reference (never copy) the spec sections that carry consumed spec knowledge; a
+            # section the spec lacks is recorded as absent so no reference is left dangling.
+            SECTIONS_PRESENT=()
+            SECTIONS_ABSENT=()
+            for section in 'Requirements' 'Key Entities' 'Clarifications' 'Success Criteria' 'Assumptions' 'Out of Scope' 'Minimum Sufficient Change'; do
+                if grep -qiE "^#{2,3}[[:space:]]+${section}([[:space:]]|\*|$)" "$FEATURE_SPEC" 2>/dev/null; then
+                    SECTIONS_PRESENT+=("$section")
+                else
+                    SECTIONS_ABSENT+=("$section")
+                fi
+            done
+            PRESENT_JSON="$(printf '%s\n' "${SECTIONS_PRESENT[@]}" | jq -R . | jq -s . 2>/dev/null || echo '[]')"
+            ABSENT_JSON="$(printf '%s\n' "${SECTIONS_ABSENT[@]}" | jq -R . | jq -s . 2>/dev/null || echo '[]')"
+            [[ ${#SECTIONS_PRESENT[@]} -eq 0 ]] && PRESENT_JSON='[]'
+            [[ ${#SECTIONS_ABSENT[@]} -eq 0 ]] && ABSENT_JSON='[]'
+            LINKS_JSON="$(jq -cn --argjson reqs "$FR_IDS_JSON" --argjson present "$PRESENT_JSON" --argjson absent "$ABSENT_JSON" '{requirements:$reqs, spec_sections:$present, spec_sections_absent:$absent}' 2>/dev/null || echo '{"requirements":[]}')"
             if write_knowledge_document "$FEATURE_DIR" feature feature "$FEATURE_TITLE" draft "$LINKS_JSON" setup-plan && [[ -n "$SPEC_HASH" && -f "$FEATURE_DOC" ]]; then
                 # Below the closing frontmatter delimiter: above it, the YAML block stops being
                 # recognised and markdownlint reads the delimiters as setext headings.
@@ -111,13 +137,15 @@ fi
 
 # Output results
 if $JSON_MODE; then
-    printf '{"FEATURE_SPEC":"%s","IMPL_PLAN":"%s","SPECS_DIR":"%s","BRANCH":"%s","HAS_GIT":"%s"}\n' \
-        "$FEATURE_SPEC" "$IMPL_PLAN" "$FEATURE_DIR" "$CURRENT_BRANCH" "$HAS_GIT"
+    printf '{"FEATURE_SPEC":"%s","IMPL_PLAN":"%s","SPECS_DIR":"%s","BRANCH":"%s","HAS_GIT":"%s","PLAN_EXISTS":%s,"PLAN_MODE":"%s"}\n' \
+        "$FEATURE_SPEC" "$IMPL_PLAN" "$FEATURE_DIR" "$CURRENT_BRANCH" "$HAS_GIT" "$PLAN_EXISTS" "$PLAN_MODE"
 else
     echo "FEATURE_SPEC: $FEATURE_SPEC"
     echo "IMPL_PLAN: $IMPL_PLAN"
     echo "SPECS_DIR: $FEATURE_DIR"
     echo "BRANCH: $CURRENT_BRANCH"
     echo "HAS_GIT: $HAS_GIT"
+    echo "PLAN_EXISTS: $PLAN_EXISTS"
+    echo "PLAN_MODE: $PLAN_MODE"
 fi
 

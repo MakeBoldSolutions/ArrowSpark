@@ -16,7 +16,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Command Resolution Order
 
-BSW.DevSpark uses a **3-tier override system**. When a `/devspark.*` command runs,
+BSW.DevSpark uses a **3-tier override system**. When a `/devspark-*` skill runs,
 the prompt is resolved in this order (first match wins):
 
 ```text
@@ -52,7 +52,7 @@ over both team customizations and stock defaults.
 2. **Parse the command name from user input** (`$ARGUMENTS`):
 
    The argument should be a command name, with or without the `devspark.` prefix.
-   Examples: `constitution`, `devspark.plan`, `implement`
+   Examples: `constitution`, `devspark-plan`, `implement`
 
    If no argument is given, list all available commands from `.devspark.work/commands/`
    (or `.devspark/defaults/commands/` if `commands/` is empty) and ask the user
@@ -91,7 +91,7 @@ over both team customizations and stock defaults.
      Based on: {source-path}
      Created: {date}
      
-     This file takes priority over team and stock defaults when you run /devspark.{command}.
+     This file takes priority over team and stock defaults when you run /devspark-{command}.
      Edit freely. To revert, delete this file.
    -->
    ```
@@ -102,7 +102,7 @@ over both team customizations and stock defaults.
    Created personalized prompt:
      .devspark.work/{git-user}/commands/devspark.{command}.md
    
-   Resolution order for /devspark.{command}:
+   Resolution order for /devspark-{command}:
      1. ✅ .devspark.work/{git-user}/commands/  (this file — ACTIVE)
      2.    .devspark.work/commands/              (team default)
      3.    .devspark/defaults/commands/     (stock BSW.DevSpark)

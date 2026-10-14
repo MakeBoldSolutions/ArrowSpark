@@ -687,14 +687,32 @@ def _git_last_commit_date(root: Path, relative_path: str) -> str | None:
     return line or None
 
 
+def _memoized_commit_date(
+    root: Path, relative_path: str, history: dict[tuple[str, str], str | None] | None
+) -> str | None:
+    if history is None:
+        return _git_last_commit_date(root, relative_path)
+    key = (root.as_posix(), relative_path)
+    if key not in history:
+        history[key] = _git_last_commit_date(root, relative_path)
+    return history[key]
+
+
 def validate_entity_layer_doc(
-    root: Path, path: Path, metadata: dict[str, Any], stale_findings: list[dict[str, str]]
+    root: Path,
+    path: Path,
+    metadata: dict[str, Any],
+    stale_findings: list[dict[str, str]],
+    history: dict[tuple[str, str], str | None] | None = None,
 ) -> None:
     """Validate an entity-layer doc's structure (raises immediately) and check staleness
     (appended to `stale_findings` instead of raising, so every stale doc in a run can be
     reported together rather than stopping at the first one). Staleness is reported, not
     hard-failed by default -- see the `stale_entities` field on the built index and the
     `--fail-on-stale` flag in `main()`.
+
+    `history` memoizes source commit dates for one build only, so a source cited by several layer
+    documents is queried once. The caller owns and discards it; nothing persists across builds.
     """
     layer = metadata.get("layer")
     if layer not in ALLOWED_LAYERS:
@@ -733,7 +751,7 @@ def validate_entity_layer_doc(
             raise ValueError(f"{path}: source_of_truth cannot target .devspark.work/ or .archive/: {source}")
         if not (root / source).exists():
             raise ValueError(f"{path}: source_of_truth path does not exist: {source}")
-        commit_date = _git_last_commit_date(root, source)
+        commit_date = _memoized_commit_date(root, source, history)
         if commit_date is None:
             continue
         try:
@@ -808,6 +826,7 @@ def stable_path_sort_key(path: PurePath) -> str:
 
 def build_entities(
     root: Path,
+    history: dict[tuple[str, str], str | None] | None = None,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, str]]]:
     """Return (entity_nodes, layer_doc_nodes, stale_entities) for every .knowledge/entities/<id>/.
 
@@ -839,7 +858,7 @@ def build_entities(
             relative = doc_path.relative_to(root).as_posix()
             metadata, body = parse_frontmatter(doc_path)
             validate_current(doc_path, metadata, body)
-            validate_entity_layer_doc(root, doc_path, metadata, stale_findings)
+            validate_entity_layer_doc(root, doc_path, metadata, stale_findings, history)
             layer = str(metadata["layer"])
             present_layers.add(layer)
             node_id = str(metadata.get("id") or f"{entity_id}-{layer}")
@@ -899,21 +918,31 @@ def generated_at(explicit: str | None = None) -> str:
     return datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
+def knowledge_markdown_paths(root: Path) -> list[Path]:
+    """Every Markdown file under `.knowledge/`, in the order the builder reads them."""
+    knowledge_root = root / ".knowledge"
+    if not knowledge_root.exists():
+        return []
+    return sorted(knowledge_root.rglob("*.md"), key=stable_path_sort_key)
+
+
 def build_index(root: Path, timestamp: str | None = None) -> dict[str, Any]:
     knowledge_root = root / ".knowledge"
     mappings = load_registry(root)
     nodes: list[dict[str, Any]] = []
     edges: list[dict[str, str]] = []
     seen: set[str] = set()
+    # Source commit dates, memoized for this build only and discarded with it.
+    history: dict[tuple[str, str], str | None] = {}
 
     # Entities are built first so governance-decision docs can validate `constrains` against real
     # entity ids, and so the reciprocal `constrained_by` check below has entities to compare against.
-    entity_nodes, layer_nodes, stale_entities = build_entities(root)
+    entity_nodes, layer_nodes, stale_entities = build_entities(root, history)
     entity_by_id = {entity["id"]: entity for entity in entity_nodes}
     decision_constrains: dict[str, list[str]] = {}
 
     if knowledge_root.exists():
-        for path in sorted(knowledge_root.rglob("*.md"), key=stable_path_sort_key):
+        for path in knowledge_markdown_paths(root):
             relative = path.relative_to(root).as_posix()
             if relative in {".knowledge/index.md", ".knowledge/README.md"}:
                 continue
@@ -1069,6 +1098,81 @@ def _drift(existing_path: Path, fresh_payload: dict[str, Any]) -> str | None:
     return None
 
 
+class InputsUncertain(RuntimeError):
+    """A build dependency could not be fingerprinted with confidence, so reuse is not safe."""
+
+
+def _tree_or_file_digest(path: Path) -> str:
+    try:
+        if path.is_dir():
+            digest = hashlib.sha256()
+            for member in sorted((p for p in path.rglob("*") if p.is_file()), key=stable_path_sort_key):
+                digest.update(member.relative_to(path).as_posix().encode("utf-8"))
+                digest.update(hashlib.sha256(member.read_bytes()).digest())
+            return "sha256:" + digest.hexdigest()
+        return "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
+    except FileNotFoundError:
+        return "missing"
+    except OSError as exc:
+        raise InputsUncertain(f"{path}: {exc}") from exc
+
+
+def _git_head(root: Path) -> str:
+    try:
+        done = subprocess.run(
+            ["git", "rev-parse", "HEAD"], cwd=root, capture_output=True, text=True, timeout=5, check=False
+        )
+    except (OSError, subprocess.SubprocessError) as exc:
+        raise InputsUncertain(f"git history identity unavailable: {exc}") from exc
+    return done.stdout.strip() if done.returncode == 0 and done.stdout.strip() else "unavailable"
+
+
+def knowledge_base_inventory(root: Path) -> dict[str, str]:
+    """Content digests of what `build_index` reads, to prove a build is still current.
+
+    Digests are of content, never timestamps: an edit that preserves the modification time still
+    changes a digest, and an added or deleted file changes the key set. It covers Knowledge
+    documents, entity definitions, the registry, the committed generated artifacts that
+    `INDEX_FRESH` compares against, and Git history identity. The inventory is returned to the
+    caller and never stored.
+    """
+    inventory: dict[str, str] = {}
+    for path in knowledge_markdown_paths(root):
+        inventory[path.relative_to(root).as_posix()] = _tree_or_file_digest(path)
+    entities_root = root / ".knowledge/entities"
+    if entities_root.is_dir():
+        for definition in sorted(entities_root.glob("*/_entity.yaml"), key=stable_path_sort_key):
+            inventory[definition.relative_to(root).as_posix()] = _tree_or_file_digest(definition)
+    for generated in (".knowledge/taxonomy-registry.json", ".knowledge/index.json", ".knowledge/ontology/coverage.json"):
+        inventory[generated] = _tree_or_file_digest(root / generated)
+    inventory["git:HEAD"] = _git_head(root)
+    return inventory
+
+
+def knowledge_source_inventory(root: Path) -> dict[str, str]:
+    """Content digests of the source files Knowledge documents cite.
+
+    Read from the same documents `build_index` reads (via `knowledge_markdown_paths` and
+    `parse_frontmatter`), so it can be taken before a build and compared after it.
+    """
+    inventory: dict[str, str] = {}
+    for path in knowledge_markdown_paths(root):
+        try:
+            metadata, _ = parse_frontmatter(path)
+        except (OSError, ValueError) as exc:
+            raise InputsUncertain(f"{path}: {exc}") from exc
+        for claim in metadata.get("source_of_truth") or []:
+            source = str(claim.get("path", "")) if isinstance(claim, dict) else str(claim)
+            if source and not re.search(r"[*?\[]", source):
+                inventory[source] = _tree_or_file_digest(root / source)
+    return inventory
+
+
+def inventory_changes(before: dict[str, str], after: dict[str, str]) -> list[str]:
+    """Sorted keys that differ, were added, or were deleted between two inventories."""
+    return sorted(key for key in set(before) | set(after) if before.get(key) != after.get(key))
+
+
 def _pattern_covers(pattern: str, changed_file: str) -> bool:
     if fnmatch.fnmatchcase(changed_file, pattern):
         return True
@@ -1079,7 +1183,7 @@ def _pattern_covers(pattern: str, changed_file: str) -> bool:
 def find_unmapped_files(index: dict[str, Any], changed_files: list[str]) -> list[str]:
     """Return the subset of changed_files that no knowledge node claims.
 
-    Used by /devspark.pr-review as a computed hint for its PRD5 ("new behavior with no
+    Used by /devspark-pr-review as a computed hint for its PRD5 ("new behavior with no
     knowledge") judgment call — never a mechanical gate on its own, just a real list backing
     the reviewer's read of the diff instead of leaving it to eyeballing.
 
@@ -1098,6 +1202,40 @@ def find_unmapped_files(index: dict[str, Any], changed_files: list[str]) -> list
         for changed_file in changed_files
         if not any(_pattern_covers(pattern, changed_file) for pattern in patterns)
     ]
+
+
+def match_file_owners(index: dict[str, Any], files: list[str]) -> dict[str, Any]:
+    """Typed Knowledge lookup for each file: which nodes apply to it or cite it as a source.
+
+    `appliesTo` says a node governs a path; `source_of_truth` says the path is evidence for the
+    node. Applicability is not exclusive ownership, so every match is reported with its
+    relationship and the pattern that matched, never collapsed to a single owner. Object-form
+    source claims match through their `path`. A file no node claims is `unmapped`, a computed hint
+    and not a defect.
+    """
+    results = []
+    unmapped = []
+    for changed_file in files:
+        owners: dict[tuple[str, str, str], dict[str, Any]] = {}
+        for node in index.get("nodes", []):
+            for relationship in ("appliesTo", "source_of_truth"):
+                for claim in node.get(relationship) or []:
+                    pattern = str(claim.get("path", "")) if isinstance(claim, dict) else str(claim)
+                    if not pattern or not _pattern_covers(pattern, changed_file):
+                        continue
+                    owners[(str(node["id"]), relationship, pattern)] = {
+                        "id": node["id"],
+                        "path": node.get("path"),
+                        "form": node.get("form"),
+                        "entity": node.get("entity"),
+                        "relationship": relationship,
+                        "pattern": pattern,
+                    }
+        ordered = [owners[key] for key in sorted(owners)]
+        results.append({"path": changed_file, "owners": ordered})
+        if not ordered:
+            unmapped.append(changed_file)
+    return {"files": results, "unmapped_files": unmapped}
 
 
 # --- Knowledge drift detection: document scan, scope resolution, evaluation, migration ------
@@ -1860,7 +1998,7 @@ def main() -> int:
                 f"STALE: {finding['path']}: source_of_truth '{finding['source']}' changed "
                 f"({finding['source_date']}) after last_verified ({finding['last_verified']}) "
                 "-- confirm the doc still matches the code before bumping last_verified "
-                "(prefer running /devspark.explain <topic> over a bare hand-edit of the date)",
+                "(prefer running /devspark-explain <topic> over a bare hand-edit of the date)",
                 file=sys.stderr,
             )
         if args.fail_on_stale:

@@ -10,6 +10,7 @@ for knowledge structure across languages.
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import re
 import subprocess
@@ -21,12 +22,17 @@ from typing import Any
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from build_knowledge_index import (  # noqa: E402
     CanonicalizationError,
+    InputsUncertain,
     ObjectClaimError,
     _drift,
     _git_last_commit_date,
     build_coverage_report,
     build_index,
     enumerate_claim_states,
+    inventory_changes,
+    knowledge_base_inventory,
+    knowledge_source_inventory,
+    match_file_owners,
     normalize_search_text,
     parse_frontmatter,
     rotate_claim,
@@ -100,6 +106,18 @@ def repository_root() -> Path:
 
 def relative(repo: Path, path: Path) -> str:
     return path.relative_to(repo).as_posix()
+
+
+def repo_relative_path(repo: Path, value: str) -> str:
+    """Forward-slash, repo-relative form of a user-supplied path (absolute paths are made relative)."""
+    candidate = Path(value)
+    if candidate.is_absolute():
+        try:
+            candidate = candidate.resolve().relative_to(repo.resolve())
+        except ValueError:
+            return candidate.as_posix()
+    text = candidate.as_posix()
+    return text[2:] if text.startswith("./") else text
 
 
 def normalize_token(token: str) -> str:
@@ -462,6 +480,60 @@ def grep_code_hits(repo: Path, keywords: list[str], limit: int) -> list[dict[str
     return hits
 
 
+def _retry_required(repo: Path, topic: str, keywords: list[str], changed: list[str]) -> int:
+    """Discard combined output: an input changed or could not be verified, so the run must be repeated."""
+    payload = {
+        "REPO_ROOT": str(repo),
+        "TOPIC": topic,
+        "KEYWORDS": keywords,
+        "RETRY_REQUIRED": True,
+        "CHANGED_INPUTS": changed,
+    }
+    print(json.dumps(payload, separators=(",", ":")))
+    return 3
+
+
+def _projection_module():
+    spec = importlib.util.spec_from_file_location(
+        "context_projection", Path(__file__).resolve().parent / "context-projection.py"
+    )
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    return module
+
+
+def knowledge_snapshot(repo: Path) -> dict[str, str]:
+    return {**knowledge_base_inventory(repo), **knowledge_source_inventory(repo)}
+
+
+def project_verified(
+    repo: Path,
+    index: dict[str, Any],
+    before: dict[str, str],
+    seeds: list[str],
+    max_hops: int | None,
+) -> tuple[dict[str, Any] | None, list[str]]:
+    """Project over the already-built index only while its inputs are proven unchanged.
+
+    Returns `(projection, [])` when the Knowledge inputs, cited sources and Git history identity
+    match their state before the build and again just before publication, otherwise
+    `(None, changed_inputs)`. Content digests decide this, never timestamps. Nothing is stored.
+    """
+    try:
+        after = knowledge_snapshot(repo)
+        changed = inventory_changes(before, after)
+        if changed:
+            return None, changed
+        module = _projection_module()
+        hops = module.DEFAULT_MAX_HOPS if max_hops is None else max(0, max_hops)
+        projection = module.project_context(index, seeds, max_hops=hops)
+        changed = inventory_changes(after, knowledge_snapshot(repo))
+    except InputsUncertain as exc:
+        return None, [f"uncertain: {exc}"]
+    return (None, changed) if changed else (projection, [])
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("topic", nargs="*", help="Free-text topic/question, e.g. 'how is auth done'")
@@ -480,6 +552,21 @@ def main() -> int:
     parser.add_argument("--claim-path", metavar="PATH")
     parser.add_argument("--claim-profile", metavar="PROFILE")
     parser.add_argument("--claim-region", metavar="REGION")
+    parser.add_argument(
+        "--files",
+        nargs="+",
+        metavar="PATH",
+        help="Files mode: report which Knowledge nodes apply to or cite each file, and which files are unmapped.",
+    )
+    parser.add_argument(
+        "--project",
+        action="store_true",
+        help=(
+            "Also project the matched ids across accepted relationships, reusing this run's one verified "
+            "build. If any input changed during the run, emit RETRY_REQUIRED instead of combined output."
+        ),
+    )
+    parser.add_argument("--max-hops", type=int, default=None, help="Hop budget for --project (default: the projection default).")
     args, _ = parser.parse_known_args()
 
     repo = repository_root()
@@ -502,6 +589,12 @@ def main() -> int:
 
     topic = " ".join(args.topic).strip()
     keywords = tokenize(topic)
+    before: dict[str, str] | None = None
+    if args.project and not args.files:
+        try:
+            before = knowledge_snapshot(repo)
+        except InputsUncertain as exc:
+            return _retry_required(repo, topic, keywords, [f"uncertain: {exc}"])
     try:
         index = build_index(repo)
     except ValueError as exc:
@@ -513,6 +606,21 @@ def main() -> int:
         return 1
 
     fresh = index_is_fresh(repo, index)
+    if args.files:
+        located = match_file_owners(index, [repo_relative_path(repo, item) for item in args.files])
+        payload = {
+            "REPO_ROOT": str(repo),
+            "INDEX_FRESH": fresh,
+            "FILES": located["files"],
+            "UNMAPPED_FILES": located["unmapped_files"],
+            "SUMMARY": {
+                "file_count": len(located["files"]),
+                "mapped_file_count": len(located["files"]) - len(located["unmapped_files"]),
+                "unmapped_file_count": len(located["unmapped_files"]),
+            },
+        }
+        print(json.dumps(payload, separators=(",", ":")))
+        return 0
     entity_lookup = {entity["id"]: entity for entity in index.get("entities", [])}
     body_text = load_body_text(repo, index.get("nodes", []))
     matched_nodes = [
@@ -537,6 +645,13 @@ def main() -> int:
             "test_hit_count": sum(1 for hit in code_hits if hit["is_test"]),
         },
     }
+    if args.project and before is not None:
+        seeds = [str(entity["id"]) for entity in matched_entities] + [str(node["id"]) for node in matched_nodes]
+        projection, changed = project_verified(repo, index, before, seeds, args.max_hops)
+        if projection is None:
+            return _retry_required(repo, topic, keywords, changed)
+        payload["PROJECTION"] = projection
+        payload["INDEX_BUILDS"] = 1
     print(json.dumps(payload, separators=(",", ":")))
     return 0
 

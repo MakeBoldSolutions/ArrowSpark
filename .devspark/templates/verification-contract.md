@@ -15,7 +15,7 @@ Findings in `gates/verify.md` are **evidence**, not opinions: every claim MUST b
 
 ## 2. Proof Modes
 
-A spec declares which proof mode(s) it requires via `required_gates: verify:<mode>` in its frontmatter (see §3). `/devspark.specify`'s route classification assigns a default mode per route (see `specify.md`); the user or `/devspark.plan` may add or override it explicitly.
+A spec declares which proof mode(s) it requires via `required_gates: verify:<mode>` in its frontmatter (see §3). `/devspark-specify`'s route classification assigns a default mode per route (see `specify.md`); the user or `/devspark-plan` may add or override it explicitly.
 
 | Mode                | Use when…                                                                 | Minimum evidence required                                                                                                                                     |
 | -------------------- | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -55,7 +55,7 @@ Do not extend this table with repository-specific technologies. If a new shape i
 
 ## 2.2 The Applicability Decision Is Reported, Not Hidden
 
-Whichever command decides whether empirical verification is warranted — `/devspark.specify` at route classification, `/devspark.plan` when the design makes the shape visible, or `/devspark.verify` itself — states the decision and its reason in two lines:
+Whichever command decides whether empirical verification is warranted — `/devspark-specify` at route classification, `/devspark-plan` when the design makes the shape visible, or `/devspark-verify` itself — states the decision and its reason in two lines:
 
 ```text
 Empirical verification: REQUIRED (end-to-end)
@@ -68,6 +68,30 @@ Reason: no verify-sensitive change shape — contained local refactor with no en
 ```
 
 Keep it to those two lines. Classification may be automatic; the reasoning may not be invisible.
+
+## 2.3 Stage and Evidence Class
+
+**Implementation complete means ready to merge and deploy, not already deployed.** Deployment validation is a separate milestone with its own evidence obligations. Two optional attributes keep the milestones apart without adding a lifecycle state, a gate, or a script.
+
+| Attribute | Values | Meaning |
+|---|---|---|
+| `stage` | `pre-merge` (default), `post-deploy` | When the obligation can be satisfied. A criterion or mode with no `stage` is `pre-merge`. |
+| `evidence_class` | `automated`, `local-integration`, `deployed`, `rollout` | What kind of evidence a mode entry or a closeout criterion carries. |
+
+| Evidence class | What it is | Typical source |
+|---|---|---|
+| `automated` | Unit, contract, golden, snapshot, or regression tests run in the build environment | The test suite and linters |
+| `local-integration` | A real flow driven against a development or local dependency, not the deployed target | A local run against a dev service or fixture server |
+| `deployed` | A check that ran against the actual deployed environment | A smoke or acceptance run against the published target |
+| `rollout` | An operational rollout check: configuration applied, migration run, monitoring or alerting live | A rollout checklist result or an operational query |
+
+Rules:
+
+- A `post-deploy` criterion requires `deployed` or `rollout` evidence and cannot be satisfied by a pre-merge run. Local execution is never evidence of deployed-environment validation: `local-integration` evidence is recorded as `local-integration` and is never counted as `deployed` or `rollout`.
+- Every `verify:<mode>` entry in `required_gates` is a pre-merge obligation. A `post-deploy` obligation is not listed in `required_gates`; it is carried as a deferred requirement with a durable record by the Closeout Contract (§4 there), so no pre-merge gate can pass or fail on evidence that does not exist yet.
+- A required pre-merge mode that can only be proven in a deployed environment is a spec authoring defect: the mode is recorded `fail` with that reason, the local portion is run and recorded as `local-integration` evidence, and the work returns to the spec for a visible amendment (move the deployment-dependent half to a `post-deploy` obligation and keep the pre-merge half). The mode is never skipped and never marked `pass`.
+- A mandatory pre-merge check that fails stays a failure. Nothing in this section weakens implementation verification, a pre-merge safety or compliance requirement, or the blocking `deployment_rollback` concern.
+- A bundle that records neither `stage` nor `evidence_class` behaves exactly as before: every obligation is `pre-merge` and every mode keeps its existing meaning.
 
 **Consequential proof stays a human decision.** A mode that needs resources or authority the command does not already hold — live traffic, a production-like environment, a replay corpus, credentials, or anything with a cost — is proposed, not assumed. State what the proof requires and ask. Automate the classification; never hide the commitment.
 
@@ -83,12 +107,12 @@ Multiple modes are comma-separated within the same `verify:` token set is not va
 
 Validation rules:
 
-- If `required_gates` names one or more `verify:<mode>` entries, `/devspark.implement`'s gate pre-flight (see `implement.md`) MUST refuse to proceed until `gates/verify.md` exists, its `modes:` list is a superset of the ones required, and every listed mode's `status` is `pass`.
-- A `verify` requirement is never satisfied by document review alone — `/devspark.critic` and `/devspark.analyze` MUST NOT mark it resolved.
+- If `required_gates` names one or more `verify:<mode>` entries, `/devspark-implement`'s gate pre-flight (see `implement.md`) MUST refuse to proceed until `gates/verify.md` exists, its `modes:` list is a superset of the ones required, and every listed mode's `status` is `pass`.
+- A `verify` requirement is never satisfied by document review alone — `/devspark-critic` and `/devspark-analyze` MUST NOT mark it resolved.
 
 ## 4. Gate Artifact Shape
 
-`/devspark.verify` (or a manual/CI-produced equivalent) writes `FEATURE_DIR/gates/verify.md`:
+`/devspark-verify` (or a manual/CI-produced equivalent) writes `FEATURE_DIR/gates/verify.md`:
 
 ```yaml
 gate: verify
@@ -99,6 +123,7 @@ blocking: true | false
 summary: "<concise outcome>"
 modes:
   - mode: snapshot-neutral | golden | regression-pinned | shadow-agreement | end-to-end
+    evidence_class: automated | local-integration | deployed | rollout   # optional; default automated
     status: pass | fail
     evidence: |
       <actual commands run and actual output/results — not a plan to run them>
@@ -110,16 +135,17 @@ The `discovered:` list is the overflow channel for everything the run surfaced t
 
 ## 5. Non-Negotiables
 
-- **Never fabricate evidence.** If a proof mode can't be executed in this environment (no test runner, no traffic sample, no baseline artifact), the gate status is `fail` with the reason stated — not a hypothetical pass.
-- **Re-run on drift.** Like `analyze`/`critic` (see the gate-staleness convention in those commands), `verify` evidence is tied to the code state it was captured against; if the implementation changes materially after verification, re-run before `/devspark.create-pr`.
+- **Never fabricate evidence.** If a proof mode can't be executed in this environment (no test runner, no traffic sample, no baseline artifact), the gate status is `fail` with the reason stated — not a hypothetical pass. A mode that needs a deployed environment that does not exist yet is the authoring defect described in §2.3, not a pass.
+- **Name the evidence class.** Record the class that was actually obtained. Evidence from a local run against a development dependency is `local-integration`, never `deployed`.
+- **Re-run on drift.** Like `analyze`/`critic` (see the gate-staleness convention in those commands), `verify` evidence is tied to the code state it was captured against; if the implementation changes materially after verification, re-run before `/devspark-create-pr`.
 - **Evidence over narration.** A finding that says "this should work because X" is not evidence. A finding that shows the command, its output, and the pass/fail conclusion is.
 
 ## 6. Closeout: The Convergence Phase of Verification
 
-Gathering evidence answers **"what does the evidence say?"** It does not answer **"is this work finished?"** That second question is the **closeout phase**, defined by the Closeout Contract (`templates/closeout-contract.md`) and run by `/devspark.verify` itself, in the same invocation, immediately after the evidence phase. Two phases, two artifacts (`gates/verify.md` and `gates/closeout.md`), one developer interaction.
+Gathering evidence answers **"what does the evidence say?"** It does not answer **"is this work finished?"** That second question is the **closeout phase**, defined by the Closeout Contract (`templates/closeout-contract.md`) and run by `/devspark-verify` itself, in the same invocation, immediately after the evidence phase. Two phases, two artifacts (`gates/verify.md` and `gates/closeout.md`), one developer interaction.
 
 The phases stay distinct because their incentives differ: the evidence phase optimizes for finding things, the closeout phase optimizes for converging. Collapsing them would quietly bias verification toward noticing less, since every observation would arrive already priced as work.
 
-A failing proof mode is a blocking defect and routes back to `/devspark.implement`. Every other observation that surfaces during the run is recorded under `discovered:` and classified in the closeout phase as an Accepted Limitation, Deferred Work, or a Learning / Changed Assumption. Turning such an observation into new work inside the current spec, on verification's own authority, is the convergence failure that contract exists to prevent.
+A failing proof mode is a blocking defect and routes back to `/devspark-implement`. Every other observation that surfaces during the run is recorded under `discovered:` and classified in the closeout phase as an Accepted Limitation, Deferred Work, or a Learning / Changed Assumption. Turning such an observation into new work inside the current spec, on verification's own authority, is the convergence failure that contract exists to prevent.
 
-`/devspark.closeout` re-runs the closeout phase alone — same contract, same artifact — and is an advanced reassessment entry point, never a required next step after this command.
+`/devspark-closeout` re-runs the closeout phase alone — same contract, same artifact — and is an advanced reassessment entry point, never a required next step after this command.

@@ -48,7 +48,7 @@ Shared guidance belongs under `templates/skills/references/`. Skill-specific
 guidance belongs under `templates/skills/<skill-name>/references/`.
 
 The first pilot skill is `templates/skills/write-spec/`. It proves that
-`/devspark.specify` can keep the same user-facing command behavior while
+`/devspark-specify` can keep the same user-facing command behavior while
 delegating portable spec-drafting instructions to a standalone skill.
 
 ## Commands vs Skills

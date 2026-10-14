@@ -5,7 +5,7 @@
 description: Perform comprehensive codebase audit against project constitution/standards, producing structured compliance report
 handoffs:
   - label: Re-run Current Audit
-    agent: devspark.site-audit
+    agent: devspark-site-audit
     prompt: Re-run the audit against the current durable repository state.
 scripts:
   sh: .devspark/scripts/bash/site-audit.sh $ARGUMENTS --json
@@ -26,7 +26,7 @@ This command performs a comprehensive codebase audit against the project constit
 
 **IMPORTANT**: This command **only provides analysis** - it does not make any code changes.
 
-Load and obey the shared preamble contract at `/.devspark/templates/command-preamble-contract.md` (installed repos) or `templates/command-preamble-contract.md` (source repos) before step 1 — in particular §9 (Genuine Fix Discipline) and its §9.1 intent-cue table when phrasing code-quality findings.
+Load and obey the shared preamble contract core at `/.devspark/templates/command-preamble-contract.md` (installed repos) or `templates/command-preamble-contract.md` (source repos) before step 1 — in particular §9 (Genuine Fix Discipline) and its §9.1 intent-cue table when phrasing code-quality findings. Preamble modules: `finding-fix`, `convergence`, `provenance`, `configuration`.
 
 ## Prerequisites
 
@@ -79,7 +79,7 @@ Execution limits (required):
 
 **Error Handling**:
 If the script fails:
-- **Constitution missing**: Guide user to run `/devspark.constitution`
+- **Constitution missing**: Guide user to run `/devspark-constitution`
 - **Script execution failed**: Provide PowerShell troubleshooting
 
 For single quotes in args like "I'm auditing", use escape syntax: e.g 'I'\''m auditing' (or double-quote if possible: "I'm auditing").
@@ -95,7 +95,7 @@ Read and parse `/.knowledge/governance/constitution.md`:
 
 If constitution doesn't exist:
 - **STOP** and inform user that constitution is required
-- Provide guidance: "Run `/devspark.constitution` to create project principles first"
+- Provide guidance: "Run `/devspark-constitution` to create project principles first"
 - Do not proceed with audit
 
 ### 3. File Discovery and Categorization
@@ -159,7 +159,7 @@ Include in the audit report under a **BSW.DevSpark Version** section:
 ```
 
 If VER1 or VER2 is present, add to the Recommendations section:
-> Re-run your agent's quickstart guide (or `/devspark.upgrade`) to update BSW.DevSpark.
+> Re-run your agent's quickstart guide (or `/devspark-upgrade`) to update BSW.DevSpark.
 
 ### 5. Durable Delta Consistency Audit
 
@@ -194,7 +194,7 @@ written there; neither is audit evidence.
   candidate contradiction as `DELTA6` (always a **warning**, never a gate — judging genuine
   contradiction vs. acceptable nuance is a human call every time).
 9. **Knowledge completeness** (repo-wide structural check, `.knowledge/` in its entirety — this is
-   the repo-wide counterpart to `/devspark.pr-review`'s diff-scoped §6c gate): run
+   the repo-wide counterpart to `/devspark-pr-review`'s diff-scoped §6c gate): run
    `scripts/build_knowledge_index.py --repo-root . --check` (or the installed-repo path). A non-zero
    exit means `.knowledge/index.json` and/or `.knowledge/ontology/coverage.json` are stale relative
    to the source docs — `KNOW1` (HIGH, regenerate before trusting any other knowledge finding in
@@ -217,7 +217,7 @@ written there; neither is audit evidence.
 12. **Taxonomy and coverage sweep** — cross-reference `.knowledge/taxonomy-registry.json`'s
     `pathPattern` entries against the actual `.knowledge/` tree: a file matching no pattern is
     unclassified content (`KNOW5`, MEDIUM). Separately, using the same repo-structure signals
-    `/devspark.discover-constitution` already gathers (directory layout, layer separation, natural
+    `/devspark-discover-constitution` already gathers (directory layout, layer separation, natural
     module boundaries), flag a central, behavior-bearing module with **no** corresponding flat doc
     or entity anywhere under `.knowledge/` as a coverage gap (`KNOW6`, MEDIUM) — evidence this exists
     is required, never a guess; do not fabricate an entity to close the gap, only report it.
@@ -466,7 +466,7 @@ Use this format:
 
 - **Audit Date**: [YYYY-MM-DD HH:MM:SS UTC]
 - **Scope**: [full|constitution|packages|quality|unused|duplicate]
-- **Auditor**: devspark.site-audit
+- **Auditor**: devspark-site-audit
 - **Constitution Version**: [VERSION from constitution]
 - **Repository**: [REPO_NAME]
 
@@ -528,7 +528,7 @@ Use this format:
 | ID | Issue | Severity | Recommendation |
 |----|-------|----------|----------------|
 | VER1 | VERSION stamp absent | HIGH | Re-run your agent's quickstart guide to install or refresh the version stamp |
-| VER2 | Version X.Y.Z installed, X.Y.Z available | MEDIUM | Run `/devspark.upgrade` to update |
+| VER2 | Version X.Y.Z installed, X.Y.Z available | MEDIUM | Run `/devspark-upgrade` to update |
 
 ## Security Findings
 
@@ -698,10 +698,10 @@ Use this format:
 
 ---
 
-*Audit generated by devspark.site-audit v1.0*
+*Audit generated by devspark-site-audit v1.0*
 *Constitution-driven codebase audit for [PROJECT_NAME]*
 *Next audit recommended: [DATE + 7 days]*
-*To re-run: `/devspark.site-audit` or `/devspark.site-audit --scope=constitution`*
+*To re-run: `/devspark-site-audit` or `/devspark-site-audit --scope=constitution`*
 ```
 
 ### 13. Output Summary to User
@@ -766,9 +766,9 @@ Every issue must include:
 
 The project constitution defines audit criteria. Create one first:
 
-1. Run: /devspark.constitution
+1. Run: /devspark-constitution
 2. Define your project's core principles
-3. Then retry: /devspark.site-audit
+3. Then retry: /devspark-site-audit
 
 Learn more: https://dev.azure.com/bswdev/HealthSource/_git/bsw.devspark
 ```

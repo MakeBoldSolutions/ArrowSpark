@@ -3,10 +3,10 @@ source: "BSW.DevSpark — © 2026 Baylor Scott & White Health. Source: https://b
 description: Draft one Azure DevOps work item from a DevSpark spec or the current conversation and create it after confirmation.
 handoffs:
   - label: Review the Created Item
-    agent: devspark.workitem-review
+    agent: devspark-workitem-review
     prompt: Grade the item that was just created against the five-dimension standard
   - label: Draft the Spec
-    agent: devspark.specify
+    agent: devspark-specify
     prompt: Turn the created work item into a full specification
 scripts:
   sh: .devspark/scripts/bash/workitem.sh --operation check --json
@@ -27,9 +27,9 @@ item should cover, and may name a work-item type.
 Turn something already decided — a drafted spec, or a conversation that reached a conclusion — into
 exactly one properly formed work item, after a human has read the draft and agreed to it.
 
-Load and obey the shared preamble contract at `/.devspark/templates/command-preamble-contract.md`
+Load and obey the shared preamble contract core at `/.devspark/templates/command-preamble-contract.md`
 (installed repos) or `templates/command-preamble-contract.md` (source repos) before step 1 — it
-covers multi-app scope resolution and the 2-tier script override.
+covers multi-app scope resolution and the 2-tier script override. Preamble modules: `configuration`.
 
 ## Constitution Authority
 
@@ -69,8 +69,15 @@ clarification and review, and `conversation` content has not.
 
 ## Work-Item Type
 
+**`User Story` is never created by this command, and no type of item is created unless a developer
+invoked this command directly.** Specification user stories are Markdown requirements, not Azure
+DevOps entities. Do not propose `User Story`, do not accept it when the developer names it, and do
+not pass it to the helper, which refuses it. A configured `default_work_item_type` of `User Story`
+is not a usable default: propose another type. No other command invokes or hands off to this one,
+and a missing work item is never a reason to run it.
+
 Propose the type and **confirm it** before drafting. Use the configured default as the proposal
-when one exists; otherwise propose one and explain why. Never create an item of a type the
+when one exists and is not `User Story`; otherwise propose one and explain why. Never create an item of a type the
 developer has not agreed to — process templates differ, and the wrong type puts the item on the
 wrong board with the wrong fields.
 

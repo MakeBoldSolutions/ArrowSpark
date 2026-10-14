@@ -817,6 +817,16 @@ function Invoke-CommentOperation {
     Write-Result -DataFragment (ConvertTo-JsonObjectFromFragments $frag)
 }
 
+function Resolve-CreateType($ctx) {
+    $type = if ($Type) { $Type } elseif ($ctx.WorkItemType) { $ctx.WorkItemType } else { 'Task' }
+    if ($type.Trim() -ieq 'User Story') {
+        Write-Failure 'type_unsupported' `
+            'creating a User Story is prohibited; DevSpark never creates one' `
+            'set work_tracking.default_work_item_type to a type other than User Story, or name another work item type'
+    }
+    return $type
+}
+
 function Invoke-ProposeCreateOperation {
     $changes = ConvertFrom-SetArguments
     if (-not $Title) { Exit-Usage 'propose-create requires -Title' }
@@ -825,14 +835,13 @@ function Invoke-ProposeCreateOperation {
 
     $ctx = Resolve-Context
     Assert-Context $ctx
+    $type = Resolve-CreateType $ctx
 
     if (-not $ctx.AreaPath) {
         Write-Failure 'context_unresolved' `
             'no default_area_path is configured, so a created item would land wherever the project defaults put it' `
             'add work_tracking.default_area_path to .devspark.work/devspark.json'
     }
-
-    $type = if ($Type) { $Type } elseif ($ctx.WorkItemType) { $ctx.WorkItemType } else { 'User Story' }
 
     $draft = [ordered]@{
         work_item_type      = $type
@@ -864,6 +873,7 @@ function Invoke-ApplyCreateOperation {
 
     $ctx = Resolve-Context
     Assert-Context $ctx
+    $type = Resolve-CreateType $ctx
     Assert-Confirmed
     Assert-Capability
     Assert-Authenticated
@@ -873,8 +883,6 @@ function Invoke-ApplyCreateOperation {
             'no default_area_path is configured, so a created item would land wherever the project defaults put it' `
             'add work_tracking.default_area_path to .devspark.work/devspark.json'
     }
-
-    $type = if ($Type) { $Type } elseif ($ctx.WorkItemType) { $ctx.WorkItemType } else { 'User Story' }
 
     $payload = [ordered]@{
         title               = $Title

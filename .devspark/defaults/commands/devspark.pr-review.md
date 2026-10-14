@@ -3,7 +3,7 @@ source: "BSW.DevSpark — © 2026 Baylor Scott & White Health. Source: https://b
 description: Perform constitution-aware pull request review with actionable feedback for any PR in the repository
 handoffs:
   - label: Address Current Findings
-    agent: devspark.pr-review
+    agent: devspark-pr-review
     prompt: Address the current unresolved review findings.
 scripts:
   sh: .devspark/scripts/bash/get-pr-context.sh $ARGUMENTS --json
@@ -20,7 +20,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Overview
 
-Load and obey the shared preamble contract at `/.devspark/templates/command-preamble-contract.md` (installed repos) or `templates/command-preamble-contract.md` (source repos) before step 1 — in particular §9 (Genuine Fix Discipline) when reviewing a PR that claims to resolve a lint/test/code-smell finding.
+Load and obey the shared preamble contract core at `/.devspark/templates/command-preamble-contract.md` (installed repos) or `templates/command-preamble-contract.md` (source repos) before step 1 — in particular §9 (Genuine Fix Discipline) when reviewing a PR that claims to resolve a lint/test/code-smell finding. Preamble modules: `finding-fix`, `convergence`, `provenance`, `configuration`.
 
 This command reviews the durable Pull Request delta against current code, tests, `.knowledge/`,
 published documentation, and the constitution. It works for any PR regardless of how the change was
@@ -72,7 +72,9 @@ Execution limits (required):
 - Max follow-up searches/reads beyond provided context: 8
 - Stop once evidence is sufficient for high-confidence conclusions
 - If confidence is low for a specific area, ask one clarifying question
-
+- `PR_CONTEXT.risk` carries the per-file tiers, rating, and `report_form`; when `report_form` is
+  `short`, spend no more than P0/P1 reads and skip additional-dimension scans (§5) that no risk
+  flag or finding calls for
 **Iteration Detection**:
 Before running a full review, check whether the user's input contains iteration keywords: "update", "re-review", "check my fixes", "revised", "changes made", "addressed". If detected:
 
@@ -97,7 +99,7 @@ The script will try to determine PR number in this order:
 **Error Handling**:
 If the script fails:
 
-- **Constitution missing**: Guide user to run `/devspark.constitution`
+- **Constitution missing**: Guide user to run `/devspark-constitution`
 - **GitHub CLI not installed**: Provide installation instructions
 - **PR not found**: Ask user to verify PR number and `gh auth status`
 - **No PR number**: Ask user to provide PR number explicitly
@@ -114,7 +116,7 @@ Classify the PR only by changed durable paths and risk. Identify production code
 artifacts. A PR's own `.devspark.work/` planning bundle (the spec/plan/tasks/gates for the feature
 this PR delivers) is expected to ride in the diff — `command-preamble-contract.md` §0 documents
 that the bundle stays live under `.devspark.work/` through merge and is archived only later, by
-`/devspark.release`. Do not flag that as a scope finding, and never use its presence or absence to
+`/devspark-release`. Do not flag that as a scope finding, and never use its presence or absence to
 adjust trust. Only flag `.devspark.work/` content that is genuinely unrelated to this PR's own
 feature (e.g. an unrelated bundle's files caught up by an errant `git add`, or files whose
 `spec_path`/feature id doesn't match this PR's source branch) as a scope finding.
@@ -133,7 +135,7 @@ Read and parse `/.knowledge/governance/constitution.md`:
 If constitution doesn't exist:
 
 - **STOP** and inform user that constitution is required
-- Provide guidance: "Run `/devspark.constitution` to create project principles first"
+- Provide guidance: "Run `/devspark-constitution` to create project principles first"
 - Do not proceed with review
 
 ### 3. Analyze PR Changes
@@ -142,29 +144,40 @@ Using the PR_CONTEXT data from the script:
 
 #### A. Risk-Tiered File Triage
 
-Assign each changed file a priority tier before reviewing, and apply the corresponding review depth:
+The script has already tiered every changed file. Use `PR_CONTEXT.risk` as the source of truth;
+do not re-derive tiers, flags, or the score by reading paths.
 
-| Tier | File Types | Review Depth |
-|------|-----------|--------------|
-| **P0 — Critical** | Route handlers, middleware, auth, database clients, payment processing, security utilities | Full line-by-line review |
-| **P1 — Important** | Business logic, domain models, utilities, data transformations, API integrations | Function-level review |
-| **P2 — Standard** | Tests, configuration files, templates, migration scripts, build files | Spot-check only |
-| **P3 — Low** | Documentation, markdown, comments, formatting-only changes | Scan for obvious errors |
+- `risk.files[]` — `path`, `tier` (P0–P3), `delta_class`, and (when available) `added`/`deleted`/`change`;
+  `promoted_by` names the domain or integration entity (from `.knowledge/`) that made a file P0
+- `risk.rating`, `risk.risk_score`, `risk.factors[]` — the auditable floor for risk; an
+  `unmapped_production` factor means changed production code no knowledge node claims (a PRD5 lead)
+- `risk.report_form` — `short`, `standard`, or `full` (see §7 Report Forms)
+- `risk.tables.changed_files` and `risk.tables.test_files` — ready-made markdown, paste verbatim
 
-For each file in `files_changed`:
+Review depth by tier:
 
-- Assign tier based on file path and purpose
-- Read the diff to understand what changed
-- Apply the corresponding review depth for that tier
-- Identify the type of change (new file, modified, deleted)
-- Note the scope of changes (lines added/removed)
-- Extract code snippets for analysis (depth depends on tier)
+| Tier | Meaning | Review Depth |
+|------|---------|--------------|
+| **P0** | Auth, routes/handlers, middleware, data access, schema, infra | Full line-by-line review |
+| **P1** | Business logic, domain models, integrations (the default) | Function-level review |
+| **P2** | Tests, config, scripts, build files | Spot-check only |
+| **P3** | Documentation, markdown, generated content | Scan for obvious errors |
+
+Tiers are a floor. If a file the script placed in P1 is demonstrably critical (it gates safety, money,
+access, or data integrity), review it as P0 and say so in the Executive Summary. Never lower a tier
+or the rating. When `PR_CONTEXT.risk` is null, assign tiers yourself using the table above.
+
+Per file:
+
+- Read the diff at the depth its tier requires
+- Identify the type of change (new file, modified, deleted) and its scope
 
 Prioritization policy:
 
 - Always start with P0 files regardless of context budget
-- If `files_changed_truncated` is true, skip P3 files and limit P2 to a quick scan before expanding scope to P0/P1 only.
-- Expand beyond sampled files only if necessary to validate a top-severity finding.
+- Do not read the diff of P3 files unless a finding needs it; the script's counts suffice
+- If `files_changed_truncated` is true, limit P2 to a quick scan and focus on P0/P1
+- Expand beyond sampled files only if necessary to validate a top-severity finding
 
 #### B. Examine PR Diff
 
@@ -175,7 +188,7 @@ Parse the full diff to:
 - Look for modified behavior
 - Note refactoring vs. feature changes
 
-**Collect code churn stats** via `git diff --numstat` (or from `PR_CONTEXT` totals) and record them in the Stats section of the report. Re-collect on every revision for trend tracking.
+**Take churn stats** from `PR_CONTEXT` (`lines_added`, `lines_deleted`) and `risk` and record them in the Stats section. Re-collect on every revision for trend tracking.
 
 #### C. Review Commit Messages
 
@@ -221,13 +234,24 @@ For each finding:
 - Explain clearly why this is an issue
 - Provide a specific, actionable recommendation
 
-#### C. Finding Legitimacy Check (required before emitting CRITICAL/HIGH/MEDIUM)
+#### C. Finding Legitimacy Check (required before any numbered finding)
 
 Severity inflation is the reviewer-side mirror of a gamed fix (§9, Genuine Fix Discipline): both
 swap a surface signal — a clean metric there, a superficially alarming pattern here — for the
-behavioral question the check exists to answer. Before a finding is emitted at CRITICAL, HIGH, or
-MEDIUM, it must pass all four tests below. Failing a test relocates the finding to a lower-friction
-form (see destinations); it does not authorize an inflated severity to stand.
+behavioral question the check exists to answer. Failing a test relocates the finding to a
+lower-friction form (see destinations); it does not authorize an inflated severity to stand.
+
+A concern is only a **candidate** until it passes this check; only validated concerns become
+numbered findings (internal reasoning: no artifact, no extra pass). A true observation is not
+necessarily a defect.
+
+**Basic legitimacy — every numbered finding, including Low.** It needs a concrete observation, a
+violated expectation (requirement, invariant, contract, documented intent, or engineering
+obligation), relevance to *this* PR, and a correction that belongs in this PR. Behavior that matches
+approved intent, is merely surprising, or is unrelated inherited debt is not a defect: record it
+under `### Observations` (§7) with no ID and no severity.
+
+CRITICAL, HIGH, and MEDIUM findings must also pass the tests below (Test 5: behavioral claims only).
 
 1. **Intent** — An approved, documented design decision is not a defect. If the PR context, the
    constitution, or `.knowledge/` shows the behavior was deliberately chosen and signed off (not
@@ -245,11 +269,24 @@ form (see destinations); it does not authorize an inflated severity to stand.
 4. **Self-consistency** — A row in the Behavioral Changes table marked `Intentional? Yes` cannot
    itself back a CRITICAL or HIGH finding. If the same behavior also has an implementation defect,
    name that defect explicitly and cite it, separately from the intentional-change row.
+5. **Consumer trace** (behavioral concern at MEDIUM or higher) — Name the reader of the changed
+   value and show that *this* instance can reach the claimed consequence, using the nearest
+   evidence (consumer, caller, callee, helper, existing test, runtime condition, design note),
+   including whatever nearby evidence would prove the concern wrong. Not exhaustive tracing. If it
+   disproves the concern, drop it (an Observation if useful) — do not keep a defeated concern at
+   lower severity. If the consequence cannot be established, it is an unconfirmed risk: label it,
+   never block on it, never rate it above Low. Uncertainty alone is not evidence of a defect.
+6. **Attribution** — When the issue is not obviously introduced by this PR, say in prose whether
+   it is *introduced* (normal finding), *exposed* (judge materiality), *pre-existing but material*
+   (the PR depends on it, expands its risk, or leaves the change unverifiable — may block), or
+   *pre-existing and unrelated* (never blocks; Observation or deferred work). Pre-existing is never
+   automatically ignorable.
 
 An item that fails Test 2 or 3 is not discarded — it is relocated so the question stays visible in
-the report, just not as a finding against the author. An item that fails Test 1 is either dropped
-or recast as `CON-NN`. If a finding of this kind was already emitted in a prior revision, withdraw
-it per the Iteration Detection rule above rather than deleting it.
+the report, just not as a finding against the author. An item that fails basic legitimacy or Test 1
+is dropped, recorded as an Observation, or recast as `CON-NN`. If a finding of this kind was already
+emitted in a prior revision, withdraw it per the Iteration Detection rule above rather than
+deleting it.
 
 #### D. Generate Findings
 
@@ -265,7 +302,10 @@ Create structured findings with **stable IDs** that persist across re-reviews. U
 - **Principle**: Name of constitution principle
 - **File:Line**: Exact location in code
 - **Issue**: Specific description of the problem, including broken code snippet for CRITICAL/HIGH
-- **Fix**: Concrete code fix for CRITICAL/HIGH findings (required); recommendation for others
+- **Fix**: Concrete code fix for CRITICAL/HIGH findings (required); recommendation for others.
+  State the defect, then the required outcome, then the least-complex sufficient correction first —
+  a risk does not prescribe architecture. Discovery alone does not make work mandatory: classify
+  what is found as a blocking defect, accepted limitation, deferred work, learning, or observation.
 
 ### 5. Additional Review Dimensions
 
@@ -311,15 +351,31 @@ Before flagging a removed safety guard, complete all 4 steps:
 3. **Check if protection moved elsewhere**: Search the PR diff for equivalent protection at a different layer (middleware, validator, caller site)
 4. **Flag only if genuinely removed**: Only create a finding if steps 2 and 3 confirm the protection is missing and the risk remains real
 
-Include behavioral regression findings in the Critical or High section as appropriate.
+Include behavioral regression findings in the Critical or High section as appropriate. A behavioral
+finding at MEDIUM or higher must also pass §4C Test 5 (consumer trace).
 
 If constitution has code quality principles:
 
 - **Naming Conventions**: Verify names follow standards
 - **Code Organization**: Check structure matches guidelines
 - **Error Handling**: Review exception handling patterns
-- **Duplication**: Identify code duplication issues
-- **Complexity**: Note overly complex code
+
+#### Accidental Complexity & Duplication Review
+
+Evaluate whether avoidable accidental complexity remains in the diff, rather than merely certifying that the implementation followed a plan:
+
+- **Evaluate Proportionality**: when the diff shows duplication or complexity disproportionate to the feature, evaluate whether a simpler repository-native implementation is reasonably available. Particularly inspect:
+  - **Repeated wiring**: multiple constructors, handlers, or call sites wired individually for a single behavior where an existing seam, middleware, or orchestration boundary could suffice.
+  - **Redundant processing**: repeated validation, transformation, or sorting of already validated, sanitized, or ordered data.
+  - **Duplicate or excessive abstraction**: new abstractions, wrappers, or helper hierarchies that duplicate established capabilities or add indirection without isolation benefit.
+  - **Speculative extension**: excessive configuration options, unused flags, or speculative extension points not justified by actual requirements.
+  - **Unnecessary indirection**: artificial layers or delegation chains that obscure control flow without architectural necessity.
+- **Compare Alternatives Before Recommending Simplification**: compare the candidate alternative's behavior, validation guarantees, failure semantics, error propagation, and operational constraints against the current diff. A smaller implementation that drops validation guarantees or changes exception behavior is NOT equivalent and must not be recommended as a pure simplification.
+- **Finding Classification for Complexity**:
+  - **Blocking (CRITICAL/HIGH)**: Demonstrated correctness, contract, security, or severe maintainability defects that meet existing severity rules (e.g. broken contracts, constitution violations, or unmaintainable architectural fragmentation).
+  - **Advisory (MEDIUM/LOW or Observation)**: A reasonable simplification opportunity that preserves all contract and validation guarantees without a demonstrated defect.
+  - **No finding**: Complexity that is genuinely justified by actual requirements, lifecycle boundaries, or architectural constraints.
+  Line count, file count, or abstraction count are NEVER automatic failure conditions. Do not turn PR review into a mandatory redesign exercise.
 
 **Gamed-fix detection** (command-preamble-contract.md §9): when a diff claims to resolve a lint rule, complexity metric, or test failure, verify the fix addresses the underlying behavioral intent, not just the mechanical check — a published eval measured genuine-fix rates as low as 5.6% for fixes that only reacted to the bare metric. Specifically:
 
@@ -348,6 +404,8 @@ Additionally:
 - Confirm tests were written appropriately
 - Review test naming and organization
 
+**Planned Tests delta** (when the spec bundle has `qa-acceptance.md`): verify proportionately that each planned `update` or `retire` was applied, from the source diff for repository-owned tests or from the durable reference for externally owned ones. Do not require a new permanent test for a `none` disposition. Never execute manual QA, require deployment, invent scenarios, or convert observations into current-spec scope.
+
 #### Documentation Review
 
 If constitution requires documentation:
@@ -363,14 +421,38 @@ Validate the changed behavior, affected tests, and current knowledge together. T
 blocking gate** — the primary control point on what reaches main — not an advisory note. Every item
 below produces a stable `PRD{N}-{seq}` finding (e.g. `PRD1-01`), tracked in its own Findings
 Detail table (§7) exactly like Critical/High constitution findings, and every open one belongs in
-the Immediate Actions (Blocking) list. (`PRD` = PR Delta, distinct from `/devspark.site-audit`'s
+the Immediate Actions (Blocking) list. (`PRD` = PR Delta, distinct from `/devspark-site-audit`'s
 repo-wide `DELTA{N}`/`KNOW{N}` IDs — same class of check, diff-scoped instead of repo-wide, kept
 separately named so the two commands' findings are never ambiguous when read side by side.)
 
-1. Use changed paths and `.knowledge/` `appliesTo` metadata to identify every relevant truth node
-   this diff touches (directly, or via an entity/decision the changed code maps to).
+1. Identify the truth nodes this diff bears on with `explain-context.py --files <changed files>`
+   (`.devspark/scripts/bash/explain-context.sh` or `.devspark/scripts/powershell/explain-context.ps1`
+   in installed repos; read-only). It reports, per file, each node that applies to it or cites it
+   through `source_of_truth`, and the unmapped files. The owners to inspect are nodes the PR touched,
+   nodes citing a changed source, and nodes applying to a changed surface. Do not read the
+   Knowledge corpus; read only what a claim check below needs.
+   - **Claim-targeted check.** For each owner, find the material claims describing the changed
+     mechanism — especially enumerable contracts: operators, enums, state values, configuration
+     keys, public fields, status codes, allowed values, defaults, endpoint behaviors, invariant
+     tables. When the diff adds or changes a member of such a set, take one existing sibling and
+     the new member and search each owner with a **word-bounded** match (substring matching lets
+     `field_eq` hit `field_equals`). An owner that lists the siblings but omits the new member names
+     a candidate section: read it and compare the claim with the implementation. A search hit alone
+     proves nothing; a promoted `PRD1` rests on a claim you read.
+   - **`last_verified`** is evidence that someone claims the document was reviewed, not proof that
+     every claim is correct. A bump on a node citing a changed source, whose changed hunks do not
+     address the changed mechanism, triggers the claim check — it is not itself a defect.
+   - **No unsupported "matches".** Do not write "Knowledge matches", "documentation is adequate",
+     "PRD1: none", or "operator tables match" because the node was touched, is freshly dated,
+     exists, or its changed hunk looked right. For a Code ↔ Knowledge surface this PR materially
+     changes, that conclusion must rest on claims you actually compared (the report need not list
+     every search).
 2. **`PRD1` — Code/knowledge contradiction (BLOCKING).** The diff's code or configuration
    contradicts what an existing `.knowledge/` node (flat doc or entity) claims about that behavior.
+   It needs a material claim you read, that contradicts the changed implementation or required
+   behavior, and that is relevant to this PR; a stale-looking node about an untouched mechanism is
+   not `PRD1`. Mechanical freshness (generated-artifact validity, stale entities) belongs to
+   `/devspark-create-pr` and §6c; `PRD1` is semantic truth.
    Fix is either: correct the code to match an intentional, still-valid claim, or correct the
    knowledge node in the same PR to match the new, intentional behavior — never merge with the two
    disagreeing.
@@ -380,7 +462,13 @@ separately named so the two commands' findings are never ambiguous when read sid
    code vs. existing knowledge) because the claim is new.
 4. **`PRD3` — Insufficient test depth (BLOCKING, severity by risk).** Changed durable behavior
    lacks executable coverage proportionate to its risk. Floor severity MEDIUM; escalate to HIGH for
-   security, data-integrity, or public-API surface changes.
+   security, data-integrity, or public-API surface changes. Proportionate means relative to the
+   changed behavior and to existing coverage at the layer that carries it: does the PR introduce
+   externally observable behavior, is it already covered where a directly tested helper owns it, are
+   the changed call sites simple delegation (which does not require duplicated caller tests), is a
+   contract-level assertion needed to establish the actual change, or is the PR merely passing
+   through unrelated historical test debt (an Observation, §4C Test 6)? `PRD3` blocks only when the
+   changed behavior lacks coverage at a layer proportionate to its acceptance risk.
 5. **`PRD4` — Planning-identifier leak (BLOCKING).** Durable code, tests, or
    `.knowledge/` in this diff references a spec ID, task ID, `FR-###`, plan link, gate file, or a
    path into `.devspark.work/` or `.archive/` — an archived path is just as forbidden as a live one,
@@ -443,24 +531,33 @@ Include scope validation results in the review output:
 - If scope mismatches are detected, report them as **HIGH** severity findings:
   - List which files violate the declared scope.
   - Recommend updating the scope declaration or splitting the PR.
-- Add a row to the Constitution Alignment Details table for scope compliance.
+- Add a row to the Constitution Alignment table for scope compliance when scope is partial or failing.
 
 ### 6c. Ontology Gap-Report Gate & Evidence/Contradiction Warnings
 
 For every `.knowledge/entities/<id>/` this PR's changed paths map to (via `appliesTo` or direct path
 under `entities/<id>/`):
 
-1. Run `scripts/build_knowledge_index.py` (or the installed-repo path) in its default (non-`--check`)
-   mode and read `.knowledge/ontology/coverage.json` for those entities only — do not evaluate
-   entities the diff doesn't touch.
-2. A gap-report failure on a touched entity (missing required layer doc, invalid `source_of_truth`,
+1. Confirm `git rev-parse HEAD` equals the PR's commit SHA from `PR_CONTEXT`. If it does not, check
+   out the PR head first or stop and say so; never judge Knowledge against a different commit.
+2. Run `scripts/build_knowledge_index.py --repo-root . --check` (or the installed-repo path). It is
+   read-only. Exit 1 is **blocking**: with `DRIFT:` the committed generated Knowledge does not match
+   the committed HEAD; without it the Knowledge cannot build. After a passing check, read the
+   committed `.knowledge/ontology/coverage.json` and the `stale_entities` list in
+   `.knowledge/index.json` for those entities only — do not evaluate entities the diff doesn't touch.
+   This check is independent of `/devspark-create-pr`, which runs it earlier; a later commit, a
+   rebase, or a corrupted index can still fail here.
+3. A gap-report failure on a touched entity (missing required layer doc, invalid `source_of_truth`,
    stale `last_verified`) is **blocking** — same tier as a constitution violation. This is the
    mechanical half of "nothing merges without pr-review": the generator's existing hard checks now
    gate the PR, not just a separate CI step.
-3. Scan touched entities' evidence entries for a code-only reference (`type: code`) with no adjacent
+4. Never regenerate Knowledge during review: do not run the builder in its default mode, and do not
+   edit or overwrite `.knowledge/index.json` or `coverage.json`. Report the finding; the author
+   regenerates and commits.
+5. Scan touched entities' evidence entries for a code-only reference (`type: code`) with no adjacent
    note explaining why a test wasn't used. Missing rationale is a **non-blocking warning**, not a
    gate — the philosophy treats "which evidence type" as a quality/degree question, never existence.
-4. Scan for contradiction candidates among graph-adjacent objects only (same entity, entities sharing
+6. Scan for contradiction candidates among graph-adjacent objects only (same entity, entities sharing
    a `constrains` decision, objects citing the same `source_of_truth`) — never brute-force
    pairwise comparison across the whole repo. Judging whether a candidate is a genuine contradiction
    or acceptable nuance is a human call; surface it as a **non-blocking warning** for review, always.
@@ -489,7 +586,7 @@ reported the same way: stable `PRD6-{seq}` id, Findings Detail row, Immediate Ac
 Two rules bound this check in the other direction:
 
 1. **An improvement you noticed is not a reason to reopen the spec.** Capture it as a Recommended
-   Improvement (non-blocking) or route it to `/devspark.specify`. The mere availability of better
+   Improvement (non-blocking) or route it to `/devspark-specify`. The mere availability of better
    work is never a blocking finding — that is the expansion loop this gate exists to stop.
 2. **A genuine defect still reopens the work.** If you find something that independently meets the
    Blocking Defect bar — a failed requirement, a violated invariant, a correctness defect, a
@@ -519,22 +616,73 @@ If file already exists:
 
   Load all existing finding IDs and statuses. Diff only what changed since the previous reviewed commit. Carry forward unresolved findings with status `➡️ Carried`, update findings resolved by new commits to `✅ Resolved`, and add new findings with `🔴 Open`. Replace the Revision Log with the current review snapshot; Git retains earlier versions.
 
+#### Report Forms
+
+The report's length follows risk, so clean low-risk PRs do not pay for the full form. Use
+`PR_CONTEXT.risk.report_form` (`short` when the rating is low, `standard` for medium, `full` for
+high; default to `standard` when absent). A re-review keeps the form of the first review unless the
+rating rose.
+
+| Section | short | standard | full |
+|---------|-------|----------|------|
+| Frontmatter, Revision Log, Stats, Executive Summary | yes | yes | yes |
+| Action Items and Findings Detail | yes | yes | yes |
+| Constitution Alignment (failures and partials only) | yes | yes | yes |
+| Changed Files (script table) | no | yes | yes |
+| Testing | one line in Executive Summary | yes | yes |
+| Behavioral Changes, Security | only when something was found | only when something was found | only when something was found |
+| Deployment & Handoff Notes | only when non-empty | only when non-empty | only when non-empty |
+
+In every form, the Approval Decision is the Recommendation and one sentence of reasoning. A
+section that has nothing to report is omitted, never written as "None found." — except
+`Immediate Actions`, which states "None found." so a reader can see blocking was checked.
+
+#### Machine-Readable Frontmatter
+
+The report opens with a YAML frontmatter block so tools can read outcomes without parsing prose.
+Keep it consistent with the body on every write:
+
+- `devspark_version` is the version that produced **this** review (preamble contract §12). Copy
+  the script's top-level `DEVSPARK_VERSION`; write `unknown` when absent, never guess. A re-review
+  stamps the version that ran the re-review, so progress across versions stays comparable.
+- `reviewed_commit` is the full SHA (no backticks, no truncation); `revision` matches the latest
+  Revision Log row.
+- `findings` and `max_severity` equal the counts in that latest Revision Log row, as raised in that
+  revision (a finding fixed later in the same session still counts). `max_severity` is `none` when
+  every count other than `con` is zero.
+- `risk_rating` and `risk_score` come from `PR_CONTEXT.risk` when present, so predicted risk can be
+  compared with the findings above. If `PR_CONTEXT.risk` is null, omit `risk_score` and set
+  `risk_rating` to your own assessment.
+- You may raise the rating above the supplied one when evidence warrants it, and must then set
+  `risk_escalated: true` and state the reason in the Executive Summary. Never lower it.
+
 #### Report Structure
 
 Use this exact format:
 
 ```markdown
+---
+pr: [NUMBER]
+devspark_version: "[DEVSPARK_VERSION from script output, or `unknown`]"
+reviewed_commit: [FULL_COMMIT_SHA]
+revision: [N]
+findings:
+  critical: [N]
+  high: [N]
+  medium: [N]
+  low: [N]
+  con: [N]
+max_severity: [none|low|medium|high|critical]
+risk_rating: [low|medium|high]
+risk_score: [N]
+risk_escalated: [true|false]
+---
+
 # Pull Request Review: [PR_TITLE]
 
-## Review Metadata
-
-- **PR Number**: #[NUMBER]
-- **Source Branch**: [HEAD_BRANCH]
-- **Target Branch**: [BASE_BRANCH]
-- **Review Date**: [YYYY-MM-DD HH:MM:SS UTC]
-- **Last Updated**: [YYYY-MM-DD HH:MM:SS UTC]
+- **PR**: #[NUMBER] — [HEAD_BRANCH] → [BASE_BRANCH] — [@AUTHOR] — [OPEN/CLOSED/MERGED]
 - **Reviewed Commit**: [COMMIT_SHA]
-- **Reviewer**: devspark.pr-review
+- **Review Date**: [YYYY-MM-DD HH:MM:SS UTC] (last updated [YYYY-MM-DD HH:MM:SS UTC])
 - **Constitution Version**: [VERSION from constitution]
 
 ## Revision Log
@@ -545,41 +693,23 @@ Use this exact format:
 
 *Add a row for each re-review. Keep the same test command across all revisions to prevent flaky baselines.*
 
-## PR Summary
-
-- **Author**: [@AUTHOR]
-- **Created**: [CREATED_DATE]
-- **Status**: [OPEN/CLOSED/MERGED]
-- **Files Changed**: [COUNT]
-- **Commits**: [COUNT]
-- **Lines**: +[ADDITIONS] -[DELETIONS]
-
 ## Stats
 
 | Metric | Value |
 |--------|-------|
 | Files changed | [COUNT] |
-| Lines added | +[ADDITIONS] |
-| Lines removed | −[DELETIONS] |
-| Net lines | [±NET] |
-| Commit snapshot | `[SHA_SHORT]` |
-
-*Collected via `git diff --numstat`. Re-collect on every revision for trend tracking.*
+| Commits | [COUNT] |
+| Lines | +[ADDITIONS] −[DELETIONS] |
+| Tiers (P0/P1/P2/P3) | [from `risk.tier_counts`] |
+| Risk | [rating] ([risk_score]) — [factor names from `risk.factors`] |
 
 ## Executive Summary
 
-- ✅ **Constitution Compliance**: [PASS/FAIL] ([X]/[Y] principles checked)
-- 🔄 **Durable Delta Consistency**: [PASS/FAIL] ([X] open PRD findings — code/knowledge contradiction, completeness, test depth, planning-ID leaks)
-- 🔒 **Security**: [X] issues found
-- 📊 **Code Quality**: [X] recommendations
-- 🧪 **Testing**: [PASS/FAIL/skipped (opted-out)]
-- 📝 **Documentation**: [PASS/FAIL/N/A]
-- 🏛️ **Constitution Improvements**: [X] CON findings
+**Overall Assessment**: [1-2 sentences. State any risk escalation and why.]
 
-**Overall Assessment**: [1-2 sentence summary]
-
-**Approval Recommendation**: [✅ APPROVE | ⚠️ REQUEST CHANGES | ❌ REJECT]
-*Note: approval depends only on the durable delta, validation evidence, constitution, and unresolved findings.*
+- Constitution: [PASS/FAIL] ([X]/[Y] principles checked) · Durable delta: [PASS/FAIL] ([X] open PRD findings)
+- Security: [X] issues · Quality: [X] recommendations · Testing: [PASS/FAIL/skipped (opted-out)] · Docs: [PASS/FAIL/N/A]
+- Constitution Improvements: [X] CON findings
 
 ## Action Items
 
@@ -601,18 +731,11 @@ Use this exact format:
 ### Recommended Improvements
 
 - [ ] **M-01** `path/file.ext:89` — [One-line description]
-- [ ] **L-01** `path/file.ext:123` — [Optional improvement]
+- [ ] **L-01** `path/file.ext:123` — [Optional improvement, one line, no code block]
 
-### Constitution Improvements (Non-blocking — feed into `/devspark.evolve-constitution`)
+### Constitution Improvements (Non-blocking — feed into `/devspark-evolve-constitution`)
 
 - [ ] **CON-01** — [Constitution section that needs updating]
-
-## What's Good
-
-*Skip this section if there is nothing noteworthy. Maximum 5 bullets.*
-
-- [Positive aspect 1 with specific file/pattern reference]
-- [Positive aspect 2]
 
 ## Findings Detail
 
@@ -659,15 +782,15 @@ open row also appears in Immediate Actions above. Stable IDs persist across re-r
 
 ### Low Priority Improvements
 
-[If none, write "None found."]
+*One row per finding, one line each. No code blocks. Omit the subsection when there are none.*
 
-| ID | Status | Principle | File:Line | Issue | Recommendation |
-|----|--------|-----------|-----------|-------|----------------|
-| L-01 | 🔴 Open | [Name] | path/file.ext:123 | [Minor suggestion] | [Optional improvement] |
+| ID | Status | File:Line | Issue and recommendation |
+|----|--------|-----------|--------------------------|
+| L-01 | 🔴 Open | path/file.ext:123 | [Minor suggestion and the improvement] |
 
 ### Constitution Improvements
 
-*Findings where the code may be correct but the constitution needs updating. Feed these into `/devspark.evolve-constitution`.*
+*Findings where the code may be correct but the constitution needs updating. Feed these into `/devspark-evolve-constitution`.*
 
 [If none, write "None found."]
 
@@ -677,65 +800,38 @@ open row also appears in Immediate Actions above. Stable IDs persist across re-r
 
 ## Constitution Alignment Details
 
+*List only principles that failed or partially passed. Summarize the rest in one line.*
+
+**Passing**: [N] of [Y] principles (N/A: [M])
+
 | Principle | Status | Evidence | Notes |
 |-----------|--------|----------|-------|
-| [Principle 1] | ✅ Pass | Files comply | [Brief explanation] |
 | [Principle 2] | ❌ Fail | src/api.ts:45 | [Why it fails] |
 | [Principle 3] | ⚠️ Partial | Multiple files | [Partial compliance details] |
-| [Principle 4] | ⏭️ N/A | - | Not applicable to this PR |
 
-## Security Checklist
+## Security
 
-- [ ] No hardcoded secrets or credentials
-- [ ] Input validation present where needed
-- [ ] Authentication/authorization checks appropriate
-- [ ] No SQL injection vulnerabilities
-- [ ] No XSS vulnerabilities
-- [ ] Dependencies reviewed for vulnerabilities
+*Include only when a security concern was found. Name the concern (secrets, input validation, authz, injection, XSS, dependencies) and the file; otherwise the Executive Summary count is enough.*
 
-[Add notes for any checked/unchecked items]
+## Testing
 
-## Testing Coverage
+**Status**: [ADEQUATE | INADEQUATE | N/A] — [one line, or the reason test execution was skipped per constitution opt-out]
 
-**Status**: [ADEQUATE | INADEQUATE | N/A]
-
-[Details about test coverage, or reasons why test execution was skipped per constitution opt-out]
-
-## Test Inventory
-
-*Count of test functions per changed test file. Unjustified removals are MEDIUM findings.*
-
-| File | Main | Branch | Delta | Justification |
-|------|------|--------|-------|---------------|
-| `tests/[test_file].py` | [N] | [N] | [±N] | N/A |
-| **Total** | [N] | [N] | [±N] | |
-
-Removed tests (if any):
+[Paste `risk.tables.test_files` verbatim.] Removed tests, if any:
 
 - `[test_name]` — **[Justified/Unjustified]**: [reason] → [finding ID if unjustified]
 
-*If no test files changed, write "No test files changed in this PR."*
+*Unjustified removals are MEDIUM findings.*
 
-## Documentation Status
+## Changed Files
 
-**Status**: [ADEQUATE | INADEQUATE | N/A]
-
-[Details about documentation, or "N/A - No documentation principle in constitution"]
-
-## Changed Files Summary
-
-| File | Tier | Changes | Type | Findings |
-|------|------|---------|------|---------|
-| src/auth/handler.py | P0 | +45 -12 | Modified | C-01, H-01 |
-| src/models/user.py | P1 | +22 -5 | Modified | M-01 |
-| tests/test_auth.py | P2 | +120 -0 | Added | None |
-| README.md | P3 | +8 -2 | Modified | None |
+[Paste `risk.tables.changed_files` verbatim. Do not rewrite it or add a Findings column.]
 
 ## Behavioral Changes
 
 *Silent behavioral changes detectable from diff analysis. Callers may break without test failures.*
 
-[If none detected, write "None detected."]
+[If none detected, omit this section.]
 
 | Change | Before | After | Intentional? | Risk |
 |--------|--------|-------|-------------|------|
@@ -745,9 +841,9 @@ Removed tests (if any):
 
 ## Deployment & Handoff Notes
 
-*Items that failed the Finding Legitimacy Check's Actionability or Ownership tests (§4C). These
-are visible questions the review raised, not findings against the author — no finding ID, no
-severity, and they do not block merge on their own.*
+*Items that failed the Finding Legitimacy Check (§4C) — Actionability, Ownership, basic
+legitimacy, or an unestablished consumer trace. These are visible questions the review raised, not
+findings against the author — no finding ID, no severity, and they do not block merge on their own.*
 
 ### Deployment Notes
 
@@ -761,25 +857,25 @@ severity, and they do not block merge on their own.*
 
 - [Remediation area] — owned by [DevOps / Product / upstream team] — [what's needed from them]
 
+### Observations
+
+*Useful facts that are not defects: behavior matching approved intent, unrelated inherited debt,
+unconfirmed risks (labeled unconfirmed), and deployment information that does not affect approval.
+No ID, no severity, no remediation required in this PR, and never a reason for REQUEST CHANGES.*
+
+[If none, write "None."]
+
+- [Observation — and why it is not a finding]
+
 ## Approval Decision
 
-**Recommendation**: [✅ APPROVE | ⚠️ REQUEST CHANGES | ❌ REJECT]
+**Recommendation**: [✅ APPROVE | ⚠️ REQUEST CHANGES | ❌ REJECT] — [one sentence tracing it to the blocking findings, or stating none]
 
-**Reasoning**:
-[Provide clear reasoning based on findings. Examples:
-
-- "PR violates mandatory Test-First principle (C-01). Must add tests before merge."
-- "No critical issues found. Minor suggestions provided but not blocking."
-- "Excellent PR - follows all constitution principles and includes comprehensive tests."]
-
-**Estimated Rework Time**: [X hours | X days | N/A]
+*Approval depends only on the durable delta, validation evidence, constitution, and unresolved findings.*
 
 ---
 
-*Review generated by devspark.pr-review v1.2*
-*Constitution-driven code review for [PROJECT_NAME]*
-*To re-review after fixes: `/devspark.pr-review #[PR_NUMBER] re-review`*
-*When addressing these findings, run `/devspark.address-pr-review {PR_ID}`. The review file must be committed on its own — this rule is enforced by the prompt and can also be enforced by the optional pre-commit hook.*
+*Re-review after fixes: `/devspark-pr-review #[PR_NUMBER] re-review`. Address findings with `/devspark-address-pr-review {PR_ID}`; commit the review file on its own.*
 
 ---
 
@@ -807,6 +903,13 @@ Write the generated report to `/.devspark.work/pr-review/pr-{PR_NUMBER}.md`:
 - Use UTF-8 encoding
 - Ensure proper line endings
 - Make file readable
+
+**Validate before reporting.** Run
+`python scripts/pr-review-validate.py <review file> --repo-root . --range origin/{target_branch}...origin/{source_branch}`
+(installed repos: `.devspark/scripts/pr-review-validate.py`). It checks the frontmatter against the
+body, the recommendation against open blocking findings, and that risk was not lowered. If it
+reports issues, fix exactly those in the file and run it once more; do not re-review. If Python or
+the script is unavailable, skip this step silently.
 
 ### 10. Output Summary to User
 
@@ -868,9 +971,21 @@ Every issue must include:
 - Avoid subjective language ("ugly code", "bad design")
 - If not in constitution, don't flag it (or mark as LOW priority observation)
 
+### Approval Semantics
+
+- Observations do not imply REQUEST CHANGES.
+- Every REQUEST CHANGES decision must trace to at least one validated blocking finding — several
+  interesting concerns without a legitimate blocker are not a blocking verdict.
+- APPROVE may coexist with Low observations, deferred work, accepted limitations, and nonblocking
+  handoff notes.
+
 ### Severity Guidelines
 
-Use this scenario-to-severity mapping table to anchor classification. When two tiers are plausible, prefer the higher one. Projects may extend this table via their constitution's anti-pattern appendix.
+Use this scenario-to-severity mapping table to anchor classification. Severity reflects the
+demonstrated consequence, materiality, current-PR responsibility, and confidence in the validated
+evidence. When two tiers are plausible, choose the one the evidence supports; uncertainty calls for
+more validation or lower confidence, never automatic escalation. Projects may extend this table via
+their constitution's anti-pattern appendix.
 
 | Finding Type | Severity | Rationale |
 |---|---|---|
@@ -904,7 +1019,7 @@ format `§{section}.{LEVEL}` matching an entry in `.knowledge/governance/severit
 
 For findings not mapped to any constitution section (e.g., security observations, code-quality
 issues not covered by the constitution): emit the finding without a `§` code and flag it as
-a `CON` candidate for `/devspark.evolve-constitution`.
+a `CON` candidate for `/devspark-evolve-constitution`.
 
 Summary tiers:
 
@@ -923,9 +1038,9 @@ Summary tiers:
 
 The project constitution defines the review criteria. Create one first:
 
-1. Run: /devspark.constitution
+1. Run: /devspark-constitution
 2. Define your project's core principles
-3. Then retry: /devspark.pr-review #{PR_NUMBER}
+3. Then retry: /devspark-pr-review #{PR_NUMBER}
 
 Learn more: <https://dev.azure.com/bswdev/HealthSource/_git/bsw.devspark>
 ```
@@ -941,7 +1056,7 @@ Troubleshooting:
 3. Confirm you have repository access
 
 If issue persists, provide PR number explicitly:
-/devspark.pr-review #123
+/devspark-pr-review #123
 ```
 
 **If GitHub CLI not installed**:
@@ -957,7 +1072,7 @@ Install GitHub CLI:
 After installation, authenticate:
 gh auth login
 
-Then retry: /devspark.pr-review
+Then retry: /devspark-pr-review
 ```
 
 ### Positive Feedback
@@ -969,25 +1084,13 @@ If PR is excellent:
 - Provide enthusiastic approval
 - Example: "Excellent PR! Comprehensive tests, clear documentation, follows all constitution principles. Strong work! ✅"
 
-### Review Updates
-
-When re-reviewing an updated PR:
-
-- Load existing finding IDs and their statuses before running the new review
-- Carry forward all unresolved findings unchanged with status `➡️ Carried`
-- Mark resolved findings as `✅ Resolved` with a brief note (e.g., "✅ Resolved: C-01 (tests added in commit abc123)")
-- Flag partially addressed findings as `⚠️ Partial` with explanation
-- Note any new findings introduced since last review with `🔴 Open`
-- Append a new row to the Revision Log table with the new commit SHA
-- Keep the same test command from the first review row to maintain a consistent baseline
-
 ## Context
 
 $ARGUMENTS
 
 ## Shared Review Resolution Contract Output
 
-When emitting findings (review observations, issues, recommendations), structure each entry to include the shared resolution contract fields so downstream tools (/devspark.address-pr-review, telemetry, release) can act on them deterministically:
+When emitting findings (review observations, issues, recommendations), structure each entry to include the shared resolution contract fields so downstream tools (/devspark-address-pr-review, telemetry, release) can act on them deterministically:
 
 ```yaml
 findings:
@@ -1000,4 +1103,4 @@ findings:
     outcome: ""                                                  # populated post-resolution by address-pr-review
 ```
 
-inding_id MUST be stable across re-runs when the underlying issue is unchanged. xecution_mode MUST be one of: `auto` (safe to apply automatically), `selective` (apply with reviewer approval), `manual` (requires human implementation). The `status` and `outcome` fields are written by `/devspark.address-pr-review` (FR-028).
+inding_id MUST be stable across re-runs when the underlying issue is unchanged. xecution_mode MUST be one of: `auto` (safe to apply automatically), `selective` (apply with reviewer approval), `manual` (requires human implementation). The `status` and `outcome` fields are written by `/devspark-address-pr-review` (FR-028).
