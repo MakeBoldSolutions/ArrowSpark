@@ -136,7 +136,7 @@ the inherited `_open_sub_menu()` mechanism does not do this itself (see
 .knowledge/architecture/arrow-puzzle.md's Puzzle Catalog and
 Session-Scoped Selection section, and the sub-menu open/close mechanics
 below). The entry list sits in a vertically scrolling, focus-following
-`ScrollContainer` (horizontal scrolling disabled) so all twenty-two entries,
+`ScrollContainer` (horizontal scrolling disabled) so all thirty entries,
 shown as three collapsible group sections (an accordion: a toggle header per
 group, its one-line description, then its entries), stay
 reachable and fully visible when focused at 960x540, 800x800 and 1280x720; the
@@ -147,8 +147,7 @@ three supported window sizes)
 and tests/save_input_regression.gd's extended
 `_test_no_reset_on_puzzle_entry()` (selection sets `PuzzleSession`, opens via
 `SceneLoader.load_scene`, disturbs no save/settings/remap state, and
-`new_game()` still starts the Reference Knot regardless of a prior
-Level Select choice earlier in the same session).
+`new_game()` still starts the first progression level regardless of a prior Level Select choice earlier in the same session).
 
 ### Web builds
 

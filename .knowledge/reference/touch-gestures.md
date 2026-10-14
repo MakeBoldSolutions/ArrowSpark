@@ -19,7 +19,7 @@ How ArrowSpark handles touch, and what the research behind it found. Owner direc
 
 - **Tap acts on release.** A touch is a pending tap. It emits one `cell_clicked` only on release, and only if no second finger appeared and movement stayed under `_TOUCH_SLOP_PIXELS` (32).
 - **One-finger drag pans.** Crossing the slop cancels the tap and starts a pan; the board catches up from the touch-down point so it does not jump. It works with Pan mode off. Pan mode and the Pan button remain for mouse users.
-- **Two-finger pinch zooms** about the midpoint, and moving both fingers together pans. Bounds are the transform's own min/max.
+- **Two-finger pinch zooms** about the midpoint, and moving both fingers together pans. Bounds are the transform's own: the camera center may reach any point of the board (above the Fit scale), and the scale is between Fit and the maximum.
 - **After a pinch**, the remaining finger is locked out (no select, no pan) until every finger lifts.
 - **Emulated mouse is ignored.** Godot synthesizes mouse events from touch with `device == InputEvent.DEVICE_ID_EMULATION`; the board drops them so one touch never selects twice or before release.
 - Tests: `_check_modeless_touch` in `tests/puzzle_canvas_check.gd` synthesizes touch events (headless cannot test real fingers).
@@ -47,5 +47,5 @@ The needed logic is about sixty lines driving the existing transform, so no addo
 
 ## Open verification
 
-- Re-test pinch, drag and tap on the real Pixel 7 Pro after the `touch-action` change. If pinch still fails, find out whether the browser or the engine drops the second finger (the old spike probe in branch `012-spike-touch-prototype` shows build id and max fingers down).
+- Pinch, drag and tap were re-tested on the real Pixel 7 Pro in Chrome after the `touch-action` change and the modeless rewrite: pinch zoom and one-finger drag worked without issue and all levels were played through. Other Android devices and browsers have not been tested.
 - iPhone Safari remains unverified.

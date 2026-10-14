@@ -1,9 +1,10 @@
 class_name PuzzleCatalog
 extends RefCounted
-## Static registry of twenty-two authored puzzles: the original eight
+## Static registry of thirty authored puzzles: the original eight
 ## baseline puzzles, six earlier structural experiments, the large-canvas
-## validation puzzle, six geometric-entanglement experiments, and the
-## hand-composed Reference Knot. Every entry carries a purpose group
+## validation puzzle, six geometric-entanglement experiments, eight
+## progression levels that step up to the hand-composed Reference Knot, and
+## the Reference Knot itself. Every entry carries a purpose group
 ## (Foundations, Puzzle Lab, ArrowSpark Levels) that is pure metadata: it drives
 ## Level Select sections, group-relative numbering and Next Puzzle scope, and
 ## never affects rules. Earlier experiments deliberately
@@ -53,6 +54,14 @@ static func _ensure_entries() -> void:
 		{"id": "knot_regions", "title": "Distinct Regions", "group": GROUP_PUZZLE_LAB, "build": Callable(PuzzleCatalog, "_build_knot_regions")},
 		{"id": "knot_single_release", "title": "Single Release", "group": GROUP_PUZZLE_LAB, "build": Callable(PuzzleCatalog, "_build_knot_single_release")},
 		{"id": "knot_boundary", "title": "Boundary Knot", "group": GROUP_PUZZLE_LAB, "build": Callable(PuzzleCatalog, "_build_knot_boundary")},
+		{"id": "first_knot", "title": "First Knot", "group": GROUP_ARROWSPARK_LEVELS, "build": Callable(PuzzleCatalog, "_build_first_knot")},
+		{"id": "two_neighborhoods", "title": "Two Neighborhoods", "group": GROUP_ARROWSPARK_LEVELS, "build": Callable(PuzzleCatalog, "_build_two_neighborhoods")},
+		{"id": "the_bridge", "title": "The Bridge", "group": GROUP_ARROWSPARK_LEVELS, "build": Callable(PuzzleCatalog, "_build_the_bridge")},
+		{"id": "false_simplicity", "title": "False Simplicity", "group": GROUP_ARROWSPARK_LEVELS, "build": Callable(PuzzleCatalog, "_build_false_simplicity")},
+		{"id": "the_rescan", "title": "The Rescan", "group": GROUP_ARROWSPARK_LEVELS, "build": Callable(PuzzleCatalog, "_build_the_rescan")},
+		{"id": "major_release", "title": "Major Release", "group": GROUP_ARROWSPARK_LEVELS, "build": Callable(PuzzleCatalog, "_build_major_release")},
+		{"id": "dense_weave", "title": "Dense Weave", "group": GROUP_ARROWSPARK_LEVELS, "build": Callable(PuzzleCatalog, "_build_dense_weave")},
+		{"id": "almost_a_knot", "title": "Almost a Knot", "group": GROUP_ARROWSPARK_LEVELS, "build": Callable(PuzzleCatalog, "_build_almost_a_knot")},
 		{"id": "reference_knot", "title": "Reference Knot", "group": GROUP_ARROWSPARK_LEVELS, "build": Callable(PuzzleCatalog, "_build_reference_knot")},
 	]
 
@@ -615,6 +624,386 @@ static func _build_knot_boundary() -> PuzzleDefinition:
 		arrows[shape[0]] = shape[1]
 		tails[shape[0]] = _tail_along(vertices)
 	return PuzzleDefinition.new(48, 36, arrows, tails)
+
+## Builds a definition from literal [head, direction, vertices] shapes, where
+## the vertices run from the head through every bend to the tail end.
+static func _from_shapes(width: int, height: int, shapes: Array) -> PuzzleDefinition:
+	var arrows := {}
+	var tails := {}
+	for shape in shapes:
+		var vertices: Array[Vector2i] = []
+		vertices.assign(shape[2])
+		arrows[shape[0]] = shape[1]
+		tails[shape[0]] = _tail_along(vertices)
+	return PuzzleDefinition.new(width, height, arrows, tails)
+
+## The first step up from Foundations: nine long, bent arrows on a small
+## board. Three moves are open at the start and the dependencies chain only
+## three deep, so the board can still be read at a glance, but every arrow now
+## bends around its neighbors.
+## A 9x7 board of 9 arrows. The layout is fixed literal data
+## found by a seeded search against this design and then checked by the
+## solver, not generated at runtime.
+static func _build_first_knot() -> PuzzleDefinition:
+	var d := PuzzleDefinition.Direction
+	var shapes := [
+		[Vector2i(5, 0), d.LEFT, [Vector2i(5, 0), Vector2i(8, 0), Vector2i(8, 2)]],
+		[Vector2i(4, 1), d.UP, [Vector2i(4, 1), Vector2i(4, 2), Vector2i(5, 2)]],
+		[Vector2i(0, 2), d.LEFT, [Vector2i(0, 2), Vector2i(1, 2), Vector2i(1, 5), Vector2i(3, 5)]],
+		[Vector2i(7, 2), d.RIGHT, [Vector2i(7, 2), Vector2i(6, 2), Vector2i(6, 3), Vector2i(5, 3)]],
+		[Vector2i(2, 3), d.DOWN, [Vector2i(2, 3), Vector2i(2, 1)]],
+		[Vector2i(3, 4), d.LEFT, [Vector2i(3, 4), Vector2i(4, 4), Vector2i(4, 6)]],
+		[Vector2i(5, 4), d.UP, [Vector2i(5, 4), Vector2i(5, 6), Vector2i(8, 6)]],
+		[Vector2i(0, 5), d.UP, [Vector2i(0, 5), Vector2i(0, 6), Vector2i(1, 6)]],
+		[Vector2i(8, 5), d.DOWN, [Vector2i(8, 5), Vector2i(8, 3), Vector2i(7, 3)]],
+	]
+	return _from_shapes(9, 7, shapes)
+
+## Two clusters of arrows sit either side of an empty gutter, with arrows
+## reaching across it in both directions: eight dependencies run from the left
+## cluster to the right and three the other way. All but one arrow belongs to
+## a single dependency web, so the neighborhoods cannot be solved
+## independently.
+## A 15x9 board of 15 arrows. The layout is fixed literal data
+## found by a seeded search against this design and then checked by the
+## solver, not generated at runtime.
+static func _build_two_neighborhoods() -> PuzzleDefinition:
+	var d := PuzzleDefinition.Direction
+	var shapes := [
+		[Vector2i(2, 0), d.RIGHT, [Vector2i(2, 0), Vector2i(0, 0), Vector2i(0, 4), Vector2i(1, 4)]],
+		[Vector2i(3, 0), d.UP, [Vector2i(3, 0), Vector2i(3, 2)]],
+		[Vector2i(12, 1), d.UP, [Vector2i(12, 1), Vector2i(12, 2), Vector2i(14, 2), Vector2i(14, 0), Vector2i(13, 0)]],
+		[Vector2i(5, 2), d.UP, [Vector2i(5, 2), Vector2i(5, 4), Vector2i(2, 4), Vector2i(2, 3)]],
+		[Vector2i(11, 2), d.DOWN, [Vector2i(11, 2), Vector2i(11, 1), Vector2i(10, 1), Vector2i(10, 0), Vector2i(9, 0), Vector2i(9, 1)]],
+		[Vector2i(6, 4), d.DOWN, [Vector2i(6, 4), Vector2i(6, 0), Vector2i(7, 0)]],
+		[Vector2i(12, 4), d.LEFT, [Vector2i(12, 4), Vector2i(14, 4), Vector2i(14, 3)]],
+		[Vector2i(5, 6), d.DOWN, [Vector2i(5, 6), Vector2i(5, 5), Vector2i(2, 5), Vector2i(2, 7)]],
+		[Vector2i(4, 7), d.DOWN, [Vector2i(4, 7), Vector2i(4, 6), Vector2i(3, 6)]],
+		[Vector2i(8, 7), d.UP, [Vector2i(8, 7), Vector2i(8, 8), Vector2i(4, 8)]],
+		[Vector2i(12, 7), d.DOWN, [Vector2i(12, 7), Vector2i(12, 5), Vector2i(14, 5), Vector2i(14, 6)]],
+		[Vector2i(14, 7), d.RIGHT, [Vector2i(14, 7), Vector2i(13, 7), Vector2i(13, 8), Vector2i(12, 8)]],
+		[Vector2i(0, 8), d.DOWN, [Vector2i(0, 8), Vector2i(0, 7), Vector2i(1, 7), Vector2i(1, 5), Vector2i(0, 5), Vector2i(0, 6)]],
+		[Vector2i(3, 8), d.RIGHT, [Vector2i(3, 8), Vector2i(1, 8)]],
+		[Vector2i(11, 8), d.RIGHT, [Vector2i(11, 8), Vector2i(9, 8)]],
+	]
+	return _from_shapes(15, 9, shapes)
+
+## One long arrow runs across the middle of the board. Two arrows hold up its
+## path and its body holds up two others, so it links the arrows on either
+## side of it.
+## A 17x9 board of 14 arrows. The layout is fixed literal data
+## found by a seeded search against this design and then checked by the
+## solver, not generated at runtime.
+static func _build_the_bridge() -> PuzzleDefinition:
+	var d := PuzzleDefinition.Direction
+	var shapes := [
+		[Vector2i(2, 0), d.UP, [Vector2i(2, 0), Vector2i(2, 2), Vector2i(0, 2)]],
+		[Vector2i(5, 0), d.LEFT, [Vector2i(5, 0), Vector2i(6, 0), Vector2i(6, 2), Vector2i(5, 2)]],
+		[Vector2i(16, 0), d.RIGHT, [Vector2i(16, 0), Vector2i(15, 0), Vector2i(15, 1)]],
+		[Vector2i(11, 1), d.UP, [Vector2i(11, 1), Vector2i(11, 2), Vector2i(12, 2)]],
+		[Vector2i(0, 3), d.LEFT, [Vector2i(0, 3), Vector2i(1, 3), Vector2i(1, 5)]],
+		[Vector2i(3, 3), d.LEFT, [Vector2i(3, 3), Vector2i(6, 3)]],
+		[Vector2i(14, 3), d.DOWN, [Vector2i(14, 3), Vector2i(14, 2), Vector2i(13, 2)]],
+		[Vector2i(16, 3), d.RIGHT, [Vector2i(16, 3), Vector2i(15, 3), Vector2i(15, 2)]],
+		[Vector2i(12, 5), d.RIGHT, [Vector2i(12, 5), Vector2i(5, 5), Vector2i(5, 4), Vector2i(2, 4)]],
+		[Vector2i(15, 5), d.UP, [Vector2i(15, 5), Vector2i(15, 8), Vector2i(14, 8)]],
+		[Vector2i(2, 6), d.UP, [Vector2i(2, 6), Vector2i(2, 8)]],
+		[Vector2i(7, 6), d.UP, [Vector2i(7, 6), Vector2i(7, 8)]],
+		[Vector2i(0, 8), d.LEFT, [Vector2i(0, 8), Vector2i(1, 8), Vector2i(1, 7), Vector2i(0, 7), Vector2i(0, 4)]],
+		[Vector2i(16, 8), d.DOWN, [Vector2i(16, 8), Vector2i(16, 4)]],
+	]
+	return _from_shapes(17, 9, shapes)
+
+## Built to look easier than it is: only four of seventeen arrows are playable
+## at the start, and runs of forced single moves of up to five follow, but the
+## open space around the arrows suggests a free choice.
+## A 14x11 board of 17 arrows. The layout is fixed literal data
+## found by a seeded search against this design and then checked by the
+## solver, not generated at runtime.
+static func _build_false_simplicity() -> PuzzleDefinition:
+	var d := PuzzleDefinition.Direction
+	var shapes := [
+		[Vector2i(7, 0), d.UP, [Vector2i(7, 0), Vector2i(7, 1), Vector2i(6, 1)]],
+		[Vector2i(5, 1), d.DOWN, [Vector2i(5, 1), Vector2i(5, 0), Vector2i(0, 0), Vector2i(0, 1), Vector2i(2, 1)]],
+		[Vector2i(10, 1), d.RIGHT, [Vector2i(10, 1), Vector2i(8, 1)]],
+		[Vector2i(8, 2), d.UP, [Vector2i(8, 2), Vector2i(8, 3), Vector2i(12, 3)]],
+		[Vector2i(12, 2), d.RIGHT, [Vector2i(12, 2), Vector2i(11, 2), Vector2i(11, 0), Vector2i(13, 0), Vector2i(13, 1)]],
+		[Vector2i(2, 6), d.LEFT, [Vector2i(2, 6), Vector2i(4, 6), Vector2i(4, 4), Vector2i(3, 4), Vector2i(3, 2)]],
+		[Vector2i(7, 6), d.DOWN, [Vector2i(7, 6), Vector2i(7, 5), Vector2i(5, 5), Vector2i(5, 2), Vector2i(7, 2)]],
+		[Vector2i(6, 7), d.DOWN, [Vector2i(6, 7), Vector2i(6, 6), Vector2i(5, 6)]],
+		[Vector2i(13, 7), d.DOWN, [Vector2i(13, 7), Vector2i(13, 2)]],
+		[Vector2i(1, 8), d.DOWN, [Vector2i(1, 8), Vector2i(1, 5), Vector2i(0, 5), Vector2i(0, 7)]],
+		[Vector2i(1, 9), d.LEFT, [Vector2i(1, 9), Vector2i(3, 9), Vector2i(3, 7), Vector2i(5, 7)]],
+		[Vector2i(6, 9), d.DOWN, [Vector2i(6, 9), Vector2i(6, 8), Vector2i(7, 8), Vector2i(7, 9)]],
+		[Vector2i(0, 10), d.DOWN, [Vector2i(0, 10), Vector2i(0, 8)]],
+		[Vector2i(1, 10), d.LEFT, [Vector2i(1, 10), Vector2i(3, 10)]],
+		[Vector2i(4, 10), d.LEFT, [Vector2i(4, 10), Vector2i(5, 10), Vector2i(5, 8)]],
+		[Vector2i(7, 10), d.LEFT, [Vector2i(7, 10), Vector2i(11, 10)]],
+		[Vector2i(13, 10), d.DOWN, [Vector2i(13, 10), Vector2i(13, 8)]],
+	]
+	return _from_shapes(14, 11, shapes)
+
+## Built so that clearing an arrow often frees nothing nearby. The next
+## playable arrow is somewhere else on the board, so the board has to be
+## scanned again after those releases.
+## A 20x12 board of 23 arrows. The layout is fixed literal data
+## found by a seeded search against this design and then checked by the
+## solver, not generated at runtime.
+static func _build_the_rescan() -> PuzzleDefinition:
+	var d := PuzzleDefinition.Direction
+	var shapes := [
+		[Vector2i(4, 0), d.UP, [Vector2i(4, 0), Vector2i(4, 1), Vector2i(5, 1), Vector2i(5, 0)]],
+		[Vector2i(11, 0), d.RIGHT, [Vector2i(11, 0), Vector2i(7, 0), Vector2i(7, 1), Vector2i(6, 1)]],
+		[Vector2i(13, 0), d.RIGHT, [Vector2i(13, 0), Vector2i(12, 0), Vector2i(12, 1), Vector2i(13, 1)]],
+		[Vector2i(16, 0), d.RIGHT, [Vector2i(16, 0), Vector2i(14, 0)]],
+		[Vector2i(19, 0), d.UP, [Vector2i(19, 0), Vector2i(19, 2)]],
+		[Vector2i(1, 1), d.DOWN, [Vector2i(1, 1), Vector2i(1, 0), Vector2i(2, 0), Vector2i(2, 4), Vector2i(4, 4)]],
+		[Vector2i(14, 1), d.LEFT, [Vector2i(14, 1), Vector2i(18, 1), Vector2i(18, 3), Vector2i(15, 3), Vector2i(15, 2)]],
+		[Vector2i(4, 2), d.UP, [Vector2i(4, 2), Vector2i(4, 3), Vector2i(3, 3), Vector2i(3, 1)]],
+		[Vector2i(9, 2), d.LEFT, [Vector2i(9, 2), Vector2i(13, 2), Vector2i(13, 3)]],
+		[Vector2i(19, 3), d.UP, [Vector2i(19, 3), Vector2i(19, 5), Vector2i(18, 5)]],
+		[Vector2i(0, 4), d.LEFT, [Vector2i(0, 4), Vector2i(1, 4), Vector2i(1, 2)]],
+		[Vector2i(6, 4), d.RIGHT, [Vector2i(6, 4), Vector2i(5, 4), Vector2i(5, 6), Vector2i(2, 6)]],
+		[Vector2i(12, 4), d.RIGHT, [Vector2i(12, 4), Vector2i(7, 4)]],
+		[Vector2i(17, 5), d.RIGHT, [Vector2i(17, 5), Vector2i(16, 5), Vector2i(16, 4), Vector2i(15, 4)]],
+		[Vector2i(19, 6), d.UP, [Vector2i(19, 6), Vector2i(19, 8)]],
+		[Vector2i(5, 7), d.LEFT, [Vector2i(5, 7), Vector2i(7, 7), Vector2i(7, 9), Vector2i(5, 9), Vector2i(5, 8)]],
+		[Vector2i(9, 8), d.RIGHT, [Vector2i(9, 8), Vector2i(8, 8), Vector2i(8, 7), Vector2i(15, 7)]],
+		[Vector2i(18, 8), d.RIGHT, [Vector2i(18, 8), Vector2i(16, 8), Vector2i(16, 9), Vector2i(18, 9), Vector2i(18, 10), Vector2i(16, 10)]],
+		[Vector2i(1, 9), d.LEFT, [Vector2i(1, 9), Vector2i(4, 9), Vector2i(4, 7)]],
+		[Vector2i(0, 10), d.DOWN, [Vector2i(0, 10), Vector2i(0, 6), Vector2i(1, 6), Vector2i(1, 5)]],
+		[Vector2i(0, 11), d.LEFT, [Vector2i(0, 11), Vector2i(2, 11)]],
+		[Vector2i(5, 11), d.DOWN, [Vector2i(5, 11), Vector2i(5, 10), Vector2i(6, 10), Vector2i(6, 11), Vector2i(10, 11)]],
+		[Vector2i(11, 11), d.LEFT, [Vector2i(11, 11), Vector2i(19, 11), Vector2i(19, 9)]],
+	]
+	return _from_shapes(20, 12, shapes)
+
+## Five parallel arrows are all held up by one tall arrow, which is itself
+## held up by another. Finding the arrow that frees the tall one, then the
+## tall one itself, releases all five at once.
+## A 22x14 board of 30 arrows. The layout is fixed literal data
+## found by a seeded search against this design and then checked by the
+## solver, not generated at runtime.
+static func _build_major_release() -> PuzzleDefinition:
+	var d := PuzzleDefinition.Direction
+	var shapes := [
+		[Vector2i(0, 0), d.UP, [Vector2i(0, 0), Vector2i(0, 2)]],
+		[Vector2i(1, 0), d.UP, [Vector2i(1, 0), Vector2i(1, 1), Vector2i(2, 1)]],
+		[Vector2i(3, 0), d.LEFT, [Vector2i(3, 0), Vector2i(6, 0), Vector2i(6, 2), Vector2i(7, 2), Vector2i(7, 3)]],
+		[Vector2i(21, 0), d.RIGHT, [Vector2i(21, 0), Vector2i(20, 0), Vector2i(20, 1), Vector2i(19, 1)]],
+		[Vector2i(15, 1), d.DOWN, [Vector2i(15, 1), Vector2i(15, 0), Vector2i(16, 0)]],
+		[Vector2i(16, 1), d.UP, [Vector2i(16, 1), Vector2i(16, 11)]],
+		[Vector2i(1, 2), d.LEFT, [Vector2i(1, 2), Vector2i(3, 2), Vector2i(3, 3), Vector2i(2, 3)]],
+		[Vector2i(11, 2), d.RIGHT, [Vector2i(11, 2), Vector2i(8, 2)]],
+		[Vector2i(2, 4), d.LEFT, [Vector2i(2, 4), Vector2i(4, 4), Vector2i(4, 2), Vector2i(5, 2)]],
+		[Vector2i(14, 4), d.RIGHT, [Vector2i(14, 4), Vector2i(8, 4)]],
+		[Vector2i(11, 5), d.RIGHT, [Vector2i(11, 5), Vector2i(5, 5)]],
+		[Vector2i(0, 7), d.DOWN, [Vector2i(0, 7), Vector2i(0, 3)]],
+		[Vector2i(18, 7), d.RIGHT, [Vector2i(18, 7), Vector2i(17, 7), Vector2i(17, 6), Vector2i(18, 6)]],
+		[Vector2i(0, 8), d.LEFT, [Vector2i(0, 8), Vector2i(1, 8), Vector2i(1, 7)]],
+		[Vector2i(2, 8), d.LEFT, [Vector2i(2, 8), Vector2i(4, 8)]],
+		[Vector2i(6, 8), d.LEFT, [Vector2i(6, 8), Vector2i(8, 8)]],
+		[Vector2i(9, 8), d.LEFT, [Vector2i(9, 8), Vector2i(11, 8), Vector2i(11, 7), Vector2i(8, 7), Vector2i(8, 6)]],
+		[Vector2i(20, 8), d.RIGHT, [Vector2i(20, 8), Vector2i(19, 8), Vector2i(19, 7)]],
+		[Vector2i(21, 8), d.DOWN, [Vector2i(21, 8), Vector2i(21, 6)]],
+		[Vector2i(3, 9), d.UP, [Vector2i(3, 9), Vector2i(3, 10), Vector2i(4, 10), Vector2i(4, 13), Vector2i(6, 13), Vector2i(6, 12)]],
+		[Vector2i(14, 9), d.RIGHT, [Vector2i(14, 9), Vector2i(8, 9)]],
+		[Vector2i(2, 10), d.DOWN, [Vector2i(2, 10), Vector2i(2, 9), Vector2i(0, 9), Vector2i(0, 12)]],
+		[Vector2i(12, 10), d.RIGHT, [Vector2i(12, 10), Vector2i(9, 10)]],
+		[Vector2i(3, 12), d.DOWN, [Vector2i(3, 12), Vector2i(3, 11), Vector2i(2, 11)]],
+		[Vector2i(17, 12), d.UP, [Vector2i(17, 12), Vector2i(17, 13), Vector2i(19, 13)]],
+		[Vector2i(21, 12), d.RIGHT, [Vector2i(21, 12), Vector2i(20, 12), Vector2i(20, 13)]],
+		[Vector2i(1, 13), d.LEFT, [Vector2i(1, 13), Vector2i(3, 13)]],
+		[Vector2i(7, 13), d.LEFT, [Vector2i(7, 13), Vector2i(11, 13)]],
+		[Vector2i(13, 13), d.DOWN, [Vector2i(13, 13), Vector2i(13, 12), Vector2i(12, 12)]],
+		[Vector2i(16, 13), d.DOWN, [Vector2i(16, 13), Vector2i(16, 12), Vector2i(15, 12)]],
+	]
+	return _from_shapes(22, 14, shapes)
+
+## Density comes from geometry rather than arrow count alone: many short bent
+## arrows interleave until the board is about seventy percent full, with
+## dependency chains up to ten deep.
+## A 26x16 board of 68 arrows. The layout is fixed literal data
+## found by a seeded search against this design and then checked by the
+## solver, not generated at runtime.
+static func _build_dense_weave() -> PuzzleDefinition:
+	var d := PuzzleDefinition.Direction
+	var shapes := [
+		[Vector2i(0, 0), d.UP, [Vector2i(0, 0), Vector2i(0, 1)]],
+		[Vector2i(8, 0), d.UP, [Vector2i(8, 0), Vector2i(8, 1)]],
+		[Vector2i(24, 0), d.RIGHT, [Vector2i(24, 0), Vector2i(23, 0)]],
+		[Vector2i(25, 0), d.UP, [Vector2i(25, 0), Vector2i(25, 1)]],
+		[Vector2i(1, 1), d.LEFT, [Vector2i(1, 1), Vector2i(2, 1)]],
+		[Vector2i(7, 1), d.UP, [Vector2i(7, 1), Vector2i(7, 2)]],
+		[Vector2i(22, 1), d.RIGHT, [Vector2i(22, 1), Vector2i(21, 1)]],
+		[Vector2i(23, 1), d.UP, [Vector2i(23, 1), Vector2i(23, 2)]],
+		[Vector2i(1, 2), d.UP, [Vector2i(1, 2), Vector2i(1, 3)]],
+		[Vector2i(8, 2), d.UP, [Vector2i(8, 2), Vector2i(8, 3)]],
+		[Vector2i(22, 2), d.UP, [Vector2i(22, 2), Vector2i(22, 3), Vector2i(24, 3)]],
+		[Vector2i(3, 3), d.LEFT, [Vector2i(3, 3), Vector2i(5, 3), Vector2i(5, 1)]],
+		[Vector2i(13, 3), d.RIGHT, [Vector2i(13, 3), Vector2i(12, 3), Vector2i(12, 2), Vector2i(13, 2), Vector2i(13, 0), Vector2i(9, 0)]],
+		[Vector2i(17, 3), d.RIGHT, [Vector2i(17, 3), Vector2i(14, 3), Vector2i(14, 2), Vector2i(15, 2), Vector2i(15, 0)]],
+		[Vector2i(21, 3), d.RIGHT, [Vector2i(21, 3), Vector2i(20, 3), Vector2i(20, 2), Vector2i(19, 2)]],
+		[Vector2i(20, 4), d.RIGHT, [Vector2i(20, 4), Vector2i(19, 4), Vector2i(19, 3), Vector2i(18, 3), Vector2i(18, 1)]],
+		[Vector2i(22, 4), d.RIGHT, [Vector2i(22, 4), Vector2i(21, 4)]],
+		[Vector2i(23, 4), d.UP, [Vector2i(23, 4), Vector2i(23, 5), Vector2i(24, 5)]],
+		[Vector2i(5, 5), d.LEFT, [Vector2i(5, 5), Vector2i(6, 5)]],
+		[Vector2i(8, 5), d.UP, [Vector2i(8, 5), Vector2i(8, 6)]],
+		[Vector2i(20, 5), d.UP, [Vector2i(20, 5), Vector2i(20, 8), Vector2i(22, 8), Vector2i(22, 9), Vector2i(21, 9)]],
+		[Vector2i(21, 5), d.UP, [Vector2i(21, 5), Vector2i(21, 6), Vector2i(22, 6), Vector2i(22, 7), Vector2i(21, 7)]],
+		[Vector2i(6, 6), d.LEFT, [Vector2i(6, 6), Vector2i(7, 6), Vector2i(7, 3), Vector2i(6, 3), Vector2i(6, 4), Vector2i(0, 4)]],
+		[Vector2i(9, 6), d.LEFT, [Vector2i(9, 6), Vector2i(10, 6), Vector2i(10, 3), Vector2i(11, 3), Vector2i(11, 5), Vector2i(15, 5), Vector2i(15, 4), Vector2i(18, 4)]],
+		[Vector2i(19, 6), d.RIGHT, [Vector2i(19, 6), Vector2i(17, 6), Vector2i(17, 14)]],
+		[Vector2i(0, 7), d.LEFT, [Vector2i(0, 7), Vector2i(1, 7)]],
+		[Vector2i(2, 7), d.LEFT, [Vector2i(2, 7), Vector2i(3, 7)]],
+		[Vector2i(4, 7), d.LEFT, [Vector2i(4, 7), Vector2i(5, 7), Vector2i(5, 6), Vector2i(3, 6), Vector2i(3, 5), Vector2i(2, 5)]],
+		[Vector2i(8, 7), d.RIGHT, [Vector2i(8, 7), Vector2i(6, 7), Vector2i(6, 9), Vector2i(2, 9), Vector2i(2, 8), Vector2i(5, 8)]],
+		[Vector2i(19, 7), d.RIGHT, [Vector2i(19, 7), Vector2i(18, 7)]],
+		[Vector2i(15, 8), d.DOWN, [Vector2i(15, 8), Vector2i(15, 7), Vector2i(12, 7), Vector2i(12, 6), Vector2i(11, 6), Vector2i(11, 12)]],
+		[Vector2i(19, 8), d.RIGHT, [Vector2i(19, 8), Vector2i(18, 8), Vector2i(18, 10), Vector2i(23, 10), Vector2i(23, 12)]],
+		[Vector2i(7, 9), d.DOWN, [Vector2i(7, 9), Vector2i(7, 8)]],
+		[Vector2i(8, 9), d.DOWN, [Vector2i(8, 9), Vector2i(8, 8)]],
+		[Vector2i(9, 9), d.DOWN, [Vector2i(9, 9), Vector2i(9, 8), Vector2i(10, 8), Vector2i(10, 14), Vector2i(11, 14)]],
+		[Vector2i(12, 9), d.DOWN, [Vector2i(12, 9), Vector2i(12, 8)]],
+		[Vector2i(13, 9), d.DOWN, [Vector2i(13, 9), Vector2i(13, 8), Vector2i(14, 8), Vector2i(14, 9), Vector2i(16, 9), Vector2i(16, 5), Vector2i(19, 5)]],
+		[Vector2i(20, 9), d.RIGHT, [Vector2i(20, 9), Vector2i(19, 9)]],
+		[Vector2i(6, 10), d.LEFT, [Vector2i(6, 10), Vector2i(9, 10)]],
+		[Vector2i(4, 11), d.LEFT, [Vector2i(4, 11), Vector2i(5, 11), Vector2i(5, 10), Vector2i(0, 10)]],
+		[Vector2i(13, 11), d.DOWN, [Vector2i(13, 11), Vector2i(13, 10), Vector2i(16, 10)]],
+		[Vector2i(3, 12), d.DOWN, [Vector2i(3, 12), Vector2i(3, 11), Vector2i(1, 11)]],
+		[Vector2i(4, 12), d.LEFT, [Vector2i(4, 12), Vector2i(8, 12), Vector2i(8, 15)]],
+		[Vector2i(9, 12), d.DOWN, [Vector2i(9, 12), Vector2i(9, 11), Vector2i(8, 11)]],
+		[Vector2i(14, 12), d.DOWN, [Vector2i(14, 12), Vector2i(14, 11)]],
+		[Vector2i(15, 12), d.DOWN, [Vector2i(15, 12), Vector2i(15, 11), Vector2i(16, 11), Vector2i(16, 12)]],
+		[Vector2i(18, 12), d.DOWN, [Vector2i(18, 12), Vector2i(18, 11), Vector2i(19, 11)]],
+		[Vector2i(21, 12), d.DOWN, [Vector2i(21, 12), Vector2i(21, 11), Vector2i(20, 11), Vector2i(20, 12), Vector2i(19, 12)]],
+		[Vector2i(25, 12), d.RIGHT, [Vector2i(25, 12), Vector2i(24, 12)]],
+		[Vector2i(1, 13), d.LEFT, [Vector2i(1, 13), Vector2i(2, 13)]],
+		[Vector2i(3, 13), d.LEFT, [Vector2i(3, 13), Vector2i(7, 13)]],
+		[Vector2i(12, 13), d.DOWN, [Vector2i(12, 13), Vector2i(12, 12)]],
+		[Vector2i(20, 13), d.RIGHT, [Vector2i(20, 13), Vector2i(18, 13)]],
+		[Vector2i(22, 13), d.DOWN, [Vector2i(22, 13), Vector2i(22, 12)]],
+		[Vector2i(0, 14), d.DOWN, [Vector2i(0, 14), Vector2i(0, 13)]],
+		[Vector2i(1, 14), d.LEFT, [Vector2i(1, 14), Vector2i(2, 14)]],
+		[Vector2i(4, 14), d.LEFT, [Vector2i(4, 14), Vector2i(5, 14)]],
+		[Vector2i(13, 14), d.DOWN, [Vector2i(13, 14), Vector2i(13, 13)]],
+		[Vector2i(14, 14), d.DOWN, [Vector2i(14, 14), Vector2i(14, 13)]],
+		[Vector2i(21, 14), d.DOWN, [Vector2i(21, 14), Vector2i(21, 13)]],
+		[Vector2i(23, 14), d.RIGHT, [Vector2i(23, 14), Vector2i(22, 14)]],
+		[Vector2i(25, 14), d.UP, [Vector2i(25, 14), Vector2i(25, 15)]],
+		[Vector2i(0, 15), d.LEFT, [Vector2i(0, 15), Vector2i(1, 15)]],
+		[Vector2i(10, 15), d.RIGHT, [Vector2i(10, 15), Vector2i(9, 15)]],
+		[Vector2i(13, 15), d.RIGHT, [Vector2i(13, 15), Vector2i(12, 15)]],
+		[Vector2i(15, 15), d.DOWN, [Vector2i(15, 15), Vector2i(15, 14)]],
+		[Vector2i(19, 15), d.DOWN, [Vector2i(19, 15), Vector2i(19, 14)]],
+		[Vector2i(24, 15), d.DOWN, [Vector2i(24, 15), Vector2i(24, 14)]],
+	]
+	return _from_shapes(26, 16, shapes)
+
+## The last step before the Reference Knot: ninety-three arrows, some over
+## thirty cells long, fill about four-fifths of the board, with chains up to
+## twelve deep and arrows held up by as many as nine others.
+## A 36x24 board of 93 arrows. The layout is fixed literal data
+## found by a seeded search against this design and then checked by the
+## solver, not generated at runtime.
+static func _build_almost_a_knot() -> PuzzleDefinition:
+	var d := PuzzleDefinition.Direction
+	var shapes := [
+		[Vector2i(17, 0), d.UP, [Vector2i(17, 0), Vector2i(17, 1), Vector2i(16, 1), Vector2i(16, 0), Vector2i(14, 0)]],
+		[Vector2i(18, 0), d.UP, [Vector2i(18, 0), Vector2i(18, 1)]],
+		[Vector2i(25, 0), d.UP, [Vector2i(25, 0), Vector2i(25, 2), Vector2i(24, 2)]],
+		[Vector2i(26, 0), d.UP, [Vector2i(26, 0), Vector2i(26, 1), Vector2i(27, 1)]],
+		[Vector2i(9, 1), d.UP, [Vector2i(9, 1), Vector2i(9, 2), Vector2i(10, 2), Vector2i(10, 0)]],
+		[Vector2i(14, 1), d.UP, [Vector2i(14, 1), Vector2i(14, 2), Vector2i(13, 2), Vector2i(13, 0), Vector2i(11, 0)]],
+		[Vector2i(15, 1), d.UP, [Vector2i(15, 1), Vector2i(15, 2)]],
+		[Vector2i(23, 1), d.RIGHT, [Vector2i(23, 1), Vector2i(21, 1), Vector2i(21, 3), Vector2i(24, 3)]],
+		[Vector2i(33, 1), d.RIGHT, [Vector2i(33, 1), Vector2i(31, 1), Vector2i(31, 0), Vector2i(32, 0)]],
+		[Vector2i(35, 1), d.RIGHT, [Vector2i(35, 1), Vector2i(34, 1), Vector2i(34, 0), Vector2i(35, 0)]],
+		[Vector2i(11, 2), d.UP, [Vector2i(11, 2), Vector2i(11, 3), Vector2i(9, 3)]],
+		[Vector2i(12, 2), d.UP, [Vector2i(12, 2), Vector2i(12, 3), Vector2i(14, 3), Vector2i(14, 4)]],
+		[Vector2i(18, 2), d.UP, [Vector2i(18, 2), Vector2i(18, 3), Vector2i(19, 3)]],
+		[Vector2i(26, 2), d.UP, [Vector2i(26, 2), Vector2i(26, 3)]],
+		[Vector2i(15, 3), d.UP, [Vector2i(15, 3), Vector2i(15, 4)]],
+		[Vector2i(25, 3), d.UP, [Vector2i(25, 3), Vector2i(25, 4)]],
+		[Vector2i(12, 4), d.UP, [Vector2i(12, 4), Vector2i(12, 5)]],
+		[Vector2i(18, 4), d.UP, [Vector2i(18, 4), Vector2i(18, 5)]],
+		[Vector2i(19, 4), d.UP, [Vector2i(19, 4), Vector2i(19, 5), Vector2i(20, 5), Vector2i(20, 0), Vector2i(23, 0)]],
+		[Vector2i(24, 4), d.UP, [Vector2i(24, 4), Vector2i(24, 5), Vector2i(23, 5), Vector2i(23, 4), Vector2i(21, 4)]],
+		[Vector2i(26, 4), d.UP, [Vector2i(26, 4), Vector2i(26, 5)]],
+		[Vector2i(31, 4), d.UP, [Vector2i(31, 4), Vector2i(31, 6)]],
+		[Vector2i(15, 5), d.UP, [Vector2i(15, 5), Vector2i(15, 6)]],
+		[Vector2i(25, 5), d.UP, [Vector2i(25, 5), Vector2i(25, 6), Vector2i(27, 6), Vector2i(27, 2), Vector2i(30, 2), Vector2i(30, 3), Vector2i(33, 3), Vector2i(33, 4)]],
+		[Vector2i(7, 6), d.UP, [Vector2i(7, 6), Vector2i(7, 7), Vector2i(6, 7), Vector2i(6, 0), Vector2i(1, 0), Vector2i(1, 3), Vector2i(2, 3), Vector2i(2, 2)]],
+		[Vector2i(9, 6), d.UP, [Vector2i(9, 6), Vector2i(9, 7), Vector2i(8, 7), Vector2i(8, 0), Vector2i(7, 0), Vector2i(7, 3)]],
+		[Vector2i(12, 6), d.UP, [Vector2i(12, 6), Vector2i(12, 7), Vector2i(11, 7), Vector2i(11, 4), Vector2i(9, 4), Vector2i(9, 5), Vector2i(10, 5), Vector2i(10, 7)]],
+		[Vector2i(20, 6), d.UP, [Vector2i(20, 6), Vector2i(20, 7), Vector2i(17, 7)]],
+		[Vector2i(15, 7), d.UP, [Vector2i(15, 7), Vector2i(15, 10), Vector2i(13, 10), Vector2i(13, 11), Vector2i(14, 11)]],
+		[Vector2i(1, 8), d.LEFT, [Vector2i(1, 8), Vector2i(2, 8), Vector2i(2, 7)]],
+		[Vector2i(34, 8), d.RIGHT, [Vector2i(34, 8), Vector2i(33, 8), Vector2i(33, 9), Vector2i(34, 9)]],
+		[Vector2i(26, 9), d.RIGHT, [Vector2i(26, 9), Vector2i(25, 9), Vector2i(25, 7), Vector2i(31, 7), Vector2i(31, 8), Vector2i(32, 8), Vector2i(32, 5), Vector2i(33, 5), Vector2i(33, 6), Vector2i(34, 6), Vector2i(34, 3), Vector2i(35, 3)]],
+		[Vector2i(28, 9), d.RIGHT, [Vector2i(28, 9), Vector2i(27, 9), Vector2i(27, 8), Vector2i(26, 8)]],
+		[Vector2i(31, 9), d.RIGHT, [Vector2i(31, 9), Vector2i(30, 9), Vector2i(30, 8)]],
+		[Vector2i(2, 10), d.LEFT, [Vector2i(2, 10), Vector2i(3, 10)]],
+		[Vector2i(4, 10), d.LEFT, [Vector2i(4, 10), Vector2i(5, 10)]],
+		[Vector2i(6, 10), d.LEFT, [Vector2i(6, 10), Vector2i(7, 10), Vector2i(7, 11)]],
+		[Vector2i(8, 10), d.LEFT, [Vector2i(8, 10), Vector2i(9, 10)]],
+		[Vector2i(16, 10), d.LEFT, [Vector2i(16, 10), Vector2i(17, 10), Vector2i(17, 9), Vector2i(19, 9), Vector2i(19, 8), Vector2i(16, 8), Vector2i(16, 2), Vector2i(17, 2), Vector2i(17, 6), Vector2i(19, 6)]],
+		[Vector2i(20, 10), d.UP, [Vector2i(20, 10), Vector2i(20, 15), Vector2i(23, 15), Vector2i(23, 16), Vector2i(27, 16), Vector2i(27, 13), Vector2i(28, 13), Vector2i(28, 17)]],
+		[Vector2i(24, 10), d.RIGHT, [Vector2i(24, 10), Vector2i(23, 10), Vector2i(23, 8), Vector2i(22, 8), Vector2i(22, 11), Vector2i(21, 11), Vector2i(21, 9), Vector2i(20, 9), Vector2i(20, 8), Vector2i(21, 8), Vector2i(21, 5), Vector2i(22, 5), Vector2i(22, 7), Vector2i(23, 7), Vector2i(23, 6), Vector2i(24, 6), Vector2i(24, 9)]],
+		[Vector2i(25, 10), d.UP, [Vector2i(25, 10), Vector2i(25, 11), Vector2i(23, 11)]],
+		[Vector2i(28, 10), d.RIGHT, [Vector2i(28, 10), Vector2i(27, 10), Vector2i(27, 11), Vector2i(26, 11), Vector2i(26, 10)]],
+		[Vector2i(30, 10), d.RIGHT, [Vector2i(30, 10), Vector2i(29, 10), Vector2i(29, 8), Vector2i(28, 8)]],
+		[Vector2i(32, 10), d.RIGHT, [Vector2i(32, 10), Vector2i(31, 10)]],
+		[Vector2i(8, 11), d.LEFT, [Vector2i(8, 11), Vector2i(9, 11)]],
+		[Vector2i(12, 11), d.DOWN, [Vector2i(12, 11), Vector2i(12, 9), Vector2i(14, 9), Vector2i(14, 5), Vector2i(13, 5), Vector2i(13, 8), Vector2i(4, 8), Vector2i(4, 6), Vector2i(5, 6), Vector2i(5, 7)]],
+		[Vector2i(15, 11), d.LEFT, [Vector2i(15, 11), Vector2i(19, 11), Vector2i(19, 10)]],
+		[Vector2i(35, 11), d.RIGHT, [Vector2i(35, 11), Vector2i(34, 11), Vector2i(34, 13)]],
+		[Vector2i(10, 12), d.DOWN, [Vector2i(10, 12), Vector2i(10, 9), Vector2i(3, 9), Vector2i(3, 5), Vector2i(0, 5), Vector2i(0, 0)]],
+		[Vector2i(22, 12), d.LEFT, [Vector2i(22, 12), Vector2i(30, 12), Vector2i(30, 11), Vector2i(31, 11), Vector2i(31, 15), Vector2i(35, 15), Vector2i(35, 20), Vector2i(34, 20), Vector2i(34, 18), Vector2i(31, 18), Vector2i(31, 20)]],
+		[Vector2i(1, 13), d.LEFT, [Vector2i(1, 13), Vector2i(2, 13), Vector2i(2, 11), Vector2i(1, 11), Vector2i(1, 10)]],
+		[Vector2i(8, 13), d.DOWN, [Vector2i(8, 13), Vector2i(8, 12), Vector2i(6, 12), Vector2i(6, 11), Vector2i(3, 11), Vector2i(3, 17), Vector2i(1, 17), Vector2i(1, 19)]],
+		[Vector2i(9, 13), d.LEFT, [Vector2i(9, 13), Vector2i(10, 13), Vector2i(10, 16), Vector2i(12, 16), Vector2i(12, 15), Vector2i(11, 15), Vector2i(11, 14), Vector2i(14, 14), Vector2i(14, 15), Vector2i(15, 15), Vector2i(15, 12), Vector2i(14, 12), Vector2i(14, 13)]],
+		[Vector2i(11, 13), d.DOWN, [Vector2i(11, 13), Vector2i(11, 9)]],
+		[Vector2i(19, 13), d.DOWN, [Vector2i(19, 13), Vector2i(19, 12), Vector2i(16, 12), Vector2i(16, 21), Vector2i(15, 21), Vector2i(15, 22), Vector2i(14, 22), Vector2i(14, 23), Vector2i(12, 23)]],
+		[Vector2i(33, 13), d.RIGHT, [Vector2i(33, 13), Vector2i(32, 13), Vector2i(32, 11), Vector2i(33, 11), Vector2i(33, 10), Vector2i(35, 10), Vector2i(35, 9)]],
+		[Vector2i(6, 14), d.DOWN, [Vector2i(6, 14), Vector2i(6, 13), Vector2i(7, 13), Vector2i(7, 14), Vector2i(8, 14), Vector2i(8, 16), Vector2i(7, 16), Vector2i(7, 15)]],
+		[Vector2i(17, 14), d.DOWN, [Vector2i(17, 14), Vector2i(17, 13), Vector2i(18, 13), Vector2i(18, 15), Vector2i(19, 15), Vector2i(19, 18), Vector2i(20, 18), Vector2i(20, 16), Vector2i(22, 16), Vector2i(22, 18), Vector2i(21, 18), Vector2i(21, 17)]],
+		[Vector2i(29, 14), d.DOWN, [Vector2i(29, 14), Vector2i(29, 13), Vector2i(30, 13), Vector2i(30, 23), Vector2i(33, 23)]],
+		[Vector2i(6, 16), d.DOWN, [Vector2i(6, 16), Vector2i(6, 15), Vector2i(4, 15), Vector2i(4, 14), Vector2i(5, 14), Vector2i(5, 12), Vector2i(4, 12), Vector2i(4, 13)]],
+		[Vector2i(9, 16), d.DOWN, [Vector2i(9, 16), Vector2i(9, 14)]],
+		[Vector2i(17, 16), d.DOWN, [Vector2i(17, 16), Vector2i(17, 15)]],
+		[Vector2i(29, 17), d.DOWN, [Vector2i(29, 17), Vector2i(29, 15)]],
+		[Vector2i(6, 18), d.DOWN, [Vector2i(6, 18), Vector2i(6, 17), Vector2i(4, 17), Vector2i(4, 16), Vector2i(5, 16)]],
+		[Vector2i(7, 18), d.DOWN, [Vector2i(7, 18), Vector2i(7, 17), Vector2i(12, 17), Vector2i(12, 20), Vector2i(15, 20), Vector2i(15, 19), Vector2i(13, 19), Vector2i(13, 18), Vector2i(14, 18), Vector2i(14, 17), Vector2i(13, 17), Vector2i(13, 15)]],
+		[Vector2i(17, 18), d.DOWN, [Vector2i(17, 18), Vector2i(17, 17), Vector2i(18, 17), Vector2i(18, 16)]],
+		[Vector2i(23, 18), d.DOWN, [Vector2i(23, 18), Vector2i(23, 17), Vector2i(27, 17), Vector2i(27, 21), Vector2i(26, 21), Vector2i(26, 23), Vector2i(28, 23), Vector2i(28, 22), Vector2i(27, 22)]],
+		[Vector2i(2, 19), d.DOWN, [Vector2i(2, 19), Vector2i(2, 18)]],
+		[Vector2i(10, 19), d.DOWN, [Vector2i(10, 19), Vector2i(10, 18), Vector2i(8, 18)]],
+		[Vector2i(18, 19), d.DOWN, [Vector2i(18, 19), Vector2i(18, 18)]],
+		[Vector2i(29, 19), d.DOWN, [Vector2i(29, 19), Vector2i(29, 18), Vector2i(28, 18)]],
+		[Vector2i(3, 20), d.DOWN, [Vector2i(3, 20), Vector2i(3, 18), Vector2i(5, 18)]],
+		[Vector2i(8, 20), d.DOWN, [Vector2i(8, 20), Vector2i(8, 19), Vector2i(7, 19), Vector2i(7, 20), Vector2i(4, 20), Vector2i(4, 19), Vector2i(6, 19)]],
+		[Vector2i(11, 20), d.DOWN, [Vector2i(11, 20), Vector2i(11, 18)]],
+		[Vector2i(17, 20), d.DOWN, [Vector2i(17, 20), Vector2i(17, 19)]],
+		[Vector2i(19, 20), d.DOWN, [Vector2i(19, 20), Vector2i(19, 19), Vector2i(21, 19), Vector2i(21, 21), Vector2i(20, 21), Vector2i(20, 20)]],
+		[Vector2i(22, 20), d.DOWN, [Vector2i(22, 20), Vector2i(22, 19), Vector2i(23, 19), Vector2i(23, 21), Vector2i(25, 21), Vector2i(25, 20), Vector2i(24, 20), Vector2i(24, 19)]],
+		[Vector2i(1, 21), d.LEFT, [Vector2i(1, 21), Vector2i(2, 21), Vector2i(2, 20), Vector2i(0, 20), Vector2i(0, 18)]],
+		[Vector2i(3, 21), d.LEFT, [Vector2i(3, 21), Vector2i(7, 21), Vector2i(7, 23), Vector2i(8, 23)]],
+		[Vector2i(8, 21), d.LEFT, [Vector2i(8, 21), Vector2i(9, 21), Vector2i(9, 23), Vector2i(11, 23), Vector2i(11, 22), Vector2i(10, 22)]],
+		[Vector2i(18, 21), d.DOWN, [Vector2i(18, 21), Vector2i(18, 20)]],
+		[Vector2i(29, 21), d.DOWN, [Vector2i(29, 21), Vector2i(29, 20), Vector2i(28, 20), Vector2i(28, 19)]],
+		[Vector2i(34, 21), d.RIGHT, [Vector2i(34, 21), Vector2i(33, 21), Vector2i(33, 22)]],
+		[Vector2i(0, 22), d.DOWN, [Vector2i(0, 22), Vector2i(0, 21)]],
+		[Vector2i(2, 22), d.LEFT, [Vector2i(2, 22), Vector2i(6, 22), Vector2i(6, 23), Vector2i(3, 23)]],
+		[Vector2i(17, 22), d.DOWN, [Vector2i(17, 22), Vector2i(17, 21)]],
+		[Vector2i(22, 22), d.DOWN, [Vector2i(22, 22), Vector2i(22, 21)]],
+		[Vector2i(35, 22), d.DOWN, [Vector2i(35, 22), Vector2i(35, 21)]],
+		[Vector2i(0, 23), d.LEFT, [Vector2i(0, 23), Vector2i(2, 23)]],
+		[Vector2i(18, 23), d.DOWN, [Vector2i(18, 23), Vector2i(18, 22), Vector2i(20, 22)]],
+		[Vector2i(29, 23), d.DOWN, [Vector2i(29, 23), Vector2i(29, 22)]],
+		[Vector2i(35, 23), d.RIGHT, [Vector2i(35, 23), Vector2i(34, 23)]],
+	]
+	return _from_shapes(36, 24, shapes)
 
 ## Reference Knot: a 46x32 board packed with bent and straight arrows, over 90%
 ## of the cells occupied and the longest over 40 cells, so almost no empty space

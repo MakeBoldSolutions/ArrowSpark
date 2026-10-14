@@ -475,6 +475,20 @@ func _check_reference_knot_analyzes() -> void:
 	check(g.edge_count > 0 and g.depth >= 1 and (g.longest_chain as Array).size() == g.depth + 1,
 		"reference_knot: the deepest dependency chain is reported consistently with its depth")
 
+## Every progression level analyzes to completion as valid and solvable, with a
+## consistent deepest chain and at least one legal move at the start.
+func _check_progression_levels_analyze() -> void:
+	var group := PuzzleCatalog.ids_in_group(PuzzleCatalog.GROUP_ARROWSPARK_LEVELS)
+	for id in group:
+		if id == "reference_knot":
+			continue
+		var result: Dictionary = PuzzleAnalyzer.analyze(PuzzleCatalog.get_definition(id))
+		var g: Dictionary = result.dependency_graph
+		check(result.valid and result.solvable, "%s: analyzer reports it valid and solvable" % id)
+		check(g.edge_count > 0 and (g.longest_chain as Array).size() == g.depth + 1,
+			"%s: the deepest dependency chain is reported consistently with its depth" % id)
+		check(result.legal_move_structure.initial_legal_count >= 1, "%s: at least one arrow is playable at the start" % id)
+
 func _initialize() -> void:
 	_check_independent_pair()
 	_check_simple_three_arrow_chain()
@@ -494,5 +508,6 @@ func _initialize() -> void:
 	_check_longest_chain_shortcut_matches_exhaustive_search()
 	_check_dense_layered_graph_resolves()
 	_check_reference_knot_analyzes()
+	_check_progression_levels_analyze()
 	print("PUZZLE_ANALYZER_FAILURES=", failures)
 	quit(1 if failures else 0)

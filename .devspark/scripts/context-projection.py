@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # BSW.DevSpark - (c) 2026 Baylor Scott & White Health. Source: https://bsw-devspark.bswhive.com
-"""Deterministic Context Projection for `/devspark.plan` (DevSpark 7.7, Context Projection v1).
+"""Deterministic Context Projection for `/devspark-plan` (DevSpark 7.7, Context Projection v1).
 
 Takes one or more already-resolved lexical seed ids (entity ids or knowledge-node ids, typically
 `MATCHED_KNOWLEDGE`/`MATCHED_ENTITIES` from `explain-context.py`) and traverses only the

@@ -3,7 +3,7 @@ source: "BSW.DevSpark — © 2026 Baylor Scott & White Health. Source: https://b
 description: Implement the active route, update current knowledge and tests, verify the delta, and populate code/knowledge linkage for in-sprint validation.
 handoffs:
   - label: Create Pull Request
-    agent: devspark.create-pr
+    agent: devspark-create-pr
     prompt: Draft a pull request for the implemented changes
     send: true
 scripts:
@@ -21,17 +21,26 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Workflow Position
 
-Load and obey the shared preamble contract at `/.devspark/templates/command-preamble-contract.md` (installed repos) or `templates/command-preamble-contract.md` (source repos) before step 1.
+Load and obey the shared preamble contract core at `/.devspark/templates/command-preamble-contract.md` (installed repos) or `templates/command-preamble-contract.md` (source repos) before step 1. Preamble modules: `finding-fix`, `convergence`, `provenance`.
 
-Delivery gateway between authoring (`specify → clarify → plan → tasks → analyze + critic`) and shipping (`create-pr → pr-review`). Also the resume point for `/devspark.quickfix` and for a `quick-spec` route — this command drives implementation for **all three** route sizes (full-spec, quick-spec, quickfix), not full-spec alone.
+Delivery gateway between authoring (`specify → clarify → plan → tasks → analyze + critic`) and shipping (`create-pr → pr-review`). Also the resume point for `/devspark-quickfix` and for a `quick-spec` route — this command drives implementation for **all three** route sizes (full-spec, quick-spec, quickfix), not full-spec alone.
 
-- **Owns**: executing the active route's task list (`tasks.md` for full-spec, the `## Action Plan` for quick-spec, the `## Validation Checklist` for quickfix); updating affected code, tests, and current `.knowledge/` together; verifying their consistency; and populating `code_ref`/`knowledge_ref` linkage on every item so the delta stays validate-able against code, tests, and knowledge for as long as it remains in `.devspark.work/`. Implement never archives anything — `/devspark.release` is the sole command that later moves a completed, linkage-verified item into `.archive/{YYYY-MM-DD}/`.
+- **Owns**: executing the active route's task list (`tasks.md` for full-spec, the `## Action Plan` for quick-spec, the `## Validation Checklist` for quickfix); updating affected code, tests, and current `.knowledge/` together; verifying their consistency; and populating `code_ref`/`knowledge_ref` linkage on every item so the delta stays validate-able against code, tests, and knowledge for as long as it remains in `.devspark.work/`. Implement never archives anything — `/devspark-release` is the sole command that later moves a completed, linkage-verified item into `.archive/{YYYY-MM-DD}/`.
 - **Traceability requirement**: before marking an item complete, update its temporary spec/plan/tasks or
   quickfix record with every affected production-code path, test path, and current `.knowledge/` path.
   Record `n/a` plus a brief reason only for a category that was genuinely unchanged. Never add a
   reference from code, tests, or `.knowledge/` back to any temporary planning document.
-- **Does NOT own**: re-specifying scope (`/devspark.specify` or `/devspark.quickfix`), re-planning (`/devspark.plan`), adding/removing tasks (`/devspark.tasks`), producing gate artifacts (`/devspark.analyze`, `/devspark.critic`, `/devspark.clarify`, `/devspark.checklist`), the PR itself (`/devspark.create-pr`, `/devspark.pr-review`).
-- **If scope grows mid-implementation**: halt, mark partial work in the active task list, route back to the appropriate authoring command. Never silently expand scope. If a quick-spec or quickfix route outgrows its size, recommend `/devspark.specify {original problem}` rather than backfilling `plan.md`/`tasks.md` mid-flight.
+- **Does NOT own**: changing the feature's objective or making a material architecture, domain, safety, security, or data-contract decision; producing independent gate artifacts (`/devspark-analyze`, `/devspark-critic`, `/devspark-clarify`, `/devspark-checklist`); the PR itself (`/devspark-create-pr`, `/devspark-pr-review`). Implement may reconcile existing scope records and add or update a bounded task only as described below.
+- **When a correction crosses the approved boundary**: distinguish an adjacent improvement from a correction necessary to complete the current objective. For an unrelated improvement, defer it and do not implement it without explicit human authorization. For a necessary but not-yet-authorized bounded correction, explain the defect, minimum fix, affected paths, and verification impact, then ask the human before proceeding. A correction that changes the objective, architecture, domain or safety invariant, security posture, data contract, or another material approved decision remains a STOP and must use the existing authoring/review route. Never infer authorization from a changed file list.
+- **Simplifying implementation without weakening the contract**: distinguish approved behavioral intent from incidental implementation mechanics. An approved Plan is implementation guidance, not an instruction to preserve redundant processing or unnecessary indirection. The implementation agent MAY choose a demonstrably simpler approach when it:
+  - Preserves functional requirements and acceptance criteria.
+  - Preserves validation and error-handling guarantees.
+  - Respects constitutional and architectural constraints.
+  - Maintains compatibility and observability.
+  - Does not materially change approved task intent or architectural decisions.
+  Record meaningful implementation deviations in `plan.md` under `## Implementation Notes`.
+  **Non-negotiable contract protection**: simplification MUST NOT silently weaken guarantees in pursuit of fewer lines. If a simpler implementation would remove an approved validation rule, change failure propagation or exception behavior, alter an API or configuration contract, or materially depart from approved architecture, pause affected work and request developer authorization before proceeding.
+- **After explicit authorization for a bounded correction**: record who authorized it, why it is necessary, its exact boundary, and the required proof in the existing spec/plan/task records; update only the affected change-surface and task/linkage entries; then continue the current route. Do not create a new spec, branch, or full plan/task bundle solely because an authorized correction touches an unlisted file. Apply existing Analyze/Judge freshness rules to the actual artifact changes and perform only the required focused recheck or rerun; do not skip a mandatory gate. Human authorization does not turn a failed requirement or verification into a pass.
 
 ## Definition of Done
 
@@ -48,7 +57,7 @@ shipped code and `.knowledge/` contain no planning identifiers; and the route's 
 (`spec.md` `**Status**`, or the quickfix record's completion marker) is set to `Complete`. The spec
 directory or quickfix record stays exactly where it is in `.devspark.work/` — implement never moves,
 archives, or deletes it. That stay is deliberate: the populated linkage is what lets anyone validate
-the delta against code, tests, and knowledge for the rest of the sprint. `/devspark.release` is the
+the delta against code, tests, and knowledge for the rest of the sprint. `/devspark-release` is the
 only command that later sweeps a completed, linkage-verified item into `.archive/{YYYY-MM-DD}/`.
 
 If any condition can't be met in one pass, stop and report exactly which one is unmet — don't keep narrating remaining steps.
@@ -59,8 +68,8 @@ If any condition can't be met in one pass, stop and report exactly which one is 
 
 Load `/.knowledge/governance/constitution.md` at step 4. Treat every mandated principle as **non-negotiable**:
 
-- Missing task for a runtime-bearing principle (observability, accessibility, security baseline, test coverage, audit logging, telemetry) with no matching `## Constitution Waivers` entry in `plan.md` → **halt** and route to `/devspark.tasks`. Do not add the task yourself.
-- An implementation choice that conflicts with a principle MUST be refused even if the task description appears to permit it → amend via `/devspark.plan` or propose via `/devspark.evolve-constitution`.
+- Missing task for a runtime-bearing principle (observability, accessibility, security baseline, test coverage, audit logging, telemetry) with no matching `## Constitution Waivers` entry in `plan.md` → **halt** and route to `/devspark-tasks`. Do not add the task yourself.
+- An implementation choice that conflicts with a principle MUST be refused even if the task description appears to permit it → amend via `/devspark-plan` or propose via `/devspark-evolve-constitution`.
 - Preserve `## Constitution Waivers` from `plan.md` through to the PR.
 
 ## Outline
@@ -72,10 +81,10 @@ Multi-app scope and script resolution are defined by the shared preamble contrac
    **Detect the active route** before doing anything else — never assume full-spec:
 
    - If `FEATURE_DIR/spec.md` exists, read its frontmatter `classification`.
-     - `classification: quick-spec` → follow **Quick-Spec Route** (below), then run **Finalize Every Route**. Do not route to `/devspark.plan`/`/devspark.tasks` to backfill artifacts quick-spec's own contract never requires.
-     - `classification: full-spec` (or no `classification` field, for pre-existing specs) → continue with steps 2-10 below. If `FEATURE_DIR/tasks.md` is missing, halt: "Run `/devspark.tasks` first to create the task list."
+     - `classification: quick-spec` → follow **Quick-Spec Route** (below), then run **Finalize Every Route**. Do not route to `/devspark-plan`/`/devspark-tasks` to backfill artifacts quick-spec's own contract never requires.
+     - `classification: full-spec` (or no `classification` field, for pre-existing specs) → continue with steps 2-10 below. If `FEATURE_DIR/tasks.md` is missing, halt: "Run `/devspark-tasks` first to create the task list."
    - If `FEATURE_DIR/spec.md` does not exist for this branch, check for a quickfix record matching the current branch under `.devspark.work/quickfixes/` (filename equal to the branch name, e.g. `042-fix-null-guard.md`). If found → follow **Quickfix Route** (below), then run **Finalize Every Route**.
-   - If neither a spec nor a quickfix record exists, halt: "No spec or quickfix record found for this branch — run `/devspark.specify` or `/devspark.quickfix` first."
+   - If neither a spec nor a quickfix record exists, halt: "No spec or quickfix record found for this branch — run `/devspark-specify` or `/devspark-quickfix` first."
 
 2. **Check checklists status** (if FEATURE_DIR/checklists/ exists):
    - `{SCRIPT}` (check-prerequisites) already computed the exact counts — read the `CHECKLISTS`/`CHECKLISTS_OVERALL` fields from its step-1 JSON output rather than re-counting checkbox lines yourself. Render its `CHECKLISTS` array as a table:
@@ -116,8 +125,8 @@ Multi-app scope and script resolution are defined by the shared preamble contrac
    - **IF EXISTS**: Read contracts/ for API specifications and test requirements
    - **IF EXISTS**: Read research.md for technical decisions and constraints
    - **IF EXISTS**: Read quickstart.md for integration scenarios
-
-   **Consume `context_resolved` as already-resolved** — `/devspark.plan` did the bounded projection
+   - **IF EXISTS**: Read qa-acceptance.md and apply its planned durable Tests delta alongside Code and Knowledge: add, update or retire the named durable tests; for a manual or hybrid scenario, add or update a durable manual-regression reference (a path or identifier in the owning system) where one is planned. Durable tests and references carry no spec, task or scenario identifiers, and `qa-acceptance.md` itself is never cited from them
+   **Consume `context_resolved` as already-resolved** — `/devspark-plan` did the bounded projection
    so this command doesn't have to. Every entry is equally authoritative regardless of its `kind`: a
    flat Knowledge document carries exactly the same weight as an entity, an entity layer, or a
    decision, and a resolved set containing no entities at all is complete, not deficient. Never
@@ -127,28 +136,32 @@ Multi-app scope and script resolution are defined by the shared preamble contrac
    under a `## Implementation Notes` entry noting the task ID, the item and relation that required
    the escalation, and why. This is an attributable signal, not a failure — frequent escalation on
    the same pair means the corpus's relations are too sparse (add the edge directly); escalation
-   despite a passing `context_resolved` means `/devspark.critic`'s sufficiency check missed a gap
+   despite a passing `context_resolved` means `/devspark-critic`'s sufficiency check missed a gap
    (tighten that prompt, don't just patch here).
 
    **Gate pre-flight (hard halt on failure unless the user explicitly overrides)**:
 
    Before writing any code, verify each gate below. Present results as a single table, then act on the worst finding.
 
+   **Planning Review is authoritative when it exists.** If `FEATURE_DIR/gates/judge.md` exists, first run `scripts/judge.py children --feature-dir <FEATURE_DIR>` and `scripts/judge.py validate --feature-dir <FEATURE_DIR>` (installed repos: `.devspark/scripts/bash/judge.sh` or `.devspark/scripts/powershell/judge.ps1`). A valid `PROCEED` verdict satisfies the "Analyze findings" and "Critic findings" rows below; `STOP` halts and routes to `/devspark-tasks` (which applies the Judge dispositions); `CONDITIONAL` asks the developer exactly the `decisions_needed` questions. Raw child findings never override a valid Judge disposition, and nothing in `gates/judge.md` is edited here. If the helper reports `judge.state: stale`, a child gate changed after Judge adjudicated; route to `/devspark-planning-review --judge-only` rather than trusting the old verdict.
+
+    **Staleness is not blocking by itself.** Freshness comes from the helper's per-child state, not from a bare hash mismatch: `fresh`, `bookkeeping-changed` (compatible recorded semantic hashes match), `stale-nonblocking` (bounded remediation or approved execution evidence), `stale-recheck-required`, and `superseded` (the reviewed design no longer exists). Only `stale-recheck-required` halts, routed to the child's reported `action` (`recheck` or `rerun`). Missing or incompatible semantic evidence keeps conservative legacy handling; never retro-stamp it. Task definitions, requirements, design, authority and proof obligations remain consequential after execution begins.
+
    | Gate                            | Source of truth                             | Pass condition                                                  | On fail                                                                      |
    | ------------------------------- | ------------------------------------------- | --------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-   | Clarifications resolved         | `spec.md`                                   | No `[NEEDS CLARIFICATION]` markers remain                       | Route to `/devspark.clarify`                                                 |
+   | Clarifications resolved         | `spec.md`                                   | No `[NEEDS CLARIFICATION]` markers remain                       | Route to `/devspark-clarify`                                                 |
    | Required gates from frontmatter | `spec.md` YAML `required_gates`             | Each listed gate has a matching artifact in FEATURE_DIR         | Route to the listed gate command                                             |
-   | Analyze findings                | FEATURE_DIR/analysis.md (or analyze output) | No `severity: critical` findings with `status: open`            | Route to `/devspark.analyze` (or `/devspark.address-pr-review`-style triage) |
-   | Critic findings                 | FEATURE_DIR/critique.md (or critic output)  | No `severity: critical` findings with `status: open`            | Route to `/devspark.critic`                                                  |
-   | Gate freshness                  | `gates/analyze.md`, `gates/critic.md` `reviewed_artifacts[]` | For each `reviewed_artifacts` entry, `git hash-object <path>` matches the recorded `hash` | If mismatched AND the gate has an open SHOWSTOPPER/CRITICAL finding: mark **STALE**, route to the mismatched gate command for re-run (never auto-overridden, `--auto` or not) |
-   | Verification (if required)      | `spec.md` `required_gates` `verify:<mode>` entries vs. `gates/verify.md` | Not checked on the first pre-flight pass (code doesn't exist yet). On the step-9 re-run (implementation reporting done), every declared `verify:<mode>` has a matching `modes[]` entry in `gates/verify.md` with `status: pass` | Route to `/devspark.verify` to produce the proof before reporting Done |
+   | Analyze findings                | FEATURE_DIR/analysis.md (or analyze output) | No `severity: critical` findings with `status: open`            | Route to `/devspark-analyze` (or `/devspark-address-pr-review`-style triage) |
+   | Critic findings                 | FEATURE_DIR/critique.md (or critic output)  | No `severity: critical` findings with `status: open`            | Route to `/devspark-critic`                                                  |
+    | Gate freshness | `gates/analyze.md`, `gates/critic.md` `reviewed_artifacts[]`; `judge.py children` when `gates/judge.md` exists | Recorded raw hashes match, or the helper reports `bookkeeping-changed`, `stale-nonblocking` or `superseded` | If `stale-recheck-required` (or, with no Judge artifact, mismatched AND an open SHOWSTOPPER/CRITICAL finding): mark **STALE** and route to the child's reported `action`; never auto-override |
+   | Verification (if required)      | `spec.md` `required_gates` `verify:<mode>` entries vs. `gates/verify.md` | Not checked on the first pre-flight pass (code doesn't exist yet). On the step-9 re-run (implementation reporting done), every declared `verify:<mode>` has a matching `modes[]` entry in `gates/verify.md` with `status: pass` | Route to `/devspark-verify` to produce the proof before reporting Done |
    | Checklists                      | step 2 result                               | All checklists at 0 incomplete (or explicit override recorded)  | Already handled in step 2                                                    |
-   | Constitution coverage           | constitution.md vs tasks.md                 | Every runtime-bearing mandated principle has a task OR a waiver | Route to `/devspark.tasks` (regenerate) or `/devspark.plan` (record waiver)  |
-   | Plan waivers acknowledged       | `plan.md` `## Constitution Waivers`         | All waivers have rationale + expiry                             | Route to `/devspark.plan`                                                    |
+   | Constitution coverage           | constitution.md vs tasks.md                 | Every runtime-bearing mandated principle has a task OR a waiver | Route to `/devspark-tasks` (regenerate) or `/devspark-plan` (record waiver)  |
+   | Plan waivers acknowledged       | `plan.md` `## Constitution Waivers`         | All waivers have rationale + expiry                             | Route to `/devspark-plan`                                                    |
 
-   If any required gate fails, surface the failure with context and ask the user whether to (a) fix first (recommended), (b) review findings, or (c) proceed anyway. If the user proceeds anyway, append or update a `## Gate Acknowledgements` section in `tasks.md` with: the failing gate(s), the unresolved findings (by ID), the user's explicit decision, and a UTC timestamp. This section will be surfaced in the PR body by `/devspark.create-pr`.
+   If any required gate fails, surface the failure with context and ask the user whether to (a) fix first (recommended), (b) review findings, or (c) proceed anyway. If the user proceeds anyway, append or update a `## Gate Acknowledgements` section in `tasks.md` with: the failing gate(s), the unresolved findings (by ID), the user's explicit decision, and a UTC timestamp. This section will be surfaced in the PR body by `/devspark-create-pr`.
 
-   **Autonomy override**: if `--auto` (or a standing autonomy instruction) is in effect, auto-select option (a) — route to `/devspark.tasks` for gate remediation (or the listed gate command) instead of waiting for a reply — and record `auto-selected: true` in the Gate Acknowledgement. **Exception, never auto-overridden**: a failing "Constitution coverage" or "Plan waivers acknowledged" row, a **STALE** "Gate freshness" row, or any finding whose severity is SHOWSTOPPER or carries a `§`-coded constitution citation — those always halt and wait for a human, `--auto` or not.
+   **Autonomy override**: if `--auto` (or a standing autonomy instruction) is in effect, auto-select option (a) — route to `/devspark-tasks` for gate remediation (or the listed gate command) instead of waiting for a reply — and record `auto-selected: true` in the Gate Acknowledgement. **Exception, never auto-overridden**: a failing "Constitution coverage" or "Plan waivers acknowledged" row, a **STALE** "Gate freshness" row, or any finding whose severity is SHOWSTOPPER or carries a `§`-coded constitution citation — those always halt and wait for a human, `--auto` or not.
 
    The YAML frontmatter classification and `required_gates` in `spec.md` are authoritative; if the prose disagrees with the metadata, treat the metadata as truth and flag the mismatch.
 
@@ -212,8 +225,13 @@ Multi-app scope and script resolution are defined by the shared preamble contrac
 
    **Continuous artifact sync** (required — do this as work happens, not at the end):
    - **Current knowledge and tests** — when a task changes behavior, update every matching
-     `.knowledge/` node selected by `appliesTo` and the affected tests in the same revision. If no
-     node describes material new behavior, create one with typed frontmatter and accurate
+     `.knowledge/` node selected by `appliesTo` (derive the owners of the changed files with
+     `explain-context.py --files <paths>`, `.devspark/scripts/bash/explain-context.sh` or
+     `.devspark/scripts/powershell/explain-context.ps1` in installed repos) and the affected tests in
+     the same revision. A changed file outside the Plan's `expected_change_surface` is fine when it is
+     justified support (a helper, a test, an owner update): note it under `## Implementation Notes`.
+     A change that needs new architecture or scope (a new state, endpoint, persisted record, cache,
+     dependency, setting or pattern) is not support: halt and route to `/devspark-plan` revise. If no node describes material new behavior, create one with typed frontmatter and accurate
      `appliesTo`; do not copy planning prose or identifiers into it. If the new behavior genuinely
      warrants a *new entity* (not just a flat doc), run `scripts/scaffold-entity.py` (default:
      dry-run) to draft `_entity.yaml` plus candidate layer doc(s) from the changed source paths,
@@ -227,8 +245,8 @@ Multi-app scope and script resolution are defined by the shared preamble contrac
      fall back to a code-only reference when a test genuinely isn't practical (e.g. requires live
      timing, external infra, or manual verification). When falling back, record *why* in the node's
      text next to `source_of_truth` — one line, e.g. "code-only: requires live token expiry timing,
-     not practical in a unit test" — so the gap is visible to `/devspark.pr-review` and
-     `/devspark.site-audit` rather than silently accepted.
+     not practical in a unit test" — so the gap is visible to `/devspark-pr-review` and
+     `/devspark-site-audit` rather than silently accepted.
    - **Task linkage (`code_ref`/`knowledge_ref`)** — the moment a task's checkbox flips to `[X]`,
     overwrite its `(code_ref: pending | knowledge_ref: pending)` marker with every real durable
     path touched. `code_ref` includes all production and test files when applicable; for
@@ -241,9 +259,9 @@ Multi-app scope and script resolution are defined by the shared preamble contrac
    - **tasks.md phase checkpoints** — when every task in a phase (Setup, Foundational, User Story N, Polish) is `[X]`, append a checkpoint line under that phase heading: `**Checkpoint**: Phase complete — YYYY-MM-DD`. For user-story phases, this is the signal that the story is independently shippable.
    - **spec.md user stories** — when all tasks tagged `[USn]` are `[X]`, update the corresponding `### User Story n` heading by appending `✅ Complete` (preserve the priority marker). This keeps the spec a live picture of delivered scope.
    - **spec.md lifecycle status** — flip `**Status**: Draft` to `**Status**: In Progress` on the first completed task (already done in step 3); the final flip to `Complete` happens in step 10.
-   - **plan.md** — if implementation discovers a deviation from the plan (different library chosen, contract adjusted, etc.), update plan.md inline and add a short `## Implementation Notes` entry dated and linked to the task ID. Do NOT silently diverge.
-   - **Constitution waivers** — if a new waiver becomes necessary mid-implementation, **halt**, route the user to `/devspark.plan` to record it, then resume. Never invent waivers from within implement.
-   - **Gate finding resolution** — when a task whose description includes `(resolves: <finding_id>[, <finding_id>...])` is marked `[X]`, flip each referenced finding's `status` from `open` to `resolved` and fill in `outcome` (one line: what changed, which commit/task) in the gate file that originated it (`gates/critic.md` for `critic-*` ids, `gates/analyze.md` for `analyze-*` ids). This is what lets a re-run of `/devspark.critic`/`/devspark.analyze` converge instead of re-reporting the same finding. Apply command-preamble-contract.md §9 (Genuine Fix Discipline) before flipping status: resolve the underlying intent, not just the mechanical check the finding cites.
+   - **plan.md** — if implementation discovers a safe simplification or deviation from the plan (different library chosen, contract adjusted, reusing an existing seam or removing redundant mechanics while preserving all validation and error-handling guarantees), update plan.md inline and add a short `## Implementation Notes` entry dated and linked to the task ID. If a deviation would remove an approved validation rule, change failure semantics, or alter an external contract, halt and request developer authorization first. Do NOT silently diverge or weaken guarantees.
+   - **Constitution waivers** — if a new waiver becomes necessary mid-implementation, **halt**, route the user to `/devspark-plan` to record it, then resume. Never invent waivers from within implement.
+   - **Gate finding resolution** — when a task whose description includes `(resolves: <finding_id>[, <finding_id>...])` is marked `[X]`, flip each referenced finding's `status` from `open` to `resolved` and fill in `outcome` (one line: what changed, which commit/task) in the gate file that originated it (`gates/critic.md` for `critic-*` ids, `gates/analyze.md` for `analyze-*` ids). This is what lets a re-run of `/devspark-critic`/`/devspark-analyze` converge instead of re-reporting the same finding. Apply command-preamble-contract.md §9 (Genuine Fix Discipline) before flipping status: resolve the underlying intent, not just the mechanical check the finding cites.
 
    **Progress reporting and error handling**:
    - Update tasks.md per task as it completes (already required above); in chat, report progress at phase checkpoints only — one line per phase, not one line per task
@@ -256,7 +274,7 @@ Multi-app scope and script resolution are defined by the shared preamble contrac
 
    **Governance expectations for the create-pr/pr-review handoff**:
    - Branch sync must pass (`HEAD` not behind `origin/main`)
-   - Every `## Gate Acknowledgements` entry and every `## Constitution Waivers` entry will be surfaced by `/devspark.create-pr` in the PR body — make sure they are accurate.
+   - Every `## Gate Acknowledgements` entry and every `## Constitution Waivers` entry will be surfaced by `/devspark-create-pr` in the PR body — make sure they are accurate.
 
 9. Completion validation:
     - Verify all required tasks in `tasks.md` are `[X]`
@@ -266,7 +284,7 @@ Multi-app scope and script resolution are defined by the shared preamble contrac
     - Validate that tests pass and coverage meets requirements
     - Confirm the implementation follows the technical plan (and that any deviations are recorded under `## Implementation Notes` in `plan.md`)
     - Re-run the gate pre-flight table from step 4 and confirm nothing regressed during implementation
-    - If `spec.md` `required_gates` declares any `verify:<mode>` entries, route to `/devspark.verify` now that code exists and wait for `gates/verify.md` to show `status: pass` for every declared mode before reporting Done
+    - If `spec.md` `required_gates` declares any `verify:<mode>` entries, route to `/devspark-verify` now that code exists and wait for `gates/verify.md` to show `status: pass` for every declared mode before reporting Done. Implementation complete means ready to merge and deploy, not already deployed: every `verify:<mode>` is a pre-merge obligation, and a `stage: post-deploy` obligation is carried as a deferred requirement with an existing `captured_as` record (closeout contract §4.1) and never blocks Done. A pre-merge mode that can only be proven in a deployed environment is a spec authoring defect: return to `/devspark-specify`, do not wait for deployment
     - Run `.devspark/scripts/{powershell,bash}/check-planning-references.*` (or `scripts/{powershell,bash}/check-planning-references.*` in source repos) and confirm it reports `ok: true` before proceeding — this is the deterministic backstop for the no-spec-reference check below, not a substitute for it
     - Regenerate `.knowledge/index.json` and validate the current-only knowledge schema
     - Report final status with summary of completed work, any remaining `## Gate Acknowledgements`, and any active `## Constitution Waivers`
@@ -277,7 +295,7 @@ Multi-app scope and script resolution are defined by the shared preamble contrac
       2. Update the `**Status**:` field from `Draft` or `In Progress` to `Complete`
          - Find the line matching `**Status**:` and replace its value with `Complete`
          - Preserve the lifecycle comment if present: `**Status**: Complete <!-- Valid: Draft | In Progress | Complete -->`
-      3. Continue to **Finalize Every Route**; do not report completion while the bundle remains.
+      3. Continue to **Finalize Every Route**; retain the completed bundle with populated linkage.
     - If any tasks remain incomplete (`- [ ]`):
       1. Update spec status to `In Progress` (if currently `Draft`)
       2. Report which tasks are still incomplete
@@ -287,18 +305,18 @@ Note: Steps 2-10 above are the **full-spec route** and assume a complete task br
 
 ## Quick-Spec Route (no `plan.md`/`tasks.md`)
 
-Triggered when `spec.md` frontmatter declares `classification: quick-spec`. quick-spec's own contract (`required_artifacts: intent, action-plan`) never produces `plan.md` or `tasks.md` — treat the spec's `## Action Plan` as the task list instead of routing to `/devspark.plan`/`/devspark.tasks` to backfill them.
+Triggered when `spec.md` frontmatter declares `classification: quick-spec`. quick-spec's own contract (`required_artifacts: intent, action-plan`) never produces `plan.md` or `tasks.md` — treat the spec's `## Action Plan` as the task list instead of routing to `/devspark-plan`/`/devspark-tasks` to backfill them.
 
 1. Read `spec.md`'s `## Action Plan` section. If its items are plain numbered text (not yet checkboxes), convert each to a checkbox in place, preserving the original wording: `- [ ] 1. First concrete implementation step`.
 2. If `**Status**` is `Draft`, update it to `In Progress` (mirrors full-spec step 3).
 3. Gate pre-flight, scoped to what `required_gates` in frontmatter actually lists (typically `checklist` only): if `FEATURE_DIR/checklists/` exists, run the same checklist-completeness check as full-spec step 2. Do not apply the full-spec gate table (constitution coverage, analyze, critic, verify) unless `required_gates` explicitly names them — quick-spec's contract does not require those gates by default.
 4. Implement each Action Plan item in order; check it off `[x]` immediately on completion — never batch updates at the end. If implementation deviates from an item's plan, add a short `## Implementation Notes` section to `spec.md` (dated) describing the deviation, mirroring the role `plan.md`'s `## Implementation Notes` plays for full-spec.
-5. **Completion**: once every Action Plan item is `[x]`, update `**Status**` to `Complete`. This is the fix for the previously-documented gap where quick-spec had no `/devspark.implement` step to flip status automatically — `/devspark.create-pr` no longer needs to catch and patch a stuck `Draft` status.
+5. **Completion**: once every Action Plan item is `[x]`, update `**Status**` to `Complete`. This is the fix for the previously-documented gap where quick-spec had no `/devspark-implement` step to flip status automatically — `/devspark-create-pr` no longer needs to catch and patch a stuck `Draft` status.
 6. Continue to **Finalize Every Route**.
 
 ## Quickfix Route (`.devspark.work/quickfixes/` record, no `spec.md`)
 
-Triggered when no `spec.md` exists for this branch but a matching quickfix record does. This is the resume point `/devspark.quickfix`'s own header promises but previously left entirely manual.
+Triggered when no `spec.md` exists for this branch but a matching quickfix record does. This is the resume point `/devspark-quickfix`'s own header promises but previously left entirely manual.
 
 1. Read the quickfix record's `## Validation Checklist` — treat each item as the task list.
 2. Implement the fix described in the record's TLDR (WHAT/WHY/HOW). As work progresses, append dated notes to the record's `## Implementation Notes` section (mirroring `plan.md`'s role for full-spec) and check off `## Validation Checklist` items `[x]` as each is verified — never batch updates at the end.
@@ -309,7 +327,9 @@ Triggered when no `spec.md` exists for this branch but a matching quickfix recor
 
 1. Run all required verification and refuse finalization on any failure.
 2. Confirm changed code, affected tests, and matching `.knowledge/` nodes describe the same resulting
-  behavior. Regenerate `.knowledge/index.json`.
+  behavior. Regenerate `.knowledge/index.json`. Generated Knowledge produced here is provisional for
+  fields that depend on future committed Git history (such as `stale_entities`); Create PR
+  (`/devspark-create-pr`) owns final validation against the committed, pushed HEAD.
 3. Check whether the delta touches anything an existing `.knowledge/governance/decisions/` doc
   claims about — a rejected alternative, a stated rationale, an entity listed in a decision's
   `constrains` (or an entity carrying a matching `constrained_by` pointer). If it does, correct that
@@ -331,10 +351,20 @@ Triggered when no `spec.md` exists for this branch but a matching quickfix recor
   spec/plan/task/quickfix/feature comment, identifier, or link to durable code, tests, or
   `.knowledge/` to "document" where a change came from — that provenance belongs solely in the
   planning bundle's own linkage markers.
-6. Leave `FEATURE_DIR` (or the quickfix record) exactly where it is under `.devspark.work/` with its
+6. **Planning-review completeness**: run
+  `scripts/judge.py lifecycle --feature-dir <FEATURE_DIR>` (`.devspark/scripts/bash/judge.sh` or
+  `.devspark/scripts/powershell/judge.ps1` in installed repos). It fails on any required task still
+  unchecked, a planning review that is required but missing, an unresolved verdict or pending human
+  decision, a stale Judge or a child gate needing a recheck (a stale `PROCEED` is not evidence),
+  preserved future work never materialized, a
+  routed obligation whose owning phase (verify, closeout) has not completed, and a closeout that
+  decided `not-complete`. Obligations routed to `pr-review` are reported as pending for that later
+  phase, not as failures. Fix every failure before continuing — a pull request represents completed
+  spec work offered for acceptance, so nothing required may be scheduled for after it.
+7. Leave `FEATURE_DIR` (or the quickfix record) exactly where it is under `.devspark.work/` with its
   completion marker set to `Complete`. Implement never moves, archives, or deletes it —
-  `/devspark.release` is the sole command that later sweeps completed, linkage-verified work out of
+  `/devspark-release` is the sole command that later sweeps completed, linkage-verified work out of
   `.devspark.work/` into `.archive/{YYYY-MM-DD}/`. For a quickfix record, also fill in its
   `## Completion` block now: `**Completed**` (today's date) and `**Commit**` (the final commit SHA
   that carries the fix) — leave `**PR**` blank, since it isn't known yet.
-7. Recommend `/devspark.create-pr`. The PR must stand alone and review the verified delta.
+8. Recommend `/devspark-create-pr`. The PR must stand alone and review the verified delta.

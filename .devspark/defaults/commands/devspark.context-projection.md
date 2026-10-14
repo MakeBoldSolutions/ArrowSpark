@@ -2,11 +2,11 @@
 
 ````markdown
 ---
-description: Deterministic Context Projection — traverses ONLY authoritative `.knowledge` relationships (entity relations, constrains/constrained_by, links.references) a small bounded distance from one or more seed ids, for direct inspection/debugging independent of `/devspark.plan`
+description: Deterministic Context Projection — traverses ONLY authoritative `.knowledge` relationships (entity relations, constrains/constrained_by, links.references) a small bounded distance from one or more seed ids, for direct inspection/debugging independent of `/devspark-plan`
 handoffs:
   - label: Run Knowledge Discovery
-    agent: devspark.discover-knowledge
-    prompt: A candidate relationship this projection did not reach may not yet be authored — run `/devspark.discover-knowledge` to propose it for human acceptance first
+    agent: devspark-discover-knowledge
+    prompt: A candidate relationship this projection did not reach may not yet be authored — run `/devspark-discover-knowledge` to propose it for human acceptance first
 scripts:
   sh: .devspark/scripts/bash/context-projection.sh $ARGUMENTS --json
   ps: .devspark/scripts/powershell/context-projection.ps1 $ARGUMENTS -Json
@@ -21,23 +21,23 @@ $ARGUMENTS
 You **MUST** consider the user input before proceeding (if not empty). Supported forms:
 
 ```text
-/devspark.context-projection --seed <id> [--seed <id> ...] [--max-hops 2] [--max-candidates 100]
-/devspark.context-projection --audit-fan-out
+/devspark-context-projection --seed <id> [--seed <id> ...] [--max-hops 2] [--max-candidates 100]
+/devspark-context-projection --audit-fan-out
 ```
 
 ## Purpose
 
 This is a direct, standalone way to inspect Context Projection independently of
-`/devspark.plan` (Section 16 diagnostic mode) — primarily for testing and debugging the graph
+`/devspark-plan` (Section 16 diagnostic mode) — primarily for testing and debugging the graph
 traversal itself before trusting its output inside planning.
 
 **Context Projection is not a second discovery/ranking pass.** Given one or more seed ids
-(typically already-resolved lexical hits from `/devspark.explain`'s `MATCHED_KNOWLEDGE` /
+(typically already-resolved lexical hits from `/devspark-explain`'s `MATCHED_KNOWLEDGE` /
 `MATCHED_ENTITIES`), it performs a deterministic, bounded breadth-first traversal of relationships
 the repository has already **accepted** into `.knowledge` — entity `relations[]`,
 `constrained_by`/`constrains` reciprocity edges, and `links.references` — as already persisted by
 `build_knowledge_index.py`. It never runs a second lexical search, and it never treats an
-unaccepted `/devspark.discover-knowledge` finding (e.g. a `governance-relationship-candidate` or
+unaccepted `/devspark-discover-knowledge` finding (e.g. a `governance-relationship-candidate` or
 `missing-relationship`) as a traversable edge — only an authored, index-validated relationship is
 reachable.
 
@@ -53,7 +53,7 @@ Context Projection    -> traverses ONLY what has been accepted
 
 ### 1. Initialize
 
-Load and obey the shared preamble contract at `/.devspark/templates/command-preamble-contract.md`
+Load and obey the shared preamble contract core at `/.devspark/templates/command-preamble-contract.md`
 (installed repos) or `templates/command-preamble-contract.md` (source repos) before step 1.
 
 Run `{SCRIPT}` and parse its JSON output.
@@ -77,7 +77,7 @@ For a normal projection run, present:
 
 For `--audit-fan-out`, present the per-entity `FAN_OUT_AUDIT` list and the `SUMMARY` (median/max
 1-hop and 2-hop sizes, `high_fanout_entities`) — this identifies graph hubs before Context
-Projection is trusted as default `/devspark.plan` behavior (Section 17/24).
+Projection is trusted as default `/devspark-plan` behavior (Section 17/24).
 
 ### 3. Candidates are not resolved context
 
@@ -85,7 +85,7 @@ What this command returns is **candidate** context: everything structurally reac
 seeds within the hop budget. It is deliberately generous so that nothing relevant is unreachable.
 It is not a working set, and it is never recorded wholesale as `context_resolved`.
 
-Narrowing candidates to the smallest set the work actually needs is `/devspark.plan`'s job, and
+Narrowing candidates to the smallest set the work actually needs is `/devspark-plan`'s job, and
 the provenance above exists to support that judgement — a candidate reached only as a sibling
 layer, or only through a shared governance hub, is usually reachable rather than needed. Expect
 `context_resolved` to be materially smaller than `CANDIDATES`.
@@ -94,5 +94,5 @@ layer, or only through a shared governance hub, is usually reachable rather than
 
 Context Projection is read-only. It never writes to `.knowledge`, never authors a relationship,
 and never promotes any candidate into authoritative truth on its own initiative — that remains a
-human/`/devspark.discover-knowledge` decision.
+human/`/devspark-discover-knowledge` decision.
 ````

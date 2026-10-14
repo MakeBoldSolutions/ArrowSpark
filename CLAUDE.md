@@ -44,12 +44,12 @@ prefer explicit types where they aid clarity; keep changes small and justify new
 
 - Modeless touch gestures in `PuzzleBoard` (tap acts on release, one-finger drag pans, two-finger
   pinch zooms, no Pan mode needed) plus `touch-action: none` on the Play page's game stage;
-  design and Godot practices in `.knowledge/reference/touch-gestures.md`. Not yet verified on a
-  real device (pinch failed on the Pixel before this change).
+  design and Godot practices in `.knowledge/reference/touch-gestures.md`. Verified on a real Pixel 7 Pro in
+  Chrome (pinch and drag work); other devices and browsers are untested.
 
 - Puzzle catalog now has purpose groups (Foundations, Puzzle Lab, ArrowSpark Levels) driving
   Level Select sections, group-relative numbering and group-scoped Next Puzzle, plus a
-  hand-composed Reference Knot that Play starts — metadata only, no rule changes.
+  hand-composed Reference Knot, with Play starting the first of eight progression levels that lead up to it — metadata only, no rule changes.
 
 - Spec 007 (in progress): extends `PuzzleState` with a deterministic Open Move
   lookup/assist counter and a revised score formula, and adds a new

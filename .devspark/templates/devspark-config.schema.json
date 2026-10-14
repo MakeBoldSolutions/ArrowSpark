@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://bsw-devspark.bswhive.com/schemas/devspark-config.schema.json",
   "title": "BSW.DevSpark Repo Config",
-  "description": "Repository facts and team policy in .devspark.work/devspark.json. See templates/command-preamble-contract.md section 7. This schema is separate from the multi-app registry at .devspark.work/devspark.registry.json.",
+  "description": "Repository facts and team policy in .devspark.work/devspark.json. See templates/preamble/configuration.md section 7. This schema is separate from the multi-app registry at .devspark.work/devspark.registry.json.",
   "type": "object",
   "additionalProperties": true,
   "properties": {
@@ -60,6 +60,24 @@
           "type": "boolean",
           "default": true,
           "description": "When false, /devspark.specify never offers a work-item review."
+        }
+      }
+    },
+    "pr_risk": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Optional PR risk digest settings. Absent by default.",
+      "properties": {
+        "tier_patterns": {
+          "type": "object",
+          "description": "Extra case-insensitive regexes matched against changed paths before the built-in table; keys are P0, P1, P2, P3. Tiers are a floor: reviewers may escalate, never lower.",
+          "additionalProperties": false,
+          "properties": {
+            "P0": { "type": "array", "items": { "type": "string" } },
+            "P1": { "type": "array", "items": { "type": "string" } },
+            "P2": { "type": "array", "items": { "type": "string" } },
+            "P3": { "type": "array", "items": { "type": "string" } }
+          }
         }
       }
     },

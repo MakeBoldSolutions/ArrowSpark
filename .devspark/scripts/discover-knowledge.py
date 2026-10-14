@@ -11,7 +11,7 @@ and historical leakage as structured, evidence-backed findings for a human (or a
 with confirmation) to act on.
 
 This is an authoring/maintenance aid, not agent memory, not automatic documentation generation,
-not historical reconstruction, not a replacement for `/devspark.explain`, and not a runtime
+not historical reconstruction, not a replacement for `/devspark-explain`, and not a runtime
 retrieval mechanism -- it never becomes the Plan Context Resolution engine itself.
 
 The two mechanical, schema-conformant edits it can apply on request (`--apply-alias`,
@@ -816,7 +816,7 @@ def discover_contradictions(repo: Path, scope: dict[str, Any], entity_files: set
                     evidence=[{"type": "claim-drift", "document": rel, "changed_claims": changed_claims}],
                     recommendation=(
                         f"'{node_id}' is marked verified but its pinned source claim(s) have "
-                        "drifted; re-verify via /devspark.explain --rotate-claim or update the document."
+                        "drifted; re-verify via /devspark-explain --rotate-claim or update the document."
                     ),
                     changes_authoritative_truth=False,
                     source="discover-knowledge",

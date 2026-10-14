@@ -30,7 +30,8 @@ latest available version and guides you through a safe upgrade. It:
 3. Classifies files across the four roots by ownership
 4. Identifies stale or missing framework files
 5. Runs the canonical quickstart guide's Update Mode to apply updates
-6. Verifies the stamp file was updated after the upgrade
+6. Retires 8.x entry points (stateless, one confirmation, edited files quarantined)
+7. Verifies the stamp file was updated after the upgrade
 
 ### Execution
 
@@ -116,10 +117,10 @@ touched). Use this classification:
 #### Command Resolution Order
 
 BSW.DevSpark uses a **3-tier override system** for command prompts. When an AI agent
-runs a `/devspark.*` command, it resolves the prompt in this order (first match wins):
+runs a `/devspark-*` command, it resolves the prompt in this order (first match wins):
 
 ```text
-1. .devspark.work/{git-user}/commands/   ← Per-user overrides (via /devspark.personalize)
+1. .devspark.work/{git-user}/commands/   ← Per-user overrides (via /devspark-personalize)
 2. .devspark.work/commands/              ← Team customizations (yours to edit freely)
 3. .devspark/defaults/commands/     ← Stock BSW.DevSpark prompts (upgrade overwrites ONLY this)
 ```
@@ -137,15 +138,14 @@ These are written to `.devspark/` and should match the latest version:
 
 - `.devspark/defaults/commands/devspark.*.md` — stock prompt templates
 - `.devspark/templates/` — stock helper templates
-- `.devspark/templates/skills/` — portable Agent Skill packages (SKILL.md + scripts + references) consumed by commands such as `/devspark.specify`
+- `.devspark/templates/skills/` — portable Agent Skill packages (SKILL.md + scripts + references) consumed by commands such as `/devspark-specify`
 - `.devspark/scripts/bash/*.sh` and `.devspark/scripts/powershell/*.ps1` — both sets always present
 - `.devspark/BSW.DevSpark.version`
-- Agent shim files:
-  - `.github/agents/*.agent.md`
-  - `.github/prompts/*.prompt.md`
-  - `.claude/commands/devspark.*.md`
-  - `.cursor/commands/devspark.*.md`
-  - `.windsurf/workflows/devspark.*.md`
+- Command entry points, one per stock command:
+  - `.github/skills/devspark-<cmd>/SKILL.md` (GitHub Copilot: the manifest category `skill`)
+  - `.claude/commands/devspark-*.md`
+  - `.cursor/commands/devspark-*.md`
+  - `.windsurf/workflows/devspark-*.md`
   - *(and equivalents for other supported agents)*
 
 #### Repository-owned (NEVER overwritten by framework refresh)
@@ -196,7 +196,7 @@ Check for signs that the install needs updating:
 
 Report findings before proceeding.
 
-Also check for `.devspark.work/commands/` overrides that shadow commands with structural contract changes, especially `/devspark.specify`, `/devspark.plan`, `/devspark.tasks`, `/devspark.implement`, and `/devspark.create-pr`. Warn the user explicitly when an override may mask a stock routing, frontmatter, or lifecycle change and recommend a manual diff/merge.
+Also check for `.devspark.work/commands/` overrides that shadow commands with structural contract changes, especially `/devspark-specify`, `/devspark-plan`, `/devspark-tasks`, `/devspark-implement`, and `/devspark-create-pr`. Warn the user explicitly when an override may mask a stock routing, frontmatter, or lifecycle change and recommend a manual diff/merge.
 
 #### Orphaned overrides (stale overrides of removed/renamed stock files)
 
@@ -211,7 +211,7 @@ Check both override surfaces, across **both** script types:
 | `.devspark.work/scripts/bash/<name>.sh` | `.devspark/scripts/bash/<name>.sh` |
 | `.devspark.work/scripts/powershell/<name>.ps1` | `.devspark/scripts/powershell/<name>.ps1` |
 
-Only `devspark.*` command overrides mirror a stock command — a team's genuinely custom command is not orphaned. For scripts, list any override whose stock counterpart is absent so the team can confirm whether it is an intentional custom script or a stale fork.
+Only `devspark.*.md` command override files mirror a stock command — a team's genuinely custom command is not orphaned. For scripts, list any override whose stock counterpart is absent so the team can confirm whether it is an intentional custom script or a stale fork.
 
 Report each orphan and recommend one of: delete it if obsolete, or rename/re-point it to the current stock file. **Never auto-delete anything under `.knowledge/` or `.archive/`** — this is advisory only.
 
@@ -229,7 +229,7 @@ Any hit means the override was copied from an old stock file. Recommend diffing 
 
 #### Legacy repo-root `build_knowledge_index.py` (framework-owned split-brain)
 
-Before the `.devspark/` framework root existed, `build_knowledge_index.py` lived directly at the repository's own `scripts/build_knowledge_index.py`. That path is no longer part of any current install target — the manifest installs it only to `.devspark/scripts/build_knowledge_index.py`, which is the sole engine every command (`/devspark.explain`, `site-audit`, `release`, CI checks) resolves to. If both a repo-root and a `.devspark/scripts/` copy exist, they can drift apart silently — a real defect fixed in 7.5.1.
+Before the `.devspark/` framework root existed, `build_knowledge_index.py` lived directly at the repository's own `scripts/build_knowledge_index.py`. That path is no longer part of any current install target — the manifest installs it only to `.devspark/scripts/build_knowledge_index.py`, which is the sole engine every command (`/devspark-explain`, `site-audit`, `release`, CI checks) resolves to. If both a repo-root and a `.devspark/scripts/` copy exist, they can drift apart silently — a real defect fixed in 7.5.1.
 
 Check for `scripts/build_knowledge_index.py` at the repository root. If absent, nothing to do. If present, verify the two copies with
 `scripts/knowledge-integrity.py --verify-sync scripts/build_knowledge_index.py .devspark/scripts/build_knowledge_index.py`
@@ -242,12 +242,12 @@ check (`KNOW7`) agree on what "identical" means:
 
 Either way, confirm no CI workflow or project script in the repository still invokes the root copy — every caller must point at `.devspark/scripts/build_knowledge_index.py`. After any deletion or reconciliation in this step, **re-run `--verify-sync`** (or, if the root copy was deleted, confirm it is now absent) before reporting success — do not claim the split-brain is resolved on the strength of the edit alone.
 
-#### New stock commands without an agent shim
+#### New stock commands without an entry point
 
-After refreshing `.devspark/`, cross-check every stock command in `.devspark/defaults/commands/devspark.*.md` against the agent's shim directory (e.g. `.github/agents/devspark.*.agent.md`). Report:
+After refreshing `.devspark/`, cross-check every stock command in `.devspark/defaults/commands/devspark.*.md` against the agent's entry points (for Copilot `.github/skills/devspark-<cmd>/SKILL.md`; for other agents `devspark-<cmd>.<ext>` in the agent's commands directory). Report:
 
-- **Missing shims** — a stock command was added upstream but has no shim yet, so it is not invokable. Re-run shim generation (Step 7) to create it.
-- **Stale shims** — a shim exists for a command that no longer ships in stock (removed/renamed). Remove the stale shim after confirming.
+- **Missing entry points** — a stock command was added upstream but has no entry point yet, so it is not invokable. Re-run entry point generation (Step 7 of the quickstart) to create it.
+- **Orphan entry points** — a generated entry point exists for a command that no longer ships in stock (removed/renamed). The retirement procedure below handles it.
 
 #### Missing `devspark.user.json` gitignore exclusion
 
@@ -273,11 +273,11 @@ Missing framework files should be reported as:
 
 ```
 MISSING: .devspark/scripts/powershell/setup-plan.ps1
-MISSING: .github/agents/devspark.specify.agent.md
+MISSING: .github/skills/devspark-specify/SKILL.md
 MISSING: .devspark/templates/skills/write-spec/SKILL.md
 ```
 
-For every command prompt that delegates to a skill (currently `/devspark.specify` → `write-spec`), verify the skill's `SKILL.md`, `scripts/`, and `references/` are present under `.devspark/templates/skills/`. A missing skill must be reported at the same severity as a missing script — commands that delegate to a missing skill silently degrade to fallback behaviour.
+For every command prompt that delegates to a skill (currently `/devspark-specify` → `write-spec`), verify the skill's `SKILL.md`, `scripts/`, and `references/` are present under `.devspark/templates/skills/`. A missing skill must be reported at the same severity as a missing script — commands that delegate to a missing skill silently degrade to fallback behaviour.
 
 ### 7. Perform the Upgrade
 
@@ -306,6 +306,8 @@ completely. At minimum the following must land:
 - `.devspark/templates/skills/write-spec/scripts/gather-context.sh`
 
 These directories are framework-owned and safe to overwrite completely.
+
+Replay the remaining manifest entries from the quickstart's Step 4 as well. Entries of category `skill` (the command skills, destined for `.github/skills/devspark-<cmd>/SKILL.md`) are installed only for GitHub Copilot; every other agent skips them and receives `devspark-<cmd>.<ext>` entry points instead.
 
 **Important**: Do NOT write to `.devspark.work/commands/` or `.devspark.work/scripts/`.
 Those directories belong to the team. Only `.devspark/defaults/commands/` and
@@ -337,6 +339,42 @@ Offer to show diffs for any changed files so the team can decide what to merge.
 - If a new stock script was added, inform the team — no action needed unless
   they want to customize it
 - Never silently overwrite `.devspark.work/scripts/`
+
+#### 7c. Retire 8.x entry points
+
+Runs after 7a installs the 9.0 entry points, and never blocks that install: a retirement problem is reported and the upgrade continues. The 8.x legacy classes below apply only when the installed major version read in Step 1 is below 9; the orphan class applies on every upgrade. The procedure is stateless: there is no marker and no flag, so the candidate rule alone decides. A second and third run list nothing and change nothing, and an interrupted run recomputes the list from what remains. The agent's quickstart holds the exact recognition rule; this section is its summary.
+
+DevSpark 9.0 exposes every command as `/devspark-<cmd>`. The 8.x dotted entry points would list each command twice, so they are retired.
+
+##### Candidates
+
+For each stock command `<cmd>`, examine only the agent's 8.x file names:
+
+- GitHub Copilot: `.github/agents/devspark.<cmd>.agent.md` and its companion `.github/prompts/devspark.<cmd>.prompt.md`
+- Other agents: `devspark.<cmd>.<ext>` in the agent's commands directory (for example `.claude/commands/devspark.<cmd>.md`)
+
+| Class | Test | Action |
+|---|---|---|
+| Unmodified managed entry point | Frontmatter absent or only `description`, `handoffs`, `agent` and a `name` equal to `devspark.<cmd>`; body is exactly one of the generated package or quickstart forms (placeholder `{{input}}`, `$ARGUMENTS` or `{{args}}`), or the Copilot prompt companion pointer (frontmatter only `agent: devspark.<cmd>`, empty body) | Delete |
+| Edited managed-name file | Anything else | Move to the quarantine; never delete |
+| Foreign file | No stock command name | Left untouched |
+
+Also report:
+
+- **Conflicts** — a path the 9.0 install needs (such as `.github/skills/devspark-<cmd>/SKILL.md`) that holds foreign content: an existing foreign skill folder or entry point file is never overwritten; report it for a human to rename or remove.
+- **Orphans** — a generated 9.0 entry point (a `devspark-<name>` skill folder marked as generated, or a `devspark-<name>.<ext>` file) whose `<name>` has no stock command; list it for deletion.
+
+For GitHub Copilot, also prune `chat.promptFilesRecommendations` in `.vscode/settings.json`: remove only the managed entries (the keys `devspark.<cmd>` for stock commands) and leave user-added entries, other settings and comments as they are.
+
+##### Confirm once, then act
+
+Show the lists and ask for **one confirmation** covering every deletion, quarantine move, orphan removal and settings cleanup. If every list is empty, report "No 8.x entry points to retire." Without a yes, change nothing.
+
+- Delete unmodified managed entry points and orphans.
+- Quarantine edited files byte-identical to `.devspark.work/migration/8.x-entry-points/<file name>`; add a numeric suffix on a name collision and never overwrite an existing file. Report this remedy: recreate the edit as a customization in `.devspark.work/commands/devspark.<cmd>.md` (team) or `.devspark.work/{git-user}/commands/devspark.<cmd>.md` (developer).
+- Report conflicts.
+
+The quarantine only adds new files. This procedure never touches, modifies, deletes or overwrites existing files in `.devspark.work/`, `.knowledge/` or `.archive/`, any customization, or any lifecycle artifact. Re-list afterwards: only the reported items may remain.
 
 ### 8. Post-Upgrade Verification
 
@@ -383,7 +421,7 @@ To merge script improvements:
 
 Next steps:
   1. Review changes: git diff
-  2. Test: run a slash command in your AI assistant (e.g., /devspark.specify)
+  2. Test: run a slash command in your AI assistant (e.g., /devspark-specify)
   3. Commit: git add -A && git commit -m "chore: upgrade devspark to vX.Y.Z"
 ```
 

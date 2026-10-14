@@ -16,6 +16,9 @@ const BLOCKED_CUE_DURATION_CAP_SECONDS: float = 0.75
 ## Tuning within 8-12 is permitted with recorded visual evidence; no duration
 ## cap is applied.
 const EXIT_SPEED_CELLS_PER_SECOND: float = 10.0
-## Extra cell-unit clearance beyond exact edge contact so full-tail finish
-## never completes early from floating-point boundary equality.
-const EXIT_CLEARANCE_MARGIN_CELLS: float = 0.001
+## Cell-unit distance a departing arrow keeps travelling past the board edge
+## before it is removed. The camera can show space beyond the edge, so the arrow
+## must not vanish at the edge itself; a fixed cell count keeps the finish
+## distance independent of zoom and pixel layout. Also guards against a
+## floating-point boundary tie ending the departure early.
+const EXIT_CLEARANCE_MARGIN_CELLS: float = 6.0

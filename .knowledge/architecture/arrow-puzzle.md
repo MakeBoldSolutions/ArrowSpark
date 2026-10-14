@@ -150,9 +150,7 @@ departure-speed constants shared by the view layer and headless tests:
 `BLOCKED_PULSE_SECONDS` (0.15s, the scale pulse inside the cue),
 `BLOCKED_CUE_DURATION_SECONDS` (0.6s, the whole bright-red cue, capped at
 `BLOCKED_CUE_DURATION_CAP_SECONDS` = 0.75s), `EXIT_SPEED_CELLS_PER_SECOND` (10.0, the shared cell-distance
-departure speed) and `EXIT_CLEARANCE_MARGIN_CELLS` (0.001, the tolerance
-margin added beyond exact edge contact so full-tail finish never completes
-early from floating-point boundary equality).
+departure speed) and `EXIT_CLEARANCE_MARGIN_CELLS` (6.0, the cell distance a departing arrow keeps travelling past the board edge before it is removed, so it does not vanish at the edge when the camera shows the space beyond it; a fixed cell count, independent of zoom and pixels).
 
 ### Solvability Analysis
 
@@ -262,17 +260,13 @@ and `PUZZLE_FAILURES=0`.
 
 `PuzzleCatalog` (scripts/puzzle/puzzle_catalog.gd) is a static-registry
 `RefCounted` class, never instantiated, sitting between the domain
-(`PuzzleDefinition`) and presentation. It holds an ordered array of twenty-two
-entries (`{id, title, group, build}`) — the original eight baseline puzzles, six
+(`PuzzleDefinition`) and presentation. It holds an ordered array of thirty entries (`{id, title, group, build}`) — the original eight baseline puzzles, six
 experimental puzzles (`nested_chain`, `cascade_key_arrow`,
 `dense_unravel`, `bent_network`, `long_range_blocker`, `composed_shaped`),
 each deliberately authored to combine structural features (dependency depth,
 cascade fan-out, density, bent-tail dependencies, long-range blocking,
 macro-scale composition) the baseline eight never did in combination, one large-canvas validation board (`canvas_validation`, titled "Large Canvas
-Validation"), and six newer geometric experiments (`knot_long_geometry`,
-`knot_interwoven_paths`, `knot_dense_core`, `knot_regions`,
-`knot_single_release`, `knot_boundary`) — each
-`build` a zero-argument static function
+Validation"), six newer geometric experiments (`knot_long_geometry`, `knot_interwoven_paths`, `knot_dense_core`, `knot_regions`, `knot_single_release`, `knot_boundary`), eight progression levels (`first_knot`, `two_neighborhoods`, `the_bridge`, `false_simplicity`, `the_rescan`, `major_release`, `dense_weave`, `almost_a_knot`) and the hand-composed Reference Knot (`reference_knot`) — each `build` a zero-argument static function
 constructing a fresh `PuzzleDefinition` exactly like `create_fixed()`'s own
 literal-construction style. `count()`, `id_at(index)`, `title_at(index)`,
 `index_of(id)` (`-1` if unknown), `ids()` (an independent ordered copy) and
@@ -299,17 +293,34 @@ kept every step solvable and is not generated at runtime. It exists to
 exercise large-board navigation, off-screen assistance and long departures;
 its difficulty is deliberately untuned. The original fourteen entries' ids, order, dimensions and exact arrow/tail
 content are pinned by fingerprints, as is the complete `canvas_validation`
-geometry. The six geometric experiments follow it in the same registry.
+geometry. The six geometric experiments follow it in the same registry, then the progression levels and the Reference Knot.
 They retain authored 32x24 to 48x36 canvases; their purpose and actual
 structural measurements are documented in
 `.knowledge/reference/gordian-knot-experiments.md`. They reuse the same
 solver, assistance, scoring and session-only selection behavior.
 
+### Progression levels
+
+Eight levels sit between the Foundations and the Reference Knot, in this order:
+`first_knot` (9x7, 9 arrows), `two_neighborhoods` (15x9, 15), `the_bridge`
+(17x9, 14), `false_simplicity` (14x11, 17), `the_rescan` (20x12, 23),
+`major_release` (22x14, 30), `dense_weave` (26x16, 68) and `almost_a_knot`
+(36x24, 93). Each is fixed literal data built by `PuzzleCatalog._from_shapes`
+from orthogonal path vertices, found by a seeded offline search against a
+structural profile and then confirmed by the solver; none is generated at
+runtime and none contains an isolated single-cell arrow. Each builder's doc
+comment states the experience the level is built to offer. Their ids, titles,
+order, dimensions, arrow counts and content versions are pinned in
+tests/puzzle_catalog_check.gd, and every one is confirmed valid and solvable
+by tests/puzzle_analyzer_check.gd. Measured structure of each level and the
+designer's observations are in
+`.knowledge/reference/progression-design-learning.md`.
+
 ### Level groups
 
 Every catalog entry carries a `group` metadata key: `arrowspark_levels`
 ("ArrowSpark Levels": designed against the current player-experience
-standard, currently the Reference Knot), `foundations` ("Foundations": the
+standard: the eight progression levels in order, then the Reference Knot), `foundations` ("Foundations": the
 eight baseline puzzles) or `puzzle_lab` ("Puzzle Lab": the structural
 experiments, the large-canvas validation board and the knot experiments).
 Groups describe why content exists, not a quality ranking, and have no effect
@@ -329,8 +340,7 @@ ranks one group above another. Every group starts expanded;
 collapsing hides a group's entries so keyboard and gamepad focus skip them. The
 in-game label and results title use the same group-relative number. The play
 HUD has a Back button (first in the Tab order) that leaves the puzzle mid-play
-for Level Select without recording a score or touching progress. Play / New
-Game starts `reference_knot` without resetting progress.
+for Level Select without recording a score or touching progress. Play / New Game starts `first_knot`, the first progression level, without resetting progress; the Reference Knot is the last level of the group.
 Source of truth: tests/puzzle_catalog_check.gd (group sizes, membership,
 position and next semantics, group-scoped session progression),
 tests/puzzle_layout_check.gd (grouped Level Select, accordion collapse and
@@ -360,7 +370,7 @@ running process, not to any node or scene.
 Source of truth: tests/puzzle_catalog_check.gd (unique/valid stable ids
 independent of position, deterministic `id_at`/`index_of`/`ids` ordering,
 fresh-and-isolated `get_definition` per call including cross-id
-independence, every one of the twenty-two entries structurally valid and
+independence, every one of the thirty entries structurally valid and
 solver-confirmed solvable with a replayed zero-mistake witness, the original
 fourteen entries' ids, order, dimensions and content unchanged, the
 `canvas_validation` fixture's dimensions/arrow count/bent long arrows/four
@@ -781,7 +791,7 @@ in-flight departure so no stale completion reaches a replaced attempt; a
 post-completion selection being ignored; a freshly instantiated scene
 starting clean; 20 rapid repeated selections on a blocked tail cell counting
 exactly once each without disturbing the attempt; the blocked-cue duration
-cap; and, for every one of the twenty-two `PuzzleCatalog` entries in turn: the
+cap; and, for every one of the thirty `PuzzleCatalog` entries in turn: the
 board's active view count matches the definition's arrow count, the HUD
 puzzle label matches the catalog title, and the same solver-derived
 zero-mistake witness clears through the real scene with unchanged
@@ -835,8 +845,7 @@ pixels per cell about the current center and pans minimally so the head cell
 plus 8 pixels of padding is inside the viewport (a satisfied reveal changes
 nothing). `world_position()`/`world_scale()` derive the World projection. Zoom
 is bounded to `[fit scale, max(192, fit scale)]` pixels per cell in 1.2x steps;
-each center axis is clamped to the interior half-extent (an axis whose board
-fits stays centered). Setup and Fit set fit mode; an effective zoom/pan sets
+above the Fit scale each center axis is clamped to the board's own extent `[0, size]`, so any board point, including every corner, can be brought to the viewport center and the viewport shows whatever lies beyond the edge (the camera cannot leave the board, so part of it is always in view); at the Fit scale the view stays locked and centered. Setup and Fit set fit mode; an effective zoom/pan sets
 manual mode (a no-op at a bound does not). A resize refits in fit mode and, in
 manual mode, keeps the absolute scale and logical center (then clamps). An
 unusable area (an axis <= 32 pixels or non-finite) marks the layout invalid:
@@ -846,8 +855,7 @@ Camera state is never serialized and resets with every attempt (Replay, Next,
 Level Select and pause-menu Restart all rebuild the scene).
 
 `PuzzleBoard` owns one transform. `World` (passive, mouse-ignore) holds the
-active views and the `DepartureClip`, which clips departing views to the full
-logical board extent; the board clips to the viewport. Navigation only moves
+active views and the `DepartureClip`, which holds departing views at the full logical board extent without clipping them (they continue past the edge); the board clips to the viewport. Navigation only moves
 `World`. `ArrowView.set_presentation_layout_valid(bool)` suspends departure
 advancement (also for direct `advance_departure` calls) while the area is
 invalid without altering routes, progress or the canonical extent; the board
@@ -906,11 +914,8 @@ a long arrow need not fit, only its head), then starts the existing pulse. Durin
 an invalid area the reveal stays pending and applies once on valid recovery with
 no extra rule call or assist; clearing or replacing the suggestion cancels it.
 
-Source of truth: tests/puzzle_viewport_transform_check.gd (pure numeric fit,
-inverse round trips, anchors, per-axis clamps, mode policy, resize, invalid area,
-reveal, projection; run in an isolated project), tests/puzzle_canvas_check.gd
-(scene-level fit and layout for the large board and all original puzzles at
-four window sizes, wheel/drag/button navigation, limits, corner reachability,
+Source of truth: tests/puzzle_viewport_transform_check.gd (pure numeric fit, inverse round trips, anchors, corner reach at several board shapes, viewports and scales, the Fit lock, bounded pan, mode policy, resize, invalid area, reveal, projection; run in an isolated project), tests/puzzle_canvas_check.gd
+(scene-level fit and layout for the large board and all original puzzles at four window sizes, wheel/drag/button navigation, limits, corner reachability to the viewport center by drag and by held keys and for every distinct catalog board size, unclipped departures,
 state and view-identity invariance, focus loop and remapping safety, drag
 eligibility and cancellation, transformed head/tail/empty/departed hits,
 blocked counters, Open Move reveal and pending reveal, state/solver/analyzer/
@@ -928,8 +933,7 @@ them.
 
 `scenes/menus/main_menu/main_menu.tscn` and `main_menu_with_animations.tscn`
 both point `game_scene_path` at `res://scenes/puzzle/arrow_puzzle.tscn`.
-`main_menu_with_animations.gd` overrides `new_game()` only to select
-`reference_knot` before delegating to the base `MainMenu`; `load_game_scene()`
+`main_menu_with_animations.gd` overrides `new_game()` only to select `first_knot` before delegating to the base `MainMenu`; `load_game_scene()`
 uses the base default implementation (`SceneLoader.load_scene(game_scene_path)` only), so
 opening the puzzle from Play/New Game never calls `GlobalState.reset()` or
 `GameState.start_game()`. Continue stays hidden (the scene's default
@@ -1010,18 +1014,14 @@ than stacking two indicators.
 
 Departure first marks terminal state, kills color/effect tweens, resets
 scale/modulation/visibility and ink synchronously, then feeds the whole
-shape through its own stationary route at a shared cell-distance speed and
-clips it at the occupied grid edge — see
-.knowledge/architecture/game-visual-system.md for the full route-math,
-speed and clearance contract. Later hover/block/exit requests are ignored,
+shape through its own stationary route at a shared cell-distance speed and lets it continue past the occupied grid edge by a fixed cell margin before removal — see .knowledge/architecture/game-visual-system.md for the full route-math, speed and clearance contract. Later hover/block/exit requests are ignored,
 and repeated start requests are ignored once departing.
 
 `PuzzleBoard` owns two presentation-only collections: `_views` (canonical
 head -> active view, ownership-routing) and `_departing_views` (original
 head -> departing view, layout/tracking only, never selection/hover
 routing). `play_removed(head)` erases the active entry, reparents the view
-into a passive `DepartureClip` child `Control` (clip_contents, mouse-filter
-ignore, sized to the occupied grid) at its own bbox-relative position, and
+into a passive `DepartureClip` child `Control` (not clipping, mouse-filter ignore, sized to the occupied grid) at its own bbox-relative position, and
 connects the one-shot completion before starting movement, so a same-frame
 full-clearance advance cannot race the callback. `_layout_views()` relayouts
 both collections from the same board cell extent on every resize; a

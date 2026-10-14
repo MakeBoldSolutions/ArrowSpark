@@ -56,7 +56,9 @@ func _init() -> void:
 	add_child(_world)
 	_departure_clip = Control.new()
 	_departure_clip.name = "DepartureClip"
-	_departure_clip.clip_contents = true
+	# Departing arrows are not cut at the board edge: with the camera able to reach
+	# the edge, the area beyond it can be on screen. The board's own clip bounds drawing.
+	_departure_clip.clip_contents = false
 	_departure_clip.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_world.add_child(_departure_clip)
 

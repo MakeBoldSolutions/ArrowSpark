@@ -115,6 +115,7 @@ narrow screens.
     asks for a larger screen. `PlayUnavailableNotice.astro` shows the message,
     links to the story and offers to copy the link or open the visitor's own
     mail app with it. Nothing is collected.
+- **Desktop browsers: supported and verified.** The supported desktop browsers are Firefox, Chrome, and Chrome-derived (Chromium-based) browsers, as defined in the constitution's verification principle. The game loads and plays, with mouse wheel zoom, middle-button drag and keyboard menu navigation, in Chrome, Firefox, and two Chromium-based browsers (the VS Code internal browser and Perplexity's browser); versions were not recorded. Edge is Chromium-based and so inside the supported set, but it has not been tested individually. Safari is outside the set and not claimed.
 - **Mobile web beta: what is verified.** Public wording is "ArrowSpark now
   works on mobile web in beta. Landscape is recommended. Some touch gestures
   are still being refined." Real-device evidence so far is one Google Pixel 7
@@ -126,11 +127,7 @@ narrow screens.
   Safari has not been verified on a real device** and is admitted by the same
   capability rule, not claimed as supported. Known limitations: controls are
   small touch targets and fullscreen may be unavailable (the button is hidden
-  when the browser refuses it). Modeless touch (tap on release, one-finger drag
-  pans, pinch zooms; see `.knowledge/reference/touch-gestures.md`) is
-  implemented after this beta record and not yet verified on a real device;
-  before it, pinch did not work on the Pixel. On touch
-  screens in landscape the frame is sized to fit the visible height and the
+  when the browser refuses it). Modeless touch (tap on release, one-finger drag pans, pinch zooms; see `.knowledge/reference/touch-gestures.md`) has since been verified on the same Pixel 7 Pro in Chrome: pinch zoom and one-finger drag worked without issue, and every level, including the larger ones, was played through by tapping (before the change, pinch did not work). The build was reached over HTTPS on a local network, because Godot's loader refuses a non-secure origin; that limit affects local testing only. Remaining limitations on the phone: the menus and Results screen between levels are small and hard to read, especially in fullscreen, and because the admission rule measures the visible page area, a landscape phone with the browser's address bar showing can be told the screen is too small until the bar hides. On touch screens in landscape the frame is sized to fit the visible height and the
   site header scrolls away instead of covering the toolbar.
 
 ## Completion bridge

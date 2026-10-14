@@ -836,6 +836,20 @@ op_comment() {
         "audit$(printf '\t')$(audit_fragment 'comment' "$ID" "$REV" "$after_rev")")"
 }
 
+resolve_create_type() {
+    local type
+    type="$TYPE"
+    [[ -z "$type" ]] && type="${CTX_TYPE:-Task}"
+    local lowered
+    lowered="$(printf '%s' "$type" | tr '[:upper:]' '[:lower:]' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+    if [[ "$lowered" == "user story" ]]; then
+        emit_failure 'type_unsupported' \
+            'creating a User Story is prohibited; DevSpark never creates one' \
+            'set work_tracking.default_work_item_type to a type other than User Story, or name another work item type'
+    fi
+    CREATE_TYPE="$type"
+}
+
 op_propose_create() {
     parse_set_arguments
     [[ -z "$TITLE" ]] && exit_usage 'propose-create requires --title'
@@ -844,6 +858,7 @@ op_propose_create() {
 
     resolve_context
     assert_context
+    resolve_create_type
 
     if [[ -z "$CTX_AREA" ]]; then
         emit_failure 'context_unresolved' \
@@ -851,10 +866,7 @@ op_propose_create() {
             'add work_tracking.default_area_path to .devspark.work/devspark.json'
     fi
 
-    local type story_supported="false"
-    type="$TYPE"
-    [[ -z "$type" ]] && type="${CTX_TYPE:-User Story}"
-    [[ -z "$type" ]] && type="User Story"
+    local type="$CREATE_TYPE" story_supported="false"
 
     # Story points only exist on some process templates. Saying so before the write is what
     # keeps a missing field from becoming a failed create.
@@ -884,6 +896,7 @@ op_apply_create() {
 
     resolve_context
     assert_context
+    resolve_create_type
     assert_confirmed
     assert_capability
     assert_authenticated
@@ -894,10 +907,7 @@ op_apply_create() {
             'add work_tracking.default_area_path to .devspark.work/devspark.json'
     fi
 
-    local type i
-    type="$TYPE"
-    [[ -z "$type" ]] && type="${CTX_TYPE:-User Story}"
-    [[ -z "$type" ]] && type="User Story"
+    local type="$CREATE_TYPE" i
 
     PATCH_NAMES=("title" "description" "acceptance_criteria")
     PATCH_VALUES=("$TITLE" "$DESCRIPTION_HTML" "$ACCEPTANCE_HTML")

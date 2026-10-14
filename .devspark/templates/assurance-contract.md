@@ -2,7 +2,7 @@
 
 <!-- BSW.DevSpark — © 2026 Baylor Scott & White Health. Source: https://bsw-devspark.bswhive.com -->
 
-Use this contract whenever a command evaluates work it did not author — `/devspark.analyze`, `/devspark.critic`, `/devspark.verify`, `/devspark.pr-review`.
+Use this contract whenever a command evaluates work it did not author — `/devspark-analyze`, `/devspark-critic`, `/devspark-verify`, `/devspark-pr-review`.
 
 Installed repos should resolve this file from `/.devspark/templates/assurance-contract.md`.
 Source repos should resolve it from `templates/assurance-contract.md`.
@@ -32,7 +32,7 @@ Analyze owns the **closed-world correctness of the authored work artifacts**. It
 
 Analyze owns, exclusively:
 
-- spec ↔ plan consistency, plan ↔ tasks consistency
+- spec ↔ plan consistency, plan ↔ tasks consistency, including a plan that contradicts a decision the spec records or changes behavior the spec declares (clarification answers, non-goals, domain invariants, architectural constraints, accepted limitations, acceptable manual operations)
 - requirement coverage and requirement ↔ task traceability
 - duplicate, contradictory, or unanchored requirements
 - terminology drift and wording precision
@@ -40,10 +40,12 @@ Analyze owns, exclusively:
 - missing task anchors; tasks citing requirement ids that do not exist
 - completed tasks with no supporting linkage
 - identifier and field names contradicting a declared contract or schema
-- Rationale Summary completeness and spec→plan Core-Problem drift
+- Spec/Plan Rationale Summary completeness and spec→plan Core-Problem alignment; Tasks remain a
+  derivative action list and do not repeat rationale
 - `context_resolved` **validity** — every cited id and relation actually resolves
 - artifact and schema conformance, and planning bookkeeping correctness
-
+- whether affected current-knowledge updates and tests *exist as tasks* (presence of coverage, not its adequacy)
+- when `qa-acceptance.md` exists: scenario trace validity, scenarios introducing requirements outside approved scope, and externally important success criteria left without a scenario
 Analyze does **not** make open-world judgments. It cannot see the running system, and it must not guess at one.
 
 ## 3. Critic's Lane
@@ -64,6 +66,10 @@ Critic owns the **open-world challenge against repository and operating reality*
 - NFR achievability
 - `context_resolved` **sufficiency**
 - architectural assumptions unsupported by current source
+- whether planned test and knowledge coverage is *proportionate to runtime risk* (adequacy, not presence — presence is Analyze's)
+- when `qa-acceptance.md` exists: internals-based scenarios, unjustified duplication, append-only regression dispositions, disproportionate coverage, and evidence that does not prove its requirement
+
+These acceptance-planning checks sit inside the existing lanes. Planning-review adjudication is unchanged: Judge receives them only as ordinary findings from the lane that owns them.
 
 ### 3.1 Evidence Requirement (non-negotiable)
 
@@ -185,6 +191,8 @@ Rules:
 - A **recheck** confirms the disposition of the findings from the discovery pass. It MUST NOT open a new open-ended discovery pass.
 - A new observation seen *during a recheck* is classified under `closeout-contract.md` §4. It may expand the current route only if it hits one of the five expansion triggers in `closeout-contract.md` §2 — objective failure, unresolved requirement, violated invariant, correctness defect, or regression. Otherwise it is an Accepted Limitation, Deferred Work, or Learning, and the pass stops.
 - A capability MUST NOT review the work performed to resolve its own earlier findings. Once implementation of those fixes begins, that delta belongs to Verify and PR Review.
+- The prohibition above is per capability, so a mechanism added to resolve an *Analyze* finding can still be reviewed by Critic, and the reverse. That cross-lane path is how a remediation ratchet continues; Planning Review's Judge phase watches for it (`judge-contract.md` §13).
+- **Assurance may discover work, but discovery alone does not expand current scope.** Only a Judge disposition (`judge-contract.md` §11), or a finding that hits a `closeout-contract.md` §2 expansion trigger, turns a finding into planning work.
 - A non-blocking finding does not automatically create a task. Scope expands only on explicit developer intent (`closeout-contract.md` §8).
 
 ## 9. Verdicts Are Derived
@@ -200,6 +208,8 @@ There is one verdict vocabulary. A capability MUST NOT invent another, and MUST 
 The verdict is computed from the findings, never authored independently. `GO`, `PASS`, `MOSTLY READY`, `PROCEED AFTER …`, and any other free-text verdict are contract violations. A verdict of `PROCEED` alongside an open Blocking Defect, or `blocking: false` alongside required pre-implementation actions, is a self-contradiction and must be corrected before the gate artifact is written.
 
 Severity and convergence stay separate dimensions. A severe risk may be an Accepted Limitation or Deferred Work and not block; a modest issue that violates a required invariant blocks.
+
+**Planning Review.** Child verdicts are evidence, not inputs to average. `/devspark-planning-review` derives one verdict from the reconciled concerns using this same vocabulary (`judge-contract.md` §14), so the developer never has to reconcile an Analyze `CONDITIONAL` with a Critic `STOP` by hand.
 
 ## 10. Interaction Policy
 
@@ -240,7 +250,7 @@ Signals describe **software shape**. They never name a product, vendor, or repos
 
 A change exhibiting none of the signals is not automatically applicable. Typical negative controls: a pure symbol rename, a local mechanical refactor with no behavioral surface, a documentation-only change, formatting.
 
-Not automatically applicable is **not** prohibited. `/devspark.critic` remains explicitly callable on any route — for an adversarial second opinion, after a significant plan revision, when the signals miss something, or when Analyze passes and something still looks wrong.
+Not automatically applicable is **not** prohibited. `/devspark-critic` remains explicitly callable on any route — for an adversarial second opinion, after a significant plan revision, when the signals miss something, or when Analyze passes and something still looks wrong.
 
 ### 11.3 Inspectable Decision
 
@@ -273,3 +283,4 @@ The reason is one line. Applicability is a routing decision, not another risk es
 6. Verdicts come from the controlled vocabulary and are derived from finding state.
 7. Assurance passes are bounded: discovery, remediation, recheck, stop.
 8. Findings classify under one convergence model — `closeout-contract.md`. There is no capability-specific taxonomy.
+9. Analyze and Critic discover; Planning Review's Judge phase (`judge-contract.md`) adjudicates scope. The developer reads one planning decision, not two reports.

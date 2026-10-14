@@ -212,11 +212,11 @@ func _test_no_reset_on_puzzle_entry() -> void:
 	check(InputMap.action_has_event(remap_action, seeded_remap) and InputMap.action_has_event(remap_action, remap_joy),
 		"selecting a Level Select entry does not disturb a seeded keyboard/gamepad remap")
 
-	# New Game always starts the Reference Knot, regardless of the Level
+	# New Game always starts the first ArrowSpark level, regardless of the Level
 	# Select choice above having already changed PuzzleSession this session.
 	menu.new_game()
-	check(PuzzleSession.get_current_id() == "reference_knot",
-		"new_game() starts the Reference Knot regardless of a prior Level Select selection")
+	check(PuzzleSession.get_current_id() == "first_knot",
+		"new_game() starts the first ArrowSpark level regardless of a prior Level Select selection")
 	check(PuzzleCatalog.group_of(PuzzleSession.get_current_id()) == "arrowspark_levels",
 		"the New Game target belongs to the ArrowSpark Levels group")
 

@@ -15,6 +15,28 @@ appliesTo:
 
 <!--
 Sync Impact Report
+Version: 2.2.0 -> 2.3.0
+Rationale: MINOR. Principle V's browser verification rule referred to "each
+supported desktop browser" without defining the set, so a verification record
+could not be checked against it.
+Modified principles:
+- V. Practical Gameplay Verification: the supported desktop browsers are
+  Firefox, Chrome and Chrome-derived (Chromium-based) browsers; a browser
+  outside that set is not claimed as supported, and a supported browser that
+  was not tested is recorded as not tested.
+Applied Amendments:
+- CAP-2026-001 (from a PR review finding): Principle V, supported desktop
+  browsers defined.
+Sync validation:
+- Updated: .knowledge/architecture/web-showcase.md (names the supported set
+  and which browsers were actually tested).
+- Reviewed: CLAUDE.md, AGENTS.md, README.md (no claim affected).
+Follow-up TODOs: none. Edge and other Chromium-based browsers fall inside the
+supported set but have not been tested individually.
+-->
+
+<!--
+Sync Impact Report
 Version: 2.1.0 -> 2.2.0
 Rationale: MINOR. The showcase now offers the game on mobile web as a beta, so
 Principle V's browser verification extends beyond desktop browsers.
@@ -130,7 +152,10 @@ No platform-specific frame-rate target or frame-time budget is mandated.
   disclose that limitation and leave it outstanding rather than claim completion.
 - Web builds MUST also be verified in a browser: the affected gameplay is
   smoke-tested in each supported desktop browser, and the results, including
-  checks not performed, are recorded the same way.
+  checks not performed, are recorded the same way. The supported desktop
+  browsers are Firefox, Chrome, and browsers derived from Chrome (Chromium-
+  based browsers). A browser outside that set is not claimed as supported, and
+  a supported browser that was not tested is recorded as not tested.
 - The mobile web beta is verified on at least one real phone in a mobile
   browser. A device or browser that was not tested is not claimed as
   supported, and emulation never substitutes for a real device.
@@ -180,4 +205,4 @@ reasoned exception; MUST rules require compliance with their stated alternatives
 
 No recurring review schedule, automated CI gate, or test coverage threshold is mandated.
 
-**Version**: 2.2.0 | **Ratified**: 2026-09-26 | **Last Amended**: 2026-10-03
+**Version**: 2.3.0 | **Ratified**: 2026-09-26 | **Last Amended**: 2026-10-14

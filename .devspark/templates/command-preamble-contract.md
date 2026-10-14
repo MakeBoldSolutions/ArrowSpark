@@ -4,11 +4,25 @@
 
 This contract centralizes shared command preamble behavior to reduce prompt bloat and improve consistency.
 
-Commands that reference this contract MUST load and obey it before step 1.
+Commands that reference this contract MUST load and obey this core before step 1. It holds the rules that bind every command; rules that bind only some commands live in modules (see Modules and Consumers).
 
 ## 0. Plan Temporarily, Review the Delta
 
 Planning is an implementation aid, not a permanent compliance record.
+
+- **A DevSpark specification is not a blueprint for software.** It is a bounded hypothesis about the
+  next valuable change to working software. The repository defines the current state; the spec
+  defines the intended delta; implementation and verification create the next state. Before taking
+  the next delta, make sure the new state remains a good place from which to change again.
+- **A specification delivers a releasable change. A product release packages and distributes completed
+  changes.** A DevSpark specification must not include tasks requiring the product release itself,
+  version publication, package distribution, or product deployment. Spec completion requires
+  appropriate implementation, verification, PR Review, merge, and closeout work—but does not depend
+  on version publication, package distribution, or product deployment. A completed specification does
+  not remain open solely because its product release has not occurred; release preparation can
+  consume multiple independently completed specifications. Release-specific integration or
+  deployment validation remains a release responsibility; feature acceptance testing is preserved
+  and never silently waived.
 
 - Authoring routes write temporary specs, plans, tasks, checklists, and gates under
   `.devspark.work/`. Route-specific traceability stays inside that active bundle.
@@ -31,7 +45,7 @@ Planning is an implementation aid, not a permanent compliance record.
   current truth after the planning bundle is deleted or archived.
 - After all required verification passes, implementation populates `code_ref`/`knowledge_ref`
   linkage on every item in the planning bundle and leaves it live under `.devspark.work/` — it
-  never archives the bundle itself. `/devspark.release` is the sole command that later confirms
+  never archives the bundle itself. `/devspark-release` is the sole command that later confirms
   every item's linkage and moves the completed bundle to `.archive/{YYYY-MM-DD}/` (preserving its
   relative path minus the `.devspark.work/` prefix), which can happen across more than one release
   window. It is not released, mined later, or reconstructed by downstream commands from
@@ -56,7 +70,7 @@ Planning is an implementation aid, not a permanent compliance record.
 | `.devspark/` | Framework | Installed stock prompts, scripts, templates, and schemas |
 | `.devspark.work/` | Repository | Temporary planning plus operational work products and overrides |
 | `.knowledge/` | Repository | Current authoritative architecture, governance, reference, patterns, and operations, plus published user-facing guidance under `.knowledge/guides/` |
-| `.archive/` | Repository | Landing place for all old work products, grouped by release; write-only, sole writers are `/devspark.release`, `/devspark.constitution`, and `/devspark.evolve-constitution` |
+| `.archive/` | Repository | Landing place for all old work products, grouped by release; write-only, sole writers are `/devspark-release`, `/devspark-constitution`, and `/devspark-evolve-constitution` |
 
 Install and upgrade may refresh `.devspark/` only. Migration between major layouts is an explicit,
 human-confirmed operation and is never performed by install or upgrade.
@@ -120,40 +134,15 @@ To reduce the cognitive load of remembering which command comes next, every comm
 
 ```text
 Where you are: <short state label>
-Next: <the single recommended command, or "run /devspark.next">
+Next: <the single recommended command, or "run /devspark-next">
 ```
 
 Guidance:
 
 - Keep it to those two lines — it is a signpost, not a summary.
-- When the command cannot confidently name the next step, fall back to `Next: run /devspark.next` so the developer always has one safe move.
+- When the command cannot confidently name the next step, fall back to `Next: run /devspark-next` so the developer always has one safe move.
 - The footer is advisory; it never replaces a command's own gate results or required confirmations.
 - Omit the footer only for pure query/list commands where "next" is meaningless.
-
-## 7. Repository Configuration ("set once" facts)
-
-Configuration is split so shared repo facts and per-developer preferences never mix:
-
-- **`.devspark.work/devspark.json`** (committed) holds **repo facts + team policy**: `platform`, `organization`, `project`, `repository`, and `policies.*` (e.g. `protect_main`).
-- **`.devspark.work/devspark.user.json`** (git-ignored, per developer) holds **personal preferences**: `assistant.name`, `shell`, and `preferences.*` (e.g. `auto_push`).
-
-Read them via the shared helpers in `common.ps1` / `common.sh` (`Get-DevSparkConfig`, `Get-DevSparkUserConfig`, `Get-AssistantName`, `Get-DevSparkPreference`; bash: `get_devspark_config_value`, `get_devspark_user_config_value`, `get_assistant_name`, `get_devspark_preference`). Resolution precedence is **env var → user file → repo file → default**. Recognized keys:
-
-- `assistant.name` (user) — the developer-chosen name for the guide voice (default `Spark`; env override `DEVSPARK_ASSISTANT_NAME`). Address and sign as this name. When the developer addresses this name in natural language (e.g. "hey Spark, where am I", "Spark, what's next"), treat it as invoking `/devspark.next` and answer with the orientation (repo, branch, platform) plus the next step.
-- `platform` (repo) — `github` | `azdo` | `gitlab`. Authoritative host; resolved by `platform.*` (config wins over auto-detection). Never re-probe `gh`/`az` to guess the host when this is set.
-- `shell` (user) — `powershell` | `bash`. Preferred script flavor when both `sh:` and `ps:` variants exist. Lets a macOS teammate choose `bash` without touching shared repo facts.
-- `preferences.auto_push` (user) — when `true`, the developer has **pre-authorized** pushing the current feature/quickfix branch to its remote after a commit, without asking each time. Treat it like a standing `--auto` for that one action.
-- `policies.protect_main` (repo) — team policy: when `true`, never commit or push directly to the default branch; branch first.
-
-Git identity defaults to `git config user.name`. It may optionally be overridden per developer in the user file via `git_user` (env `DEVSPARK_GIT_USER` wins) — useful as a friendlier display name and as the deterministic key for personal `.devspark.work/{git-user}/` prompt and script overrides. Resolve it via `Get-GitUser` / `get_git_user`.
-
-**`git_user` uniqueness (important):** because `git_user` is also the folder key for personal overrides (`.devspark.work/{git-user}/commands/`, `.devspark.work/{git-user}/scripts/`), two developers who set the same `git_user` value — or who copy a teammate's `devspark.user.json` as a starting template without changing it — will silently share the same personal override folder and pick up each other's customized prompts/scripts. Use a value that's unique within the repo (e.g. `firstname-lastinitial` or your actual `git config user.name`, which is already unique per commit author) rather than something generic like a role name or team name.
-
-**Safety rules for `auto_push` (non-negotiable):**
-
-- Only ever push the current topic branch to its own upstream. Never `--force`.
-- `auto_push` never overrides `protect_main`: pushing directly to the default branch always requires an explicit human decision.
-- Publishing a branch is visible to others but reversible; opening/merging a PR is not covered by `auto_push` and still follows the normal PR flow.
 
 ## 8. Branch Safety (non-negotiable)
 
@@ -165,99 +154,58 @@ DevSpark commands MUST NOT create, switch (`git checkout` / `git switch`), renam
 - Never `git reset --hard`, force-delete a branch, or discard commits/branches without explicit confirmation.
 - `policies.protect_main` ("branch first") does **not** authorize an unattended switch: offer to create the branch and wait for the yes.
 
-## 9. Genuine Fix Discipline (anti-gaming)
+## Modules and Consumers
 
-When a task, gate finding, or automated check (lint rule, static-analysis metric, code-smell warning, test failure) names a specific violation, do not react to the bare metric alone — e.g. "function too complex (11 > 5)" or "bare except". A published pre-registered eval (prompt-vs-metric-eval, comparing bare-metric vs. behavioral-intent phrasing across two Claude models) measured genuine-fix rates as low as 5.6% when the model reacted only to a raw linter number, versus 83% when it was first asked to reason about the underlying intent — and the stronger model gamed the bare metric *more*, not less.
+The sections that live in modules keep their numbers wherever they are; other documents cite them as `§N`. The
+core (this file) carries §0-§6, §8, §13 and §14, which bind every command. The remaining sections live
+in modules under `preamble/` (installed: `/.devspark/templates/preamble/`; source:
+`templates/preamble/`). A command loads this core, then only the modules the table names it as a
+consumer of. A command that cites a section MUST load the module that owns it, and every consumer
+listed here MUST load its module even without an explicit citation, because the obligation binds it
+whether or not its prompt says so. `tests/test_preamble_modules_contract.py` enforces both rules.
 
-Before fixing, state in one sentence the behavioral intent the check is a proxy for (e.g. "this function should do one thing — what is it, in one sentence?"; "this handler should name and surface the specific error, not swallow it"), then implement a fix that satisfies that intent — not just the number. Before marking the finding resolved, confirm it isn't a gamed fix:
+| Module | Sections | Owns |
+|---|---|---|
+| `finding-fix` | 9, 9.1, 9.2 | Genuine Fix Discipline, intent cues, constitution citation |
+| `convergence` | 10 | Finding classification and when a route is finished |
+| `orchestration` | 11 | How many commands a developer must know |
+| `provenance` | 12 | Artifact version provenance |
+| `configuration` | 7 | Repository and user configuration, `auto_push` safety |
 
-- **Complexity/length findings**: a genuine fix reduces actual branching or splits real responsibilities apart; splitting the same branches into helper functions purely to lower the tool's count is gamed.
-- **Exception-handling findings**: a genuine fix names a specific exception type and does something with it (log, re-raise, handle); narrowing the `except` clause while still silently discarding the error is gamed.
-- **Any finding**: if a human reviewer would say "this only satisfies the tool without changing behavior," it is gamed, not done.
+```yaml
+preamble_modules:
+  finding-fix: [address-pr-review, analyze, critic, implement, pr-review, quickfix, site-audit, verify]
+  convergence: [address-pr-review, analyze, checklist, closeout, create-pr, critic, explain, implement, planning-review, pr-review, site-audit, tasks, verify]
+  orchestration: [closeout, next, planning-review, verify]
+  provenance: [analyze, clarify, closeout, critic, implement, plan, planning-review, pr-review, quickfix, site-audit, specify, tasks, verify]
+  configuration: [address-pr-review, create-pr, next, pr-review, quickfix, site-audit, specify, update-pr, workitem-create, workitem-review]
+```
 
-Applies wherever `/devspark.implement` resolves an `analyze`/`critic` finding, `/devspark.quickfix` implements its root-cause fix, or any code-quality remediation task is performed.
+## 13. Minimum Sufficient Change
 
-### 9.1 Intent Cues for Common Structural Smells
+> **Minimum Sufficient Change.** Build the smallest complete solution that satisfies the current objective, explicit requirements, invariants, and demonstrated operating constraints. Prefer simpler and more local solutions over speculative flexibility. Future usefulness alone does not justify present complexity.
 
-Stating the behavioral intent from scratch each time invites inconsistent phrasing. For the smells a linter or static-analysis tool most commonly flags, use the intent cue below as the starting sentence, then apply the genuine-fix test in the row before marking the finding resolved:
+- **MVP** — build the smallest valuable outcome. Specify names it; everything else is explicitly out of scope.
+- **KISS** — prefer the simplest safe design that satisfies the current requirements, and the least powerful mechanism that satisfies them safely.
+- **YAGNI** — do not add behavior, abstraction, state, configuration, infrastructure, or extensibility for hypothetical future needs. Every new mechanism (state, configuration, feature flag, persistence, cache, background process, endpoint, telemetry subsystem, extension point, generic abstraction) is justified by a current requirement, invariant, demonstrated constraint, or accepted operational need.
 
-| Smell (tool-agnostic)                          | Intent cue (say this first)                                                        | Genuine fix looks like                                                         | Gamed fix looks like                                                                  |
-| ----------------------------------------------- | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| Oversized function / high complexity            | "This function should do one thing — what is it, in one sentence?"                  | Extracting a real sub-responsibility into a named, independently testable unit | Splitting branches into helpers with no real boundary, purely to lower the count       |
-| Too many parameters                             | "These parameters travel together — is there a missing object/abstraction?"        | Introducing the missing type and passing it instead of the loose bag           | Wrapping the same list in an untyped `{ ...everything }` bag that renames the coupling |
-| Deep nesting                                    | "What is the guard clause or early return that removes this level?"                | Inverting conditions / early-returning so the happy path is flat               | Wrapping the same nested logic in an extra function to hide it from the counter        |
-| Duplicated code                                 | "What is the one behavior these copies implement, and where should it live once?"   | Extracting a shared implementation both call sites use                        | Renaming variables/reformatting one copy so a text-diff tool no longer matches it      |
-| Swallowed / bare exception                      | "What should the caller learn when this fails, and what should happen next?"       | Naming the specific exception type and logging, re-raising, or handling it     | Narrowing the `except`/`catch` clause while still silently discarding the error        |
-| Unused variable / import / dead code            | "Does this code path still get exercised — by whom?"                                | Removing it, or wiring it in if it was meant to be used                       | Prefixing with `_`/adding a suppression comment purely to silence the tool             |
-| Oversized file / module                         | "What are the distinct responsibilities living in this file?"                      | Splitting along real seams (one responsibility per file)                       | Moving code to a second file with no coherent boundary just to shrink line counts      |
-
-This table is a starting point, not a substitute for judgment — a smell not listed still requires stating intent before fixing, per the rule above.
-
-**Cross-language note**: the intent cues and the genuine-fix test are language-agnostic. The same gamed patterns appear across ecosystems — an empty `catch (e) {}` / `catch {}` (JS/TS, C#, Java) or a `catch (Exception)` that swallows, and suppressions such as a `_`-prefixed name, `// eslint-disable-next-line`, `# type: ignore`, `#pragma warning disable`, or `[SuppressMessage]` added purely to silence the tool. Apply the same intent test regardless of language: would a reviewer say the behavior changed, or only the tool's verdict?
-
-### 9.2 Citing a Constitution Principle
-
-If the project constitution (`/.knowledge/governance/constitution.md`) declares a genuine-fix / intent-over-metrics principle, a gate command (`/devspark.critic`, `/devspark.analyze`, `/devspark.pr-review`, `/devspark.site-audit`) that flags a gamed fix SHOULD cite that principle ID in the finding, escalating it from process guidance to a constitution violation (which those gates already treat as their highest severity). If no such principle exists, §9 still stands on its own as a non-negotiable process rule — the citation is an escalation hook, not a precondition.
-
-## 10. Convergence Discipline (finding classification)
-
-Generating findings is easy; recognizing that work is finished is not. A command that treats every new observation as new work inside the active route creates a loop — verify, discover, implement, verify again — in which the specification silently expands and never converges.
-
-> **A spec is complete when its stated objective has been resolved and every remaining finding has been classified — not when every observation generated during the work has been eliminated.**
+> **Complexity is a cost that requires justification.** Completeness means completely satisfying today's justified needs, not anticipating every future need.
 >
-> **Verification may discover work, but discovery alone does not expand the current specification.**
+> **Correctness, security, safety, data integrity, and explicit contracts are not optional simplifications.**
 
-A finding creates mandatory work **inside the active route** only when it demonstrates one of five **expansion triggers**: failure of the stated objective, an unresolved requirement, a violated invariant, a correctness defect, or a regression caused by this change. Every other finding is classified — **Accepted Limitation**, **Deferred Work**, or **Learning / Changed Assumption** — and the route converges.
+Least-powerful-mechanism order (guidance, not an algorithm): existing behavior already satisfies it; clarify the requirement or documentation; remove unnecessary behavior; simplify the existing design; reuse an existing capability; deterministic validation or a test; operational procedure or human review; accept a bounded limitation; local code; new runtime machinery last.
 
-This binds every command that produces findings (`/devspark.analyze`, `/devspark.critic`, `/devspark.verify`, `/devspark.checklist`, `/devspark.explain`, `/devspark.site-audit`, `/devspark.pr-review`) and every command that consumes them (`/devspark.implement`, `/devspark.create-pr`). A finding command still reports everything it sees — reporting is not expansion. What it MUST NOT do is convert a non-triggering observation into required work on its own authority, or imply the route is unfinished because observations remain.
+This is a rule of reasoning for every command, not a gate: Specify captures the MVP boundary, Plan captures operating context and the expected mechanism shape, Critic proposes the least-complex mitigation first, and Judge asks what can be removed. Nothing here fails a plan on a count alone.
 
-**Timing matters.** Before implementation begins, a gate that reshapes the spec is *authoring*, not expansion — `/devspark.analyze` and `/devspark.critic` exist precisely to change the plan while changing it is still cheap, and a finding that tightens a requirement there is the system working. The expansion rule binds from the moment implementation starts: after that point, a non-triggering observation is classified and carried, not folded into the route.
+Minimum Sufficient Change applies to governance as well as implementation. When an authorized
+bounded correction crosses the original scope boundary, follow convergence §10: reconcile the
+existing feature records and perform only the applicable review and verification steps. Human
+authorization never waives a required gate or its actual result.
 
-The rule is symmetric, and the second half matters as much as the first: a finding that **does** hit an expansion trigger is a Blocking Defect and cannot be classified away. Classification is how a route converges honestly, not how a failed requirement is retired quietly.
+## 14. Reusing Already-Loaded Artifacts
 
-The four classifications, the acceptance-criterion kinds (`requirement` / `invariant` / `hypothesis` / `target`) that decide which findings can block, the experimental rule for a disproven hypothesis, the `gates/closeout.md` artifact, and the rule that scope expands only on explicit developer intent are defined in `/.devspark/templates/closeout-contract.md` (installed repos) or `templates/closeout-contract.md` (source repos).
+When the current context already holds the **full, unchanged** content of an artifact this command needs (the constitution, `spec.md`, `plan.md`, `tasks.md`, a contract), use it from context instead of loading it again.
 
-**Closeout is a phase, not a command.** `/devspark.verify` runs it automatically as its second half and emits the completion decision in the same invocation; `/devspark.closeout` is an advanced reassessment entry point, and no command may present it as a routine next step. See §11.
-
-If the project constitution declares a convergence principle, a gate command that flags an unclassified finding at completion, a laundered requirement, or an unjustified mid-route expansion SHOULD cite that principle ID, per the same escalation hook as §9.2.
-
-## 11. Orchestration Discipline (how many commands a developer must know)
-
-> **Minimize required developer orchestration. DevSpark may use rich internal lifecycle states and specialist capabilities, but the normal developer path exposes only meaningful human decision boundaries.**
->
-> **A new lifecycle responsibility does not automatically justify a new mandatory command.**
-
-Internal rigor is supposed to *reduce* a developer's cognitive load, not transfer it to them as orchestration ceremony. A framework that answers every new responsibility with a new required prompt eventually requires a workflow cheat sheet to complete ordinary work, and at that point it has traded adoption for tidiness.
-
-**The test for a new user-facing command.** Before adding one, answer: *does meaningful human judgment or authorization need to occur between these phases?* If yes, the boundary is real and deserves an entry point. If no, orchestrate it automatically inside the command that already owns the preceding phase.
-
-Worked examples: evidence → closeout is mechanical (automatic, inside `/devspark.verify`); closeout → PR is a real boundary (the developer inspects the decision before opening a PR); a proposal becoming authoritative Knowledge requires a human; pushing, tagging, or publishing requires human authorization.
-
-**The converse also binds — do not over-automate.** Simplification is not an excuse for an opaque command that silently specifies, plans, implements, accepts limitations, revises hypotheses, approves, and publishes. The target is: **automate mechanical transitions; expose consequential decisions.**
-
-**Capabilities and entry points are different things.** A new internal state does not need to surface as a command. Where an advanced or recovery entry point is genuinely useful, it is documented as optional and shares one implementation with its automatic caller — a simple default path plus explicit advanced commands, never two implementations of the same rules that can drift apart. The durable statement of this principle, with its command classification, lives in `.knowledge/governance/devspark-philosophy.md` and `.knowledge/governance/devspark-prompt-mapping.md`.
-
-## 12. Artifact Version Provenance
-
-> **Every DevSpark-generated lifecycle artifact records the DevSpark version that produced that artifact instance.**
-
-Without this, evaluating whether a framework change actually improved outcomes requires reconstructing framework versions from Git dates and upgrade commits — an inference that is both laborious and easy to get wrong.
-
-**Resolution.** Commands resolve the installed version through the shared helper (`Get-DevSparkVersion` / `get_devspark_version` in `common.ps1` / `common.sh`), which reads `.devspark/BSW.DevSpark.version`. No prompt or template invents its own version detection. When the version cannot be determined, write `unknown` — never guess, and never block on it.
-
-**Artifact-local, not centralized.** Each artifact describes its own producer. DevSpark does not maintain a lifecycle ledger, and a spec MUST NOT accumulate `planned_with:` / `analyzed_with:` / `verified_with:` fields — that would turn the spec into a mutable database of its own history.
-
-**Two meanings, one field name.**
-
-| Artifact | `devspark_version` means |
-|---|---|
-| `spec.md`, `plan.md`, `tasks.md` | the version under which the artifact was **authored** |
-| `gates/*.md`, PR-review records | the version that produced **this specific instance** |
-
-**Provenance stays truthful.** A command writes `devspark_version` only into artifacts it is legitimately creating or regenerating. Upgrading the framework does not rewrite existing artifacts, and running a later-phase command never restamps an earlier artifact. A route may therefore legitimately show `spec.md` at one version and `gates/verify.md` at a newer one — that is information, not inconsistency.
-
-**Optional revision.** When the installed version is a development build (a `-dev` suffix, or a source-dogfood stamp) and a commit is readily available, a command MAY additionally record `devspark_revision: <short-sha>`. Version is the field that matters; revision is never required.
-
-**Backward compatible.** The field is additive. Artifacts without it remain valid, every consumer tolerates its absence, and no historical artifact is migrated.
-
-**Why it is here.** Historical effectiveness analysis MUST use artifact-recorded versions when present and infer from repository history only as a fallback. This is observability for the methodology itself, not an analytics subsystem — no command collects, aggregates, or reports these values.
+- Reuse only full content that nothing has changed since it was read, in this same context. Never reuse a summary, an excerpt, or a copy from another session or a cache; reload when in doubt.
+- Reuse saves a read, not a responsibility. A command whose job is an independent check (constitution compliance, analysis, critique, verification) still evaluates the artifact itself and never adopts another command's conclusion about it.
+- A command that edits an artifact reloads it before relying on it again.

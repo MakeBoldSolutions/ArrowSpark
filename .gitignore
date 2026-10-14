@@ -35,3 +35,6 @@ web/node_modules/
 web/dist/
 web/.astro/
 web/public/game/
+
+# Per-developer DevSpark preferences (assistant name, shell, auto_push) - never commit
+/.devspark.work/devspark.user.json

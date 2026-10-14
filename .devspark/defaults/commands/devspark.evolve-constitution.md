@@ -3,10 +3,10 @@ source: "BSW.DevSpark — © 2026 Baylor Scott & White Health. Source: https://b
 description: Analyze PR review findings and codebase patterns to propose constitution amendments with change tracking
 handoffs:
   - label: Apply Amendment
-    agent: devspark.constitution
+    agent: devspark-constitution
     prompt: Apply the approved constitution amendment
   - label: Review PRs
-    agent: devspark.pr-review
+    agent: devspark-pr-review
     prompt: Review recent PRs to gather more data
 scripts:
   sh: .devspark/scripts/bash/evolution-context.sh $ARGUMENTS --json
@@ -23,11 +23,11 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Lifecycle Position
 
-Continuous-improvement step: `PR reviews + audits → evolve-constitution → CAP-YYYY-NNN.md (DRAFT) → approve/reject → /devspark.constitution applies APPROVED CAPs`. Runs *after* a constitution exists, *between* version bumps.
+Continuous-improvement step: `PR reviews + audits → evolve-constitution → CAP-YYYY-NNN.md (DRAFT) → approve/reject → /devspark-constitution applies APPROVED CAPs`. Runs *after* a constitution exists, *between* version bumps.
 
 - **Owns**: pattern analysis across PR reviews and audits, gap detection, and temporary Constitution Amendment Proposals (CAPs) under `.devspark.work/governance/` until resolution.
-- **Does NOT own**: editing `constitution.md` (only `/devspark.constitution` writes it — this command always emits a *proposal* file); bootstrapping (→ `/devspark.discover-constitution` brownfield, `/devspark.constitution` greenfield); performing the reviews themselves (→ `/devspark.pr-review`, `/devspark.site-audit`).
-- **Prerequisite**: if `/.knowledge/governance/constitution.md` does not exist, halt and route to `/devspark.discover-constitution` (brownfield) or `/devspark.constitution` (greenfield). Never propose against a non-existent constitution.
+- **Does NOT own**: editing `constitution.md` (only `/devspark-constitution` writes it — this command always emits a *proposal* file); bootstrapping (→ `/devspark-discover-constitution` brownfield, `/devspark-constitution` greenfield); performing the reviews themselves (→ `/devspark-pr-review`, `/devspark-site-audit`).
+- **Prerequisite**: if `/.knowledge/governance/constitution.md` does not exist, halt and route to `/devspark-discover-constitution` (brownfield) or `/devspark-constitution` (greenfield). Never propose against a non-existent constitution.
 
 ## Overview
 
@@ -38,7 +38,7 @@ This command facilitates constitution evolution by:
 3. Generating draft amendment proposals (CAP - Constitution Amendment Proposal)
 4. Managing the approval workflow; Git records proposal and constitution history
 
-**IMPORTANT**: This command generates PROPOSALS only. Amendments must be explicitly approved before being applied via `/devspark.constitution`.
+**IMPORTANT**: This command generates PROPOSALS only. Amendments must be explicitly approved before being applied via `/devspark-constitution`.
 
 ## Prerequisites
 
@@ -53,15 +53,15 @@ Parse `$ARGUMENTS` for action type:
 | Action    | Trigger                                                      | Description                                   |
 | --------- | ------------------------------------------------------------ | --------------------------------------------- |
 | `analyze` | Default                                                      | Analyze reviews/audits and propose amendments |
-| `suggest` | `/devspark.evolve-constitution suggest "..."`                | Create proposal from manual suggestion        |
-| `approve` | `/devspark.evolve-constitution approve CAP-YYYY-NNN`         | Approve a proposal                            |
-| `reject`  | `/devspark.evolve-constitution reject CAP-YYYY-NNN "reason"` | Reject a proposal                             |
+| `suggest` | `/devspark-evolve-constitution suggest "..."`                | Create proposal from manual suggestion        |
+| `approve` | `/devspark-evolve-constitution approve CAP-YYYY-NNN`         | Approve a proposal                            |
+| `reject`  | `/devspark-evolve-constitution reject CAP-YYYY-NNN "reason"` | Reject a proposal                             |
 
 ## Outline
 
 ### 1. Initialize Evolution Context
 
-Load and obey the shared preamble contract at `/.devspark/templates/command-preamble-contract.md` (installed repos) or `templates/command-preamble-contract.md` (source repos) before step 1 — it covers the 2-tier override check for scripts.
+Load and obey the shared preamble contract core at `/.devspark/templates/command-preamble-contract.md` (installed repos) or `templates/command-preamble-contract.md` (source repos) before step 1 — it covers the 2-tier override check for scripts.
 
 Run `{SCRIPT}` to gather context and parse JSON output for:
 
@@ -90,7 +90,7 @@ Run `{SCRIPT}` to gather context and parse JSON output for:
 If constitution doesn't exist:
 
 - **STOP** and inform user that constitution is required
-- Provide guidance: "Run `/devspark.constitution` to create project principles first"
+- Provide guidance: "Run `/devspark-constitution` to create project principles first"
 
 ### 2. Handle Action
 
@@ -101,7 +101,7 @@ If ACTION is "approve" and CAP_ID is provided:
 1. Read proposal from `PROPOSALS_DIR/CAP_ID.md`
 2. If file doesn't exist: ERROR "Proposal {CAP_ID} not found"
 3. Update proposal status to "APPROVED"
-4. Commit the approved status when an audit trail is required. `/devspark.constitution` applies the
+4. Commit the approved status when an audit trail is required. `/devspark-constitution` applies the
    change and then archives the proposal under `.archive/{YYYY-MM-DD}/governance/`; no separate
    history file or applied-proposal tree is created in `.devspark.work/`.
 5. Output:
@@ -112,7 +112,7 @@ Proposal Approved: {CAP_ID}
 The amendment has been approved but NOT YET APPLIED.
 
 To apply this amendment to the constitution:
-/devspark.constitution
+/devspark-constitution
 
 The constitution command will detect approved proposals and offer to apply them.
 ```
@@ -240,11 +240,11 @@ No constitution amendments recommended at this time.
 **Recommendations:**
 
 - Continue monitoring with regular PR reviews
-- Run `/devspark.site-audit` for comprehensive compliance check
+- Run `/devspark-site-audit` for comprehensive compliance check
 - Revisit evolution analysis after 10+ more PR reviews
 
 To force a proposal from manual observation:
-/devspark.evolve-constitution suggest "Your observed pattern or needed principle"
+/devspark-evolve-constitution suggest "Your observed pattern or needed principle"
 ```
 
 Stop execution if no proposals warranted.
@@ -263,7 +263,7 @@ Ensure directory exists: Create `/.devspark.work/governance/` if missing.
 - **Proposal ID**: {NEXT_CAP_ID}
 - **Created**: {TIMESTAMP}
 - **Status**: DRAFT
-- **Proposer**: /devspark.evolve-constitution
+- **Proposer**: /devspark-evolve-constitution
 - **Source**: {analyze | suggest | from-pr | from-audit}
 
 ## Amendment Type
@@ -362,7 +362,7 @@ Select one:
 - [ ] Check `.knowledge/governance/decisions/*.md` for a decision that contradicts this amendment
       (a rationale, rejected alternative, or `constrains` entry that no longer holds). If found, that
       decision must be corrected **in place** as part of applying this amendment (via
-      `/devspark.constitution`) — never left as a second, now-contradicting governance document, and
+      `/devspark-constitution`) — never left as a second, now-contradicting governance document, and
       never superseded by a new decision file for the same topic.
 
 ## Voting Record
@@ -379,7 +379,7 @@ Select one:
 
 ---
 
-_Generated by /devspark.evolve-constitution v1.0_
+_Generated by /devspark-evolve-constitution v1.0_
 _Review period: 14 days from creation_
 ```
 
@@ -387,7 +387,7 @@ _Review period: 14 days from creation_
 
 Do not create a constitution-history file or a proposal tree under `.devspark.work/`. Pending
 proposals remain under `.devspark.work/governance/` only while unresolved. Commit a resolution when
-an audit trail is required, apply approved changes through `/devspark.constitution`, then archive
+an audit trail is required, apply approved changes through `/devspark-constitution`, then archive
 the proposal under `.archive/{YYYY-MM-DD}/governance/`. Use Git history for prior versions and
 decisions; use the archived file for the proposal's own content.
 
@@ -434,17 +434,17 @@ decisions; use the archived file for the proposal's own content.
    Share proposals with team for discussion
 
 3. **Approve or Reject**:
-   - Approve: `/devspark.evolve-constitution approve {NEXT_CAP_ID}`
-   - Reject: `/devspark.evolve-constitution reject {NEXT_CAP_ID} "reason"`
+   - Approve: `/devspark-evolve-constitution approve {NEXT_CAP_ID}`
+   - Reject: `/devspark-evolve-constitution reject {NEXT_CAP_ID} "reason"`
 
 4. **Apply Approved Amendments**:
-   `/devspark.constitution`
+   `/devspark-constitution`
 
 ### Additional Analysis Options
 
-- From specific PR: `/devspark.evolve-constitution --from-pr #123`
-- From specific audit: `/devspark.evolve-constitution --from-audit 2026-01-15`
-- Manual suggestion: `/devspark.evolve-constitution suggest "description"`
+- From specific PR: `/devspark-evolve-constitution --from-pr #123`
+- From specific audit: `/devspark-evolve-constitution --from-audit 2026-01-15`
+- Manual suggestion: `/devspark-evolve-constitution suggest "description"`
 ```
 
 ## Guidelines
@@ -484,7 +484,7 @@ When PR review finds uncategorized issues:
 
 ```markdown
 **Note**: This issue doesn't map to current constitution principles.
-Consider running `/devspark.evolve-constitution` to propose amendments.
+Consider running `/devspark-evolve-constitution` to propose amendments.
 ```
 
 **Site Audit Integration:**
@@ -493,7 +493,7 @@ When audit finds patterns without principles:
 
 ```markdown
 **Gap Detected**: {N} issues found without constitutional coverage.
-Recommendation: Run `/devspark.evolve-constitution --scope=audit`
+Recommendation: Run `/devspark-evolve-constitution --scope=audit`
 ```
 
 ### Error Handling
@@ -507,12 +507,12 @@ No PR reviews found in /.devspark.work/pr-review/
 
 To build analysis data:
 
-1. Run `/devspark.pr-review` on recent PRs
+1. Run `/devspark-pr-review` on recent PRs
 2. Accumulate 5+ reviews for meaningful patterns
-3. Retry `/devspark.evolve-constitution`
+3. Retry `/devspark-evolve-constitution`
 
 Or create manual proposal:
-/devspark.evolve-constitution suggest "Your observed pattern"
+/devspark-evolve-constitution suggest "Your observed pattern"
 ```
 
 **No Constitution:**
@@ -522,10 +522,10 @@ Cannot perform evolution analysis - Constitution required
 
 Create a constitution first:
 
-1. Run: /devspark.constitution
+1. Run: /devspark-constitution
 2. Define your project's core principles
 3. Run PR reviews to build compliance data
-4. Then retry: /devspark.evolve-constitution
+4. Then retry: /devspark-evolve-constitution
 ```
 
 ## Context

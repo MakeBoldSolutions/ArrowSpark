@@ -39,7 +39,7 @@ $scriptStart = Get-Date
 . "$PSScriptRoot/common.ps1"
 
 # Delegate to the single branch-creation choke point. Branch Safety is confirmed
-# by the caller (for example, /devspark.specify) before this script runs, so -Yes avoids a double-prompt
+# by the caller (for example, /devspark-specify) before this script runs, so -Yes avoids a double-prompt
 # for a decision the developer already made.
 # Splat a hashtable, not an array: array splatting binds positionally, and
 # new-branch.ps1 sets PositionalBinding=$false, so every token would be

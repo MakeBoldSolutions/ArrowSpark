@@ -3,10 +3,10 @@ source: "BSW.DevSpark — © 2026 Baylor Scott & White Health. Source: https://b
 description: Analyze git commit history patterns for contributor velocity, commit hygiene, DORA metrics, AI adoption level, and architecture maturity
 handoffs:
   - label: Run Site Audit
-    agent: devspark.site-audit
+    agent: devspark-site-audit
     prompt: Run a full codebase audit to complement commit history insights
   - label: Run Current-State Cleanup
-    agent: devspark.release
+    agent: devspark-release
     prompt: Review retained work products and current knowledge for cleanup
 scripts:
   sh: .devspark/scripts/bash/commit-audit.sh $ARGUMENTS --json
@@ -52,7 +52,7 @@ Multiple scope flags may be combined: `--scope=velocity,hygiene`
 
 ### 1. Initialize Audit Context
 
-Load and obey the shared preamble contract at `/.devspark/templates/command-preamble-contract.md` (installed repos) or `templates/command-preamble-contract.md` (source repos) before step 1 — it covers the 2-tier override check for scripts.
+Load and obey the shared preamble contract core at `/.devspark/templates/command-preamble-contract.md` (installed repos) or `templates/command-preamble-contract.md` (source repos) before step 1 — it covers the 2-tier override check for scripts.
 
 Run `{SCRIPT}` and parse its JSON output.
 
@@ -204,7 +204,7 @@ Write a report to the script-provided `report_path` (or `/.devspark.work/audit/c
 - **Branch**: [BRANCH_NAME]
 - **Date Range**: [FIRST_COMMIT_DATE] to [LAST_COMMIT_DATE]
 - **Total Commits Analyzed**: [N]
-- **Auditor**: devspark.commit-audit
+- **Auditor**: devspark-commit-audit
 
 ## Executive Summary
 

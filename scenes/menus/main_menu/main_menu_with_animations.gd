@@ -68,12 +68,12 @@ func _on_continue_game_button_pressed():
 func _on_level_select_button_pressed():
 	_open_sub_menu(level_select_scene)
 
-## New Game (Play) always starts the Reference Knot, regardless of any prior
-## Level Select choice earlier in the same session. The base implementation's
+## New Game (Play) always starts the first ArrowSpark level, regardless of any
+## prior Level Select choice earlier in the same session. The base implementation's
 ## existing no-GlobalState.reset()/no-GameState.start_game() guarantee is
 ## otherwise untouched — this only sets which puzzle load_game_scene() opens.
 func new_game():
-	PuzzleSession.set_current_id("reference_knot")
+	PuzzleSession.set_current_id("first_knot")
 	super.new_game()
 
 func _on_puzzle_selected(id: String):

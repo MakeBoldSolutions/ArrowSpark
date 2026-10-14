@@ -3,10 +3,10 @@ source: "BSW.DevSpark — © 2026 Baylor Scott & White Health. Source: https://b
 description: Rapid lightweight fix workflow that bypasses full spec creation while maintaining constitution compliance validation
 handoffs:
   - label: View Quickfix History
-    agent: devspark.quickfix
-    prompt: Show me previous quickfixes with /devspark.quickfix list
+    agent: devspark-quickfix
+    prompt: Show me previous quickfixes with /devspark-quickfix list
   - label: Upgrade to Full Spec
-    agent: devspark.specify
+    agent: devspark-specify
     prompt: Create a full specification for this change
 scripts:
   sh: .devspark/scripts/bash/quickfix-context.sh $ARGUMENTS --json
@@ -23,25 +23,25 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Workflow Position
 
-Alternative entry point to authoring: `[user request] → route decision → { specify → clarify → plan → tasks | quickfix } → implement`. Use **instead of** `/devspark.specify` for bug fixes, config tweaks, docs updates, hotfixes, or minor features under ~4 hours. `/devspark.specify` recommends this command automatically for `one-off-fix` classification.
+Alternative entry point to authoring: `[user request] → route decision → { specify → clarify → plan → tasks | quickfix } → implement`. Use **instead of** `/devspark-specify` for bug fixes, config tweaks, docs updates, hotfixes, or minor features under ~4 hours. `/devspark-specify` recommends this command automatically for `one-off-fix` classification.
 
 - **Owns**: classification, targeted constitution check, a dedicated quickfix branch (`NNN-fix-<slug>`), a temporary product-owner change record (`NNN-fix-<slug>` with WHAT/WHY/HOW), a minimal `## Context Resolution` (whatever `.knowledge/` content the fix touches — flat documents, entities, entity layers, or decisions — if any), and complete `code_ref`/`knowledge_ref` linkage on the Validation Checklist. Before checking an item complete, record every affected production-code, test, and current `.knowledge/` path there; never reference the temporary quickfix record from a durable file.
-- **Does NOT own**: multi-file architectural changes, new user-facing features, or API/schema changes (→ `/devspark.specify`); interactive ambiguity resolution (→ `/devspark.clarify`); design artifacts (→ `/devspark.plan`); story-organized task lists (→ `/devspark.tasks`); adversarial risk review (→ `/devspark.critic`, `/devspark.analyze`) — quickfix's lightweight contract deliberately skips both gates entirely rather than running a lighter version of either; escalate to `/devspark.specify` if the change turns out to need them.
-- **If scope expands during implementation**: halt and recommend `/devspark.specify {original problem}` rather than stretching the quickfix.
+- **Does NOT own**: multi-file architectural changes, new user-facing features, or API/schema changes (→ `/devspark-specify`); interactive ambiguity resolution (→ `/devspark-clarify`); design artifacts (→ `/devspark-plan`); story-organized task lists (→ `/devspark-tasks`); adversarial risk review (→ `/devspark-critic`, `/devspark-analyze`) — quickfix's lightweight contract deliberately skips both gates entirely rather than running a lighter version of either; escalate to `/devspark-specify` if the change turns out to need them.
+- **If scope expands during implementation**: halt and recommend `/devspark-specify {original problem}` rather than stretching the quickfix.
 
 ## Constitution Authority
 
-`/.knowledge/governance/constitution.md` is **required** — if missing, halt and direct the user to `/devspark.constitution`. The targeted constitution check (§5) loads only principles relevant to the detected classification, but they remain non-negotiable: a FAIL must be surfaced and acknowledged in writing, never silently ignored.
+`/.knowledge/governance/constitution.md` is **required** — if missing, halt and direct the user to `/devspark-constitution`. The targeted constitution check (§5) loads only principles relevant to the detected classification, but they remain non-negotiable: a FAIL must be surfaced and acknowledged in writing, never silently ignored.
 
-Load and obey the shared preamble contract at `/.devspark/templates/command-preamble-contract.md` (installed repos) or `templates/command-preamble-contract.md` (source repos) before step 1 — in particular §9 (Genuine Fix Discipline) when the quickfix originates from a linter/test/code-smell finding.
+Load and obey the shared preamble contract core at `/.devspark/templates/command-preamble-contract.md` (installed repos) or `templates/command-preamble-contract.md` (source repos) before step 1 — in particular §9 (Genuine Fix Discipline) when the quickfix originates from a linter/test/code-smell finding. Preamble modules: `finding-fix`, `provenance`, `configuration`.
 
 ## Overview
 
 This command enables rapid fixes without full-spec overhead. Its record lives under
-`.devspark.work/quickfixes/` for as long as it takes to reach `/devspark.implement`, which updates
+`.devspark.work/quickfixes/` for as long as it takes to reach `/devspark-implement`, which updates
 code, affected tests, and current knowledge, passes required verification, and populates the
 record's `code_ref`/`knowledge_ref` linkage. The record then stays live in `.devspark.work/quickfixes/`
-— `/devspark.release` is the only command that later archives it to `.archive/{YYYY-MM-DD}/quickfixes/`
+— `/devspark-release` is the only command that later archives it to `.archive/{YYYY-MM-DD}/quickfixes/`
 once it's Complete and linkage-verified.
 
 **Use Cases:**
@@ -68,14 +68,14 @@ Parse `$ARGUMENTS` for action type:
 | Action     | Trigger                                   | Description                |
 | ---------- | ----------------------------------------- | -------------------------- |
 | `create`   | Default (description provided)            | Create new quickfix record |
-| `complete` | Legacy compatibility only | Route unfinished records through `/devspark.implement` |
-| `list`     | `/devspark.quickfix list`                 | Show recent quickfixes     |
+| `complete` | Legacy compatibility only | Route unfinished records through `/devspark-implement` |
+| `list`     | `/devspark-quickfix list`                 | Show recent quickfixes     |
 
 ## Definition of Done
 
 Done when (for `create`): the quickfix branch `BRANCH_NAME` is checked out when approved, the
 temporary record exists at `QUICKFIX_DIR/NEXT_ID.md` with WHAT/WHY/HOW and constitution compliance,
-and the final summary routes to `/devspark.implement`. `list` is read-only. `complete` must not retain
+and the final summary routes to `/devspark-implement`. `list` is read-only. `complete` must not retain
 a completed record; route to implementation finalization and deletion.
 
 ## Outline
@@ -108,7 +108,7 @@ Run `{SCRIPT}` to gather context and parse JSON output for:
 If constitution doesn't exist:
 
 - **STOP** and inform user that constitution is required
-- Provide guidance: "Run `/devspark.constitution` to create project principles first"
+- Provide guidance: "Run `/devspark-constitution` to create project principles first"
 - Do not proceed with quickfix creation
 
 ### 2. Handle Action
@@ -139,8 +139,8 @@ If ACTION is "complete" and QUICKFIX_ID is provided:
 
 1. Read the quickfix record from `QUICKFIX_DIR/QUICKFIX_ID.md`.
 2. If it does not exist, report that it was already finalized or never existed.
-3. If it exists, do not mark it as completed here. Route to `/devspark.implement`, which owns
-  verification and current-knowledge consistency; `/devspark.release` owns archiving the record
+3. If it exists, do not mark it as completed here. Route to `/devspark-implement`, which owns
+  verification and current-knowledge consistency; `/devspark-release` owns archiving the record
   under `.archive/` once it's Complete and linkage-verified.
 4. Stop execution.
 
@@ -169,7 +169,7 @@ Scope Warning: This appears to be a larger change than a typical {CLASSIFICATION
 
 Consider upgrading to a full specification:
 
-- Run `/devspark.specify {description}` for proper planning
+- Run `/devspark-specify {description}` for proper planning
 - Or continue with quickfix if you're confident it's small
 ```
 
@@ -197,7 +197,7 @@ For each relevant principle:
 
 **Compliance Decision:**
 
-- If any FAIL: Surface the blocking concern, explain why it matters, recommend `/devspark.specify` or escalation, and ask whether to continue anyway, switch workflows, or stop. **Never auto-bypassed** — a FAIL here is a constitution violation by definition, so this always waits for a human regardless of `--auto`.
+- If any FAIL: Surface the blocking concern, explain why it matters, recommend `/devspark-specify` or escalation, and ask whether to continue anyway, switch workflows, or stop. **Never auto-bypassed** — a FAIL here is a constitution violation by definition, so this always waits for a human regardless of `--auto`.
 - If CONDITIONAL: Document required actions in the quickfix record. Under `--auto` (or a standing autonomy instruction), this is auto-documented and the run proceeds without asking — CONDITIONAL is not a blocker, it's a recorded follow-up.
 - If all PASS: Proceed with quickfix creation.
 
@@ -304,7 +304,7 @@ required_gates: { Leave blank for low risk; otherwise checklist }
 
 ---
 
-Generated by /devspark.quickfix v1.0.
+Generated by /devspark-quickfix v1.0.
 ```
 
 ### 9. Commit Quickfix Record
@@ -363,13 +363,13 @@ summary: "Targeted constitution check complete"
 1. Iterate on the fix on branch `{BRANCH_NAME}` — apply the change described in HOW, then commit as you go
 2. Run tests to verify the fix
 3. Update the record's Implementation Notes as the fix evolves; if WHAT/WHY/HOW change, keep the TLDR accurate
-4. Mark record complete: `/devspark.quickfix complete {NEXT_ID}`
-5. Create PR — prefer `/devspark.create-pr` so the PR reflects quickfix context and any recorded gate acknowledgements
+4. Mark record complete: `/devspark-quickfix complete {NEXT_ID}`
+5. Create PR — prefer `/devspark-create-pr` so the PR reflects quickfix context and any recorded gate acknowledgements
 6. If creating manually, verify `{BRANCH_NAME}` is in sync with the target branch (usually `main`) before opening the PR
 
 If scope expands beyond {MAX_EFFORT}:
 
-- Upgrade to full spec: `/devspark.specify {problem statement}`
+- Upgrade to full spec: `/devspark-specify {problem statement}`
 ````
 
 ## Guidelines
@@ -391,7 +391,7 @@ Scope Expansion Detected
 Your quickfix may be growing beyond the {CLASSIFICATION} classification.
 Consider upgrading to a full specification for better tracking:
 
-/devspark.specify {original problem statement}
+/devspark-specify {original problem statement}
 
 This ensures proper planning and documentation for larger changes.
 ```
@@ -421,8 +421,8 @@ This change has outgrown the assumptions of the quickfix route.
 Signal: {which signal, and the specific evidence for it}
 
 Continue as quickfix, or promote to a full spec?
-  - Continue: /devspark.quickfix complete {ID} when done
-  - Promote:  /devspark.specify {original problem statement}
+  - Continue: /devspark-quickfix complete {ID} when done
+  - Promote:  /devspark-specify {original problem statement}
 ```
 
 The developer owns that decision. Record the outcome in the record's Implementation Notes so a later reader can see the route was examined and chosen, not merely inherited.
@@ -448,9 +448,9 @@ Cannot perform quickfix - Constitution required
 
 The project constitution defines validation criteria. Create one first:
 
-1. Run: /devspark.constitution
+1. Run: /devspark-constitution
 2. Define your project's core principles
-3. Then retry: /devspark.quickfix {description}
+3. Then retry: /devspark-quickfix {description}
 
 Learn more: https://dev.azure.com/bswdev/HealthSource/_git/bsw.devspark
 ```

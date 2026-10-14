@@ -1,7 +1,7 @@
 {
   "generated": {
     "by": "build-knowledge-index",
-    "at": "2026-10-11T16:49:19Z"
+    "at": "2026-10-14T12:38:11Z"
   },
   "roots": [
     {
@@ -81,6 +81,7 @@
         "Rule Layer (Core Boundary)",
         "Solvability Analysis",
         "Puzzle Catalog and Session-Scoped Selection",
+        "Progression levels",
         "Level groups",
         "Puzzle content version",
         "Attempt timing and the Web completion hand-off",
@@ -328,6 +329,28 @@
         "Contradictions and limits",
         "Transition",
         "Catalog placement"
+      ]
+    },
+    {
+      "id": "progression-design-learning",
+      "type": "authoritative-reference",
+      "form": "flat-document",
+      "role": "authoritative-reference",
+      "path": ".knowledge/reference/progression-design-learning.md",
+      "title": "Progression Levels Design Learning",
+      "appliesTo": [
+        "scripts/puzzle/puzzle_catalog.gd",
+        "tests/puzzle_catalog_check.gd",
+        "tests/puzzle_analyzer_check.gd",
+        "tests/puzzle_structural_report.gd"
+      ],
+      "headings": [
+        "Progression Levels Design Learning",
+        "Observed facts: what each level measures",
+        "Observed facts: how the levels were found",
+        "Designer judgments",
+        "Open questions",
+        "Playtest notes"
       ]
     },
     {

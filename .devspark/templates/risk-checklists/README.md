@@ -2,7 +2,7 @@
 
 <!-- BSW.DevSpark — © 2026 Baylor Scott & White Health. Source: https://bsw-devspark.bswhive.com -->
 
-Loaded by `/devspark.critic` (see [`templates/commands/critic.md`](../commands/critic.md) §7) to apply stack- and archetype-specific failure-mode lenses on top of the universal Risk Category Registry.
+Loaded by `/devspark-critic` (see [`templates/commands/critic.md`](../commands/critic.md) §7) to apply stack- and archetype-specific failure-mode lenses on top of the universal Risk Category Registry.
 
 ## File naming
 

@@ -32,6 +32,9 @@ cd "$REPO_ROOT"
 if [[ -z "$BRANCH" ]]; then
     BRANCH="$(git branch --show-current 2>/dev/null || true)"
 fi
+if [[ "$BRANCH" =~ ^(main|master|trunk|develop|HEAD)$ ]]; then
+    BRANCH=""
+fi
 
 # Roots this rule never applies to: the ephemeral planning roots themselves, the installed
 # framework payload, vendor/build output, and two meta-documents whose entire purpose is to
@@ -40,7 +43,7 @@ fi
 ALWAYS_EXCLUDED=(".devspark.work/" ".archive/" ".devspark/" ".git/" ".venv/" "node_modules/" "site/_site/" ".pytest_cache/")
 ALWAYS_EXCLUDED_FILES=("AGENTS.md" "CHANGELOG.md")
 # templates/, .github/ (shims generated from templates/), and tests/ legitimately document or
-# exercise the ID conventions themselves (e.g. tasks-template.md's illustrative "T012 ... FR-001",
+# exercise the ID conventions themselves (e.g. tasks-template.md's illustrative task/requirement IDs,
 # a generated shim's example command invocation, or this repo's own tests asserting spec/task/
 # quickfix numbering and parsing behavior) -- excluded only from the generic-ID-pattern tier
 # below, never from the exact-branch-name tier, since a real feature's own branch name should
@@ -54,7 +57,7 @@ ID_PATTERN='\bFR-[0-9]{3}\b|\bT[0-9]{3}\b|\bQF-[0-9]{4}-[0-9]{3}\b'
 # every completed item's code/knowledge, or the traceability this contract exists for is
 # one-sided. Only tasks.md and quickfix records use this exact marker (quick-spec's Action Plan
 # does not), so this pass targets those two file shapes specifically rather than every tracked file.
-LINKAGE_PATTERN='^- \[[Xx]\].*\(code_ref:[[:space:]]*([^|]+[^| ])[[:space:]]*\|[[:space:]]*knowledge_ref:[[:space:]]*([^)]+[^) ])\)[[:space:]]*$'
+LINKAGE_PATTERN='^- \[[Xx]\].*\(code_ref:[[:space:]]*([^|]+[^| ])[[:space:]]*\|[[:space:]]*knowledge_ref:[[:space:]]*([^)]+[^) ])[[:space:]]*\)[[:space:]]*$'
 
 is_excluded() {
     local path="$1"; shift
@@ -70,6 +73,13 @@ is_excluded_file() {
         [[ "$path" == "$name" ]] && return 0
     done
     return 1
+}
+
+trim() {
+    local value="$1"
+    value="${value#"${value%%[![:space:]]*}"}"
+    value="${value%"${value##*[![:space:]]}"}"
+    printf '%s' "$value"
 }
 
 BRANCH_FINDINGS=()
@@ -105,8 +115,8 @@ while IFS= read -r file; do
     while IFS= read -r line; do
         line_number=$((line_number + 1))
         if [[ "$line" =~ $LINKAGE_PATTERN ]]; then
-            coderef="$(echo "${BASH_REMATCH[1]}" | xargs)"
-            kref="$(echo "${BASH_REMATCH[2]}" | xargs)"
+            coderef="$(trim "${BASH_REMATCH[1]}")"
+            kref="$(trim "${BASH_REMATCH[2]}")"
             [[ "${coderef,,}" == "pending" ]] && LINKAGE_FINDINGS+=("$file:$line_number:code_ref")
             [[ "${kref,,}" == "pending" ]] && LINKAGE_FINDINGS+=("$file:$line_number:knowledge_ref")
         fi

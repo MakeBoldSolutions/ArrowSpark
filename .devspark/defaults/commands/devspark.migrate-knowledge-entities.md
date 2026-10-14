@@ -16,7 +16,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 `.knowledge/` supports two coexisting content models: flat type-folder docs (`architecture/`,
 `patterns/`, `operations/`, classified by `type:` frontmatter — the default, no setup required) and
 the entity-ontology layout (`entities/<id>/_entity.yaml` plus per-layer docs such as
-`architecture.md`, `business.md`, `operations.md`). `/devspark.migrate-knowledge-entities` moves
+`architecture.md`, `business.md`, `operations.md`). `/devspark-migrate-knowledge-entities` moves
 existing flat docs into entity folders and regenerates the knowledge index.
 
 **This is entirely optional.** Flat type-folder docs keep working forever — nothing requires

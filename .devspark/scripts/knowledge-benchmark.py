@@ -2,7 +2,7 @@
 # BSW.DevSpark - (c) 2026 Baylor Scott & White Health. Source: https://bsw-devspark.bswhive.com
 """Canonical `.knowledge` retrieval evaluation harness (DevSpark 7.6.1).
 
-Reuses `/devspark.explain`'s own retrieval engine (`scripts/explain-context.py`) unmodified --
+Reuses `/devspark-explain`'s own retrieval engine (`scripts/explain-context.py`) unmodified --
 this harness never widens the candidate limit, removes governance/ADR nodes, or special-cases
 entity collapsing without saying so. It exists so a retrieval regression fixture measured today
 means the same thing when re-measured after a future release, instead of depending on disposable,
@@ -15,7 +15,7 @@ Canonical definitions (7.6.1 -- see also `.knowledge/governance/devspark-philoso
     `conversations`). An `expected` identity in a fixture matches a raw node either by exact raw
     `id` or by exact `entity` match -- both are recorded as `matched_as` in results.
   - consumer candidate: one of the first `limit` raw nodes, in ranked order. This is EXACTLY what
-    a real `/devspark.explain` consumer receives -- no entity collapsing ever adds a candidate
+    a real `/devspark-explain` consumer receives -- no entity collapsing ever adds a candidate
     beyond this boundary.
   - collapsed consumer view: the consumer candidates, deduplicated to one entry per entity. It can
     only ever *reduce* the visible set (fewer, deduplicated entries) -- it never promotes a
@@ -40,7 +40,7 @@ from typing import Any
 
 import yaml
 
-DEFAULT_LIMIT = 8  # matches /devspark.explain's own --match-limit default
+DEFAULT_LIMIT = 8  # matches /devspark-explain's own --match-limit default
 FULL_RANKING_PREVIEW_CAP = 50  # diagnostics only; bounds output size on large corpora
 
 

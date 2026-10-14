@@ -75,9 +75,29 @@ if ($hasGit) {
     }
 }
 
-# Spec / quickfix detection for the current branch
+# Spec / quickfix detection for the current branch. The branch name may differ from the spec
+# directory, so resolve by numeric prefix: an exact spec directory wins, a quickfix record for the
+# branch means a quickfix (not a spec), otherwise exactly one spec directory with that prefix is the
+# active spec. DEVSPARK_FEATURE overrides the branch. More than one match is reported, never guessed.
 $specDir = Join-Path $repoRoot (".devspark.work/specs/" + $currentBranch)
-$specExists = Test-Path (Join-Path $specDir "spec.md")
+$specAmbiguous = $false
+$specAmbiguousMatches = ''
+if (-not (Test-Path (Join-Path $specDir 'spec.md')) -and $currentBranch -match '^(\d{3})-' -and -not (Test-Path (Join-Path $repoRoot ".devspark.work/quickfixes/$currentBranch.md"))) {
+    $specPrefix = $matches[1]
+    $specsRoot = Join-Path $repoRoot '.devspark.work/specs'
+    $prefixDirs = @()
+    if (Test-Path $specsRoot) {
+        $prefixDirs = @(Get-ChildItem -Path $specsRoot -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -like "$specPrefix-*" -and (Test-Path (Join-Path $_.FullName 'spec.md')) })
+    }
+    if ($prefixDirs.Count -eq 1) {
+        $specDir = $prefixDirs[0].FullName
+    } elseif ($prefixDirs.Count -gt 1) {
+        $specAmbiguous = $true
+        $specAmbiguousMatches = (($prefixDirs | Select-Object -ExpandProperty Name) -join ', ')
+    }
+}
+$specExists = (-not $specAmbiguous) -and (Test-Path (Join-Path $specDir "spec.md"))
+$specFeature = if ($specExists) { Split-Path $specDir -Leaf } else { '' }
 
 # Spec authoring sub-state (plan -> tasks -> analyze -> critic -> implement -> verify)
 $planExists = $false
@@ -93,6 +113,18 @@ $requireCritic = $false
 $requireChecklist = $false
 $analyzeGate = $false
 $criticGate = $false
+$judgeGate = $false
+$judgeVerdict = ""
+$judgeNeedsRecheck = $false
+$judgePendingDecisions = 0
+$planRevisionCount = 0
+$planChanged = $null
+$tasksChanged = $false
+$tasksStale = $true
+$planSpecState = "unknown"
+$tasksPlanState = "unknown"
+$judgeInvalidated = $false
+$remediationAppended = $false
 $checklistGate = $false
 $verifyRequired = $false
 $verifyPassed = $false
@@ -107,6 +139,7 @@ if ($specExists) {
             $tasksTotal = ([regex]::Matches($tasksText, '(?m)^\s*[-*]\s*\[[ xX]\]')).Count
             $tasksDone = ([regex]::Matches($tasksText, '(?m)^\s*[-*]\s*\[[xX]\]')).Count
             $tasksComplete = ($tasksTotal -gt 0 -and $tasksDone -ge $tasksTotal)
+            $remediationAppended = [bool]([regex]::IsMatch($tasksText, '(?mi)^## Gate Remediation'))
         } catch { $tasksComplete = $false }
     }
     try {
@@ -123,6 +156,14 @@ if ($specExists) {
     $isFullSpec = ($classification -match 'full-spec') -or ($classification -eq '' -and ($planExists -or $tasksExists))
     $analyzeGate = Test-Path (Join-Path $specDir "gates/analyze.md")
     $criticGate = Test-Path (Join-Path $specDir "gates/critic.md")
+    $judgeFile = Join-Path $specDir "gates/judge.md"
+    if (Test-Path $judgeFile) {
+        $judgeGate = $true
+        try {
+            $jt = Get-Content $judgeFile -Raw -ErrorAction SilentlyContinue
+            if ($jt -match '(?m)^verdict:\s*(\S+)') { $judgeVerdict = $matches[1].Trim() }
+        } catch { $judgeVerdict = "" }
+    }
     $checklistGate = Test-Path (Join-Path $specDir "gates/checklist.md")
     $verifyGate = Join-Path $specDir "gates/verify.md"
     if (Test-Path $verifyGate) {
@@ -138,14 +179,46 @@ if ($specExists) {
             if ($ct -match '(?m)^decision:\s*(\S+)') { $closeoutDecision = $matches[1].Trim() }
         } catch { $closeoutDecision = "" }
     }
+    if ($verifyRequired) { $verifyPassed = $false }
+    $judgePy = Join-Path $PSScriptRoot '../judge.py'
+    if (Test-Path $judgePy) {
+        foreach ($py in @('python3', 'python')) {
+            if (-not (Get-Command $py -ErrorAction SilentlyContinue)) { continue }
+            try {
+                $reviewState = (& $py $judgePy review-state --feature-dir $specDir 2>$null) -join "`n"
+                if ($LASTEXITCODE -eq 0 -and $reviewState) {
+                    $reviewData = $reviewState | ConvertFrom-Json
+                    $judgeNeedsRecheck = [bool]$reviewData.needs_recheck
+                    $judgePendingDecisions = [int]$reviewData.pending_decisions
+                    $planRevisionCount = [int]$reviewData.plan_revision_count
+                    $planChanged = $reviewData.plan_changed
+                    $tasksChanged = [bool]$reviewData.tasks_changed
+                    $tasksStale = [bool]$reviewData.tasks_stale
+                    if ($reviewData.plan_spec_state) { $planSpecState = [string]$reviewData.plan_spec_state }
+                    if ($reviewData.tasks_plan_state) { $tasksPlanState = [string]$reviewData.tasks_plan_state }
+                    $judgeInvalidated = [bool]$reviewData.judge_stale -or $reviewData.spec_changed -eq $true
+                    $verifyRequired = [bool]$reviewData.verify_required
+                    $verifyPassed = [bool]$reviewData.verify_passed
+                    $closeoutDecision = [string]$reviewData.closeout_decision
+                    break
+                }
+            } catch { }
+        }
+    }
 }
+
+# Edge routes yield to pending decisions, spec/Judge invalidation and STOP remediation.
+$planningEdgesRoutable = (-not $judgeGate) -or (-not $judgeInvalidated -and $judgeVerdict -ne "STOP")
 
 # Advisory gates that are required but whose artifact is missing/unmet (never block progress)
 $pendingGates = @()
 if ($specExists) {
     if ($requireChecklist -and -not $checklistGate) { $pendingGates += "checklist" }
-    if ($requireAnalyze -and -not $analyzeGate) { $pendingGates += "analyze" }
-    if ($requireCritic -and -not $criticGate) { $pendingGates += "critic" }
+    # Planning Review (judge.md) supersedes the separate analyze/critic artifacts: Critic may be not applicable.
+    if (-not $judgeGate) {
+        if ($requireAnalyze -and -not $analyzeGate) { $pendingGates += "analyze" }
+        if ($requireCritic -and -not $criticGate) { $pendingGates += "critic" }
+    }
     if ($verifyRequired -and -not $verifyPassed) { $pendingGates += "verify" }
     if ($closeoutDecision -eq "not-complete") { $pendingGates += "closeout (blocking defects open)" }
 }
@@ -217,80 +290,136 @@ if (Test-Path $reviewDir) {
 }
 
 # ---- Recommendation ladder ----
-$recommended = "/devspark.specify"
+$recommended = "/devspark-specify"
 $state = "unknown"
-$reason = "Describe the work to /devspark.specify and it will route you."
+$reason = "Describe the work to /devspark-specify and it will route you."
 
 if (-not $constitutionExists) {
-    $recommended = "/devspark.constitution"
+    $recommended = "/devspark-constitution"
     $state = "no-constitution"
     $reason = "No project constitution found. Create your principles first so every command has a validation baseline."
 }
+elseif ($specAmbiguous) {
+    $recommended = "resolve"
+    $state = "ambiguous-spec"
+    $reason = "Branch '$currentBranch' matches more than one spec directory ($specAmbiguousMatches). Set DEVSPARK_FEATURE to the intended directory name, or remove the duplicate, then re-run /devspark.next."
+}
+elseif ($specExists -and ($judgeVerdict -eq "CONDITIONAL" -or $judgePendingDecisions -gt 0)) {
+    $recommended = "/devspark-planning-review"
+    $state = "review-needs-decision"
+    $reason = "A human planning decision is pending. Answer it before remediation or implementation, then use /devspark-planning-review --judge-only to record the disposition."
+}
 elseif ($isDefaultBranch -and -not $specExists -and -not $quickfixExists) {
-    $recommended = "/devspark.specify"
+    $recommended = "/devspark-specify"
     $state = "no-active-work"
-    $reason = "You're on '$currentBranch' with no active spec or quickfix. Start with /devspark.specify (unsure of size) or /devspark.quickfix (small, contained fix)."
+    $reason = "You're on '$currentBranch' with no active spec or quickfix. Start with /devspark-specify (unsure of size) or /devspark-quickfix (small, contained fix)."
 }
 elseif ($specExists -and $isFullSpec -and -not $planExists) {
-    $recommended = "/devspark.plan"
+    $recommended = "/devspark-plan"
     $state = "spec-needs-plan"
-    $reason = "Spec exists for '$currentBranch' but there's no plan yet. Run /devspark.plan to produce the technical design."
+    $reason = "Spec exists for '$currentBranch' but there's no plan yet. Run /devspark-plan to produce the technical design."
+}
+elseif ($specExists -and $isFullSpec -and $planExists -and $planSpecState -eq "stale" -and $planningEdgesRoutable) {
+    $recommended = "/devspark-plan"
+    $state = "plan-stale-against-spec"
+    $reason = "The spec changed in meaning since the plan was produced or last checked. Run /devspark-plan: it checks the existing plan against the current spec and changes only what the spec requires."
 }
 elseif ($specExists -and $isFullSpec -and $planExists -and -not $tasksExists) {
-    $recommended = "/devspark.tasks"
+    $recommended = "/devspark-tasks"
     $state = "plan-needs-tasks"
-    $reason = "Plan exists but there's no task breakdown. Run /devspark.tasks to generate the ordered task list."
+    $reason = "Plan exists but there's no task breakdown. Run /devspark-tasks to generate the ordered task list."
 }
-elseif ($specExists -and $isFullSpec -and $tasksExists -and $tasksDone -eq 0 -and $requireAnalyze -and -not $analyzeGate) {
-    $recommended = "/devspark.analyze"
-    $state = "tasks-need-analyze"
-    $reason = "Tasks are ready and this full-spec route requires an analysis gate. Run /devspark.analyze to check spec/plan/tasks consistency before implementing."
+elseif ($specExists -and $isFullSpec -and $tasksExists -and $tasksPlanState -eq "stale" -and $planningEdgesRoutable) {
+    $recommended = "/devspark-tasks"
+    $state = "tasks-stale-against-plan"
+    $reason = "The plan changed in meaning since the task list was projected. Run /devspark-tasks: it checks the task list against the current plan and re-projects only unchecked work."
 }
-elseif ($specExists -and $isFullSpec -and $tasksExists -and $tasksDone -eq 0 -and $requireCritic -and -not $criticGate) {
-    $recommended = "/devspark.critic"
-    $state = "tasks-need-critic"
-    $reason = "Analysis is done and this full-spec route requires a risk review. Run /devspark.critic for an adversarial pre-mortem before implementing."
+elseif ($specExists -and $isFullSpec -and $tasksExists -and -not $judgeGate -and ($requireAnalyze -or $requireCritic)) {
+    $recommended = "/devspark-planning-review"
+    $state = "tasks-need-review"
+    $reason = "Tasks are ready and this full-spec route requires planning assurance. Run /devspark-planning-review: it runs Analyze, Critic when applicable, and Judge, and returns one planning decision before implementing."
+}
+# Unresolved Planning Review outranks task progress: a finished task list never overrides open assurance.
+elseif ($specExists -and $isFullSpec -and $tasksExists -and $judgeInvalidated) {
+    $recommended = "/devspark-planning-review"
+    $state = "review-needs-recheck"
+    $reason = "The specification or adjudicated child evidence changed. Re-establish planning authority before applying corrections."
+}
+elseif ($specExists -and $isFullSpec -and $tasksExists -and $judgeVerdict -eq "STOP" -and $planRevisionCount -gt 0 -and $planChanged -eq $true -and $tasksStale) {
+    $recommended = "/devspark-tasks"
+    $state = "plan-needs-reprojection"
+    $reason = "Plan semantics changed. Re-project unchecked Tasks from the approved Plan and protect completed work before focused review."
+}
+elseif ($specExists -and $isFullSpec -and $tasksExists -and $judgeVerdict -eq "STOP" -and $planRevisionCount -gt 0 -and $planChanged -eq $false) {
+    $recommended = "/devspark-plan"
+    $state = "review-needs-plan"
+    $reason = "Judge assigned an approved Plan correction. Run /devspark-plan in focused revise mode; preserve unrelated decisions and never reset automatically."
+}
+elseif ($specExists -and $isFullSpec -and $tasksExists -and $judgeVerdict -eq "STOP" -and ($planChanged -eq $true -or $tasksChanged -or $remediationAppended -or ($planRevisionCount -gt 0 -and $null -eq $planChanged))) {
+    $recommended = "/devspark-planning-review"
+    $state = "review-needs-recheck"
+    $reason = "Correction inputs changed or their provenance is unknown. Re-run /devspark-planning-review for a focused check; changed content does not resolve STOP by itself."
+}
+elseif ($specExists -and $isFullSpec -and $tasksExists -and $judgeVerdict -eq "STOP") {
+    $recommended = "/devspark-tasks"
+    $state = "review-blocked"
+    $reason = "Planning review returned STOP. Run /devspark-tasks for validated task-owned corrections only; missing ownership or scope authority must stop for a decision."
+}
+elseif ($specExists -and $isFullSpec -and $tasksExists -and $judgeNeedsRecheck) {
+    $recommended = "/devspark-planning-review"
+    $state = "review-needs-recheck"
+    $reason = "A reviewed artifact changed in a way that invalidates the Planning Review evidence. Re-run /devspark-planning-review: it reuses what is still fresh and rechecks only what changed."
 }
 elseif ($specExists -and $isFullSpec -and $tasksExists -and -not $tasksComplete) {
-    $recommended = "/devspark.implement"
+    $recommended = "/devspark-implement"
     $state = "tasks-incomplete"
-    $reason = "Tasks are defined ($tasksDone/$tasksTotal complete) but not finished. Run /devspark.implement to execute the remaining tasks."
+    $reason = "Tasks are defined ($tasksDone/$tasksTotal complete) but not finished. Run /devspark-implement to execute the remaining tasks."
 }
-elseif ($specExists -and $isFullSpec -and $tasksComplete) {
-    $recommended = "/devspark.implement"
-    $state = "implementation-needs-finalization"
-    $reason = "The task list is complete but the temporary planning bundle still exists. Run /devspark.implement to verify code, tests, and current knowledge, then delete the bundle."
+elseif ($specExists -and $isFullSpec -and $tasksComplete -and $verifyRequired -and -not $verifyPassed) {
+    $recommended = "/devspark-verify"
+    $state = "implementation-needs-verification"
+    $reason = "Implementation tasks are complete; declared Verify modes still need passing evidence. Run /devspark-verify, including its Closeout phase."
 }
-elseif ($specExists -and -not $isFullSpec) {
-    $recommended = "/devspark.implement"
+elseif ($specExists -and $isFullSpec -and $tasksComplete -and $closeoutDecision -eq "not-complete") {
+    $recommended = "/devspark-implement"
+    $state = "closeout-not-complete"
+    $reason = "Closeout records blocking defects. Resume approved defect handling; any semantic planning change must stop for Plan and explicit authority."
+}
+elseif ($specExists -and $isFullSpec -and $tasksComplete -and $verifyRequired -and $closeoutDecision -ne "complete") {
+    $recommended = "/devspark-verify"
+    $state = "verification-needs-closeout"
+    $reason = "Required proof has passed but Closeout is missing or unresolved. Run /devspark-verify to complete the convergence phase; retain the planning bundle."
+}
+elseif ($specExists -and -not $isFullSpec -and $specStatus -ne "Complete") {
+    $recommended = "/devspark-implement"
     $state = "quickspec-needs-implement"
     $statusLabel = if ($specStatus) { $specStatus } else { "Draft" }
-    $reason = "A temporary quick-spec exists for '$currentBranch' (Status: $statusLabel). Run /devspark.implement to finish its action plan, verify the durable result, and delete the bundle."
+    $reason = "A temporary quick-spec exists for '$currentBranch' (Status: $statusLabel). Run /devspark-implement to finish its action plan, verify the durable result, and retain the bundle."
 }
-elseif ($quickfixExists -and -not $prExists) {
-    $recommended = "/devspark.implement"
+elseif ($quickfixExists -and -not $quickfixComplete -and -not $prExists) {
+    $recommended = "/devspark-implement"
     $state = "quickfix-open"
-    $reason = "A temporary quickfix record exists for '$currentBranch'. Run /devspark.implement to finish the change, verify code, tests, and current knowledge, and delete the record."
+    $reason = "A temporary quickfix record exists for '$currentBranch'. Run /devspark-implement to finish the change, verify code, tests, and current knowledge, and retain the record."
 }
 elseif ($dirty) {
     $recommended = "commit"
     $state = "uncommitted-changes"
-    $reason = "You have uncommitted changes on '$currentBranch'. Commit your work (then re-run /devspark.next). If this is a spec route mid-implementation, continue with /devspark.implement."
+    $reason = "You have uncommitted changes on '$currentBranch'. Commit your work (then re-run /devspark.next). If this is a spec route mid-implementation, continue with /devspark-implement."
 }
 elseif (-not $prExists) {
-    $recommended = "/devspark.create-pr"
+    $recommended = "/devspark-create-pr"
     $state = "ready-for-pr"
-    $reason = "Work is committed on '$currentBranch' and no PR exists yet. Open one with /devspark.create-pr (it will publish the branch and let you optionally run /devspark.verify)."
+    $reason = "Work is committed on '$currentBranch' and no PR exists yet. Open one with /devspark-create-pr (it will publish the branch and let you optionally run /devspark-verify)."
 }
 elseif ($prExists -and -not $reviewFileExists) {
-    $recommended = "/devspark.pr-review"
+    $recommended = "/devspark-pr-review"
     $state = "pr-needs-review"
-    $reason = "PR #$prNumber is open but has no review yet. Run /devspark.pr-review to review it against the constitution."
+    $reason = "PR #$prNumber is open but has no review yet. Run /devspark-pr-review to review it against the constitution."
 }
 elseif ($reviewFileExists -and $reviewOpenFindings) {
-    $recommended = "/devspark.address-pr-review"
+    $recommended = "/devspark-address-pr-review"
     $state = "review-has-open-findings"
-    $reason = "PR #$prNumber has open review findings. Run /devspark.address-pr-review to fix them, then re-review with /devspark.pr-review #$prNumber re-review."
+    $reason = "PR #$prNumber has open review findings. Run /devspark-address-pr-review to fix them, then re-review with /devspark-pr-review #$prNumber re-review."
 }
 elseif ($reviewFileExists -and $behindTarget) {
     $recommended = "sync"
@@ -304,7 +433,7 @@ elseif ($reviewFileExists) {
 }
 
 # Surface still-open advisory gates without blocking the primary recommendation.
-if ($pendingGatesStr -and $recommended -notmatch 'analyze|critic|checklist|verify|constitution') {
+if ($pendingGatesStr -and $recommended -notmatch 'analyze|critic|checklist|verify|constitution|planning-review') {
     $reason = "$reason Open advisory gates still recommended before merge: $pendingGatesStr."
 }
 
@@ -324,6 +453,8 @@ $result = [ordered]@{
     BRANCH_PUSHED       = $branchPushed
     BEHIND_TARGET       = $behindTarget
     SPEC_EXISTS         = $specExists
+    SPEC_FEATURE        = $specFeature
+    SPEC_AMBIGUOUS      = $specAmbiguous
     IS_FULL_SPEC        = $isFullSpec
     SPEC_STATUS         = $specStatus
     PLAN_EXISTS         = $planExists
@@ -334,6 +465,10 @@ $result = [ordered]@{
     VERIFY_REQUIRED     = $verifyRequired
     VERIFY_PASSED       = $verifyPassed
     CLOSEOUT_DECISION   = $closeoutDecision
+    JUDGE_VERDICT       = $judgeVerdict
+    JUDGE_NEEDS_RECHECK = $judgeNeedsRecheck
+    PLAN_SPEC_STATE     = $planSpecState
+    TASKS_PLAN_STATE    = $tasksPlanState
     PENDING_GATES       = $pendingGatesStr
     QUICKFIX_EXISTS     = $quickfixExists
     QUICKFIX_COMPLETE   = $quickfixComplete

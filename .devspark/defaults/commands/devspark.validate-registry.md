@@ -71,4 +71,4 @@ Status: PASS / FAIL
 ## Constraints
 
 - This command is read-only — no files may be created or modified
-- Usable as a pre-merge check by running `/devspark.validate-registry` from an agent chat session
+- Usable as a pre-merge check by running `/devspark-validate-registry` from an agent chat session
