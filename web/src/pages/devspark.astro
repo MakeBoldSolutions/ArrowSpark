@@ -97,6 +97,21 @@ const facts = (await getEntry('facts', 'main'))!.data;
     <LessonsPair lessons={lessons} />
   </section>
 
+  <section class="page section" aria-labelledby="research">
+    <Eyebrow>Research</Eyebrow>
+    <h2 id="research" class="section-title">Is this just waterfall with an AI?</h2>
+    <div class="research-card">
+      <p class="research-card__lead">
+        Kent Beck argues that spec-driven AI development slides into waterfall. We tested that against all thirteen
+        ArrowSpark specs, the agent transcripts and this site’s own story, looking for counterexamples as hard as for
+        support. The verdict is <strong>partially supported</strong>: the specs were genuinely small, incremental
+        changes, but the iteration came mostly from a human playing the game, sometimes in spite of the process.
+      </p>
+      <p class="research-card__lead">It ends with concrete feedback for improving DevSpark, drawn from what was observed.</p>
+      <Button href="/devspark/beck-retrospective/" variant="primary">Read the assessment <Icon name="arrow-right" /></Button>
+    </div>
+  </section>
+
   <section class="section--sunken" aria-labelledby="reference-knot">
     <div class="page section">
       <Eyebrow>Reference Knot</Eyebrow>
@@ -186,4 +201,13 @@ const facts = (await getEntry('facts', 'main'))!.data;
     margin: 0;
   }
   .more { font-size: var(--fs-lg); }
+  .research-card {
+    max-width: var(--container-prose);
+    background: var(--surface-card);
+    border: var(--border-hairline) solid var(--border-default);
+    border-left: var(--border-accent) solid var(--brand);
+    border-radius: var(--radius-lg);
+    padding: clamp(var(--space-5), 4vw, var(--space-8));
+  }
+  .research-card__lead { font-size: var(--fs-lg); margin: 0 0 var(--space-5); }
 </style>

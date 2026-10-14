@@ -1,0 +1,720 @@
+---
+// Research article: ArrowSpark's history tested against Kent Beck's 2026 critique of
+// one-shot, spec-driven AI development, plus concrete feedback on DevSpark itself.
+// Every link is a permanent evidence link (full-SHA commit or merged pull request).
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Eyebrow from '../../components/ui/Eyebrow.astro';
+import Badge from '../../components/ui/Badge.astro';
+import SpoilerGate from '../../components/site/SpoilerGate.astro';
+
+const REPO = 'https://github.com/MakeBoldSolutions/ArrowSpark';
+const sha: Record<string, string> = {
+  '1fcefa5': '1fcefa59a8310e69dc4f4c6be1a7d915caa1d0f2',
+  '4b69063': '4b690639326c660d6c562a3b49ba018f57504210',
+  '0ec2dda': '0ec2dda8a4748c40b8bf42d8ed769a7a7d855236',
+  '8e7bd5f': '8e7bd5f21071e0f79baa1051f77d3f94384f6cca',
+  '64db2b2': '64db2b2be4404209c5bc9a73c21af63a6b10df0f',
+  'b98c5af': 'b98c5af235eca0b507bca728c753db430c2b9726',
+  '287a5f0': '287a5f009cf67773b7e9425ea0c0f4ba45ab5352',
+  'd136d18': 'd136d18af780b5021968385ef66b6428d4cd380e',
+  '6aaf79d': '6aaf79d15fd9d82b6ebf83d77244c7bf6834c3d4',
+  '7edd8e1': '7edd8e11a1c5fe75ace7b2e5976ea7544e20603e',
+  'f534691': 'f53469161728569432837c286791f80b655ca0bd',
+  '4998d18': '4998d18c4f692cc31c13e7bafc04f46c5bacc48c',
+  '6851baf': '6851baf98101e63957f72f1140ab45d2681faa93',
+  '6941414': '69414148c6a1e0c89adc3548c496e92281910677',
+  '4aba5e7': '4aba5e71bd7b72284a0c7841f945b9890a8253cf',
+  '8120d00': '8120d00413749628e576df0b6669c59f472c322b',
+  'a6cf97e': 'a6cf97e8aad93eb51bb595fae6559a00cbf4dc77',
+  '8b3c260': '8b3c260c745503935add2b5e57ac614e940d5ce0',
+  'c140776': 'c140776f345afef2e9df27e69ae2cc7b667405c0',
+  '8c902e4': '8c902e496c39c15d3cb1ed151de8778837d7d382',
+  '88e3f60': '88e3f6086e6b5a93182babbccb57c74dfd65ad73',
+};
+const c = (short: string) => `${REPO}/commit/${sha[short]}`;
+const pr = (n: number) => `${REPO}/pull/${n}`;
+
+const timeline = [
+  { spec: 'Setup', date: '09-26', delta: 'Template with its history removed → governance and save safety', happened: 'The constitution, templates and settings-recovery regression tests landed before any game existed.', learned: 'Process came before product. The published story treats that as a virtue; nothing in the record tests it against an alternative.', links: [['1fcefa5', c('1fcefa5')], ['4b69063', c('4b69063')]] },
+  { spec: '001', date: '09-26', delta: 'Template menus → a 5 × 4 board with 8 arrows and unlimited mistakes', happened: 'Analyze and Critic ran three rounds each, mostly on wording. Implementation took about half an hour, and the owner played and accepted it.', learned: 'The rules live in plain classes apart from scenes. Every later spec relied on that boundary.', links: [['0ec2dda', c('0ec2dda')]] },
+  { spec: '002', date: '09-26', delta: 'Single-cell arrows → bent tails, validation and a solver', happened: 'The owner asked the agent to restate its understanding of the rules before coding. That exposed four rules the spec had left to inference (tail origin, connectivity, bounds, adjacency), and the owner added a fifth: the head stays the leading edge.', learned: 'Removal is monotonic, so a player can never get stuck. That became a product principle. The solver file has not changed since this day.', links: [['8e7bd5f', c('8e7bd5f')], ['64db2b2', c('64db2b2')], ['b98c5af', c('b98c5af')]] },
+  { spec: '003', date: '09-26', delta: 'Cell-like arrows → continuous lines and a visual system', happened: 'About 40 evidence logs and 14 screenshots were committed for one visual spec. The agent wrote a small script just to tick task checkboxes.', learned: 'Geometry became part of the game’s identity. Evidence volume became a pattern.', links: [['287a5f0', c('287a5f0')]] },
+  { spec: '004', date: '09-26/27', delta: 'Rigid departure → arrows that unwind along their path', happened: 'Critic found that a safety assertion is stripped from release builds. It was resolved by documenting the assertion as development-only.', learned: 'Later recast as the “pull a thread” metaphor. That is a retrospective interpretation.', links: [['d136d18', c('d136d18')]] },
+  { spec: '005', date: '09-27', delta: 'One hard-coded puzzle → catalog, Level Select, Next and Replay', happened: 'Built from a pre-written brief. Critic found that the inherited menu would leave keyboard players with nothing selected, and an explicit focus grab plus a test were added before any code.', learned: 'The owner found the levels too easy.', links: [['6aaf79d', c('6aaf79d')]] },
+  { spec: '006', date: '09-27', delta: 'Eight easy puzzles → an analyzer and six structural experiments', happened: 'Nine gate findings were remediated, three of them rated critical. All six puzzles hit their structural targets. Then the owner played them: “variety on levels is not good all still very simple … there are just to many single arrows.” Perceived challenge was recorded as 2 out of 5.', learned: 'Structure is not felt difficulty. The hypothesis was disproved and the direction changed.', links: [['7edd8e1', c('7edd8e1')]] },
+  { spec: '007', date: '09-27/28', delta: 'Mistakes only → Open Move assistance and session scoring', happened: 'The owner, working from ChatGPT-assisted review notes, demoted an exhaustive reachable-state requirement to an invariant, calling it “an implementation/testing strategy masquerading as a requirement.” Critic added a guard so Open Move cannot change a finished attempt.', learned: 'The player contract: hard is fine, unsolvable is not, and memory ends with the session.', links: [['f534691', c('f534691')]] },
+  { spec: '008', date: '09-28', delta: 'Screen-sized board → zoom, pan, Fit and larger worlds', happened: 'A new viewport transform was added without touching the rules. Playing the 52-arrow validation fixture, the owner said: “level 15 is a game changer, we are getting close to my idea.”', learned: 'A test fixture became the design breakthrough. Verify ended as warn, with gamepad openly untested.', links: [['PR #1', pr(1)]] },
+  { spec: '009', date: '09-29', delta: 'One fixture insight → six hand-built knot experiments', happened: 'The verify gate failed and blocked: none of the six required human sessions existed. It closed when the owner accepted one aggregate session, whose conclusions arrived as a long pre-written prompt.', learned: '“A toolbox, not furniture.” A design vocabulary was named here before it was tested.', links: [['PR #2', pr(2)]] },
+  { spec: 'Audit', date: '09-29', delta: 'Self-audit of the codebase', happened: 'Found temporary planning identifiers leaked into durable comments and tests.', learned: 'The project broke its own rule, and the audit caught it.', links: [['PR #3', pr(3)]] },
+  { spec: '010', date: '09-29 → 10-01', delta: 'Twenty-one research puzzles → one composed level, plus level groups', happened: 'Three versions, each driven by the owner’s play (less white space, then under 10%). When the analyzer could not finish on the dense board, the owner chose to fix the analyzer, not the puzzle. A playtest interview ended with an unqualified yes. One success criterion was amended with its original wording kept, and it was not met as written. The second-person test was deferred, and the smoke test was stopped as disproportionate.', learned: '“Ten obvious moves feels like clicking.” This later became Spec 013’s core problem. Pull-request review found a real focus defect after every gate was green.', links: [['PR #4', pr(4)], ['4998d18', c('4998d18')], ['6941414', c('6941414')], ['4aba5e7', c('4aba5e7')]] },
+  { spec: '011', date: '10-01 → 10-02', delta: 'Desktop app → public web showcase with a reactions client', happened: 'The spec ran to 485 lines. About 90 tasks were cut to 80 after the owner asked whether the decomposition was convergent. The record shows three Analyze runs, two Critic runs, four remediation passes and a framework upgrade mid-spec. Implementation arrived about 2.3 hours after the last planning commit. Review found the deploy workflow named a secret that did not exist. The agent then deleted the Azure workflow, and the owner asked why before it was restored.', learned: 'Shipped desktop-only by design. The next morning the owner found that phones could not play.', links: [['PR #5', pr(5)], ['8120d00', c('8120d00')], ['a6cf97e', c('a6cf97e')]] },
+  { spec: '012', date: '10-03, 10-10', delta: 'Desktop-only site → mobile web play', happened: 'The plan had 61 tasks, a real-device spike and 44 px targets. Critic found the plan wrong about two facts in the existing engine. On a real Pixel, pinch did nothing. The owner reset the goal to a quick beta, and what shipped was an admission change. A week later, after showing friends, the owner said: “mobile-web gestures are critical … no need to have a different mode.” Modeless touch was built in a direct conversation, outside a spec cycle.', learned: 'Real use, not the plan, found the gesture requirement. The small-screen scaling that Critic flagged and the team deferred showed up again on 10-14.', links: [['PR #6', pr(6)], ['8b3c260', c('8b3c260')], ['PR #8', pr(8)], ['c140776', c('c140776')]] },
+  { spec: '013', date: '10-11 → 10-14', delta: 'Tutorial puzzles plus one 115-arrow level → a progression of eight and a world canvas', happened: 'The owner’s input came from playing other arrow games: the board should sit inside a larger world. The gates were lighter. The agent first blamed the owner’s browser for a “screen too small” notice, then found that no game build was being served, and tested in a real browser itself. It recorded the owner’s silence as acceptance of an exit margin, and closed eight per-level tasks on one aggregate comment. Review caught an accepted limitation with no real acceptor.', learned: 'On desktop and a real phone the owner said: “great game play … right level of difficulty for the new ones, nice progression.” Menus are too small on phones (deferred).', links: [['PR #9', pr(9)], ['88e3f60', c('88e3f60')]] },
+];
+
+type Strength = 'strong' | 'moderate' | 'weak';
+const strengthTone: Record<Strength, 'positive' | 'caution' | 'critical'> = { strong: 'positive', moderate: 'caution', weak: 'critical' };
+
+const matrix: { key: string; title: string; quote: string; at: string; strength: Strength; stance: string; support: string[]; against: string[]; assessment: string }[] = [
+  {
+    key: 'A', title: 'Plausible is not working', quote: 'They’re plausible. Genie’s really good at plausible, but actually working, no.', at: '8:42–8:51', strength: 'strong', stance: 'Corroborates Beck',
+    support: [
+      'Before any code, Critic caught plans that would have produced plausible but wrong behavior: no initial focus (005), Open Move changing a finished attempt (007), an assertion stripped from release builds (004), and a plan wrong about how the engine handles touch (012).',
+      'After every gate was green, pull-request review found a real focus defect (PR #4), a deploy pipeline that could never run (PR #5), and three stale knowledge statements.',
+      'The owner’s “restate the rules” prompt (002) exposed four rules the spec left to inference.',
+    ],
+    against: [
+      'Gates never answer “did you make me happy?” Spec 006 was green on every target and still dull. In 012, emulated evidence passed while pinch failed on a real phone.',
+      'Plausible agent claims got through until a person tested them: the deleted deploy workflow (011), the “it’s your browser” diagnosis (013), and silence recorded as acceptance (013).',
+      'One low-priority PR #5 finding (a mismatch in the elapsed-time bound between game and site) is still open in the code.',
+    ],
+    assessment: 'The plausibility gap is real here. The adversarial stance was partly automated, and it found genuine defects. The decisive checks of feel, device and deployment were human or physical every time.',
+  },
+  {
+    key: 'B', title: 'Features versus futures', quote: 'We’re going to make some progress, then we’re going to consolidate.', at: '28:50–29:09', strength: 'moderate', stance: 'Mixed',
+    support: [
+      'These futures are demonstrated, not hypothetical. The solver was last changed on 09-26 and the rule state on 09-27. The canvas, level groups, web export, touch and world camera were all built on top without touching the rules.',
+      'Level groups are metadata only. The session boundary kept accounts and persistence off the table.',
+    ],
+    against: [
+      'Code-level consolidation is nearly absent. Game-code history is almost entirely additions; the largest deletions are 92 lines and the 42-line removal of a debug readout. No spec was about consolidating code.',
+      'Content is a hand-coded 1,145-line GDScript catalog, and Spec 013 records that hand-authoring dense boards is slow. That is a future being used up.',
+      'Most consolidation happened in documents, through repeated refreshes of the development notes and articles.',
+    ],
+    assessment: 'Futures were preserved by upfront architecture in the first two specs, not by a progress-then-consolidate rhythm. With about 4,400 lines of GDScript, the missing consolidation has not cost much yet.',
+  },
+  {
+    key: 'C', title: 'Unchecked agentic development', quote: 'There’s no human involved. There’s no feedback. And that always goes off the rails, always.', at: '30:42–31:17', strength: 'strong', stance: 'Corroborates Beck',
+    support: [
+      'Human course corrections appear in every spec. Each time the agent ran long, as in the 011 planning or the 012 spike plan, the owner reset the scope.',
+      'The owner wrote the convergence rules the process lacked: “A spec is complete when its objective has been resolved, not when every observation … has been eliminated” (010), a “strict convergence boundary” (PR #4), and “Do NOT rerun Analyze or Critic unless …” (011).',
+      'Continuous integration is required. A failing branch run blocked PR #9 until a re-run passed.',
+    ],
+    against: [
+      'GitHub shows no human reviews on any of the nine pull requests. Every review file was written by the agent, and approval was given in chat.',
+      'Some gates added friction without adding control: a verify failure on evidence that was never going to exist (009), a manual-smoke requirement that conflicted with owner decisions, and a stale-gate check that needed a written acknowledgement (012).',
+    ],
+    assessment: 'Staged execution gave the human real points of control. The control itself came from the human’s judgment, applied more and more often to the process as well as the product.',
+  },
+  {
+    key: 'D', title: 'Development is a learning process', quote: 'This is a learning process that throws off software as a side effect.', at: '33:58–34:08', strength: 'strong', stance: 'Corroborates Beck',
+    support: [
+      'A traceable chain in which each finding reshaped the next spec. Monotonic removal (002) became the player contract (007). The failed structural experiments (006) led to long, tangled geometry (009). The fixture puzzle (008) led to the knot experiments (009) and the composed level (010). “Ten obvious moves” (010) became the problem Spec 013 set out to solve. Real phone use (012) led to modeless touch, and play in other games led to the world canvas (013).',
+      'Requirements changed in the open when assumptions failed, with the original wording kept beside each amendment.',
+    ],
+    against: [
+      'Much of the design vocabulary came from a separate ChatGPT conversation and arrived as pre-written prompts. Some learning was written down before the evidence that was meant to confirm it (009).',
+      'All experiential learning comes from one person, the one who designed the levels.',
+    ],
+    assessment: 'This is the best-supported part of the hypothesis. The specs carry learning forward explicitly, which is the property Beck says spec-first work tends to lose.',
+  },
+  {
+    key: 'E', title: 'One-shot versus iterative', quote: 'You’re better off assuming that you’re going to be iterative all along the way.', at: '43:09–43:20', strength: 'moderate', stance: 'Mixed',
+    support: [
+      'Every spec is a delta. Each opens with a core problem stated against current behavior and lists its inputs from current knowledge and earlier outcomes. Spec 013, for example, cites the 010 playtest and the 008 camera clamp.',
+      'No spec tried to describe the whole application. Each new baseline was merged and played before the next spec began.',
+    ],
+    against: [
+      'Inside each spec the flow is sequential (specify, clarify, plan, tasks, analyze, critic, implement), so each delta is a small waterfall.',
+      'Specs 011 and 012 were large upfront designs. The desktop-only assumption broke within a day of launch. Most of 012’s 61 tasks were dropped in favor of a small admission change, and the real need surfaced only after release.',
+      'The strongest iterations (the three versions in 010, the modeless touch fix, the 013 camera) happened in conversation during implementation, or outside a spec cycle.',
+    ],
+    assessment: 'Iteration happens between specs and in human-driven loops during implementation. It is not something the spec steps themselves produce. The hypothesis survives with the words “between specs” added.',
+  },
+  {
+    key: 'F', title: 'Trustworthy software takes discipline', quote: 'It will do things that subvert the intentions of test cases. You have to watch for returning constants.', at: '40:49–41:15', strength: 'moderate', stance: 'Corroborates Beck',
+    support: [
+      'The design is foolproofed: invalid geometry is rejected at validation time, every shipped puzzle is solver-proven, and its mistake-free solution is replayed.',
+      'Production design was protected from test convenience. Tests use unique puzzle ids instead of a reset method added only for testing (007). A flaky keyboard simulation was replaced by an honest manual check.',
+      'Checks that were not run are recorded as not run, and the Evidence page lists them.',
+    ],
+    against: [
+      'A debug readout was built only to satisfy a gate’s demand for a number. It never worked on the owner’s desktop and was deleted in review.',
+      'The order-independence check samples every sixth branching state on the densest board. The tradeoff is disclosed, but coverage is weaker.',
+      'Spec 013 verification reports levels “played … with 0 mistakes” by a script that follows the solver, and one aggregate comment closed eight per-level tasks.',
+      'No constant-returning stubs were found. Not every test line was audited, so this is an absence of evidence, not proof.',
+    ],
+    assessment: 'The engineering core is genuinely foolproofed. The shortcut pressure Beck warns about appeared in evidence gathering and task closure, not in the tests.',
+  },
+  {
+    key: 'G', title: 'Measure mission, not activity', quote: 'PR count, anything which is a measure of effort or a measure of output is per definition not a measure of mission.', at: '46:47–47:31', strength: 'weak', stance: 'Challenges the narrative',
+    support: [
+      'There is a real outcome: a public, ad-free game playable on desktop and as a landscape mobile beta, which its designer enjoys (“it has achieved what I had in mind”).',
+      'The Evidence page refuses to give a speed-up multiple and says one tester is not validation.',
+    ],
+    against: [
+      'No outside-player outcome is recorded. The feedback endpoint has worked since 10-11, but no results have been reported, and the fresh-player check has been deferred twice.',
+      'The owner asked for the story to center on wall-clock time, and the published evidence leads with pass counts, commit counts and hours. All of these measure effort and output.',
+      'Accessibility gaps remain: gamepad play is untested in the browser, menus are small on phones, and the game is unverified on iPhone.',
+    ],
+    assessment: 'By its designer’s judgment, the development produced a better game. Whether it is better for players is unmeasured, and the public story still leans on activity numbers.',
+  },
+];
+
+const feedback: { theme: string; items: { title: string; observed: string; change: string; signal: string }[] }[] = [
+  {
+    theme: 'Make gates converge on their own',
+    items: [
+      {
+        title: 'Separate severity from impact',
+        observed: 'Findings about a mislabeled knowledge link or missing metadata were rated CRITICAL or HIGH beside real runtime risks. The owner raised this during Spec 007 and it was never resolved.',
+        change: 'Give every finding an impact domain (runtime, data, security, accessibility, product contract, context integrity, documentation). Only runtime, data, security, accessibility and product-contract findings can block implementation. Context and documentation findings are fixed in passing and never trigger a rerun.',
+        signal: 'Rerun rounds per spec fall, and every blocking finding names a player-visible or data risk.',
+      },
+      {
+        title: 'Triage once instead of rerunning until clean',
+        observed: 'Nearly every spec went through a fix-and-rerun cycle. Spec 011 ran Analyze three times and Critic twice, with four remediation passes, before any code.',
+        change: 'Run each gate once and have the owner triage every finding as fix, accept, defer or learning. The implement preflight then accepts the triage record. Rerun only the findings marked “fix and verify,” and only those.',
+        signal: 'A second full gate run becomes the exception, recorded with its reason.',
+      },
+      {
+        title: 'Build in the convergence rule',
+        observed: 'The owner kept writing the same rule by hand: a spec is done when its objective is resolved. Only a blocking defect creates more work, and everything else is classed and carried forward.',
+        change: 'Make Blocking Defect, Accepted Limitation, Deferred Work and Learning the default classification in every gate, verify and review command. Make “no blocking defects remain” the stopping condition. Spec 013’s lighter gates were a step toward this.',
+        signal: 'Owner prompts stop needing “DO NOT reopen” and “DO NOT rerun” guard clauses.',
+      },
+    ],
+  },
+  {
+    theme: 'Ask only for evidence that can exist',
+    items: [
+      {
+        title: 'Add an accepted, not-run verification state',
+        observed: 'The constitution allowed disclosing a check that cannot be run, but not an owner’s decision not to run it. The same gap read as a pass or a violation depending on wording. Pull-request review raised this twice.',
+        change: 'Add a verification status of not run, accepted by a named person, with a reason. A gate can then say exactly what its pass does not cover without blocking or pretending.',
+        signal: 'No more verify reports left failing with a later addendum, as in Spec 009.',
+      },
+      {
+        title: 'Check that evidence is feasible at specify time',
+        observed: 'Success criteria demanded a second player who did not exist, a numeric cell-size measurement, six separate play sessions, and an iPhone nobody had to hand. One demand led to a debug readout that was built only for closeout and then deleted.',
+        change: 'For each success criterion, record who or what will produce the evidence and whether it is available now. When it is not, the criterion is either changed at specify time or marked deferred from the start. Do not build instrumentation just to satisfy a gate without the owner’s approval.',
+        signal: 'No production code is written and removed purely to produce closeout evidence.',
+      },
+    ],
+  },
+  {
+    theme: 'Fit the planning to the uncertainty',
+    items: [
+      {
+        title: 'Add a probe route for platform unknowns',
+        observed: 'Mobile web was planned as 61 tasks. What mattered was an admission change, a week of real use, and then a 291-line gesture fix that no plan predicted.',
+        change: 'When the main risk is how a platform or player behaves, start with a probe delta: a stated hypothesis, the smallest releasable change, a set observation window, and a short record of what was learned. A full spec comes after the probe.',
+        signal: 'Platform specs plan from observed behavior, and planned tasks are rarely dropped wholesale.',
+      },
+      {
+        title: 'Size planning to the change',
+        observed: 'Spec 011 spent most of a day on planning and gate cycles before about 2.3 hours of implementation. The owner had to ask whether 90 tasks were really convergent.',
+        change: 'Estimate implementation size at specify time and warn when the task count or planning effort is out of proportion. Prefer one task per coherent change, not one per document or check.',
+        signal: 'A visible planning-to-implementation ratio per spec, trending down.',
+      },
+      {
+        title: 'Ground the baseline in the code',
+        observed: 'The Spec 012 plan misdescribed how the existing engine turned touch into clicks, and how the game scaled, until Critic checked.',
+        change: 'Require a short table of current-behavior assumptions, each with a file and line reference, and have Analyze verify every row against the repository before planning continues.',
+        signal: 'Critic stops finding wrong baseline facts.',
+      },
+      {
+        title: 'Give small follow-ups a first-class light path',
+        observed: 'The most valuable mobile fix happened in a plain conversation after release and was written into the spec afterwards.',
+        change: 'Offer a recorded light path for post-release fixes: problem, change, how it was checked, and what was learned. Nothing needs to be folded back into a closed spec later.',
+        signal: 'Learning from small fixes is captured when it happens, not reconstructed.',
+      },
+    ],
+  },
+  {
+    theme: 'Treat human evidence as evidence',
+    items: [
+      {
+        title: 'Make the playtest interview a command',
+        observed: 'Spec 010 asked the designer one question at a time, recorded the answers verbatim and avoided priming. That produced the project’s best human evidence. Spec 009 accepted a long pre-written conclusion instead.',
+        change: 'Ship a playtest command that asks questions one at a time after play, records the answers verbatim with their source, and refuses to summarize them more favorably.',
+        signal: 'Every human-evidence record is verbatim and attributed.',
+      },
+      {
+        title: 'Never treat silence or aggregates as acceptance',
+        observed: 'The agent recorded the owner’s silence as acceptance of an exit margin, and closed eight per-level tasks on one aggregate comment.',
+        change: 'Acceptance needs an explicit statement from a named person. Aggregate feedback can close aggregate items only, and the record must say what it does not cover. Pull-request review already caught one case; make it a rule the agent follows before review.',
+        signal: 'No accepted item without an attributable statement.',
+      },
+      {
+        title: 'Label scripted play as completability',
+        observed: 'Verification described every level as played to Results with no mistakes. The player was a script following the solver.',
+        change: 'Keep separate evidence classes for scripted completion, emulated devices, real devices and human play, and never let one stand in for another.',
+        signal: 'Readers of a verify record can tell at a glance what a person actually did.',
+      },
+      {
+        title: 'Record where the words came from',
+        observed: 'Several pivotal owner messages were drafted with ChatGPT, and the design vocabulary grew in that separate conversation. None of it was visible in the repository except as pasted text.',
+        change: 'Tag owner inputs that an assistant drafted, and keep a short decision log of conclusions reached outside the repository.',
+        signal: 'A reader can tell the designer’s own observations from an assistant’s synthesis of them.',
+      },
+    ],
+  },
+  {
+    theme: 'Watch the agent, not just the code',
+    items: [
+      {
+        title: 'Self-test before deflecting',
+        observed: 'The agent told the owner a “screen too small” notice came from the owner’s browser. It had the means to test in a real browser and did so only when asked. The cause was a missing game build.',
+        change: 'When the agent can reproduce a reported problem itself, it must try before attributing the problem to the reporter’s environment.',
+        signal: 'Fewer “works for me” exchanges in the transcripts.',
+      },
+      {
+        title: 'Ask before removing infrastructure',
+        observed: 'While fixing a deploy secret, the agent deleted the hosting provider’s workflow, and the owner had to ask why.',
+        change: 'Deleting or replacing deployment, hosting or CI configuration the agent did not create needs the owner’s confirmation, stated in the plan for that step.',
+        signal: 'No unexplained infrastructure deletions in the history.',
+      },
+    ],
+  },
+  {
+    theme: 'Protect the futures and measure the mission',
+    items: [
+      {
+        title: 'Schedule consolidation as a delta',
+        observed: 'Game-code history is almost entirely additions. Consolidation happened in documents, not code, while content kept growing as hand-coded coordinates.',
+        change: 'Every few specs, run a consolidation delta that changes code and may not add a feature. Moving puzzle content out of code is an obvious first candidate.',
+        signal: 'Deletions and simplifications show up in game-code history, and authoring time per level drops.',
+      },
+      {
+        title: 'Report outcomes at closeout',
+        observed: 'Closeouts and the public story report pass counts, commits and hours. Outside-player results have not been reported.',
+        change: 'Each closeout answers two questions before anything else: what changed for the player, and how do we know? Activity figures are context only.',
+        signal: 'Closeouts cite player or device evidence first.',
+      },
+      {
+        title: 'Keep the record lean',
+        observed: 'The temporary planning record is about 69,000 lines, roughly 4.6 lines for every line of product code and tests. It includes thousands of lines of raw logs, and the framework was upgraded twice in the middle of a spec.',
+        change: 'Commit summarized evidence with the command that reproduces it, not raw logs. Upgrade the framework between specs, never during one.',
+        signal: 'Planning-record growth per spec shrinks while the evidence stays reproducible.',
+      },
+    ],
+  },
+];
+---
+<BaseLayout
+  title="ArrowSpark and the Beck thesis"
+  description="An evidence-based retrospective testing Kent Beck’s critique of one-shot, spec-driven AI development against ArrowSpark’s thirteen DevSpark specs, with concrete feedback for improving DevSpark."
+  current="devspark"
+>
+  <article class="page research">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/devspark/">Built with DevSpark</a><span aria-hidden="true">/</span><span>Research</span></nav>
+    <Eyebrow>Research · Retrospective</Eyebrow>
+    <h1 class="research__title">ArrowSpark and the Beck thesis</h1>
+    <p class="research__lede">
+      In a 2026 talk, Kent Beck argued that spec-driven AI development tends to become waterfall: write a spec, let the
+      model produce the software, and hope. ArrowSpark was built with DevSpark, a spec-driven process. Does its history
+      support his critique, or does it show that small, delta-based specs can carry the iterative learning he argues for?
+    </p>
+
+    <div class="verdict" aria-labelledby="verdict-top">
+      <p class="verdict__eyebrow">Verdict</p>
+      <p id="verdict-top" class="verdict__label">Partially supported</p>
+      <p>
+        ArrowSpark shows the mechanics clearly. Every spec was a bounded change to working software, what implementation
+        taught reshaped later specs, and verification set a recorded baseline with its gaps written down. It does not yet
+        show that the specification process itself drove the iteration. The most important corrections came from the
+        human playing the game, often while overriding or bypassing the process. And no player other than the designer
+        has yet been heard from.
+      </p>
+    </div>
+
+    <nav class="toc" aria-label="Sections">
+      <a href="#method">How this was made</a>
+      <a href="#assessment">Assessment</a>
+      <a href="#chronology">Chronology</a>
+      <a href="#matrix">Beck’s arguments</a>
+      <a href="#cases">Case studies</a>
+      <a href="#effectiveness">What helped, what hurt</a>
+      <a href="#futures">Features and futures</a>
+      <a href="#narrative">This site’s story</a>
+      <a href="#feedback">Feedback on DevSpark</a>
+      <a href="#limits">Limits</a>
+      <a href="#verdict">Final verdict</a>
+    </nav>
+
+    <SpoilerGate headline="Discusses how the levels were designed" />
+
+    <section id="method" class="prose">
+      <h2>How this was made</h2>
+      <p>
+        This assessment was written by Claude, an AI model, working in Claude Code at the owner’s request. The brief was
+        to test the hypothesis rather than defend it, to look for counterexamples, and to change nothing. The owner asked
+        for it to be published in full, unsoftened. The same kind of agent that helped build the game also wrote this
+        review of it, so read it with that in mind. Every claim below points to something you can check.
+      </p>
+      <p>Sources:</p>
+      <ul>
+        <li>The full public git history: 151 commits from 2026-09-26 to 2026-10-14, Specs 001 to 013, and pull requests #1 to #9.</li>
+        <li>The temporary spec, plan, gate, verification and review records kept alongside the code.</li>
+        <li>46 local Claude Code session transcripts, read for the owner’s typed messages and the agent’s replies.</li>
+        <li>This site’s Journey, Evidence and Story pages as they were on 2026-10-14.</li>
+      </ul>
+      <p>
+        Beck’s words are quoted from selected excerpts of his 2026 talk,
+        <a href="https://www.youtube.com/watch?v=F8fBgDCf2Y4">“software craftsmanship and AI-augmented development”</a>.
+        Times on this page are US Central. Line counts come from tracked files at commit
+        <a href={c('88e3f60')}><code>88e3f60</code></a>, sorted by path. They size the work and say nothing about its value.
+      </p>
+    </section>
+
+    <section id="assessment" class="prose">
+      <h2>Assessment</h2>
+      <p>
+        ArrowSpark mostly <strong>corroborates</strong> Beck. It worked best when it behaved the way he describes: small
+        changes to deployed software, judged by a person, followed by another change. Where its record resembles the
+        one-shot model he criticizes, it struggled. The clearest cases are a 485-line, 80-task showcase spec and a 61-task
+        mobile plan that shipped as a small admission change.
+      </p>
+      <p>
+        DevSpark’s real contribution is narrower than “spec-driven development works.” It made each iteration’s intent,
+        assumptions and evidence explicit and durable. That made the plausibility gap visible. Adversarial review before
+        code, and pull-request review after every gate was green, both found real defects that tests had not. It also gave
+        the human a fixed place to say “this is wrong,” and that happened in almost every spec.
+      </p>
+      <p>
+        The cost is large and measurable. The temporary planning and verification record runs to about 69,400 lines,
+        including roughly 323,000 words of Markdown plus raw evidence logs. Against that sit about 8,900 lines of product
+        code and 6,300 lines of tests. Nearly every spec went through a fix-and-rerun gate cycle. The owner repeatedly
+        had to write explicit limits to stop reviews from widening the scope, and gates demanded evidence that could not
+        exist yet.
+      </p>
+      <p>
+        The mission evidence is thin. The game is live and playable, and its designer likes it. Nothing is recorded from
+        anyone else, and the fresh-player test has now been deferred twice.
+      </p>
+    </section>
+
+    <ul class="figures" aria-label="Key figures">
+      <li><span class="figures__v">13</span><span class="figures__k">specs, all merged, in 18 days</span></li>
+      <li><span class="figures__v">~8,900</span><span class="figures__k">lines of product code (game and site)</span></li>
+      <li><span class="figures__v">~6,300</span><span class="figures__k">lines of tests</span></li>
+      <li><span class="figures__v">~69,400</span><span class="figures__k">lines of temporary planning and evidence records</span></li>
+      <li><span class="figures__v">2</span><span class="figures__k">rule-core files unchanged since Sept 26–27</span></li>
+      <li><span class="figures__v">0</span><span class="figures__k">independent players with recorded results</span></li>
+    </ul>
+
+    <section id="chronology">
+      <div class="prose">
+        <h2>Chronology</h2>
+        <p>
+          Each spec started from the software the previous one left behind. Quotations are the owner’s own words from the
+          session transcripts, spelling included.
+        </p>
+      </div>
+      <div class="table-frame">
+        <table class="timeline">
+          <thead><tr><th scope="col">Spec</th><th scope="col">Starting point and change</th><th scope="col">What happened</th><th scope="col">What it taught</th><th scope="col">Evidence</th></tr></thead>
+          <tbody>
+            {timeline.map((row) => (
+              <tr>
+                <th scope="row">{row.spec}<span class="timeline__date">{row.date}</span></th>
+                <td>{row.delta}</td>
+                <td>{row.happened}</td>
+                <td>{row.learned}</td>
+                <td class="timeline__links">{row.links.map(([label, url]) => <a href={url}>{label}</a>)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="matrix">
+      <div class="prose">
+        <h2>Beck’s arguments, one at a time</h2>
+        <p>
+          For each argument: the quote, the evidence for and against, how strong that evidence is, and what it adds up
+          to.
+        </p>
+      </div>
+      <div class="matrix">
+        {matrix.map((arg) => (
+          <article class="arg">
+            <h3><span class="arg__key">{arg.key}</span>{arg.title}</h3>
+            <blockquote>“{arg.quote}” <cite>{arg.at}</cite></blockquote>
+            <p class="arg__chips"><Badge tone={strengthTone[arg.strength]}>Evidence: {arg.strength}</Badge><Badge tone="info">{arg.stance}</Badge></p>
+            <div class="arg__cols">
+              <div><h4>For</h4><ul>{arg.support.map((item) => <li>{item}</li>)}</ul></div>
+              <div><h4>Against</h4><ul>{arg.against.map((item) => <li>{item}</li>)}</ul></div>
+            </div>
+            <p class="arg__assessment"><strong>Assessment.</strong> {arg.assessment}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section id="cases" class="prose">
+      <h2>Case studies: working software, a bounded change, a new baseline</h2>
+      <p>
+        The model under test is <em>working software, then a bounded spec, plan, implement, verify, consolidate, then new
+        working software</em>. ArrowSpark followed every step except consolidate. That step happened in documents, not
+        code.
+      </p>
+      <h3>Strongest support</h3>
+      <ol>
+        <li>
+          <strong>A test fixture redirected the game (008 to 013).</strong> A viewport spec needed a large validation
+          puzzle. Playing it produced “level 15 is a game changer.” That observation shaped the next three specs, and the
+          composed level’s playtest finding about too many obvious moves became Spec 013’s stated core problem. Every step
+          started from merged software that someone had played.
+        </li>
+        <li>
+          <strong>A green experiment was overturned (006).</strong> Six puzzles met every measured target, and the owner’s
+          play said they were dull. The spec closed as a successful disproof, and the next spec changed direction instead
+          of tuning the numbers.
+        </li>
+        <li>
+          <strong>Ship the beta, then learn (012, then PR #8).</strong> The owner cut the mobile plan down to an admission
+          change and released it. After a week of real use with friends came the request for modeless gestures, a
+          291-line fix. Deployed use found the requirement that no plan had.
+        </li>
+      </ol>
+      <h3>Strongest counterexamples</h3>
+      <ol>
+        <li>
+          <strong>Planning ahead of feedback (011).</strong> Most of a day went to specify, clarify, analyze and critic
+          cycles, a task list argued down from about 90, and a framework upgrade. All of that came before about 2.3 hours
+          of implementation. Its central desktop-only assumption fell to the owner’s own phone the next morning.
+        </li>
+        <li>
+          <strong>A plan not grounded in current code (012).</strong> The plan misdescribed how the existing engine handled
+          touch until a second review checked it against the code.
+        </li>
+        <li>
+          <strong>Verification that accepted prepared conclusions (009).</strong> The verify gate correctly failed. It was
+          then closed by accepting a pre-written playtest conclusion, so the new baseline’s “learning” was partly asserted,
+          not observed.
+        </li>
+      </ol>
+    </section>
+
+    <section id="effectiveness">
+      <div class="prose">
+        <h2>What helped, what hurt</h2>
+        <p>This separates the practice (explicit, bounded specs) from the tooling (DevSpark’s particular gates and artifacts).</p>
+      </div>
+      <div class="table-frame">
+        <table>
+          <thead><tr><th scope="col">Practice</th><th scope="col">Finding</th><th scope="col">Example</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Adversarial review before code</th><td><Badge tone="positive">Added value</Badge></td><td>The keyboard focus gap (005), the completed-attempt guard (007), wrong engine facts (012), and a small-screen scaling risk that later came true</td></tr>
+            <tr><th scope="row">Pull-request review after the gates</th><td><Badge tone="positive">Added value</Badge></td><td>A focus defect, a deploy that could never run, stale knowledge, and an unowned acceptance (<a href={pr(4)}>#4</a>, <a href={pr(5)}>#5</a>, <a href={pr(9)}>#9</a>)</td></tr>
+            <tr><th scope="row">The owner asking the agent to restate the rules</th><td><Badge tone="positive">Added value</Badge></td><td>Four undecided rules found before any code (002)</td></tr>
+            <tr><th scope="row">Solver-backed regression gates in CI</th><td><Badge tone="positive">Added value</Badge></td><td>Every puzzle proven solvable. The rule core never regressed across eleven later specs.</td></tr>
+            <tr><th scope="row">Recording unrun checks as unrun</th><td><Badge tone="positive">Added value</Badge></td><td>Verify recorded as warn (008). An amended criterion kept beside its original (<a href={c('6941414')}>010</a>).</td></tr>
+            <tr><th scope="row">Durable knowledge as the lasting record</th><td><Badge tone="positive">Added value</Badge></td><td>Later specs cite it as their starting point, which keeps them grounded as changes to what exists</td></tr>
+            <tr><th scope="row">One-question-at-a-time playtest interview</th><td><Badge tone="positive">Added value</Badge></td><td>Spec 010’s verbatim, unprimed answers, in contrast with 009</td></tr>
+            <tr><th scope="row">Rerun-until-clean gate loops</th><td><Badge tone="critical">Friction</Badge></td><td>Wording and metadata findings rated critical for context, not for player risk</td></tr>
+            <tr><th scope="row">Evidence demands that could not yet be met</th><td><Badge tone="critical">Friction</Badge></td><td>A debug readout built and deleted (<a href={c('6851baf')}>6851baf</a>), a second player who did not exist, six sessions in 009</td></tr>
+            <tr><th scope="row">Task decomposition and bookkeeping</th><td><Badge tone="critical">Friction</Badge></td><td>About 90 tasks cut to 80 in 011 (<a href={c('8120d00')}>8120d00</a>), and a script written just to tick checkboxes</td></tr>
+            <tr><th scope="row">Framework upgrades mid-spec</th><td><Badge tone="critical">Friction</Badge></td><td>Two upgrades, during 011 (<a href={c('a6cf97e')}>a6cf97e</a>) and 013 (<a href={c('8c902e4')}>8c902e4</a>)</td></tr>
+            <tr><th scope="row">Lighter gates in 013</th><td><Badge tone="caution">Promising</Badge></td><td>Shorter planning, while review still caught an overreach. One spec of evidence so far.</td></tr>
+            <tr><th scope="row">Whether gates prevented defects that would otherwise have shipped</th><td><Badge tone="neutral">Unknown</Badge></td><td>There was no run without them to compare</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="prose after-table">
+        One pattern stands out. Over time the owner became the convergence mechanism. The prompts grew longer and more
+        defensive (“DO NOT reopen”, “DO NOT require”, “only a Blocking Defect should generate additional implementation
+        work”). DevSpark’s later additions read like the tooling learning what the human had been doing by hand: focused
+        rechecks, a judge step, and the rule that an accepted limitation needs a real acceptor. That counts in DevSpark’s
+        favor as an instrument that evolves. It also shows that, at the time, it needed a human to stop it.
+      </p>
+    </section>
+
+    <section id="futures" class="prose">
+      <h2>Features and futures</h2>
+      <p>
+        <strong>Features delivered:</strong> a playable loop with unlimited mistakes; bent multi-cell arrows with
+        validation and a solver; continuous arrows that unwind; a catalog with Level Select, Replay, Next and level groups;
+        Open Move and session scoring; zoom, pan and Fit, then a world canvas around the board; a web build, this site and
+        a feedback client; a landscape mobile beta with modeless touch; and eight foundations puzzles, thirteen lab
+        experiments, one composed level and a progression of eight.
+      </p>
+      <p>
+        <strong>Futures demonstrated:</strong> the rules-apart-from-screen boundary absorbed the canvas, web, touch and
+        camera changes without a single rule edit. The solver and analyzer were reused as instruments, and level groups
+        were added as metadata. <strong>Futures claimed but not yet used:</strong> a clean path to procedural generation,
+        analyzer measures as generator inputs, and feedback data driving design. <strong>Futures being used up:</strong>
+        content authored as coordinates in a growing code file, deferred small-screen scaling, and the unverified iPhone
+        path.
+      </p>
+      <p>
+        Measured Beck’s way: <strong>effort</strong> was 46 agent sessions plus a design conversation that was not
+        recorded. <strong>Output</strong> was 13 specs, 151 commits and about 4,100 passing checks. The
+        <strong>outcome</strong> is a live game that one person finds enjoyable, clearly richer than it was at Spec 005.
+        The <strong>mission</strong> question, whether it is enjoyable and accessible for players, is still unmeasured.
+        The architecture leaves it free to keep evolving.
+      </p>
+    </section>
+
+    <section id="narrative" class="prose">
+      <h2>What this site’s story should change</h2>
+      <p>These recommendations apply to the rest of this site. They are recorded here and will be acted on separately.</p>
+      <ul>
+        <li>
+          <strong>Journey</strong> stops at the showcase launch, and step 7 implies gamepad navigation works in the
+          browser, which was never tested. Add the mobile beta, the gestures that came from real use, and the world-canvas
+          progression. Add the lesson that the desktop-only assumption fell within a day of launch.
+        </li>
+        <li>
+          <strong>Evidence</strong> still says there is no claim of support on phones, tablets or touch screens, which a
+          released beta now contradicts, and its counts are frozen at Spec 010. State that the beta was verified on one
+          Android phone and that iPhone is unverified. Say plainly that outside-player results have not been reported.
+          Show the process cost next to the test counts.
+        </li>
+        <li>
+          <strong>Story</strong> clocks start at the first commit. Spec 002’s spec session began about 50 minutes before
+          that, and “fourteen minutes from idea to task list” followed a pre-written brief. Present the line “the process
+          was the reason the speed was safe” as the author’s view, because nothing tests it against an alternative.
+        </li>
+        <li>
+          <strong>What the story leaves out:</strong> ChatGPT’s role as design partner and prompt drafter, the agent
+          deleting the deploy workflow, the misdiagnosed “screen too small” notice, and the pre-written evidence in 009.
+          Give two or three agent failures the same weight as the successes.
+        </li>
+        <li>
+          <strong>Framing:</strong> lead with what each iteration taught and changed in the game, and keep the clock as
+          context. That is the most direct answer to Beck’s point about mission.
+        </li>
+      </ul>
+    </section>
+
+    <section id="feedback">
+      <div class="prose">
+        <h2>Feedback on DevSpark</h2>
+        <p>
+          Every proposal below starts from a behavior observed in this project, and none of them adds a new gate. Most
+          remove work or give the human’s judgment a defined place in the process. Each one names the signal that would
+          show it worked.
+        </p>
+      </div>
+      {feedback.map((group) => (
+        <div class="fb-group">
+          <h3>{group.theme}</h3>
+          <div class="fb-list">
+            {group.items.map((item) => (
+              <article class="fb">
+                <h4>{item.title}</h4>
+                <dl>
+                  <dt>Observed</dt><dd>{item.observed}</dd>
+                  <dt>Change</dt><dd>{item.change}</dd>
+                  <dt>Signal</dt><dd>{item.signal}</dd>
+                </dl>
+              </article>
+            ))}
+          </div>
+        </div>
+      ))}
+    </section>
+
+    <section id="limits" class="prose">
+      <h2>Limits of this research</h2>
+      <ul>
+        <li>The brief assumed GitHub Copilot. No evidence of Copilot use was found and no commit mentions it. The agent record is Claude Code, which co-authored 90 commits. The editor’s own Copilot storage was not searched.</li>
+        <li>The ChatGPT design conversation is not available. It shows up only as pasted text and a timeline document derived from it, so its share of the thinking cannot be measured.</li>
+        <li>Transcripts were read for typed messages and agent replies. Some answers given through question prompts fell outside that reading.</li>
+        <li>Timestamps bracket activity; they do not measure effort. Gate records were often overwritten in place, so rerun counts are lower bounds.</li>
+        <li>Classifying lines by path is a judgment call. Puzzle data counts as game code, and evidence logs count as planning.</li>
+        <li>For this review the game and tests were not run, not every test was audited for weak assertions, and not every gate finding was classified by real impact.</li>
+        <li>There is one developer and one tester, no telemetry and no reported feedback data, so player satisfaction cannot be inferred.</li>
+      </ul>
+    </section>
+
+    <section id="verdict" class="prose">
+      <h2>Final verdict</h2>
+      <blockquote>
+        “ArrowSpark demonstrates that specification-driven development can operationalize iterative engineering when each
+        specification defines a bounded delta against current working software, implementation generates feedback, and
+        verification establishes the next baseline.”
+      </blockquote>
+      <div class="verdict verdict--inline">
+        <p class="verdict__label">Partially supported</p>
+        <p><strong>Supported:</strong> all thirteen specs were bounded changes grounded in the current software. Feedback from implementation was carried forward explicitly. Verification set honest baselines with their gaps recorded, and the architecture held across eleven later specs.</p>
+        <p><strong>Not supported:</strong> the claim that the specification process itself drove the iteration. Within a spec the flow was sequential. The most valuable feedback loops ran through the human playing the game, often against the process’s own demands, and twice outside a spec cycle. There is no mission-level evidence beyond one designer.</p>
+        <p><strong>Not contradicted:</strong> nothing in the record shows bounded specs blocking iteration. The failures came from excess (ceremony, upfront planning, evidence demands), not from the bounded-delta model itself.</p>
+      </div>
+      <h3>What would strengthen the conclusion</h3>
+      <ol>
+        <li>Outside-player results from this site, tied to puzzle versions, and at least one change made because of them.</li>
+        <li>One spec cycle with time recorded per phase, so the cost of planning and gates can be weighed against what they found.</li>
+        <li>A ledger of every gate finding showing whether it was a runtime defect or an artifact issue, and whether CI or the human would have caught it anyway.</li>
+        <li>A deliberate consolidation change, such as moving puzzle content out of code.</li>
+        <li>A side-by-side comparison of a light-touch change and a full-ceremony change of similar size, measured by defects and rework.</li>
+      </ol>
+      <p>
+        <a href="/devspark/">Back to Built with DevSpark</a> · <a href="/evidence/">Evidence</a> · <a href="/story/">Read the story</a>
+      </p>
+    </section>
+  </article>
+</BaseLayout>
+
+<style>
+  .research { padding-block: var(--space-10) var(--space-16); }
+  .crumbs { display: flex; gap: var(--space-2); font-size: var(--fs-sm); font-weight: var(--fw-semibold); color: var(--text-muted); margin-bottom: var(--space-6); }
+  .research__title { font-size: var(--fs-h1); color: var(--brand); margin-top: var(--space-3); max-width: 22ch; }
+  .research__lede { font-size: var(--fs-xl); color: var(--ink-700); max-width: 62ch; margin-top: var(--space-5); }
+  .prose { max-width: var(--container-prose); font-size: var(--fs-lg); line-height: var(--lh-relaxed); }
+  .prose p, .prose ul, .prose ol { margin: 0 0 var(--space-5); }
+  .prose li { margin-bottom: var(--space-2); }
+  section { scroll-margin-top: var(--space-20); }
+  h2 { font-size: var(--fs-h2); margin: var(--space-16) 0 var(--space-5); padding-top: var(--space-6); border-top: var(--border-thick) solid var(--ink-900); }
+  h3 { font-size: var(--fs-h4); margin: var(--space-10) 0 var(--space-4); }
+  h4 { font-size: var(--fs-lg); margin: 0 0 var(--space-3); }
+  blockquote {
+    margin: var(--space-4) 0;
+    padding: var(--space-2) 0 var(--space-2) var(--space-5);
+    border-left: var(--border-accent) solid var(--accent);
+    color: var(--ink-700);
+    font-style: italic;
+  }
+  cite { display: block; font-style: normal; font-size: var(--fs-sm); color: var(--text-muted); margin-top: var(--space-1); }
+  .verdict {
+    margin-top: var(--space-8);
+    max-width: var(--container-prose);
+    background: var(--surface-card);
+    border: var(--border-hairline) solid var(--border-default);
+    border-left: var(--border-accent) solid var(--caution);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+  }
+  .verdict p { margin: var(--space-2) 0 0; }
+  .verdict__eyebrow { font-size: var(--fs-xs); font-weight: var(--fw-bold); letter-spacing: var(--ls-eyebrow); text-transform: uppercase; color: var(--text-muted); }
+  .verdict .verdict__label { font-family: var(--font-display); font-weight: var(--fw-extrabold); font-size: var(--fs-h3); color: var(--text-strong); margin-top: var(--space-1); }
+  .verdict--inline { margin-bottom: var(--space-5); }
+  .toc { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: var(--space-8) 0; font-size: var(--fs-sm); font-weight: var(--fw-semibold); }
+  .toc a { padding: var(--space-1) var(--space-3); border: var(--border-hairline) solid var(--border-default); border-radius: var(--radius-pill); background: var(--surface-card); text-decoration: none; }
+  .figures { list-style: none; margin: var(--space-8) 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr)); gap: var(--space-3); }
+  .figures li { background: var(--surface-card); border: var(--border-hairline) solid var(--border-default); border-radius: var(--radius-md); padding: var(--space-4); display: grid; gap: var(--space-1); }
+  .figures__v { font-family: var(--font-display); font-weight: var(--fw-extrabold); font-size: var(--fs-2xl); color: var(--text-strong); font-variant-numeric: tabular-nums; }
+  .figures__k { font-size: var(--fs-sm); color: var(--ink-600); line-height: var(--lh-snug); }
+  .table-frame { overflow-x: auto; margin-top: var(--space-6); border: var(--border-hairline) solid var(--border-default); border-radius: var(--radius-lg); background: var(--surface-card); }
+  table { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); line-height: var(--lh-normal); }
+  th, td { text-align: left; vertical-align: top; padding: var(--space-3) var(--space-4); border-bottom: var(--border-hairline) solid var(--border-subtle); }
+  thead th { font-size: var(--fs-xs); letter-spacing: var(--ls-wide); text-transform: uppercase; color: var(--text-muted); background: var(--surface-sunken); }
+  tbody tr:last-child > * { border-bottom: 0; }
+  tbody th { font-family: var(--font-display); font-weight: var(--fw-bold); color: var(--text-strong); }
+  .timeline { min-width: 60rem; }
+  .timeline tbody th { white-space: nowrap; }
+  .timeline__date { display: block; font-family: var(--font-body); font-weight: var(--fw-medium); font-size: var(--fs-xs); color: var(--text-muted); }
+  .timeline__links { display: flex; flex-direction: column; gap: var(--space-1); white-space: nowrap; }
+  .after-table { margin-top: var(--space-6); }
+  .matrix { display: grid; gap: var(--space-5); margin-top: var(--space-6); }
+  .arg { background: var(--surface-card); border: var(--border-hairline) solid var(--border-default); border-radius: var(--radius-lg); padding: clamp(var(--space-5), 3vw, var(--space-8)); min-width: 0; }
+  .arg h3 { margin: 0; display: flex; gap: var(--space-3); align-items: baseline; }
+  .arg__key { font-family: var(--font-mono); font-size: var(--fs-base); color: var(--brand); }
+  .arg__chips { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: var(--space-3) 0 var(--space-4); }
+  .arg__cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); gap: var(--space-6); }
+  .arg__cols > div { min-width: 0; }
+  .arg h4 { font-size: var(--fs-xs); letter-spacing: var(--ls-eyebrow); text-transform: uppercase; color: var(--text-muted); }
+  .arg ul { margin: 0; padding-left: var(--space-5); }
+  .arg li { margin-bottom: var(--space-2); }
+  .arg__assessment { margin: var(--space-5) 0 0; padding-top: var(--space-4); border-top: var(--border-hairline) solid var(--border-subtle); }
+  .fb-group h3 { margin-top: var(--space-10); }
+  .fb-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr)); gap: var(--space-4); }
+  .fb { background: var(--surface-card); border: var(--border-hairline) solid var(--border-default); border-top: var(--border-thick) solid var(--brand); border-radius: var(--radius-lg); padding: var(--space-5); min-width: 0; }
+  .fb dl { margin: 0; display: grid; gap: var(--space-2); }
+  .fb dt { font-size: var(--fs-xs); font-weight: var(--fw-bold); letter-spacing: var(--ls-eyebrow); text-transform: uppercase; color: var(--text-muted); margin-top: var(--space-2); }
+  .fb dd { margin: 0; }
+</style>
