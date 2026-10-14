@@ -115,7 +115,7 @@ narrow screens.
     asks for a larger screen. `PlayUnavailableNotice.astro` shows the message,
     links to the story and offers to copy the link or open the visitor's own
     mail app with it. Nothing is collected.
-- **Desktop browsers: what is verified.** The game loads and plays, with mouse wheel zoom, middle-button drag and keyboard menu navigation, in Chrome, Firefox, the VS Code internal browser and Perplexity's browser (versions not recorded). Safari and Edge are untested and not claimed.
+- **Desktop browsers: supported and verified.** The supported desktop browsers are Firefox, Chrome, and Chrome-derived (Chromium-based) browsers, as defined in the constitution's verification principle. The game loads and plays, with mouse wheel zoom, middle-button drag and keyboard menu navigation, in Chrome, Firefox, and two Chromium-based browsers (the VS Code internal browser and Perplexity's browser); versions were not recorded. Edge is Chromium-based and so inside the supported set, but it has not been tested individually. Safari is outside the set and not claimed.
 - **Mobile web beta: what is verified.** Public wording is "ArrowSpark now
   works on mobile web in beta. Landscape is recommended. Some touch gestures
   are still being refined." Real-device evidence so far is one Google Pixel 7
