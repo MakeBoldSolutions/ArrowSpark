@@ -206,7 +206,7 @@ func _check_effects() -> void:
 		check(view._geometry == geometry_before_duplicate and view._departure_distance == distance_before_duplicate \
 				and view.scale == Vector2.ONE and view._head.color == GameVisualStyle.ARROW_NORMAL,
 			"terminal departure ignores stale effects and duplicate starts")
-		view.advance_departure(0.3)
+		view.advance_departure(view._finish_distance / PuzzleFeedback.EXIT_SPEED_CELLS_PER_SECOND + 0.1)
 		view.advance_departure(0.3)
 		check(completions[0] == 1, "departure emits completion exactly once")
 		view.free()

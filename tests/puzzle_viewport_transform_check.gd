@@ -105,25 +105,98 @@ func _test_noop_bound_keeps_fit_mode() -> void:
 func _test_pan_clamping() -> void:
 	var transform := _make(Vector2i(40, 30), Vector2(1000, 600))
 	transform.zoom_at(4.0, Vector2(500, 300))
-	var s := transform.cell_pixels
-	var half := (Vector2(1000, 600) - Vector2(32, 32)) / (2.0 * s)
 	transform.pan_pixels(Vector2(1.0e6, 1.0e6))
-	check(_near_v(transform.center_cells, half, 0.001), "dragging content far right/down clamps to the top-left margin")
-	check(_near_v(transform.logical_to_local(Vector2.ZERO), Vector2(16, 16), 0.01),
-		"at the top-left extreme the board corner sits on the fit margin")
+	check(_near_v(transform.center_cells, Vector2(0, 0), 0.001), "dragging content far right/down stops with the top-left corner at the center")
+	check(_near_v(transform.logical_to_local(Vector2.ZERO), Vector2(500, 300), 0.01),
+		"at the top-left extreme the board corner sits at the middle of the viewport")
 	transform.pan_pixels(Vector2(-1.0e6, -1.0e6))
-	check(_near_v(transform.center_cells, Vector2(40, 30) - half, 0.001), "dragging the other way clamps to the far corner")
-	check(_near_v(transform.logical_to_local(Vector2(40, 30)), Vector2(984, 584), 0.01),
-		"at the far extreme the board corner sits on the fit margin")
+	check(_near_v(transform.center_cells, Vector2(40, 30), 0.001), "dragging the other way stops with the far corner at the center")
+	check(_near_v(transform.logical_to_local(Vector2(40, 30)), Vector2(500, 300), 0.01),
+		"at the far extreme the far board corner sits at the middle of the viewport")
+	var inside := transform.logical_to_local(Vector2(39, 29))
+	check(inside.x > 0.0 and inside.x < 500.0 and inside.y > 0.0 and inside.y < 300.0,
+		"part of the board always remains inside the viewport")
 
-	# per-axis: a board that fits one axis stays centered there while the other pans.
+	# Both axes pan independently now, even where the board would fit the view.
 	var tall := _make(Vector2i(4, 60), Vector2(400, 400))
 	tall.zoom_at(1.44, Vector2(200, 200))
-	var wide_axis_center := tall.center_cells.x
 	tall.pan_pixels(Vector2(300, 300))
-	check(_near(wide_axis_center, 2.0) and _near(tall.center_cells.x, 2.0),
-		"an axis whose board fits the view stays centered while the other axis pans")
-	check(tall.center_cells.y < 30.0, "the long axis still pans")
+	check(tall.center_cells.x < 2.0 and tall.center_cells.x >= 0.0, "the short axis also pans, within the board")
+	check(tall.center_cells.y < 30.0, "the long axis pans")
+
+func _corner_reach_cases() -> Array:
+	var grids: Array[Vector2i] = [Vector2i(5, 5), Vector2i(10, 5), Vector2i(40, 30), Vector2i(46, 32), Vector2i(4, 60)]
+	var areas: Array[Vector2] = [Vector2(1000, 600), Vector2(640, 320), Vector2(1280, 720)]
+	var cases: Array = []
+	for grid in grids:
+		for area in areas:
+			cases.append([grid, area])
+	return cases
+
+func _test_corner_reach() -> void:
+	var all_reached := true
+	var centered := true
+	var checked := 0
+	for case in _corner_reach_cases():
+		var grid: Vector2i = case[0]
+		var area: Vector2 = case[1]
+		var probe := _make(grid, area)
+		var fit_scale := probe.cell_pixels
+		for target in [fit_scale * 1.01, fit_scale * 2.0, probe.max_cell_pixels()]:
+			if target <= fit_scale * 1.005 or target > probe.max_cell_pixels() + 0.001:
+				continue
+			for corner in [Vector2(0, 0), Vector2(grid.x, 0), Vector2(0, grid.y), Vector2(grid)]:
+				var transform := _make(grid, area)
+				transform.zoom_at(target / transform.cell_pixels, area / 2.0)
+				transform.pan_pixels(Vector2(1.0e6 if corner.x == 0.0 else -1.0e6, 1.0e6 if corner.y == 0.0 else -1.0e6))
+				checked += 1
+				if not _near_v(transform.center_cells, corner, 0.001):
+					all_reached = false
+				if not _near_v(transform.logical_to_local(corner), area / 2.0, 0.01):
+					centered = false
+	check(checked > 0, "corner reach covers several board shapes, viewports and scales (%d cases)" % checked)
+	check(all_reached, "every board corner can become the camera center at every zoom above Fit")
+	check(centered, "a corner brought to the center projects to the middle of the viewport")
+
+func _test_fit_lock() -> void:
+	var transform := _make(Vector2i(40, 30), Vector2(1000, 600))
+	var small := _make(Vector2i(5, 5), Vector2(1000, 600))
+	check(not small.pan_pixels(Vector2(300, 300)) and small.fit_mode, "a small board at Fit cannot be dragged")
+	transform.zoom_at(4.0, Vector2(100, 100))
+	transform.pan_pixels(Vector2(1.0e6, 1.0e6))
+	transform.zoom_at(0.0001, Vector2(500, 300))
+	check(_near(transform.cell_pixels, transform.fit_cell_pixels(), 0.001), "zooming all the way out reaches the Fit scale")
+	check(_near_v(transform.center_cells, Vector2(20, 15), 0.001), "reaching the Fit scale re-centers the board")
+	check(not transform.pan_pixels(Vector2(200, 200)), "the Fit scale locks panning again")
+
+func _test_edge_anchor_stability() -> void:
+	# While the center bound does not bind, the board point under the anchor stays
+	# within one screen pixel, including with the board edge near the anchor.
+	var worst := 0.0
+	for corner in [Vector2(0, 0), Vector2(40, 30)]:
+		for anchor in [Vector2(500, 300), Vector2(700, 380), Vector2(300, 220)]:
+			var transform := _make(Vector2i(40, 30), Vector2(1000, 600))
+			transform.zoom_at(3.0, Vector2(500, 300))
+			transform.pan_pixels(Vector2(1.0e6 if corner.x == 0.0 else -1.0e6, 1.0e6 if corner.y == 0.0 else -1.0e6))
+			for factor in [1.2, 1.2, 1.2, 1.0 / 1.2]:
+				var before := transform.local_to_logical(anchor)
+				if not transform.zoom_at(factor, anchor):
+					continue
+				var center := transform.center_cells
+				var inside_bounds: bool = center.x > 0.0005 and center.y > 0.0005 and center.x < 39.9995 and center.y < 29.9995
+				if not inside_bounds:
+					continue
+				worst = maxf(worst, (transform.local_to_logical(anchor) - before).length() * transform.cell_pixels)
+	check(worst < 1.0, "zoom anchored at a point keeps it within one pixel whenever the center bound does not bind (worst %.4f px)" % worst)
+
+	var edge := _make(Vector2i(40, 30), Vector2(1000, 600))
+	edge.zoom_at(4.0, Vector2(500, 300))
+	edge.pan_pixels(Vector2(1.0e6, 1.0e6))
+	var anchor_point := Vector2(700, 380)
+	var anchored_before := edge.local_to_logical(anchor_point)
+	edge.zoom_at(1.5, anchor_point)
+	check((edge.local_to_logical(anchor_point) - anchored_before).length() * edge.cell_pixels < 1.0,
+		"zooming in with a board corner at the center keeps the point under the pointer")
 
 func _test_pan_pixels_sign() -> void:
 	var transform := _make(Vector2i(40, 30), Vector2(1000, 600))
@@ -243,6 +316,9 @@ func _initialize() -> void:
 	_test_zoom_anchor_and_limits()
 	_test_noop_bound_keeps_fit_mode()
 	_test_pan_clamping()
+	_test_corner_reach()
+	_test_fit_lock()
+	_test_edge_anchor_stability()
 	_test_pan_pixels_sign()
 	_test_fit_resets()
 	_test_resize_policy()

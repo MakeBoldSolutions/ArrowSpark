@@ -104,17 +104,15 @@ route on resize or navigation (only the parent projection changes).
 
 A departure finishes only once cell-distance progress reaches
 `length + forward_clearance(...)` (route length plus remaining edge distance
-plus the tail-cap radius plus a small tolerance margin), so full-tail
+plus the tail-cap radius plus the exit margin, `PuzzleFeedback.EXIT_CLEARANCE_MARGIN_CELLS`, so the arrow travels well past the edge), so full-tail
 clearance — not head exit — triggers completion, exactly once, guarded
 against direct-call bypass of pause/invalid-layout/already-finished state.
 `PuzzleBoard` erases active ownership, reparents the view into a passive
-`DepartureClip` `Control` (clip_contents, mouse-filter ignore) sized to the
-full logical board extent (canonical pixels, at the `World` origin under the
+`DepartureClip` `Control` (not clipping, mouse-filter ignore) sized to the full logical board extent (canonical pixels, at the `World` origin under the
 World transform), and connects the one-shot
 completion before starting movement. Active and departing views share the one `World` projection; departing
 views never restart or recompute their route, only their parent projection
-changes, and a departure watched at any zoom (or entirely off-screen) still
-clears the full logical board. Pause
+changes, and a departure watched at any zoom (or entirely off-screen) still clears the full logical board and the exit margin beyond it. Pause
 suspends advancement with the tree (also enforced by an explicit paused
 check so direct test calls cannot bypass it); an invalid (zero, tiny or non-finite) layout suspends
 advancement through `ArrowView.set_presentation_layout_valid` without

@@ -23,7 +23,7 @@ Two things stand between the showcase and "comfortable sending people to": (1) t
 
 ### Decision Summary
 
-Ship the camera fix first as a small, isolated change to the presentation transform (clamp the camera center to the board rectangle instead of clamping the viewport edge), then add about eight hand-authored levels as literal catalog data proven by the existing solver. No rules, scoring, persistence or site contract changes.
+Ship the camera fix first (the departure presentation change is confirmed in scope by the owner as FR-023) as a small, isolated change to the presentation transform (clamp the camera center to the board rectangle instead of clamping the viewport edge), then add about eight hand-authored levels as literal catalog data proven by the existing solver. No rules, scoring, persistence or site contract changes.
 
 ### Key Drivers
 
@@ -173,3 +173,13 @@ web/                                                # evidence/story copy only i
 ## Complexity Tracking
 
 No constitution violations; section intentionally empty.
+
+
+## Implementation Notes
+
+- 2026-10-14, camera (T004): the clamp limits the camera center to the board rectangle above the Fit scale and locks it to the board center at Fit. Because of that bound, zoom keeps the point under the pointer fixed only while the center bound does not bind. The case that does bind is zooming out with the pointer on the board side while a corner is at the center; there the view settles at the corner instead of holding the point. The transform check measures the in-bounds case (worst drift well under one pixel). This narrows FR-021's "no drift introduced by clamping"; classified Accepted Limitation.
+- 2026-10-14, departures (T007, T008): the clip is off and `EXIT_CLEARANCE_MARGIN_CELLS` is 6.0. The value is provisional until the owner's desktop smoke measures the added time before Results and judges whether removal is hidden (SC-012).
+- 2026-10-14, tests (T009): `tests/puzzle_presentation_check.gd` also assumed a 0.6 s departure; its completion budget now derives from the view's finish distance. `puzzle_layout_check.gd` and the canvas timing budget needed no change.
+- 2026-10-14, catalog (T016 to T023): the eight builders share a new `_from_shapes` helper in `puzzle_catalog.gd` instead of repeating the Reference Knot's literal loop; the Reference Knot builder is untouched.
+- 2026-10-14, authoring: levels were found with a throwaway offline search (not committed) that places arrows in reverse solve order, with center-outward layering for the two dense levels; the game's solver confirmed all eight. The exact search parameters are recorded as observations in the design-learning record, not as code.
+- 2026-10-14, engine: the only Godot available locally was 4.7.2, not the pinned 4.4. Both gates and editor validation passed on 4.7.2 (editor validation ran on a copy of the project to avoid rewriting the repository's `.godot` cache). Results on the pinned 4.4 have not been obtained.

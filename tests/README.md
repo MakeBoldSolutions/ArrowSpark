@@ -16,7 +16,7 @@ requires exit code zero and `REGRESSION_FAILURES=0`. Each Godot process has a
 Play/New Game, or selecting a puzzle from Level Select, does not call
 `GlobalState.reset()` or `GameState.start_game()` (the no-reset guarantee for
 existing saved progress), and that New Game always sets `PuzzleSession` to
-the Reference Knot (`reference_knot`) regardless of a prior Level Select choice
+the first ArrowSpark level (`first_knot`) regardless of a prior Level Select choice
 earlier in the same session. The isolated project also carries `scripts/puzzle/puzzle_definition.gd`,
 `scripts/puzzle/puzzle_catalog.gd` and `scripts/puzzle_session.gd`, since
 `main_menu_with_animations.gd`'s `new_game()`/Level Select handler now
@@ -80,9 +80,9 @@ This runs nine independent headless checks, in execution order:
    fingerprint, checks the appended `canvas_validation` fixture (40x30, fifty-two
    arrows, long bent arrows, all four directions, a tail-caused dependency, a
    top-left open move, occupied corners) and the Next flow from puzzle 14, and
-   enumerates all 22 authored catalog entries (eight baseline puzzles, six
+   enumerates all 30 authored catalog entries (eight baseline puzzles, six
    structural experiments, one large-canvas fixture, six Gordian Knot
-   experiments and the Reference Knot) in three purpose groups asserting, for each: a unique, non-empty stable id
+   experiments, eight progression levels and the Reference Knot) in three purpose groups asserting, for each: a unique, non-empty stable id
    independent of array position; structural validity via
    `PuzzleDefinition.is_valid()`; solver-confirmed solvability via
    `PuzzleSolver.analyze()`; the returned witness replays against a fresh

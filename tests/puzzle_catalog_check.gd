@@ -20,7 +20,7 @@ func check(condition: bool, description: String) -> void:
 ## fails loudly rather than skipping the malformed one.
 func _check_full_catalog_solvable() -> void:
 	var count := PuzzleCatalog.count()
-	check(count == 22, "the catalog contains 21 existing puzzles and the Reference Knot")
+	check(count == 30, "the catalog contains 21 existing puzzles, eight progression levels and the Reference Knot")
 
 	var seen_ids: Dictionary = {}
 	for i in range(count):
@@ -103,7 +103,7 @@ func _check_groups() -> void:
 	check(total == PuzzleCatalog.count(), "group membership covers every catalog entry exactly once")
 	check(PuzzleCatalog.ids_in_group("foundations").size() == 8, "Foundations has 8 entries")
 	check(PuzzleCatalog.ids_in_group("puzzle_lab").size() == 13, "Puzzle Lab has 13 entries")
-	check(PuzzleCatalog.ids_in_group("arrowspark_levels").size() == 1, "ArrowSpark Levels has 1 entry")
+	check(PuzzleCatalog.ids_in_group("arrowspark_levels").size() == 9, "ArrowSpark Levels has the eight progression levels and the Reference Knot")
 	for i in range(PuzzleCatalog.count()):
 		var id := PuzzleCatalog.id_at(i)
 		check(group_ids.has(PuzzleCatalog.group_of(id)), "entry '%s' has a valid group" % id)
@@ -114,7 +114,10 @@ func _check_groups() -> void:
 	check(PuzzleCatalog.group_position("subtle_blockers") == 8, "subtle_blockers is eighth in Foundations")
 	check(PuzzleCatalog.group_position("nested_chain") == 1, "nested_chain is first in Puzzle Lab")
 	check(PuzzleCatalog.group_position("knot_boundary") == 13, "knot_boundary is thirteenth in Puzzle Lab")
-	check(PuzzleCatalog.group_position("reference_knot") == 1, "reference_knot is first in ArrowSpark Levels")
+	check(PuzzleCatalog.group_position("first_knot") == 1, "first_knot is first in ArrowSpark Levels")
+	check(PuzzleCatalog.group_position("reference_knot") == 9, "reference_knot is last in ArrowSpark Levels")
+	check(PuzzleCatalog.next_in_group("almost_a_knot") == "reference_knot", "the last progression level leads into the Reference Knot")
+	check(PuzzleCatalog.next_in_group("first_knot") == "two_neighborhoods", "the progression runs in its intended order")
 	check(PuzzleCatalog.next_in_group("intro") == "first_bend", "next_in_group advances within a group")
 	check(PuzzleCatalog.next_in_group("subtle_blockers") == "", "next_in_group ends at the last Foundations entry")
 	check(PuzzleCatalog.next_in_group("knot_boundary") == "", "next_in_group ends at the last Puzzle Lab entry")
@@ -454,6 +457,48 @@ func _check_puzzle_session_defaults_and_navigation() -> void:
 	check(PuzzleSession.get_current_id() == PuzzleCatalog.id_at(0),
 		"an invalid current id falls back to the first catalog entry on next read")
 
+## The progression levels keep their ids, titles, order, dimensions, arrow counts
+## and exact geometry: a change to any of them must fail here. Each level also
+## belongs to ArrowSpark Levels, ahead of the Reference Knot, and none relies on
+## isolated single-cell arrows for its geometry.
+const PROGRESSION_LEVELS: Array[Dictionary] = [
+	{"id": "first_knot", "title": "First Knot", "size": Vector2i(9, 7), "arrows": 9, "version": "g1-8f675c5f02cc"},
+	{"id": "two_neighborhoods", "title": "Two Neighborhoods", "size": Vector2i(15, 9), "arrows": 15, "version": "g1-ecf87d2e92ec"},
+	{"id": "the_bridge", "title": "The Bridge", "size": Vector2i(17, 9), "arrows": 14, "version": "g1-1fa47c6f7736"},
+	{"id": "false_simplicity", "title": "False Simplicity", "size": Vector2i(14, 11), "arrows": 17, "version": "g1-d324da959318"},
+	{"id": "the_rescan", "title": "The Rescan", "size": Vector2i(20, 12), "arrows": 23, "version": "g1-6f5cf54bbf35"},
+	{"id": "major_release", "title": "Major Release", "size": Vector2i(22, 14), "arrows": 30, "version": "g1-f916a6ea8496"},
+	{"id": "dense_weave", "title": "Dense Weave", "size": Vector2i(26, 16), "arrows": 68, "version": "g1-030c1402781a"},
+	{"id": "almost_a_knot", "title": "Almost a Knot", "size": Vector2i(36, 24), "arrows": 93, "version": "g1-76fa1582e5a2"},
+]
+
+func _check_progression_levels() -> void:
+	var group := PuzzleCatalog.ids_in_group(PuzzleCatalog.GROUP_ARROWSPARK_LEVELS)
+	check(group.size() == PROGRESSION_LEVELS.size() + 1, "ArrowSpark Levels holds the progression and the Reference Knot")
+	var versions: Dictionary = {}
+	var previous_arrows := 0
+	for i in range(PROGRESSION_LEVELS.size()):
+		var expected: Dictionary = PROGRESSION_LEVELS[i]
+		var id: String = expected["id"]
+		check(group[i] == id, "progression position %d keeps id '%s'" % [i + 1, id])
+		check(PuzzleCatalog.get_title(id) == expected["title"], "'%s' keeps its title" % id)
+		var definition: PuzzleDefinition = PuzzleCatalog.get_definition(id)
+		check(Vector2i(definition.width, definition.height) == expected["size"], "'%s' keeps its board dimensions" % id)
+		check(definition.arrows.size() == expected["arrows"], "'%s' keeps its arrow count" % id)
+		var version := PuzzleContentVersion.of(definition)
+		check(version == expected["version"], "'%s' content version is pinned at %s (got %s)" % [id, expected["version"], version])
+		check(not versions.has(version), "'%s' has a content version distinct from the other levels" % id)
+		versions[version] = true
+		var singles := 0
+		for head in definition.arrows.keys():
+			if definition.get_arrow_cells(head).size() == 1:
+				singles += 1
+		check(singles == 0, "'%s' relies on no isolated single-cell arrows" % id)
+		check(definition.arrows.size() >= previous_arrows - 2, "'%s' does not step back in size from the level before it" % id)
+		previous_arrows = definition.arrows.size()
+	check(PuzzleContentVersion.of(PuzzleCatalog.get_definition("reference_knot")) != "", "the Reference Knot remains in the group")
+	check(not versions.has(REFERENCE_KNOT_CONTENT_VERSION), "no progression level shares the Reference Knot's geometry")
+
 ## The Reference Knot is the showcase level: every observed session and every
 ## reaction names this exact geometry. A change to its board must fail here.
 const REFERENCE_KNOT_CONTENT_VERSION := "g1-7ce0942d4a5e"
@@ -502,6 +547,7 @@ func _check_reference_knot_content_version() -> void:
 func _initialize() -> void:
 	_check_full_catalog_solvable()
 	_check_reference_knot_content_version()
+	_check_progression_levels()
 	_check_original_entries_unchanged()
 	_check_canvas_validation_fixture()
 	_check_knot_entries()

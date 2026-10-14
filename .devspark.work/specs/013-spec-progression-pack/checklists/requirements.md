@@ -40,7 +40,7 @@
 - [x] Measurability: SC-010 given a one-pixel tolerance; SC-009 narrowed to a headless all-board-sizes check plus sampled hand checks, so it does not contradict the "no large manual test matrices" exclusion.
 - [x] Existing artifacts affected are named: durable architecture knowledge of the bounds clamp (FR-016) and existing headless checks asserting the old clamp (FR-022).
 - [x] Fit-scale pan resolved with the owner: locked and centered at Fit, buffer reachable only after zooming in beyond Fit. Buffer size remains a planning decision.
-- [ ] Not yet re-run: analyze and critic gates against the updated spec.
+- [x] Analyze and critic gates re-run via planning review; verdict PROCEED. FR-023 (departing arrows) and SC-012 added with the owner's decision.
 
 ## Notes
 

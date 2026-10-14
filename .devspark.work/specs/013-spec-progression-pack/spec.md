@@ -4,7 +4,7 @@ classification: full-spec
 risk_level: medium
 target_workflow: specify-full
 required_artifacts: spec, plan, tasks
-recommended_next_step: plan
+recommended_next_step: implement
 required_gates: checklist, analyze, critic
 depends_on: []
 supersedes: []
@@ -21,7 +21,7 @@ participants:
 
 **Feature Branch**: `013-spec-progression-pack`
 **Created**: 2026-10-11
-**Status**: Draft <!-- Valid: Draft | In Progress | Complete -->
+**Status**: In Progress <!-- Valid: Draft | In Progress | Complete -->
 **Input**: User description: "Create a small curated progression of hand-authored, solver-proven ArrowSpark levels that bridge the gap between the small Foundations puzzles and the 115-arrow Reference Knot. Content only; not a generator."
 
 > This spec is temporary working state under `.devspark.work/specs/`. It remains there until
@@ -73,7 +73,7 @@ Hand-author a short progression of real levels, each exploring a distinct kind o
 ### Architectural Impact
 
 - Catalog gains new entries in the existing level group. Stable ids of current puzzles are unchanged.
-- Three layers become explicit: the viewport (the screen area), the board (the puzzle grid) and the world (the board plus empty buffer). The camera clamp in `PuzzleViewportTransform` moves from the board to the world. This is a presentation-layer change in `PuzzleViewportTransform` and `PuzzleBoard` only.
+- Three layers become explicit: the viewport (the screen area), the board (the puzzle grid) and the world (the board plus whatever lies beyond its edges). The camera clamp in `PuzzleViewportTransform` moves from the board to the world. This is a presentation-layer change in `PuzzleViewportTransform` and `PuzzleBoard` only.
 - No change to puzzle rules, scoring, the solver's meaning, board geometry or hit testing in logical coordinates, input mapping, persistence or the site.
 - Group-relative numbering and group-scoped Next Puzzle shift as designed when entries are added; this is expected behavior, not a regression.
 
@@ -98,6 +98,7 @@ A short, targeted gameplay fix. A player zooms into a dense region and pans so t
 3. **Given** the camera near a board edge, **When** the player wheel-zooms or pinch-zooms there, **Then** the board point under the cursor or between the fingers stays under it.
 4. **Given** the player has panned into the empty world, **When** they use Fit Puzzle or a reveal (hint, selection), **Then** the board is brought back into view as before.
 5. **Given** the camera, **When** panned far from the board, **Then** it stops while some of the board remains reachable: the player cannot lose the board.
+6. **Given** the player completes arrows while the board edge is on screen, **When** an arrow departs, **Then** it is not sliced at the board edge; it keeps moving past the edge and is removed only after travelling a fixed margin beyond it.
 
 ---
 
@@ -145,7 +146,7 @@ A player who has learned the basics moves through roughly eight hand-authored le
 
 - **FR-001**: The catalog MUST gain between six and ten new hand-authored, player-facing levels, targeting about eight, placed in the level group that currently holds only the Reference Knot and ordered before it.
 - **FR-002**: Each new level MUST be valid and proven solvable by the existing solver, with the evidence recorded.
-- **FR-003**: Each new level MUST use only existing gameplay rules, scoring, rendering and input; no rule, scoring, hint, persistence or UI change is part of this spec beyond the camera/world change in FR-018 to FR-022.
+- **FR-003**: Each new level MUST use only existing gameplay rules, scoring, rendering and input; no rule, scoring, hint, persistence or UI change is part of this spec beyond the camera/world change in FR-018 to FR-022 and the departure presentation change in FR-023.
 - **FR-004**: Each new level MUST have a stable id and a distinct, player-appropriate title, and MUST carry a short design-intent note naming its primary challenge or experience.
 - **FR-005**: The set MUST present meaningfully different structures or experiences, drawn from ideas such as: tracing long or bent arrows; nearby arrow ownership; multiple local neighborhoods; dependencies between neighborhoods; bridge arrows; short follow-up chains; uncertainty followed by insight; major releases that open several moves; renewed whole-board rescans; rising visual density; longer tails and more bends. The ideas and the illustrative titles (First Knot, Two Neighborhoods, The Bridge, False Simplicity, The Rescan, Major Release, Dense Weave, Almost a Knot) are guidance, not a required list.
 - **FR-006**: The set MUST rise in scale and demand in a way a reviewer can describe as a progression; the first new level MUST be a plausible next step after the Foundations material and the last a plausible lead-in to the Reference Knot.
@@ -163,11 +164,13 @@ A player who has learned the basics moves through roughly eight hand-authored le
 
 #### Story 1 - Navigation and world buffer
 
-- **FR-018**: The puzzle view MUST distinguish a board (the puzzle grid) from a world (the board plus empty buffer on every side), and MUST allow the camera center to reach any point of the board, including all four corners, at every zoom level beyond Fit (at Fit the whole board is already in view and the view stays centered).
-- **FR-019**: The world buffer MUST be large enough that a board corner can be centered in the viewport at any zoom, and MUST be bounded so that part of the board always remains inside the viewport.
+- **FR-018**: The puzzle view MUST distinguish a board (the puzzle grid) from a world (the board plus whatever empty space the viewport shows beyond its edges), and MUST allow the camera center to reach any point of the board, including all four corners, at every zoom level beyond Fit (at Fit the whole board is already in view and the view stays centered).
+- **FR-019**: The reachable world MUST allow a board corner to be centered in the viewport at any zoom beyond Fit (the camera center is limited to the board itself, so no separate buffer size exists), and MUST be bounded so that part of the board always remains inside the viewport.
 - **FR-020**: Fit Puzzle, initial view, reveal-on-hint/selection and window resize MUST keep their current framing behavior; the buffer is only reachable by panning after zooming in beyond Fit, and MUST NOT change how a fitted board looks; at Fit scale the view stays centered and does not pan.
 - **FR-021**: Wheel zoom, pinch zoom and the zoom buttons MUST keep the anchor point (cursor, pinch midpoint or viewport center) fixed in board space, including near and beyond board edges, with no drift introduced by clamping.
 - **FR-022**: The camera change MUST be confined to the presentation layer; logical board geometry, hit testing in board coordinates, solver, state and scoring MUST be unchanged. Existing headless checks that assert the old board-edge clamp MUST be updated to the new behavior, and checks MUST be added for corner-centering, bounded pan and anchor stability.
+
+- **FR-023**: Departing arrows MUST NOT be clipped at the board edge. A departing arrow MUST continue past the board edge and be removed only after travelling a fixed margin (in cells, independent of pixel size or zoom) beyond it, so that removal is not visible in the common zoomed-in view. The added time before Results MUST be measured and recorded; rules, state, scoring and the order of completion MUST be unchanged.
 
 ### Key Entities
 
@@ -185,15 +188,16 @@ A player who has learned the basics moves through roughly eight hand-authored le
 - **SC-005**: A reviewer reading the intent notes can name a different primary challenge for every level, and none relies mainly on isolated single-cell arrows.
 - **SC-006**: In the designer's judgment, the step from the previous level to each next level, including from the last new level to the Reference Knot, is not a cliff; any judged cliff is recorded as a finding with its classification.
 - **SC-007**: A design-learning record exists that a future generator specification could cite, and no generator code, runtime generation or procedural content is added.
-- **SC-008**: Zero changes to gameplay rules, scoring, hint behavior, persistence, controls layout or the showcase site's contracts. The only engine change is the camera/world clamp.
+- **SC-008**: Zero changes to gameplay rules, scoring, hint behavior, persistence, controls layout or the showcase site's contracts. The only engine changes are the camera/world clamp and the departure presentation in FR-023.
 - **SC-009**: A headless check shows each of the four board corners can be brought to the viewport center for every distinct board size in the catalog; on desktop this is hand-confirmed on a small and a large puzzle, and on the real Android phone on one new level and the Reference Knot. Fit Puzzle looks unchanged.
 - **SC-010**: Pinch and wheel zoom near a board edge keep the board point under the anchor within one screen pixel of its pre-zoom position (headless check at the transform level; hand check on desktop and phone).
+- **SC-012**: Completing the Reference Knot zoomed in with a board edge near the screen center shows no arrow sliced at the board edge, and the added time before Results is measured and recorded.
 - **SC-011**: Choosing Play from the main menu starts the first new progression level.
 
 ## Assumptions
 
 - The existing solver and analyzer are sufficient; extending them is not part of this spec. If a needed characteristic is not reported by existing tooling, it is recorded as unavailable rather than built.
-- New levels fit the existing board model. Apart from the world-buffer camera change in User Story 1, the existing zoom, pan and Fit Puzzle support their size. The exact buffer size (for example, half a viewport per side) is a planning decision. Boards at or below the Reference Knot's size are expected.
+- New levels fit the existing board model. Apart from the world-buffer camera change in User Story 1, the existing zoom, pan and Fit Puzzle support their size. The world needs no separate buffer size: the camera center is limited to the board itself, and the viewport shows whatever lies beyond the edge. Boards at or below the Reference Knot's size are expected.
 - The existing puzzle content-version mechanism for the completion hand-off, if it derives from catalog content, updates by its existing means.
 - The designer's own playtesting is acceptable evidence of feel for this spec, and its single-tester limitation is acknowledged in the record rather than treated as a defect.
 - The reactions/feedback API is separate, already-working effort and is not part of this spec; this spec closes the remaining gameplay and content gaps before the owner shares the showcase.

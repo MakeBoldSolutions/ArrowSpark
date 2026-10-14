@@ -164,15 +164,16 @@ func _commit(new_scale: float, new_center: Vector2) -> bool:
 	fit_mode = false
 	return true
 
+## At the Fit scale the whole board is in view, so the view stays centered. Above
+## it the camera center may reach any point of the board (not just the interior),
+## so a corner or edge can be brought to the middle of the viewport; the empty
+## space beyond the board is simply what the viewport shows there.
 func _clamped_center(center: Vector2, scale: float) -> Vector2:
+	if scale <= fit_cell_pixels() + _EPSILON:
+		return Vector2(board_size) / 2.0
 	var result := center
 	for axis in 2:
-		var extent: float = float(board_size[axis])
-		var reach: float = (viewport_size[axis] - MIN_AXIS_PIXELS) / (2.0 * scale)
-		if extent > 2.0 * reach + _EPSILON:
-			result[axis] = clampf(center[axis], reach, extent - reach)
-		else:
-			result[axis] = extent / 2.0
+		result[axis] = clampf(center[axis], 0.0, float(board_size[axis]))
 	return result
 
 func _refresh_validity() -> void:

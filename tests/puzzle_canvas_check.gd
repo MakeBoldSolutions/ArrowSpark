@@ -161,6 +161,8 @@ func _check_initial_fit_and_large_board() -> void:
 			and is_equal_approx(world_rect.get_center().y, board_rect.get_center().y),
 		"the fitted world is centered in the board area")
 	check(board.clip_contents, "the board clips its contents to the viewport")
+	check(not board._departure_clip.clip_contents,
+		"departing arrows are not clipped at the board edge, which the camera can now show")
 	check(board._world.get_parent() == board and board._departure_clip.get_parent() == board._world,
 		"World is a child of the board and owns the departure clip")
 	check(board._world.mouse_filter == Control.MOUSE_FILTER_IGNORE \
@@ -201,6 +203,9 @@ func _check_zoom_pan_corners_and_invariants() -> void:
 		check(reached[corner_cell], "corner cell %s can be brought fully into view at the working scale" % [corner_cell])
 		var hit := board.view_transform.cell_at(rect.get_center())
 		check(hit == corner_cell, "corner cell %s resolves under its own center after panning" % [corner_cell])
+		var board_corner := Vector2(corner_cell.x + (1 if corner_cell.x > 0 else 0), corner_cell.y + (1 if corner_cell.y > 0 else 0))
+		check(transform.logical_to_local(board_corner).distance_to(board.size / 2.0) < 0.5,
+			"board corner %s is brought to the middle of the viewport" % [board_corner])
 
 	check(state_before == _snapshot(puzzle), "navigation leaves the rule state untouched")
 	check(identities_before == _view_identities(board), "navigation keeps every arrow view instance")
@@ -398,6 +403,23 @@ func _check_focused_actions() -> void:
 	var diagonal := (transform.center_cells - center_before) * scale
 	check(absf(diagonal.length() - PuzzleBoard.KEY_PAN_SPEED * 0.1) < 0.5,
 		"diagonal pan is normalized to the same speed as a straight pan")
+
+	# Held keys can bring the far corner to the center and no further.
+	Input.action_press(&"move_down")
+	Input.action_press(&"move_right")
+	for i in range(400):
+		board._process(0.1)
+	Input.action_release(&"move_down")
+	Input.action_release(&"move_right")
+	check(transform.center_cells.is_equal_approx(Vector2(board.definition.width, board.definition.height)),
+		"held keyboard or stick pan stops with the far board corner at the center")
+	Input.action_press(&"move_up")
+	Input.action_press(&"move_left")
+	for i in range(400):
+		board._process(0.1)
+	Input.action_release(&"move_up")
+	Input.action_release(&"move_left")
+	check(transform.center_cells.is_equal_approx(Vector2.ZERO), "held pan the other way stops at the near corner")
 
 	# Focus transfer: another focused control never lets the camera keep moving.
 	var pan_button: Button = puzzle.get_node("%PanButton")
