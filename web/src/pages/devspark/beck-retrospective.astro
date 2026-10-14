@@ -31,6 +31,12 @@ const sha: Record<string, string> = {
   '8c902e4': '8c902e496c39c15d3cb1ed151de8778837d7d382',
   '88e3f60': '88e3f6086e6b5a93182babbccb57c74dfd65ad73',
 };
+const TALK = 'https://www.youtube.com/watch?v=F8fBgDCf2Y4';
+/** Link to a moment in the talk, given as "m:ss". */
+const at = (stamp: string) => {
+  const [m, s] = stamp.split(':').map(Number);
+  return `${TALK}&t=${(m ?? 0) * 60 + (s ?? 0)}s`;
+};
 const c = (short: string) => `${REPO}/commit/${sha[short]}`;
 const pr = (n: number) => `${REPO}/pull/${n}`;
 
@@ -307,6 +313,19 @@ const feedback: { theme: string; items: { title: string; observed: string; chang
       support his critique, or does it show that small, delta-based specs can carry the iterative learning he argues for?
     </p>
 
+    <a class="talk" href={TALK}>
+      <span class="talk__play" aria-hidden="true">▶</span>
+      <span class="talk__text">
+        <span class="talk__eyebrow">Watch the talk · YouTube</span>
+        <span class="talk__title">Kent Beck on software craftsmanship and AI-augmented development (2026)</span>
+        <span class="talk__quote">“There’s a word for that, that’s exactly waterfall development where it didn’t work.” (35:27)</span>
+      </span>
+    </a>
+    <p class="talk__note">
+      Opens on YouTube. This page doesn’t embed the video, so nothing from YouTube loads until you choose to watch. Each
+      quote below links to its moment in the talk.
+    </p>
+
     <div class="verdict" aria-labelledby="verdict-top">
       <p class="verdict__eyebrow">Verdict</p>
       <p id="verdict-top" class="verdict__label">Partially supported</p>
@@ -432,7 +451,7 @@ const feedback: { theme: string; items: { title: string; observed: string; chang
         {matrix.map((arg) => (
           <article class="arg">
             <h3><span class="arg__key">{arg.key}</span>{arg.title}</h3>
-            <blockquote>“{arg.quote}” <cite>{arg.at}</cite></blockquote>
+            <blockquote>“{arg.quote}” <cite><a href={at(arg.at.split('–')[0] ?? '')}>{arg.at}</a></cite></blockquote>
             <p class="arg__chips"><Badge tone={strengthTone[arg.strength]}>Evidence: {arg.strength}</Badge><Badge tone="info">{arg.stance}</Badge></p>
             <div class="arg__cols">
               <div><h4>For</h4><ul>{arg.support.map((item) => <li>{item}</li>)}</ul></div>
@@ -670,6 +689,37 @@ const feedback: { theme: string; items: { title: string; observed: string; chang
     font-style: italic;
   }
   cite { display: block; font-style: normal; font-size: var(--fs-sm); color: var(--text-muted); margin-top: var(--space-1); }
+  .talk {
+    margin-top: var(--space-8);
+    max-width: var(--container-prose);
+    display: flex;
+    gap: var(--space-5);
+    align-items: center;
+    padding: var(--space-5);
+    background: var(--surface-dark);
+    color: var(--text-on-dark);
+    border-radius: var(--radius-lg);
+    text-decoration: none;
+    transition: box-shadow var(--dur-base) var(--ease-standard);
+  }
+  .talk:hover { box-shadow: var(--shadow-md); }
+  .talk:focus-visible { outline: none; box-shadow: var(--ring-focus); }
+  .talk__play {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: var(--space-16);
+    height: var(--space-16);
+    border-radius: var(--radius-pill);
+    background: var(--brand);
+    color: var(--text-on-brand);
+    font-size: var(--fs-xl);
+  }
+  .talk__text { display: grid; gap: var(--space-1); min-width: 0; }
+  .talk__eyebrow { font-size: var(--fs-xs); font-weight: var(--fw-bold); letter-spacing: var(--ls-eyebrow); text-transform: uppercase; color: var(--ember-300); }
+  .talk__title { font-family: var(--font-display); font-weight: var(--fw-extrabold); font-size: var(--fs-xl); line-height: var(--lh-snug); }
+  .talk__quote { font-size: var(--fs-sm); font-style: italic; color: var(--cream-deep); }
+  .talk__note { font-size: var(--fs-sm); color: var(--text-muted); max-width: var(--container-prose); margin: var(--space-3) 0 0; }
   .verdict {
     margin-top: var(--space-8);
     max-width: var(--container-prose);

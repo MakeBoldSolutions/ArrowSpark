@@ -36,6 +36,21 @@ const facts = (await getEntry('facts', 'main'))!.data;
     </p>
   </section>
 
+  <section class="page research" aria-labelledby="research">
+    <div class="research-card">
+      <Eyebrow>Research</Eyebrow>
+      <h2 id="research" class="research-card__title">Is this just waterfall with an AI?</h2>
+      <p class="research-card__lead">
+        Kent Beck argues that spec-driven AI development slides into waterfall. We tested that against all thirteen
+        ArrowSpark specs, the agent transcripts and this site’s own story, looking for counterexamples as hard as for
+        support. The verdict is <strong>partially supported</strong>: the specs were genuinely small, incremental
+        changes, but the iteration came mostly from a human playing the game, sometimes in spite of the process.
+      </p>
+      <p class="research-card__lead">It ends with concrete feedback for improving DevSpark, drawn from what was observed.</p>
+      <Button href="/devspark/beck-retrospective/" variant="primary">Read the assessment <Icon name="arrow-right" /></Button>
+    </div>
+  </section>
+
   <section class="page legend" aria-label="How to read the beats">
     <span class="legend__belief">Belief</span>
     <Icon name="arrow-right" />
@@ -95,21 +110,6 @@ const facts = (await getEntry('facts', 'main'))!.data;
     <Eyebrow>Worked and didn’t</Eyebrow>
     <h2 id="worked-didnt" class="section-title">What worked. What didn’t.</h2>
     <LessonsPair lessons={lessons} />
-  </section>
-
-  <section class="page section" aria-labelledby="research">
-    <Eyebrow>Research</Eyebrow>
-    <h2 id="research" class="section-title">Is this just waterfall with an AI?</h2>
-    <div class="research-card">
-      <p class="research-card__lead">
-        Kent Beck argues that spec-driven AI development slides into waterfall. We tested that against all thirteen
-        ArrowSpark specs, the agent transcripts and this site’s own story, looking for counterexamples as hard as for
-        support. The verdict is <strong>partially supported</strong>: the specs were genuinely small, incremental
-        changes, but the iteration came mostly from a human playing the game, sometimes in spite of the process.
-      </p>
-      <p class="research-card__lead">It ends with concrete feedback for improving DevSpark, drawn from what was observed.</p>
-      <Button href="/devspark/beck-retrospective/" variant="primary">Read the assessment <Icon name="arrow-right" /></Button>
-    </div>
   </section>
 
   <section class="section--sunken" aria-labelledby="reference-knot">
@@ -201,6 +201,8 @@ const facts = (await getEntry('facts', 'main'))!.data;
     margin: 0;
   }
   .more { font-size: var(--fs-lg); }
+  .research { padding-bottom: var(--space-12); }
+  .research-card__title { font-size: var(--fs-h3); margin: var(--space-2) 0 var(--space-4); }
   .research-card {
     max-width: var(--container-prose);
     background: var(--surface-card);
