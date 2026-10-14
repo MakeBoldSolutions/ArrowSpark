@@ -21,7 +21,7 @@ participants:
 
 **Feature Branch**: `013-spec-progression-pack`
 **Created**: 2026-10-11
-**Status**: In Progress <!-- Valid: Draft | In Progress | Complete -->
+**Status**: Complete <!-- Valid: Draft | In Progress | Complete -->
 **Input**: User description: "Create a small curated progression of hand-authored, solver-proven ArrowSpark levels that bridge the gap between the small Foundations puzzles and the 115-arrow Reference Knot. Content only; not a generator."
 
 > This spec is temporary working state under `.devspark.work/specs/`. It remains there until
@@ -83,7 +83,7 @@ Review the levels by playing them and reading the per-level notes, then check th
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - Comfortable navigation: any part of the board can be centered (Priority: P1)
+### User Story 1 - Comfortable navigation: any part of the board can be centered (Priority: P1) ✅ Complete
 
 A short, targeted gameplay fix. A player zooms into a dense region and pans so that any point of the board, including corners and edges, sits at the center of the screen, on desktop and on a touch phone. The board lives inside a larger empty world, so there is room to do this, as in the similar arrow games the owner likes. This ships first and is independently valuable on the existing puzzles.
 
@@ -95,14 +95,14 @@ A short, targeted gameplay fix. A player zooms into a dense region and pans so t
 
 1. **Given** any puzzle zoomed in, **When** the player pans toward a board corner, **Then** the corner cell can be brought to the center of the viewport.
 2. **Given** the puzzle at Fit Puzzle, **When** the view is shown, **Then** it frames the board as it does today; the extra world space is not visible until the player zooms in and pans out to it.
-3. **Given** the camera near a board edge, **When** the player wheel-zooms or pinch-zooms there, **Then** the board point under the cursor or between the fingers stays under it.
+3. **Given** the camera near a board edge, **When** the player wheel-zooms or pinch-zooms there, **Then** the board point under the cursor or between the fingers stays under it, except where the camera-center bound or the Fit lock leaves no way to hold it (for example zooming out with a board corner at the center), in which case the view settles at that bound.
 4. **Given** the player has panned into the empty world, **When** they use Fit Puzzle or a reveal (hint, selection), **Then** the board is brought back into view as before.
 5. **Given** the camera, **When** panned far from the board, **Then** it stops while some of the board remains reachable: the player cannot lose the board.
 6. **Given** the player completes arrows while the board edge is on screen, **When** an arrow departs, **Then** it is not sliced at the board edge; it keeps moving past the edge and is removed only after travelling a fixed margin beyond it.
 
 ---
 
-### User Story 2 - A hand-authored progression that fleshes out the demo (Priority: P1)
+### User Story 2 - A hand-authored progression that fleshes out the demo (Priority: P1) ✅ Complete
 
 A player who has learned the basics moves through roughly eight hand-authored levels that grow in size and in the kinds of thinking required, and reaches the Reference Knot having already met long and bent arrows, neighborhoods, dependencies and board-wide rescans. Each level offers a different experience, is proven solvable, and plays correctly on desktop and mobile web. Together with User Story 1 this brings the showcase to a state the owner is comfortable sending people to.
 
@@ -167,7 +167,7 @@ A player who has learned the basics moves through roughly eight hand-authored le
 - **FR-018**: The puzzle view MUST distinguish a board (the puzzle grid) from a world (the board plus whatever empty space the viewport shows beyond its edges), and MUST allow the camera center to reach any point of the board, including all four corners, at every zoom level beyond Fit (at Fit the whole board is already in view and the view stays centered).
 - **FR-019**: The reachable world MUST allow a board corner to be centered in the viewport at any zoom beyond Fit (the camera center is limited to the board itself, so no separate buffer size exists), and MUST be bounded so that part of the board always remains inside the viewport.
 - **FR-020**: Fit Puzzle, initial view, reveal-on-hint/selection and window resize MUST keep their current framing behavior; the buffer is only reachable by panning after zooming in beyond Fit, and MUST NOT change how a fitted board looks; at Fit scale the view stays centered and does not pan.
-- **FR-021**: Wheel zoom, pinch zoom and the zoom buttons MUST keep the anchor point (cursor, pinch midpoint or viewport center) fixed in board space, including near and beyond board edges, with no drift introduced by clamping.
+- **FR-021**: Wheel zoom, pinch zoom and the zoom buttons MUST keep the anchor point (cursor, pinch midpoint or viewport center) fixed in board space, including near and beyond board edges. The only exception is where the camera-center bound or the Fit lock leaves no way to hold the point (for example zooming out with a board corner at the center); there the view stays within bounds and settles at the bound instead of holding the point.
 - **FR-022**: The camera change MUST be confined to the presentation layer; logical board geometry, hit testing in board coordinates, solver, state and scoring MUST be unchanged. Existing headless checks that assert the old board-edge clamp MUST be updated to the new behavior, and checks MUST be added for corner-centering, bounded pan and anchor stability.
 
 - **FR-023**: Departing arrows MUST NOT be clipped at the board edge. A departing arrow MUST continue past the board edge and be removed only after travelling a fixed margin (in cells, independent of pixel size or zoom) beyond it, so that removal is not visible in the common zoomed-in view. The added time before Results MUST be measured and recorded; rules, state, scoring and the order of completion MUST be unchanged.
@@ -190,7 +190,7 @@ A player who has learned the basics moves through roughly eight hand-authored le
 - **SC-007**: A design-learning record exists that a future generator specification could cite, and no generator code, runtime generation or procedural content is added.
 - **SC-008**: Zero changes to gameplay rules, scoring, hint behavior, persistence, controls layout or the showcase site's contracts. The only engine changes are the camera/world clamp and the departure presentation in FR-023.
 - **SC-009**: A headless check shows each of the four board corners can be brought to the viewport center for every distinct board size in the catalog; on desktop this is hand-confirmed on a small and a large puzzle, and on the real Android phone on one new level and the Reference Knot. Fit Puzzle looks unchanged.
-- **SC-010**: Pinch and wheel zoom near a board edge keep the board point under the anchor within one screen pixel of its pre-zoom position (headless check at the transform level; hand check on desktop and phone).
+- **SC-010**: Pinch and wheel zoom near a board edge keep the board point under the anchor within one screen pixel of its pre-zoom position whenever the camera-center bound and the Fit lock do not bind (headless check at the transform level; hand check on desktop and phone).
 - **SC-012**: Completing the Reference Knot zoomed in with a board edge near the screen center shows no arrow sliced at the board edge, and the added time before Results is measured and recorded.
 - **SC-011**: Choosing Play from the main menu starts the first new progression level.
 

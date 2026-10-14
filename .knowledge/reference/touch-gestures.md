@@ -47,5 +47,5 @@ The needed logic is about sixty lines driving the existing transform, so no addo
 
 ## Open verification
 
-- Re-test pinch, drag and tap on the real Pixel 7 Pro after the `touch-action` change. If pinch still fails, find out whether the browser or the engine drops the second finger (the old spike probe in branch `012-spike-touch-prototype` shows build id and max fingers down).
+- Pinch, drag and tap were re-tested on the real Pixel 7 Pro in Chrome after the `touch-action` change and the modeless rewrite: pinch zoom and one-finger drag worked without issue and all levels were played through. Other Android devices and browsers have not been tested.
 - iPhone Safari remains unverified.

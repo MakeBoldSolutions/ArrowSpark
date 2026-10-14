@@ -182,4 +182,36 @@ No constitution violations; section intentionally empty.
 - 2026-10-14, tests (T009): `tests/puzzle_presentation_check.gd` also assumed a 0.6 s departure; its completion budget now derives from the view's finish distance. `puzzle_layout_check.gd` and the canvas timing budget needed no change.
 - 2026-10-14, catalog (T016 to T023): the eight builders share a new `_from_shapes` helper in `puzzle_catalog.gd` instead of repeating the Reference Knot's literal loop; the Reference Knot builder is untouched.
 - 2026-10-14, authoring: levels were found with a throwaway offline search (not committed) that places arrows in reverse solve order, with center-outward layering for the two dense levels; the game's solver confirmed all eight. The exact search parameters are recorded as observations in the design-learning record, not as code.
-- 2026-10-14, engine: the only Godot available locally was 4.7.2, not the pinned 4.4. Both gates and editor validation passed on 4.7.2 (editor validation ran on a copy of the project to avoid rewriting the repository's `.godot` cache). Results on the pinned 4.4 have not been obtained.
+- 2026-10-14, engine: the first runs used Godot 4.7.2 (editor validation on a project copy, to avoid rewriting the repository's `.godot` cache). The pinned Godot 4.4-stable was then downloaded from the official release (SHA-512 verified) and both gates were re-run from a clean copy of the repository: all nine puzzle-gate markers 0 and `REGRESSION_FAILURES=0` on 4.4.
+
+## Verification Record
+
+2026-10-14, automated browser run (headless Chrome driving the real Godot 4.4 Web export, served by the site's dev server as build `local`). Not a substitute for the owner's own desktop and phone checks.
+
+- Admission: at 1600 x 1150 with a fine pointer the Play page admits the game (`data-play="play"`); Godot 4.4 boots with WebGL 2; no console errors in any run.
+- Play: New Game starts "1. First Knot" (9 arrows).
+- Camera: with the First Knot zoomed in and held keys panning, the board's top-left corner reached the center of the board area, and the bottom-right corner likewise (arrows lie only in the opposite quadrant). Fit unchanged at start.
+- Departures: with the board's right edge at the screen center, an exiting arrow was not cut at the edge; at about 0.6 s its head was far past the edge, and at about 1.1 s its tail was still leaving the screen.
+- Full play-through: all nine ArrowSpark levels were played to Results by clicking arrows in solver order, each with 0 mistakes and 100% accuracy, including the 93-arrow Almost a Knot and the 115-arrow Reference Knot (session total 384 = 9+15+14+17+23+30+68+93+115). Next Puzzle moved from level 1 through to level 9; the Reference Knot offers Level Select instead of Next. Back from a level reached Level Select, which lists the group ending "8. Almost a Knot", "9. Reference Knot".
+- Time from the last click to the Results screen (includes the departure and the harness's own polling): 1.1 to 3.1 s across the nine levels (1.07, 2.06, 1.37, 2.1, 2.36, 2.06, 2.62, 1.18, 3.07). The margin adds about 0.6 s per departure by calculation (6 cells at 10 cells per second); it was not measured against the old margin.
+
+Owner confirmation (2026-10-14, own desktop play on the same build): gameplay is good, mouse wheel zoom works and middle-button drag works; the camera behavior wanted from the navigation story is as intended. The 6-cell departure margin was not objected to.
+
+Not run, and still the owner's to do:
+- Pan-mode left-drag was not tried by the owner; headless synthetic drags did not move the view, so the automated run covered only keyboard and button navigation.
+- Gamepad input, keyboard activation of Play and Level Select, Open Move at an edge, pause menu, Replay.
+- Other browsers (Edge launch failed under automation; Firefox not tried) and the real Android phone.
+- The designer's own play of the levels and the judgment on the departure margin and the step to the Reference Knot.
+- Levels 2 to 7 were played through but their screenshots were not examined beyond Results for the first, second and last levels.
+
+Findings classification: Accepted Limitation: anchor drift when the camera-center bound binds (see the camera note); departure removal may still be visible at extreme zoom-out with the camera at an edge. Learning / Changed Assumption: the dependency, depth and fill measures of the last level differ markedly from the Reference Knot (see the design-learning record). Deferred Work: the owner's per-level play notes and the real-device checks above. No Blocking Defect found.
+
+Owner phone and desktop report (2026-10-14, after playing all levels, phone reached over a self-signed HTTPS proxy on the local network):
+- All levels played; game play, difficulty of the new boards and the progression were judged good. Pinch zoom and one-finger drag worked without issue.
+- Finding (Deferred Work, outside this work's scope: no UI redesign or touch-target work): the menus between levels (Results and the other menus) are very small and hard to read on the phone, especially in fullscreen.
+- Finding (Deferred Work): the Play page's admission rule measures the visible page area, so on a phone in landscape with the browser's address bar showing, the viewport can be under 320 px high and the page says the screen is too small until the bar is hidden. Plain HTTP over the local network fails Godot's secure-context check; this affects only local testing.
+- Not recorded: phone model, Android version, browser.
+
+Owner device and desktop record (2026-10-14): phone was a Google Pixel 7 Pro in Chrome (Android version and Chrome version not recorded this time). Desktop: keyboard menu navigation works, Replay works and mouse play works (desktop browser not recorded; wheel zoom and middle-drag were confirmed earlier). Not exercised: gamepad, pause menu, Open Move at an edge, any browser other than Chrome, iPhone.
+
+Desktop browsers (owner, 2026-10-14): the game and the navigation worked in Chrome, Firefox, the VS Code internal browser and Perplexity's browser. Versions were not recorded. Not tested: Safari, Edge (the automated Edge launch failed), any mobile browser other than Chrome on Android, iPhone.

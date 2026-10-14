@@ -915,7 +915,7 @@ an invalid area the reveal stays pending and applies once on valid recovery with
 no extra rule call or assist; clearing or replacing the suggestion cancels it.
 
 Source of truth: tests/puzzle_viewport_transform_check.gd (pure numeric fit, inverse round trips, anchors, corner reach at several board shapes, viewports and scales, the Fit lock, bounded pan, mode policy, resize, invalid area, reveal, projection; run in an isolated project), tests/puzzle_canvas_check.gd
-(scene-level fit and layout for the large board and all original puzzles at four window sizes, wheel/drag/button navigation, limits, corner reachability to the viewport center by drag and by held keys, unclipped departures,
+(scene-level fit and layout for the large board and all original puzzles at four window sizes, wheel/drag/button navigation, limits, corner reachability to the viewport center by drag and by held keys and for every distinct catalog board size, unclipped departures,
 state and view-identity invariance, focus loop and remapping safety, drag
 eligibility and cancellation, transformed head/tail/empty/departed hits,
 blocked counters, Open Move reveal and pending reveal, state/solver/analyzer/

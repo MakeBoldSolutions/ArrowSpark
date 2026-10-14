@@ -217,6 +217,33 @@ func _check_zoom_pan_corners_and_invariants() -> void:
 	check(state_before == _snapshot(puzzle), "Fit Puzzle leaves the rule state untouched")
 	await _dispose(puzzle)
 
+## Every distinct board size in the catalog can have each of its four corners
+## brought to the viewport center, at a mid scale and at the maximum scale.
+func _check_corner_reach_for_every_catalog_size() -> void:
+	var sizes: Dictionary = {}
+	for id in PuzzleCatalog.ids():
+		var definition: PuzzleDefinition = PuzzleCatalog.get_definition(id)
+		sizes[Vector2i(definition.width, definition.height)] = id
+	var area := Vector2(1000, 600)
+	var failures_here := 0
+	var cases := 0
+	for size in sizes.keys():
+		for factor in [1.5, 1000.0]:
+			for corner in [Vector2(0, 0), Vector2(size.x, 0), Vector2(0, size.y), Vector2(size)]:
+				var transform := PuzzleViewportTransform.new()
+				transform.configure(size)
+				transform.resize_view(area)
+				transform.zoom_at(factor, area / 2.0)
+				if transform.cell_pixels <= transform.fit_cell_pixels() + 0.001:
+					continue # already at the Fit scale: the whole board is in view and stays centered
+				transform.pan_pixels(Vector2(1.0e6 if corner.x == 0.0 else -1.0e6, 1.0e6 if corner.y == 0.0 else -1.0e6))
+				cases += 1
+				if transform.logical_to_local(corner).distance_to(area / 2.0) > 0.5:
+					failures_here += 1
+	check(sizes.size() >= 15, "the catalog has %d distinct board sizes to check" % sizes.size())
+	check(cases > 0 and failures_here == 0,
+		"every catalog board size can bring each corner to the viewport center (%d cases, %d misses)" % [cases, failures_here])
+
 func _check_limit_saturation() -> void:
 	var puzzle := await _spawn(LARGE_ID)
 	var board := _board(puzzle)
@@ -1270,6 +1297,7 @@ func _initialize() -> void:
 		_long_heads.append(head)
 	await _check_initial_fit_and_large_board()
 	await _check_zoom_pan_corners_and_invariants()
+	_check_corner_reach_for_every_catalog_size()
 	await _check_limit_saturation()
 	await _check_wheel_step_scaling_and_clamp()
 	await _check_original_puzzles_fit_without_navigation()

@@ -13,7 +13,7 @@ appliesTo:
 
 What the eight progression levels (`first_knot` to `almost_a_knot`, between the Foundations and the Reference Knot) show about how levels are built and measured. This is a record of observations, kept so a later generator specification could use them as constraints. It commits to building nothing. Facts are separated from judgments and open questions.
 
-Evidence base: one designer, and the structural tooling (`PuzzleAnalyzer`, `PuzzleSolver`). The designer's own playtest notes per level are **not yet recorded** (see the last section); the measured facts below do not depend on them.
+Evidence base: one designer, and the structural tooling (`PuzzleAnalyzer`, `PuzzleSolver`). The designer played all eight levels on desktop and on a phone; their notes are in the last section and are aggregate, not per level. The measured facts below do not depend on them.
 
 ## Observed facts: what each level measures
 
@@ -50,17 +50,23 @@ Per-level structure that was checked directly, beyond the tooling's summary:
 ## Designer judgments
 
 - Recorded so far: once a search existed, finding a level for a given profile was cheap; placing dense boards by coordinates is slow, which is why the Reference Knot also grew from a hand-composed skeleton filled out by a seeded search (see its builder comment in the catalog).
-- The designer's judgment that the set steps up smoothly, and that each level offers the experience its comment states, has not been made yet; it needs play.
+- After playing every level on desktop and phone, the designer judged the new boards to be at the right level of difficulty and the progression to be good, and the game play to be what they wanted. This is one person's judgment and was not given level by level.
+- Pinch zoom and one-finger drag on the phone raised no issue and were described as fun.
 
 ## Open questions
 
-- The jump from `almost_a_knot` to the Reference Knot in structural terms is large: dependency depth 12 to 33, average arrow length 7.4 to 11.7, playable arrows at the start 16 to 6, fill 0.80 to 0.92. Whether it feels like a cliff is a judgment for play, and the amount of structure by which a step feels natural is unknown.
+- The jump from `almost_a_knot` to the Reference Knot in structural terms is large: dependency depth 12 to 33, average arrow length 7.4 to 11.7, playable arrows at the start 16 to 6, fill 0.80 to 0.92. The designer reported a good progression overall and did not single out that step, so no cliff was reported; whether the step feels natural to a first-time player is untested.
 - Structure is not perceived difficulty. Whether `false_simplicity` looks easier than it is, whether `the_rescan` forces rescans in play, and whether `dense_weave` reads as dense and not as a pile of short arrows, are untested.
 - Components, depth and fan-out describe a graph the player never sees. Which of them predict the experience of a level, if any, is open; a single designer is too small an evidence base to say.
 - Whether a generator could produce these profiles without the per-level constructions above is untested.
 
-## Playtest notes (to be recorded)
+## Playtest notes
 
-For each level the designer records where they searched, where an insight occurred, whether follow-up moves felt rewarding, whether the board felt tedious or satisfying, whether it produced a meaningful rescan, and which releases felt especially good. None of this has been recorded yet:
+Recorded once, in aggregate, after the designer played all eight levels (and the Reference Knot) on a desktop browser and on a phone:
 
-`first_knot`, `two_neighborhoods`, `the_bridge`, `false_simplicity`, `the_rescan`, `major_release`, `dense_weave`, `almost_a_knot`: not yet played and noted.
+- Game play: good, "just what I wanted".
+- Difficulty of the new boards: the right level.
+- Progression across the new levels: good.
+- Gestures on the phone (pinch zoom, drag): no issue.
+- Not noted per level: where the designer searched, where an insight occurred, which releases felt especially good. The structural measures are the only per-level record.
+- Not part of the levels, but observed in the same session: the between-level menu and results screens are small and hard to read on a phone, especially in fullscreen.
