@@ -59,7 +59,7 @@ findings:
     classification: accepted-limitation
     summary: "Zoom does not hold the pointer board point when the camera-center bound or the Fit lock leaves no way to (for example zooming out with a board corner at the center); the view settles at the bound."
     rationale: "Inherent to a bound on the camera center; the in-bounds case is within one pixel and tested. FR-021, SC-010 and the scenario were amended to state the exception, so no requirement as written is violated. Hits no expansion trigger."
-    accepted_by: "Mark Hazleton (owner), who confirmed the camera behavior as the desired behavior after hands-on desktop and phone play on 2026-10-14; the exception itself was not separately reviewed by them and is flagged for their confirmation in the verify report"
+    accepted_by: "Mark Hazleton (owner), who confirmed the camera behavior as the desired behavior after hands-on desktop and phone play, and then reviewed this specific exception and accepted it on 2026-10-14 (pull request review of #9, finding M-01)"
   - id: CO-004
     classification: learning
     summary: "A fixed 6-cell departure margin hides removal at normal zoom, but with the camera at a board edge and fully zoomed out the visible area beyond the edge spans many cells."

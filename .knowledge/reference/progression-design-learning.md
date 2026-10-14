@@ -31,7 +31,7 @@ All values come from `python tests/run_puzzle_structural_report.py`, which is de
 | `almost_a_knot` | 36x24 | 93 | 0.80 | 16 of 93 | 12 | 196 | 5 | 3 | 239 | 32 / 7.4 |
 | `reference_knot` (for comparison) | 46x32 | 115 | 0.92 | 6 of 115 | 33 | 661 | 1 | 5 | 207 | 43 / 11.7 |
 
-Per-level structure that was checked directly, beyond the tooling's summary:
+Per-level structure that was checked directly, beyond the tooling's summary. These checks (dependency counts across the gutter, the bridge's degrees, the key arrow's blockers, the nearest-arrow rescan count) come from an offline analysis script that is not kept in the repository, so they are the designer's observations and cannot be reproduced from the repo; the table above is reproducible with the structural report:
 
 - `two_neighborhoods`: the analyzer reports two components because one arrow stands alone; the other fourteen form one web. Counting dependencies by which side of the gutter the head sits on gives eight from the left cluster to the right and three the other way.
 - `the_bridge`: the long arrow (12 cells) has two arrows holding up its path and holds up two others. The graph has four components, so the bridge links part of the board, not all of it.
