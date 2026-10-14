@@ -2,14 +2,14 @@
 pr: 9
 devspark_version: "9.1.0"
 reviewed_commit: 776ae49719f8af1b8ee4f387c4f57b24009cc50d
-revision: 2
+revision: 3
 findings:
   critical: 0
   high: 0
-  medium: 1
-  low: 2
+  medium: 0
+  low: 0
   con: 0
-max_severity: medium
+max_severity: none
 risk_rating: medium
 risk_score: 6
 risk_escalated: false
@@ -28,13 +28,14 @@ risk_escalated: false
 |-----|--------|------|----------|------|--------|-----|-----|--------------|--------|
 | 1 | 776ae49 | 2026-10-14 | 0 | 0 | 1 | 2 | 1 | `python tests/run_puzzle_regressions.py` and `python tests/run_regressions.py` (Godot 4.4-stable, from an export of the PR head) | pass |
 | 2 | a85cb09 | 2026-10-14 | 0 | 0 | 1 | 2 | 0 | no code changed; `build_knowledge_index.py --check` and knowledge-integrity pass; the two gates were not re-run | pass |
+| 3 | ae7757e | 2026-10-14 | 0 | 0 | 0 | 0 | 0 | no code changed; `build_knowledge_index.py --check` and knowledge-integrity pass; the two gates were not re-run | pass |
 
 ## Stats
 
 | Metric | Value |
 |--------|-------|
 | Files changed | 198 (196 at rev 1; the platform sample returned only 100, all framework files; the 21 durable game, test and knowledge files were reviewed directly from the diff) |
-| Commits | 5 |
+| Commits | 7 |
 | Lines | +8898 −1601 (durable game, test and knowledge delta: +762 −91 in 21 files) |
 | Tiers (P0/P1/P2/P3) | script sample: 0 / 1 / 0 / 99, not representative; own assessment of the durable delta: game logic P1, tests P2, knowledge P3 |
 | Risk | medium (6) — production_without_tests, large_diff, unmapped_production; the first and third come from the unrepresentative sample and were kept, never lowered |
@@ -44,7 +45,7 @@ risk_escalated: false
 **Overall Assessment**: A small, well-bounded presentation change (camera clamp, unclipped departures) plus eight new literal-data levels, with tests, knowledge and verification that agree with each other. No blocking findings; two minor documentation points and one governance suggestion. The script's risk factors came from a 100-file sample that contained only framework files, so the rating was kept at medium rather than lowered or recomputed.
 
 - Constitution: PASS (6/6 principles checked) · Durable delta: PASS (0 open PRD findings)
-- Security: 0 issues · Quality: 2 recommendations · Testing: PASS (both gates 0 failures on Godot 4.4 from the PR head) · Docs: PASS
+- Security: 0 issues · Quality: 2 recommendations (resolved at rev 3) · Testing: PASS (both gates 0 failures on Godot 4.4 from the PR head) · Docs: PASS
 - Constitution Improvements: 1 CON finding (resolved at rev 2)
 - The change is verified as the author's closeout describes: `gates/closeout.md` is `complete`, 0 blocking defects, 0 unclassified, deferred items point at existing records.
 
@@ -56,9 +57,9 @@ None found.
 
 ### Recommended Improvements
 
-- [ ] **M-01** `.devspark.work/specs/013-spec-progression-pack/gates/closeout.md` (CO-003) — the accepted-limitation names the owner, but the owner confirmed the camera behavior generally and has not reviewed the specific exception. Ask for a one-line confirmation of the exception and record it.
-- [ ] **L-01** `.knowledge/reference/progression-design-learning.md:34` — several per-level measurements (cross-gutter dependency counts, bridge degrees, key-arrow blocking, the nearest-arrow rescan count) came from an offline script that is not in the repository, so a reader cannot reproduce them.
-- [ ] **L-02** commit `206c10a` — the subject "Refactor puzzle feedback and testing structure" does not describe what it contains (the camera clamp, unclipped departures and the eight levels). Use a squash merge with the PR title.
+- [x] **M-01** — *Fixed in ae7757e: the owner reviewed and accepted the specific zoom exception; the closeout record now says so* — `.devspark.work/specs/013-spec-progression-pack/gates/closeout.md` (CO-003) — the accepted-limitation names the owner, but the owner confirmed the camera behavior generally and has not reviewed the specific exception. Ask for a one-line confirmation of the exception and record it.
+- [x] **L-01** — *Fixed in ae7757e: the learning record states that the extra per-level checks come from an offline script not kept in the repo* — `.knowledge/reference/progression-design-learning.md:34` — several per-level measurements (cross-gutter dependency counts, bridge degrees, key-arrow blocking, the nearest-arrow rescan count) came from an offline script that is not in the repository, so a reader cannot reproduce them.
+- [x] **L-02** — *Fixed in ae7757e: the PR description now asks for a squash merge with the PR title; the pushed commit is not rewritten* — commit `206c10a` — the subject "Refactor puzzle feedback and testing structure" does not describe what it contains (the camera clamp, unclipped departures and the eight levels). Use a squash merge with the PR title.
 
 ### Constitution Improvements (Non-blocking — feed into `/devspark-evolve-constitution`)
 
@@ -82,14 +83,14 @@ None found. Checked: the clamp, the unclipped departure and margin, the catalog 
 
 | ID | Status | Principle | File:Line | Issue | Recommendation |
 |----|--------|-----------|-----------|-------|----------------|
-| M-01 | 🔴 Open | Closeout contract §4 (accepted-limitation needs a real acceptor) | .devspark.work/specs/013-spec-progression-pack/gates/closeout.md (CO-003) | The recorded acceptor confirmed the desired camera behavior after play but did not review the zoom exception (the pointer point is not held when the camera-center bound or the Fit lock binds). The artifact says so honestly; it is not yet an explicit acceptance. | The owner confirms the exception in one line (PR comment or the artifact), then update `accepted_by`. |
+| M-01 | ✅ Resolved | Closeout contract §4 (accepted-limitation needs a real acceptor) | .devspark.work/specs/013-spec-progression-pack/gates/closeout.md (CO-003) | The recorded acceptor confirmed the desired camera behavior after play but did not review the zoom exception (the pointer point is not held when the camera-center bound or the Fit lock binds). The artifact says so honestly; it is not yet an explicit acceptance. | The owner confirms the exception in one line (PR comment or the artifact), then update `accepted_by`. |
 
 ### Low Priority Improvements
 
 | ID | Status | File:Line | Issue and recommendation |
 |----|--------|-----------|--------------------------|
-| L-01 | 🔴 Open | .knowledge/reference/progression-design-learning.md:34 | The "checked directly" bullets rest on an uncommitted analysis script; add one sentence saying they come from an offline script not kept in the repo, or turn the cheap ones into assertions in the catalog check. |
-| L-02 | 🔴 Open | commit 206c10a | Misleading subject for a commit that carries the feature; squash-merge with the PR title so main's history reads correctly. |
+| L-01 | ✅ Resolved | .knowledge/reference/progression-design-learning.md:34 | The "checked directly" bullets rest on an uncommitted analysis script; add one sentence saying they come from an offline script not kept in the repo, or turn the cheap ones into assertions in the catalog check. |
+| L-02 | ✅ Resolved | commit 206c10a | Misleading subject for a commit that carries the feature; squash-merge with the PR title so main's history reads correctly. |
 
 ### Constitution Improvements
 
@@ -194,7 +195,7 @@ Removed tests: none; two assertions were replaced because their premise (the old
 
 ## Approval Decision
 
-**Recommendation**: ✅ APPROVE — no blocking findings; the two recommended items are documentation and merge-hygiene points that do not need to hold up the merge.
+**Recommendation**: ✅ APPROVE — no blocking findings; every recommended item is now resolved.
 
 *Approval depends only on the durable delta, validation evidence, constitution, and unresolved findings.*
 
