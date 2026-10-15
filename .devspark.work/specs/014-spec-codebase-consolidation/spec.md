@@ -22,7 +22,7 @@ participants:
 
 **Feature Branch**: `014-spec-codebase-consolidation`
 **Created**: 2026-10-15
-**Status**: In Progress <!-- Valid: Draft | In Progress | Complete -->
+**Status**: Complete <!-- Valid: Draft | In Progress | Complete -->
 **Input**: User description: "Organize the existing codebase into a coherent, maintainable structure, identify unnecessary complexity and duplication, and selectively consolidate code without changing game behavior."
 
 > This spec is temporary working state under `.devspark.work/specs/`. It remains there until
