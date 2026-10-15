@@ -71,3 +71,12 @@ Run on 2026-10-15 at `e424388`, whose production code is identical to `58a8bec`.
 - `grep 'a.y < b.y or (a.y == b.y and a.x < b.x)' scripts scenes` finds 1 definition (was 4).
 - Puzzle gate: exit 0, all 9 markers `=0`. Probe rerun versus `baseline-before.txt`:
   `PROBE_DIFF=EMPTY` (195,273 bytes, identical).
+
+## C3: direction step (T015–T016)
+
+- `ArrowView._direction_vector()` returns `Vector2(PuzzleDefinition.direction_vector(direction))`.
+  The four-branch `match` is gone, and an unknown value still maps to the zero vector.
+- Direction-to-step mappings in production code: 1 (was 2).
+- Puzzle gate: exit 0, all 9 markers `=0`. That includes the real-project canvas, presentation and
+  departure checks, which instantiate `ArrowView`. The PASS count is 7,511 against 7,390 at T001;
+  the +121 are exactly the C1 pin checks.

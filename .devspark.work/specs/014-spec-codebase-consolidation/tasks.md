@@ -67,8 +67,8 @@ participants:
 
 ### C3: direction step
 
-- [ ] T015 [US2] Make `_direction_vector()` return `Vector2(PuzzleDefinition.direction_vector(direction))` and remove its `match` in `scenes/puzzle/arrow_view.gd` (Implements: FR-006) (code_ref: pending | knowledge_ref: pending)
-- [ ] T016 [US2] Run the puzzle gate (canvas, presentation and departure checks run in the real project); grep confirms one direction-to-step mapping in production code (Implements: FR-006) (code_ref: pending | knowledge_ref: pending)
+- [X] T015 [US2] Make `_direction_vector()` return `Vector2(PuzzleDefinition.direction_vector(direction))` and remove its `match` in `scenes/puzzle/arrow_view.gd` (Implements: FR-006) (code_ref: scenes/puzzle/arrow_view.gd::_direction_vector | knowledge_ref: n/a: game-visual-system.md and arrow-puzzle.md do not describe the direction mapping (checked in T019))
+- [X] T016 [US2] Run the puzzle gate (canvas, presentation and departure checks run in the real project); grep confirms one direction-to-step mapping in production code (Implements: FR-006) (code_ref: scenes/puzzle/arrow_view.gd::_direction_vector | knowledge_ref: n/a: game-visual-system.md and arrow-puzzle.md do not describe the direction mapping (checked in T019))
 
 **Checkpoint**: Commit C3.
 
