@@ -118,8 +118,9 @@ at every step, counting arrows, never cells.
 
 `PuzzleState` also holds `open_move_assists` (int, defaults 0) alongside
 `mistakes`. `find_open_move()` returns one currently-legal active head,
-chosen deterministically in the same (y, x)-ascending order
-`PuzzleSolver.analyze()` walks, or `null` only if no active arrow remains; it
+chosen deterministically in (y, x)-ascending order
+(`PuzzleDefinition.head_less_than`, the one ordering `PuzzleSolver.analyze()`,
+`PuzzleContentVersion` and `PuzzleAnalyzer` also use), or `null` only if no active arrow remains; it
 is a pure query reusing `_is_head_blocked` directly, never a second rules
 engine, and it is callable at any time — including while a departure
 animation from an earlier removal is still visually in progress, since it
@@ -287,13 +288,18 @@ only three shorter than eight), all four directions appear, long tails cross
 the rays of other arrows so most removals unlock several others, all four
 corner regions are occupied, and the initial open move (the first legal head
 in (y, x) order) is near the top-left. The layout is fixed literal data built
-from orthogonal path vertices expanded deterministically by
+by `PuzzleCatalog._from_shapes`, like every other vertex-path board, from
+orthogonal path vertices expanded deterministically by
 `PuzzleCatalog._tail_along`; it was found once by a seeded offline search that
 kept every step solvable and is not generated at runtime. It exists to
 exercise large-board navigation, off-screen assistance and long departures;
 its difficulty is deliberately untuned. The original fourteen entries' ids, order, dimensions and exact arrow/tail
 content are pinned by fingerprints, as is the complete `canvas_validation`
-geometry. The six geometric experiments follow it in the same registry, then the progression levels and the Reference Knot.
+geometry. In addition, every catalog entry is pinned in one table
+(`CATALOG_PINS` in `tests/puzzle_catalog_check.gd`): its id, title, group,
+catalog position and the content version of its exact geometry. Any change to
+an existing board fails the catalog gate and names the entry, and a new entry
+fails until its pin is recorded. The six geometric experiments follow it in the same registry, then the progression levels and the Reference Knot.
 They retain authored 32x24 to 48x36 canvases; their purpose and actual
 structural measurements are documented in
 `.knowledge/reference/gordian-knot-experiments.md`. They reuse the same
@@ -565,8 +571,9 @@ defined as the graph's longest **simple** directed path (no repeated node),
 which is always finite even when a geometric dependency cycle exists (a
 per-path visited set forbids revisiting a node, so a cycle simply ends that
 branch of the search rather than looping) — ties are broken deterministically
-by the lexicographically smallest head sequence under `PuzzleSolver`'s own
-existing (y, x)-ascending comparator. When the graph is acyclic (every solvable
+by the lexicographically smallest head sequence under
+`PuzzleDefinition.head_less_than`, the same (y, x)-ascending ordering the
+solver uses. When the graph is acyclic (every solvable
 definition) the chain is computed by dynamic programming in time linear in the
 edge count, returning exactly what the exhaustive simple-path search returns;
 only a graph containing a cycle runs that exhaustive search, which is
