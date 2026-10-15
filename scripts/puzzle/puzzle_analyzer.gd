@@ -172,7 +172,7 @@ static func _count_bends(head: Vector2i, tail: Array) -> int:
 ## for this part.
 static func _compute_dependency_graph(definition: PuzzleDefinition, owners: Dictionary) -> Dictionary:
 	var heads: Array = definition.arrows.keys()
-	heads.sort_custom(_head_less_than)
+	heads.sort_custom(PuzzleDefinition.head_less_than)
 
 	var out_neighbors: Dictionary = {}
 	var in_degree: Dictionary = {}
@@ -250,7 +250,7 @@ static func _union(parent: Dictionary, a: Vector2i, b: Vector2i) -> void:
 ## graph, always finite even when a geometric cycle exists, since a per-path
 ## visited set forbids revisiting a node already on the current path. Ties
 ## are broken deterministically by the lexicographically smallest head
-## sequence under PuzzleSolver.analyze()'s own (y, x)-ascending comparator --
+## sequence under PuzzleDefinition.head_less_than, the ordering the solver uses --
 ## this is an analysis-only capability over a *candidate* definition; it never
 ## implies the definition is solvable or catalog-eligible.
 ## Deepest dependency chain, ties broken by the (y, x) head ordering. When the
@@ -339,14 +339,8 @@ static func _chain_less_than(a: Array, b: Array) -> bool:
 		var head_b: Vector2i = b[i]
 		if head_a == head_b:
 			continue
-		return _head_less_than(head_a, head_b)
+		return PuzzleDefinition.head_less_than(head_a, head_b)
 	return a.size() < b.size()
-
-## The same (y, x)-ascending comparator PuzzleSolver.analyze() already uses to
-## pick a legal head deterministically -- reused here, not reinvented, so both
-## the solver's witness and the analyzer's tie-break agree on one ordering.
-static func _head_less_than(a: Vector2i, b: Vector2i) -> bool:
-	return a.y < b.y or (a.y == b.y and a.x < b.x)
 
 # --- Blocker distance (static, geometric, initial-state only) --------------
 
@@ -357,7 +351,7 @@ static func _head_less_than(a: Vector2i, b: Vector2i) -> bool:
 ## measurement of human perception.
 static func _compute_blocker_distance(definition: PuzzleDefinition, owners: Dictionary) -> Dictionary:
 	var heads: Array = definition.arrows.keys()
-	heads.sort_custom(_head_less_than)
+	heads.sort_custom(PuzzleDefinition.head_less_than)
 
 	var edges: Array = []
 	var max_distance := 0
@@ -375,7 +369,7 @@ static func _compute_blocker_distance(definition: PuzzleDefinition, owners: Dict
 				nearest_by_blocker[owner] = i + 1
 
 		var blockers: Array = nearest_by_blocker.keys()
-		blockers.sort_custom(_head_less_than)
+		blockers.sort_custom(PuzzleDefinition.head_less_than)
 		for blocker in blockers:
 			var distance: int = nearest_by_blocker[blocker]
 			edges.append({"blocked": head, "blocker": blocker, "distance": distance})

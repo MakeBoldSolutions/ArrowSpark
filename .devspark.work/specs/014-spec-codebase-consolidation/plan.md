@@ -295,3 +295,14 @@ C0), `gates/behavior_probe.gd`, `gates/baseline-*.txt`.
 
 None. No constitution violations, and no repeated integration across call sites beyond replacing
 existing duplicates with one shared definition.
+
+## Implementation Notes
+
+- 2026-10-15 (T005–T007): `tests/run_puzzle_regressions.py` hides a failing check's output
+  (`subprocess.run(check=True)` raises before printing). The SC-001 entry name was therefore taken
+  from a direct run of `tests/puzzle_catalog_check.gd`. The runner is left unchanged, as an adjacent
+  improvement, and listed under Deferred in `consolidation-record.md`.
+- 2026-10-15 (bookkeeping): the DevSpark semantic hash treats `**Checkpoint**: Phase complete` lines
+  in `tasks.md` as semantic, so each one would make the Analyze gate `stale-recheck-required`. Phase
+  checkpoint lines are therefore added in one pass at the end, followed by a single focused Analyze
+  recheck, instead of a recheck after every phase. DevSpark itself is not changed.

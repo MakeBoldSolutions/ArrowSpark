@@ -410,7 +410,7 @@ func _graph_from_edges(count: int, edges: Array, rng: RandomNumberGenerator) -> 
 		var head := Vector2i(positions[i], 0)
 		heads.append(head)
 		out_neighbors[head] = []
-	heads.sort_custom(PuzzleAnalyzer._head_less_than)
+	heads.sort_custom(PuzzleDefinition.head_less_than)
 	for edge in edges:
 		(out_neighbors[Vector2i(positions[edge[0]], 0)] as Array).append(Vector2i(positions[edge[1]], 0))
 	return {"heads": heads, "out": out_neighbors}

@@ -30,6 +30,14 @@ static func direction_vector(direction: int) -> Vector2i:
 			return Vector2i(1, 0)
 	return Vector2i.ZERO
 
+## The one deterministic head ordering: row (y) first, then column (x). Used
+## by PuzzleState.find_open_move(), PuzzleSolver.analyze(),
+## PuzzleContentVersion.canonical_text() and PuzzleAnalyzer, so the Open Move
+## suggestion, the solver witness, content versions and analyzer tie-breaks
+## always agree. Heads are unique, so this is a strict total order.
+static func head_less_than(a: Vector2i, b: Vector2i) -> bool:
+	return a.y < b.y or (a.y == b.y and a.x < b.x)
+
 ## Cells strictly between a head and the board edge along its own direction
 ## of travel (its forward escape ray), computed from fixed geometry alone —
 ## independent of which arrows are currently active. Shared by validation

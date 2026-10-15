@@ -124,7 +124,7 @@ minimum_sufficient_change:
 The users of this spec are the developers and AI agents who make the next change. Players are
 protected by the rule that nothing they can observe changes.
 
-### User Story 1 - Catalog changes are caught before they ship (Priority: P1)
+### User Story 1 - Catalog changes are caught before they ship (Priority: P1) ✅ Complete
 
 A developer edits puzzle-building code, by refactoring it or adding a board. Any change to an
 existing board's geometry, identity, title, group or position fails an automated check that names
