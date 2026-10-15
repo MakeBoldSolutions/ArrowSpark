@@ -13,10 +13,9 @@ extends RefCounted
 ## than a typical window at a comfortable arrow size. Never instantiated; every member is static. Each entry
 ## pairs a stable id (independent of array position, title, or any filesystem
 ## path) with a display title and a zero-argument builder returning a freshly
-## constructed PuzzleDefinition — exactly PuzzleDefinition.create_fixed()'s
-## existing literal-construction style, so isolation (no shared mutable
-## substructure across calls) falls out of the construction pattern itself,
-## with no caching layer.
+## constructed PuzzleDefinition from literal data on every call, so isolation
+## (no shared mutable substructure across calls) falls out of the construction
+## pattern itself, with no caching layer.
 
 const GROUP_ARROWSPARK_LEVELS := "arrowspark_levels"
 const GROUP_FOUNDATIONS := "foundations"
@@ -155,8 +154,11 @@ static func get_definition(id: String) -> PuzzleDefinition:
 	return build.call()
 
 # --- Puzzle builders --------------------------------------------------------
-# Each builder mirrors PuzzleDefinition.create_fixed()'s literal-construction
-# style: dictionaries of arrows/tails passed directly to PuzzleDefinition.new().
+# Builders use one of three literal styles: arrow/tail dictionaries passed to
+# PuzzleDefinition.new() (the small boards, like PuzzleDefinition.create_fixed()),
+# a short computed loop (dense_unravel, composed_shaped), or [head, direction,
+# vertices] shapes passed to _from_shapes (the large-canvas, experiment and
+# progression boards).
 
 ## Six single-cell arrows, each facing straight off a board edge with an
 ## empty forward ray, so every one is legal from the very first state.

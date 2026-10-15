@@ -1,7 +1,7 @@
 {
   "generated": {
     "by": "build-knowledge-index",
-    "at": "2026-10-15T14:56:49Z"
+    "at": "2026-10-15T14:59:03Z"
   },
   "roots": [
     {
@@ -78,6 +78,7 @@
       ],
       "headings": [
         "Arrow Puzzle Rules, Presentation and Menu Integration",
+        "Code Responsibilities",
         "Rule Layer (Core Boundary)",
         "Solvability Analysis",
         "Puzzle Catalog and Session-Scoped Selection",

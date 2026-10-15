@@ -116,3 +116,27 @@ Run on 2026-10-15 at `e424388`, whose production code is identical to `58a8bec`.
   - The New Game button's tooltip (`main_menu_with_animations.tscn:389`) says "Starts the
     Reference Knot", but New Game starts `first_knot`. This is player-visible text, and the spec
     allows no UI changes.
+
+## C6–C7: stale docs and the responsibility map (T024–T027)
+
+- `tests/run_puzzle_regressions.py` docstring: "all 22 catalog entries" corrected to 30. It now
+  includes the eight progression levels and the all-entry pins.
+- `scripts/puzzle/puzzle_catalog.gd` comments: two claims that every builder uses
+  `create_fixed()`'s dictionary style now name the three literal styles (dictionaries; computed
+  loops in `dense_unravel` and `composed_shaped`; vertex-path shapes through `_from_shapes`).
+  Comment-only.
+- `.knowledge/architecture/arrow-puzzle.md` gains `## Code Responsibilities`. A scripted check
+  confirms that every one of the 37 remaining production scripts is named in the map.
+- `.knowledge/index.json` regenerated (exit 0).
+- **SC-005 self-check.** Each of the six US3 questions, answered from the map alone, for the
+  reviewer to confirm at PR review (Judge J-001):
+  1. Blocking rule: `PuzzleState._is_head_blocked`, over `PuzzleDefinition.forward_ray_cells`.
+  2. Open Move choice: `PuzzleState.find_open_move`, first legal head by
+     `PuzzleDefinition.head_less_than`.
+  3. Score formula: `PuzzleState.get_results`.
+  4. Group-scoped Next Puzzle: `PuzzleSession.advance_to_next`, through
+     `PuzzleCatalog.next_in_group`.
+  5. Pinch zoom: `PuzzleBoard` touch handling, applied through `PuzzleViewportTransform`.
+  6. Persisted saved-game state: the template's `GlobalState`, holding `GameState`/`LevelState`;
+     puzzle play never writes to it. Unreachable scenes are listed under "Template copies,
+     unreferenced", and the removed examples under the restore note.

@@ -174,7 +174,7 @@ definition in production code.
 
 ---
 
-### User Story 3 - A newcomer can tell what each part of the code is for (Priority: P3)
+### User Story 3 - A newcomer can tell what each part of the code is for (Priority: P3) ✅ Complete
 
 A developer or agent new to the repository reads one current document. It shows which part of the
 code owns puzzle rules, puzzle content, session state, presentation, input and template
