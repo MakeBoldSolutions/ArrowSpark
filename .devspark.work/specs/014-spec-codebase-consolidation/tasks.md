@@ -25,15 +25,19 @@ participants:
 
 ## Phase 1: Setup
 
-- [ ] T001 Confirm `<godot> --version` prints 4.4.1, then run full gates on the unmodified tree and record the results as the pre-change gate baseline in `FD/consolidation-record.md` (plan C0; research R-02) (code_ref: pending | knowledge_ref: pending)
+**Checkpoint**: Phase complete — 2026-10-15
+
+- [X] T001 Confirm `<godot> --version` prints 4.4.1, then run full gates on the unmodified tree and record the results as the pre-change gate baseline in `FD/consolidation-record.md` (plan C0; research R-02) (code_ref: n/a: baseline evidence only, no durable code changed (probe and record live in the spec bundle) | knowledge_ref: n/a: no knowledge changed)
 
 ## Phase 2: Foundational (behavior baseline; blocks every production change)
 
-- [ ] T002 Write the temporary probe `FD/gates/behavior_probe.gd` exactly as specified in quickstart.md "Behavior probe" (per entry: identity fields, content version, solver result, Open Move trail, analyzer report) (plan C0; FR-014) (code_ref: pending | knowledge_ref: pending)
-- [ ] T003 Run the probe on the unmodified tree into `FD/gates/baseline-before.txt`. Confirm it has 30 entry blocks and record the commit it ran on (plan C0; FR-014) (code_ref: pending | knowledge_ref: pending)
-- [ ] T004 Record the "Before" measures in `FD/consolidation-record.md`: production file and line counts, the five largest files, duplication counts (ordering 4, direction 2, shape loop 9), pin coverage 24/30, the unreachable-template count from research R-01, and catalog lines (plan C0; SC-006) (code_ref: pending | knowledge_ref: pending)
+- [X] T002 Write the temporary probe `FD/gates/behavior_probe.gd` exactly as specified in quickstart.md "Behavior probe" (per entry: identity fields, content version, solver result, Open Move trail, analyzer report) (plan C0; FR-014) (code_ref: n/a: baseline evidence only, no durable code changed (probe and record live in the spec bundle) | knowledge_ref: n/a: no knowledge changed)
+- [X] T003 Run the probe on the unmodified tree into `FD/gates/baseline-before.txt`. Confirm it has 30 entry blocks and record the commit it ran on (plan C0; FR-014) (code_ref: n/a: baseline evidence only, no durable code changed (probe and record live in the spec bundle) | knowledge_ref: n/a: no knowledge changed)
+- [X] T004 Record the "Before" measures in `FD/consolidation-record.md`: production file and line counts, the five largest files, duplication counts (ordering 4, direction 2, shape loop 9), pin coverage 24/30, the unreachable-template count from research R-01, and catalog lines (plan C0; SC-006) (code_ref: n/a: baseline evidence only, no durable code changed (probe and record live in the spec bundle) | knowledge_ref: n/a: no knowledge changed)
 
 **Checkpoint**: Baseline captured; no repository file outside `FD/` has changed.
+
+**Checkpoint**: Phase complete — 2026-10-15
 
 ## Phase 3: User Story 1 — Catalog changes are caught before they ship (Priority: P1)
 
