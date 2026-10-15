@@ -74,8 +74,8 @@ participants:
 
 ### C4: catalog shapes
 
-- [ ] T017 [US2] In `scripts/puzzle/puzzle_catalog.gd`, end each of `_build_canvas_validation`, `_build_knot_long_geometry`, `_build_knot_interwoven_paths`, `_build_knot_dense_core`, `_build_knot_regions`, `_build_knot_single_release`, `_build_knot_boundary` and `_build_reference_knot` with `return _from_shapes(<width>, <height>, shapes)`, deleting the inline loop. Board literals, their order and comments are untouched (Implements: FR-007) (code_ref: pending | knowledge_ref: pending)
-- [ ] T018 [US2] Run the puzzle gate (C1 pins all green); re-run the probe and diff it (must be empty); `git diff --stat` and `git diff` on the catalog show only loop deletions and the 8 return lines (Implements: FR-007, FR-014) (code_ref: pending | knowledge_ref: pending)
+- [X] T017 [US2] In `scripts/puzzle/puzzle_catalog.gd`, end each of `_build_canvas_validation`, `_build_knot_long_geometry`, `_build_knot_interwoven_paths`, `_build_knot_dense_core`, `_build_knot_regions`, `_build_knot_single_release`, `_build_knot_boundary` and `_build_reference_knot` with `return _from_shapes(<width>, <height>, shapes)`, deleting the inline loop. Board literals, their order and comments are untouched (Implements: FR-007) (code_ref: scripts/puzzle/puzzle_catalog.gd (8 builders -> _from_shapes) | knowledge_ref: pending: arrow-puzzle.md canvas-validation prose updated in T019)
+- [X] T018 [US2] Run the puzzle gate (C1 pins all green); re-run the probe and diff it (must be empty); `git diff --stat` and `git diff` on the catalog show only loop deletions and the 8 return lines (Implements: FR-007, FR-014) (code_ref: scripts/puzzle/puzzle_catalog.gd (8 builders -> _from_shapes) | knowledge_ref: pending: arrow-puzzle.md canvas-validation prose updated in T019)
 
 **Checkpoint**: Commit C4.
 

@@ -80,3 +80,12 @@ Run on 2026-10-15 at `e424388`, whose production code is identical to `58a8bec`.
 - Puzzle gate: exit 0, all 9 markers `=0`. That includes the real-project canvas, presentation and
   departure checks, which instantiate `ArrowView`. The PASS count is 7,511 against 7,390 at T001;
   the +121 are exactly the C1 pin checks.
+
+## C4: catalog shapes (T017–T018)
+
+- The 8 builders (`canvas_validation`, the six `knot_*` boards, `reference_knot`) end with
+  `return _from_shapes(<w>, <h>, shapes)`. Diff: +8 / −64, and only the loop and return lines
+  changed; literals, their order and comments are untouched.
+- Shape-to-board loops: 1 (was 9). Catalog: 1,089 lines (was 1,145).
+- Puzzle gate: exit 0, all 9 markers `=0`, including all 30 C1 pins. Probe:
+  `PROBE_DIFF=EMPTY`.
