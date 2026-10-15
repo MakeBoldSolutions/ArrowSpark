@@ -214,12 +214,13 @@ recorded.
   and `.knowledge/guides/repo-story/history.json` (last changed in `8101b00`). None of those files
   is touched by this branch.
 
-### Manual acceptance: OUTSTANDING (T033, T034 required; T035 conditional)
+### Manual acceptance: PASSED (recorded 2026-10-15, reported by the developer)
 
-| Check | Status |
+| Check | Result |
 |---|---|
-| T033 desktop smoke (4.4.1 editor; Simple Introduction, Large Canvas Validation, Reference Knot; full flow list) | **Not run**: needs a person at the desktop |
-| T034 browser smoke (Firefox, Chrome) on build `d0053dc` | **Not run**: build ready (`web/public/game/d0053dc/`, site built); needs a person in each browser. Other Chromium browsers: not tested |
-| T035 mobile-beta phone smoke | **Not run**: mobile beta not re-verified on this build; the beta claim is not extended to it. iPhone: not tested |
+| T033 desktop smoke | **Passed.** Run from VS Code (Godot desktop run of this branch), covering the plan's desktop flow list |
+| T034 browser smoke on build `d0053dc` (`astro preview`, port 4329) | **Passed in Perplexity's browser (Comet, Chromium-based).** Firefox: **not tested**. Chrome: **not tested**. Other Chromium-based browsers: not tested |
+| T035 mobile-beta phone smoke (conditional) | **Not run, by the developer's choice.** The mobile beta is not re-verified on this build, and the beta claim is not extended to it. iPhone: not tested |
 
-The spec stays **In Progress** until T033 and T034 are recorded as passed (Principle V).
+Per Principle V, the supported desktop browsers that were not exercised (Firefox, Chrome) are
+recorded as not tested rather than claimed. The browser smoke ran in one Chromium-based browser.
