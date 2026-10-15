@@ -1,7 +1,7 @@
 {
   "generated": {
     "by": "build-knowledge-index",
-    "at": "2026-10-15T14:51:41Z"
+    "at": "2026-10-15T14:56:49Z"
   },
   "roots": [
     {
@@ -138,7 +138,6 @@
         "project.godot",
         "scripts/game_state.gd",
         "scripts/level_state.gd",
-        "scripts/level_list_state_manager.gd",
         "addons/maaacks_game_template/base/scripts/global_state.gd",
         "addons/maaacks_game_template/base/scripts/global_state_data.gd",
         "addons/maaacks_game_template/base/scripts/app_settings.gd",

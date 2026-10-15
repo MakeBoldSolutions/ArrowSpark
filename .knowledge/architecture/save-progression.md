@@ -6,7 +6,6 @@ appliesTo:
   - project.godot
   - scripts/game_state.gd
   - scripts/level_state.gd
-  - scripts/level_list_state_manager.gd
   - addons/maaacks_game_template/base/scripts/global_state.gd
   - addons/maaacks_game_template/base/scripts/global_state_data.gd
   - addons/maaacks_game_template/base/scripts/app_settings.gd
@@ -101,11 +100,16 @@ focus can always leave it, which means such a remap also moves GUI focus.
 `scenes/menus/main_menu/main_menu_with_animations.gd`'s Play/New Game path
 (`main_menu.tscn` and `main_menu_with_animations.tscn`, both routed to
 `res://scenes/puzzle/arrow_puzzle.tscn`) overrides `new_game()` only to set
-`PuzzleSession.set_current_id("reference_knot")` (the Reference Knot) before delegating to
+`PuzzleSession.set_current_id("first_knot")` (the first ArrowSpark level) before delegating to
 the base `new_game()` (`load_game_scene()`); it still never calls
 `GlobalState.reset()` or `GameState.start_game()`. The puzzle attempt itself
 (`scripts/puzzle/puzzle_state.gd`) is in-memory only and is never read from
-or written to `GlobalState`/`GameState`; see
+or written to `GlobalState`/`GameState`. `GameState` and `LevelState` stay in
+`scripts/` even though no live gameplay path uses them: a saved
+`user://global_state.tres` serializes them by script path, so removing either
+would break loading existing saves. The template's level-list example that
+used them is not part of the project (it can be restored from
+`addons/maaacks_game_template/examples/`). See
 .knowledge/architecture/arrow-puzzle.md for its rules, and for
 `PuzzleCatalog`/`PuzzleSession` themselves. Existing saved level progress,
 settings and recovery behavior described above are therefore unaffected by

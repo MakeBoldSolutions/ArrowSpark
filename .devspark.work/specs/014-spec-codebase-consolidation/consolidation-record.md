@@ -89,3 +89,30 @@ Run on 2026-10-15 at `e424388`, whose production code is identical to `58a8bec`.
 - Shape-to-board loops: 1 (was 9). Catalog: 1,089 lines (was 1,145).
 - Puzzle gate: exit 0, all 9 markers `=0`, including all 30 C1 pins. Probe:
   `PROBE_DIFF=EMPTY`.
+
+## C5: template example removal (T020–T023)
+
+- Reachability walk (follows `res://`, `uid://` and `class_name` from `project.godot`):
+  `gates/reachable-before.txt` has 127 files; none of the 23 removal files is reached;
+  `scripts/game_state.gd` and `scripts/level_state.gd` are reached and are not in the list.
+- `git rm` of 34 paths (23 files plus 11 `.uid`): `scenes/game_scene/`, `scenes/end_credits/`,
+  `scenes/menus/level_select_menu/`, `scenes/loading_screen/`,
+  `scenes/overlaid_menus/{game_won,level_lost,level_won}_menu.*`,
+  `scripts/level_list_state_manager.gd*`.
+- `gates/reachable-after.txt` is identical to the before file (`REACHED_SET_UNCHANGED`). The
+  dangling-reference `git grep` finds nothing outside the addon, the archive and this bundle once
+  `index.json` is regenerated.
+- Full gates: puzzle exit 0 (9 markers `=0`), save exit 0 (`REGRESSION_FAILURES=0`, so seeded saved
+  progress and remaps are preserved), and editor validation exit 0 with no missing-dependency or
+  parse errors.
+- `save-progression.md`: `appliesTo` no longer lists the level-list manager; it states why
+  GameState/LevelState stay, and where the example came from. It also fixes a stale claim: New Game
+  selects `first_knot` (per `main_menu_with_animations.gd:76`), not `reference_knot`.
+- **Found, left unchanged (out of scope):**
+  - `web/scripts/check-content.mjs` still lists `scenes/loading_screen` among the folders it scans
+    for pre-play words. Its `walk()` returns `[]` for a missing folder, so it still passes
+    (`check-content: ok`, exit 0). The shipped loading screen is the addon's, which it never
+    scanned. `web-showcase.md` describes that scan list.
+  - The New Game button's tooltip (`main_menu_with_animations.tscn:389`) says "Starts the
+    Reference Knot", but New Game starts `first_knot`. This is player-visible text, and the spec
+    allows no UI changes.

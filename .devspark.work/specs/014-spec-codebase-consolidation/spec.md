@@ -148,7 +148,7 @@ gate; it fails and names that board. Revert the change and it passes.
 
 ---
 
-### User Story 2 - One definition for each behavior-defining rule (Priority: P2)
+### User Story 2 - One definition for each behavior-defining rule (Priority: P2) ✅ Complete
 
 A developer who needs to change how arrows are ordered, how a direction maps to a step, or how
 vertex-path shapes become boards changes it in one place, and every user of that rule follows.
@@ -199,7 +199,7 @@ the shipped entry scene.
 
 ---
 
-### User Story 4 - Template example content no longer misleads (Priority: P3)
+### User Story 4 - Template example content no longer misleads (Priority: P3) ✅ Complete
 
 A developer browsing the scenes no longer finds a parallel "levels" system that the game never
 uses.
