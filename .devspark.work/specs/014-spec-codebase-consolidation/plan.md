@@ -306,3 +306,11 @@ existing duplicates with one shared definition.
   in `tasks.md` as semantic, so each one would make the Analyze gate `stale-recheck-required`. Phase
   checkpoint lines are therefore added in one pass at the end, followed by a single focused Analyze
   recheck, instead of a recheck after every phase. DevSpark itself is not changed.
+- 2026-10-15 (T034, partial): the web export used Godot `4.4.stable.official.4c311cbee`
+  (`/tmp/arrow-godot44-sw5m039b/Godot_v4.4-stable_win64.exe`), not 4.4.1. This machine has web
+  export templates only for `4.4.stable`. The engine version is unchanged (4.4 line; no project
+  files rewritten), and every gate and probe still ran on 4.4.1.
+- 2026-10-15 (T022): `save-progression.md` claimed New Game selects `reference_knot`;
+  `main_menu_with_animations.gd` selects `first_knot`. The knowledge was corrected. The New Game
+  tooltip still says "Starts the Reference Knot", which is player-visible text, so it is left
+  unchanged and listed under Deferred.

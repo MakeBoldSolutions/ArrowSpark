@@ -27,6 +27,8 @@ participants:
 
 - [X] T001 Confirm `<godot> --version` prints 4.4.1, then run full gates on the unmodified tree and record the results as the pre-change gate baseline in `FD/consolidation-record.md` (plan C0; research R-02) (code_ref: n/a: baseline evidence only, no durable code changed (probe and record live in the spec bundle) | knowledge_ref: n/a: no knowledge changed)
 
+**Checkpoint**: Phase complete — 2026-10-15
+
 ## Phase 2: Foundational (behavior baseline; blocks every production change)
 
 - [X] T002 Write the temporary probe `FD/gates/behavior_probe.gd` exactly as specified in quickstart.md "Behavior probe" (per entry: identity fields, content version, solver result, Open Move trail, analyzer report) (plan C0; FR-014) (code_ref: n/a: baseline evidence only, no durable code changed (probe and record live in the spec bundle) | knowledge_ref: n/a: no knowledge changed)
@@ -34,6 +36,8 @@ participants:
 - [X] T004 Record the "Before" measures in `FD/consolidation-record.md`: production file and line counts, the five largest files, duplication counts (ordering 4, direction 2, shape loop 9), pin coverage 24/30, the unreachable-template count from research R-01, and catalog lines (plan C0; SC-006) (code_ref: n/a: baseline evidence only, no durable code changed (probe and record live in the spec bundle) | knowledge_ref: n/a: no knowledge changed)
 
 **Checkpoint**: Baseline captured; no repository file outside `FD/` has changed.
+
+**Checkpoint**: Phase complete — 2026-10-15
 
 ## Phase 3: User Story 1 — Catalog changes are caught before they ship (Priority: P1)
 
@@ -46,6 +50,8 @@ participants:
 - [X] T007 [US1] Mutation demonstration per quickstart.md: move one tail vertex of `_build_knot_regions` in `scripts/puzzle/puzzle_catalog.gd`, confirm the puzzle gate fails naming `knot_regions`, then restore by undoing that single edit and prove the file matches the committed version with `git diff --quiet` (quickstart.md steps 1–6; no `git checkout`, `restore` or `stash`) and confirm the gate passes. Paste both outputs into `FD/consolidation-record.md` (Implements: FR-004) (code_ref: tests/puzzle_catalog_check.gd::CATALOG_PINS, tests/puzzle_catalog_check.gd::_check_catalog_pins | knowledge_ref: .knowledge/architecture/arrow-puzzle.md (all-entry pin described, via T019))
 
 **Checkpoint**: Commit C1 (test only). SC-001 evidence recorded.
+
+**Checkpoint**: Phase complete — 2026-10-15
 
 ## Phase 4: User Story 2 — One definition for each behavior-defining rule (Priority: P2)
 
@@ -83,6 +89,8 @@ participants:
 
 - [X] T019 [US2] Update `.knowledge/architecture/arrow-puzzle.md` prose that describes the consolidated rules: the (y, x) ordering mentions (~lines 121, 163, 472, 569) name `PuzzleDefinition.head_less_than` as the single definition, and the canvas-validation description (~289–291) says it is built by `_from_shapes` like the other vertex-path boards. Review `.knowledge/architecture/game-visual-system.md` (owner of `scenes/puzzle/**`) and change it only if it describes arrow direction mapping (Implements: FR-005, FR-006, FR-007) (code_ref: .knowledge/architecture/arrow-puzzle.md (no code) | knowledge_ref: .knowledge/architecture/arrow-puzzle.md (Open Move ordering, canvas_validation build, all-entry pins, analyzer tie-break), .knowledge/index.json; game-visual-system.md reviewed: no direction-mapping prose, unchanged)
 
+**Checkpoint**: Phase complete — 2026-10-15
+
 ## Phase 5: User Story 4 — Template example content no longer misleads (Priority: P3)
 
 **Goal**: Remove exactly research R-01's removal set (plan C5). Done before US3 so the map describes the final tree.
@@ -95,6 +103,8 @@ participants:
 - [X] T023 [US4] Re-run the reachability walk into `FD/gates/reachable-after.txt` (the reached set must equal `reachable-before.txt`) and the dangling-reference `git grep` from quickstart.md (no matches). Run full gates; editor validation must show no missing-dependency errors, and `run_regressions.py` must be green for save preservation (Implements: FR-009, FR-010, FR-011) (code_ref: removed: scenes/game_scene/ (game_ui.tscn, configurable_sub_viewport.gd, input_display_label.gd, levels/level.gd, level_1..3.tscn), scenes/end_credits/, scenes/menus/level_select_menu/, scenes/loading_screen/, scenes/overlaid_menus/{game_won,level_lost,level_won}_menu.{gd,tscn}, scripts/level_list_state_manager.gd (+ .uid sidecars); kept: scripts/game_state.gd, scripts/level_state.gd | knowledge_ref: .knowledge/architecture/save-progression.md, .knowledge/index.json)
 
 **Checkpoint**: Commit C5.
+
+**Checkpoint**: Phase complete — 2026-10-15
 
 ## Phase 6: User Story 3 — A newcomer can tell what each part of the code is for (Priority: P3)
 
@@ -109,24 +119,28 @@ participants:
 
 **Checkpoint**: Commit C6 and C7. Puzzle gate green after T024; knowledge index regenerated.
 
+**Checkpoint**: Phase complete — 2026-10-15
+
 ## Phase 7: User Story 5 — Larger improvements are queued, not lost (Priority: P4)
 
 **Goal**: Deferred-work and left-alone records (plan C8 outline sections 2–3).
 
 **Independent Test**: Spec US5 scenario 1; SC-007.
 
-- [ ] T028 [US5] Write the "Deferred" section of `FD/consolidation-record.md` with evidence, reason, trigger and seam for each of: data files or resources, generator, board input separation, unifying the three authoring styles, the remaining unreferenced template copies, and folding the legacy pin mechanisms (Implements: FR-012) (code_ref: pending | knowledge_ref: pending)
-- [ ] T029 [US5] Write the "Left alone" section of `FD/consolidation-record.md`, with a reason for each FR-013 item plus `create_fixed()`; confirm none of the deferred or left-alone items were changed in the branch diff (Implements: FR-013, FR-016) (code_ref: pending | knowledge_ref: pending)
+- [X] T028 [US5] Write the "Deferred" section of `FD/consolidation-record.md` with evidence, reason, trigger and seam for each of: data files or resources, generator, board input separation, unifying the three authoring styles, the remaining unreferenced template copies, and folding the legacy pin mechanisms (Implements: FR-012) (code_ref: n/a: records only, no durable code changed | knowledge_ref: n/a: records live in the spec bundle)
+- [X] T029 [US5] Write the "Left alone" section of `FD/consolidation-record.md`, with a reason for each FR-013 item plus `create_fixed()`; confirm none of the deferred or left-alone items were changed in the branch diff (Implements: FR-013, FR-016) (code_ref: n/a: records only, no durable code changed | knowledge_ref: n/a: records live in the spec bundle)
+
+**Checkpoint**: Phase complete — 2026-10-15
 
 ## Final Phase: Verification & Cross-Cutting
 
-- [ ] T030 Re-run the probe into `FD/gates/baseline-after.txt`, diff it against `baseline-before.txt` (must be empty), and record `PROBE_DIFF=EMPTY` (verify:snapshot-neutral) (Implements: FR-014) (code_ref: pending | knowledge_ref: pending)
-- [ ] T031 Record the "After" measures in `FD/consolidation-record.md` (same measures as T004), with SC-002 counts 1/1/1 and pins 30/30 (SC-002, SC-006) (code_ref: pending | knowledge_ref: pending)
-- [ ] T032 Run final full gates on the branch head and record the full output markers (SC-004; Principle V) (Implements: FR-015) (code_ref: pending | knowledge_ref: pending)
+- [X] T030 Re-run the probe into `FD/gates/baseline-after.txt`, diff it against `baseline-before.txt` (must be empty), and record `PROBE_DIFF=EMPTY` (verify:snapshot-neutral) (Implements: FR-014) (code_ref: n/a: verification only (probe output in the spec bundle) | knowledge_ref: n/a: verification only)
+- [X] T031 Record the "After" measures in `FD/consolidation-record.md` (same measures as T004), with SC-002 counts 1/1/1 and pins 30/30 (SC-002, SC-006) (code_ref: n/a: measures only | knowledge_ref: n/a: measures only)
+- [X] T032 Run final full gates on the branch head and record the full output markers (SC-004; Principle V) (Implements: FR-015) (code_ref: n/a: verification only; gates run over scripts/, scenes/, tests/ | knowledge_ref: n/a: verification only)
 - [ ] T033 Manual desktop smoke in the 4.4.1 editor per plan.md Verification (Simple Introduction, Large Canvas Validation, Reference Knot; departures in all four directions, Open Move, zoom, pan, Fit, results, Next, Replay, Level Select, Back, pause and restart, remap then help text); record the results (Principles III, V) (Implements: FR-015) (code_ref: pending | knowledge_ref: pending)
 - [ ] T034 Build the web export with 4.4.1 and the site per quickstart.md; manual browser smoke in Firefox and Chrome; record results, with other Chromium browsers as not tested (Principle V) (Implements: FR-015) (code_ref: pending | knowledge_ref: pending)
 - [ ] T035 Conditional manual mobile-beta smoke: when a real Android phone is available, run tap, drag pan, pinch and results, and record the device and browser. Otherwise record "mobile beta not re-verified on this build" (no input or touch code changed; the beta claim is not extended). Record iPhone as not tested. Not a completion blocker (Principle V) (Implements: FR-015) (code_ref: pending | knowledge_ref: pending)
-- [ ] T036 No-planning-reference check: `git grep -n -E "014-spec|\.devspark\.work|consolidation-record|R-0[1-3]"` over `scripts/ scenes/ tests/ .knowledge/ CLAUDE.md AGENTS.md` returns no matches introduced by this branch (spec retention rule) (code_ref: pending | knowledge_ref: pending)
+- [X] T036 No-planning-reference check: `git grep -n -E "014-spec|\.devspark\.work|consolidation-record|R-0[1-3]"` over `scripts/ scenes/ tests/ .knowledge/ CLAUDE.md AGENTS.md` returns no matches introduced by this branch (spec retention rule) (code_ref: n/a: check only, no planning identifiers found in durable code | knowledge_ref: n/a: check only, none found in .knowledge/)
 - [ ] T037 Fill every task's `code_ref`/`knowledge_ref` (one shared entry per checkpoint unit is allowed). In `FD/consolidation-record.md`, record **Technical completion** (T030–T032, T036 passed) separately from **Manual acceptance** (T033, T034 required; T035 conditional). Set spec Status to Complete only when both pass; if T033 or T034 is outstanding, leave it In Progress and list what is outstanding. Retain the complete `FD` (probe, outputs, record) for release archival (code_ref: pending | knowledge_ref: pending)
 
 ## Dependencies

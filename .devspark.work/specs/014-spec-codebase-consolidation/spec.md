@@ -221,7 +221,7 @@ gates pass.
 
 ---
 
-### User Story 5 - Larger improvements are queued, not lost (Priority: P4)
+### User Story 5 - Larger improvements are queued, not lost (Priority: P4) ✅ Complete
 
 The project owner can see which larger refactorings were considered, why each was deferred, and
 what seam the future work would build on. None of it is implemented here.

@@ -140,3 +140,86 @@ Run on 2026-10-15 at `e424388`, whose production code is identical to `58a8bec`.
   6. Persisted saved-game state: the template's `GlobalState`, holding `GameState`/`LevelState`;
      puzzle play never writes to it. Unreachable scenes are listed under "Template copies,
      unreferenced", and the removed examples under the restore note.
+
+## Deferred (T028)
+
+Each item is preserved here and not implemented. "Seam" is what this spec leaves in place for it.
+
+| Item | Evidence | Why deferred | Trigger for its own spec | Seam left |
+|---|---|---|---|---|
+| Puzzle content as data files or resources | The catalog is about 150 lines of logic and about 940 lines of board literals. Authoring friction in the progression-design learning came from offline search and placing boards by coordinates, not from the GDScript format | A new format, loader, error handling and export inclusion, with no current maintenance pain they would remove | A generator or authoring tool that must write boards without editing code, or contributors who cannot edit GDScript | Every vertex-path board goes through `_from_shapes`; all 30 entries are geometry-pinned |
+| Programmatic puzzle generation | The progression boards came from a seeded offline search that is not in the repo | Out of scope by the spec | A decision to grow the catalog beyond hand curation | Solver and analyzer as acceptance oracles; the all-entry pin table; `PuzzleContentVersion` identity |
+| Separating board input from view management | `puzzle_board.gd` has 548 lines, 8 commits, +625/−77. Mouse, keyboard, gamepad, touch, hit testing and view placement live in one script | Touch behavior is verified on one real phone only; a split needs real-device re-verification | The next input-method change, or a second board-like scene that needs the same input | Unchanged; the responsibility map names it "Input and board canvas" |
+| Unifying the three catalog authoring styles | Dictionary literals (14 small boards), computed loops (`dense_unravel`, `composed_shaped`), vertex-path shapes (16 boards) | The computed and dictionary boards would have to be re-expressed as literal data; the pins would guard it, but there is no maintenance need yet | The data-file follow-up above | The pins make such a rewrite safe and checkable |
+| Remaining unreferenced template copies | `main_menu.{gd,tscn}`, `mini_options_menu.{gd,tscn}`, `master_options_menu.tscn`, `video_options_menu.tscn`, `input_options_menu_with_mouse_sensitivity.tscn`, `opening.tscn`, `overlaid_menu{,_container}.{gd,tscn}`, five `resources/themes/*.tres` (reached by nothing; see `gates/reachable-after.txt`) | Not in the spec's removal set; they are the template's customization copies | A template upgrade, or a decision to prune all template copies | Listed in the responsibility map as unreferenced |
+| Folding the legacy pin mechanisms into the all-entry table | The 14-entry fingerprints, the canvas fingerprint and the progression/Reference Knot content versions overlap with `CATALOG_PINS` | Removing checks was not required; overlapping pins are harmless | Any change to how catalog content identity is checked | `CATALOG_PINS` already covers all 30 entries |
+| Regression runner hides a failing check's output | `tests/run_puzzle_regressions.py` uses `subprocess.run(check=True, capture_output=True)` and prints only after success (seen during the C1 mutation demo) | Adjacent improvement; not needed for this spec's proof | The next change to the runners | Running the failing check directly shows its `FAIL:` lines |
+| Web content check still lists `scenes/loading_screen` | `web/scripts/check-content.mjs` scans a folder that no longer exists; `walk()` returns `[]`, so the check passes | `web/` is out of scope | The next web content-check change | n/a |
+| New Game tooltip names the wrong puzzle | `main_menu_with_animations.tscn:389` says "Starts the Reference Knot", but New Game starts `first_knot` | Player-visible text; the spec allows no UI changes | Next menu copy change | n/a |
+
+## Left alone (T029)
+
+| Item | Reason |
+|---|---|
+| `PuzzleAnalyzer` (513 lines) | One responsibility (structural analysis), 2 commits. Only its ordering calls changed (C2, +5/−11) |
+| `PuzzleState`, `PuzzleSolver` | Cohesive rule authority and solver. Only the ordering call changed (C2, +1/−3 each) |
+| `PuzzleViewportTransform` | Pure, tested presentation math; untouched |
+| `PuzzleSession`, `PuzzleScoreboard` (static holders) | Small and documented, following the established static-var precedent; untouched |
+| The `check()` helper in each test file | Each runner copies its scripts into an isolated temporary project, so a shared helper would complicate every runner; untouched |
+| One-line scripts extending template scenes | Principle II: project-level customization of the template; untouched |
+| Duplicated two-line navigation handlers in `arrow_puzzle.gd` | `_on_back_button_pressed` and `_on_results_level_select_requested` are two lines each; merging them gains nothing; untouched |
+| `PuzzleDefinition.create_fixed()` | A test fixture on the model, used at 11 test call sites; moving it is churn; untouched |
+
+Branch diff check: `puzzle_board.gd`, `arrow_puzzle.gd`, `puzzle_viewport_transform.gd`,
+`puzzle_session.gd`, `puzzle_scoreboard.gd`, `game_state.gd`, `level_state.gd`, `project.godot`,
+`export_presets.cfg`, `addons/` and `web/` have no changes against `58a8bec`. Nothing on the
+Deferred list was implemented.
+
+## After measures (T031), at `d0053dc`
+
+| Measure | Before | After |
+|---|---|---|
+| Production GDScript (scripts/ + scenes/) | 48 files, 4,427 lines | 37 files, 4,136 lines |
+| Largest five | catalog 1,145 · board 548 · analyzer 513 · arrow view 315 · puzzle scene 250 | catalog 1,091 · board 548 · analyzer 507 · arrow view 306 · puzzle scene 250 |
+| Head-ordering definitions | 4 | **1** (`PuzzleDefinition.head_less_than`) |
+| Direction-to-step mappings | 2 | **1** (`PuzzleDefinition.direction_vector`) |
+| Shape-to-board loops | 9 | **1** (`PuzzleCatalog._from_shapes`) |
+| Catalog entries with an exact-geometry pin | 24 of 30 | **30 of 30** |
+| Unreachable FR-011 template content | 23 files + 11 `.uid` (226 GDScript lines) | 0 |
+| Test GDScript lines | 5,727 | 5,781 (+54: the pin table and its check) |
+| Web game package (`index.pck`) | 1,300,336 B (a prior local build, commit unknown) | 1,260,640 B (build `d0053dc`) |
+| Branch diff vs `58a8bec` (code, tests, addons, web, project files) | | 44 files, +95 / −861 |
+
+The pack-size comparison is indicative only, because the earlier local build's commit is not
+recorded.
+
+## Final verification
+
+### Technical completion: PASSED (T030–T032, T036)
+
+- T030 probe at `d0053dc`: `gates/baseline-after.txt` is identical to `baseline-before.txt`
+  (`PROBE_DIFF=EMPTY`, 195,273 bytes). For all 30 entries the content versions, validity,
+  solvability, witness orders, solver metrics, Open Move trails and analyzer reports are unchanged.
+- T032 full gates at `d0053dc`: puzzle exit 0 (9 markers `=0`), save exit 0
+  (`REGRESSION_FAILURES=0`), editor validation exit 0 with 0 error/missing lines. No engine-written
+  files changed.
+- Web build: `node web/scripts/export-game.mjs` succeeded with Godot
+  `4.4.stable.official.4c311cbee` (build `d0053dc`). The 4.4.1 binary has no web export templates
+  on this machine; 4.4-stable does, and the previous spec exported with it. `npm run build` exit 0
+  (`check-content: ok`); `npm run check` exit 0.
+- T036: a grep of every line this branch adds to `scripts/ scenes/ tests/ .knowledge/ CLAUDE.md
+  AGENTS.md` for spec, task, requirement or bundle identifiers finds none.
+  `check-planning-references.ps1`: `branch_findings: []`, `linkage_findings: []`. Its 8
+  `id_findings` all predate the branch: byte patterns in addon screenshots and a vendored font,
+  and `.knowledge/guides/repo-story/history.json` (last changed in `8101b00`). None of those files
+  is touched by this branch.
+
+### Manual acceptance: OUTSTANDING (T033, T034 required; T035 conditional)
+
+| Check | Status |
+|---|---|
+| T033 desktop smoke (4.4.1 editor; Simple Introduction, Large Canvas Validation, Reference Knot; full flow list) | **Not run**: needs a person at the desktop |
+| T034 browser smoke (Firefox, Chrome) on build `d0053dc` | **Not run**: build ready (`web/public/game/d0053dc/`, site built); needs a person in each browser. Other Chromium browsers: not tested |
+| T035 mobile-beta phone smoke | **Not run**: mobile beta not re-verified on this build; the beta claim is not extended to it. iPhone: not tested |
+
+The spec stays **In Progress** until T033 and T034 are recorded as passed (Principle V).
