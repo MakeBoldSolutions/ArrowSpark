@@ -183,8 +183,9 @@ function scanWords(file, text, where = '') {
   }
 }
 
-// The game's menus and loading screens, shown before the first puzzle.
-for (const dir of ['scenes/menus', 'scenes/loading_screen']) {
+// The game's menus, shown before the first puzzle. (The loading screen is the
+// template addon's own and carries no project text.)
+for (const dir of ['scenes/menus']) {
   for (const file of walk(join(repoRoot, dir), (p) => p.endsWith('.tscn'))) {
     for (const match of read(file).matchAll(/^(?:text|tooltip_text|placeholder_text)\s*=\s*"((?:[^"\\]|\\.)*)"/gm)) {
       scanWords(file, match[1]);
