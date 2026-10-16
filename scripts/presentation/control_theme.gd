@@ -44,6 +44,9 @@ static func _apply_text(theme: Theme) -> void:
 	theme.set_color("default_color", "RichTextLabel", S.TEXT_PRIMARY)
 	theme.set_font("normal_font", "RichTextLabel", S.SUPPORTING_FONT)
 	theme.set_font("bold_font", "RichTextLabel", S.SECONDARY_HEADING_FONT)
+	# The brand faces ship without italics; emphasis uses weight instead of a faux slant.
+	theme.set_font("italics_font", "RichTextLabel", S.UI_FONT)
+	theme.set_font("bold_italics_font", "RichTextLabel", S.SECONDARY_HEADING_FONT)
 	theme.set_font_size("normal_font_size", "RichTextLabel", 20)
 	theme.set_font_size("bold_font_size", "RichTextLabel", 20)
 	theme.set_stylebox("separator", "HSeparator", _line(S.SURFACE_BORDER, 1, false))
@@ -148,19 +151,25 @@ static func _apply_sliders(theme: Theme) -> void:
 		theme.set_icon("grabber_highlight", type, ICON_GRABBER_HIGHLIGHT)
 		theme.set_icon("grabber_disabled", type, ICON_GRABBER)
 
-static func _track(color: Color, vertical: bool) -> StyleBoxLine:
-	var line := StyleBoxLine.new()
-	line.color = color
-	line.thickness = 6
-	line.vertical = vertical
+## The slider draws its style across the full widget height (the 48 px target), so the
+## visible 6 px track is pulled in from both sides with negative expand margins.
+static func _track(color: Color, vertical: bool) -> StyleBoxFlat:
+	var track := StyleBoxFlat.new()
+	track.bg_color = color
+	track.set_corner_radius_all(3)
 	var pad := S.MIN_TARGET_HEIGHT / 2.0
+	var inset := -(pad - 3.0)
 	if vertical:
-		line.content_margin_left = pad
-		line.content_margin_right = pad
+		track.content_margin_left = pad
+		track.content_margin_right = pad
+		track.expand_margin_left = inset
+		track.expand_margin_right = inset
 	else:
-		line.content_margin_top = pad
-		line.content_margin_bottom = pad
-	return line
+		track.content_margin_top = pad
+		track.content_margin_bottom = pad
+		track.expand_margin_top = inset
+		track.expand_margin_bottom = inset
+	return track
 
 static func _apply_scrollbars(theme: Theme) -> void:
 	for type in [&"VScrollBar", &"HScrollBar"]:
@@ -195,6 +204,8 @@ static func _apply_popup(theme: Theme) -> void:
 	panel.shadow_size = S.SHADOW_SIZE
 	_set_margins(panel, S.SPACING[1])
 	theme.set_stylebox("panel", "PopupMenu", panel)
+	# Room for the popup's own scrollbar, which overlays the item column on long lists.
+	theme.set_constant("item_end_padding", "PopupMenu", S.SPACING[5])
 	theme.set_stylebox("panel", "PopupPanel", panel)
 	theme.set_stylebox("hover", "PopupMenu", _box(S.EMBER_50, 4, S.EMBER_50))
 	theme.set_stylebox("separator", "PopupMenu", _line(S.SURFACE_BORDER, 1, false))

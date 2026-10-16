@@ -8,3 +8,9 @@
 script = ExtResource("2_ii3ug")
 options_packed_scene = ExtResource("3_un3r1")
 main_menu_scene = "res://scenes/menus/main_menu/main_menu_with_animations.tscn"
+
+[node name="BackgroundColor" parent="." index="0"]
+color = Color(0.117647, 0.117647, 0.117647, 0.6)
+
+[node name="CloseButton" parent="MenuPanelContainer/MarginContainer/BoxContainer/MenuButtonsMargin/MenuButtons" index="0"]
+theme_type_variation = &"PrimaryButton"

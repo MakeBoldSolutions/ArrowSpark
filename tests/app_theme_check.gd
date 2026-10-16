@@ -34,6 +34,9 @@ func _check_installed() -> void:
 		"AppTheme merges the brand Button style into the engine default theme")
 	check(default_theme.default_font == GameVisualStyle.SUPPORTING_FONT,
 		"the brand body font is the default font everywhere")
+	var loader := root.get_node_or_null(^"/root/SceneLoader")
+	check(loader != null and loader.get(&"loading_screen_path") == "res://scenes/loading_screen/loading_screen.tscn",
+		"the scene loader uses the branded loading screen")
 
 func _check_canvas_layer_inheritance() -> void:
 	var layer := CanvasLayer.new()
