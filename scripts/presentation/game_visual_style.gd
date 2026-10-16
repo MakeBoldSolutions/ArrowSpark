@@ -13,6 +13,31 @@ const TEXT_SECONDARY := Color("56544f")
 const TEXT_ON_ACCENT := Color("f8f6f2")
 const CRITICAL := Color("e8221a")
 const SURFACE_BORDER := Color("ddd9d0")
+# Make Bold ramp steps used by app-wide controls and the menu hero.
+const INK_800 := Color("2c2c2b")
+const INK_500 := Color("76736c")
+const INK_400 := Color("9b988f")
+const INK_300 := Color("c2bfb6")
+const INK_100 := Color("ece9e2")
+const CREAM_DEEP := Color("efece4")
+const RUST_600 := Color("841e05")
+const EMBER_50 := Color("fdf1e6")
+const EMBER_100 := Color("f9dabc")
+const EMBER_300 := Color("e88f3d")
+const HERO_BACKGROUND := ARROW_NORMAL
+const HERO_TEXT := TEXT_ON_ACCENT
+const HERO_ACCENT := ARROW_HOVER
+const HERO_SUPPORTING := SURFACE_BORDER
+const SCRIM := Color(30.0 / 255.0, 30.0 / 255.0, 30.0 / 255.0, 0.6)
+const TOOLTIP_BACKGROUND := INK_800
+const MIN_TARGET_HEIGHT := 48
+const TITLE_FONT_SIZE := 72
+## Level Select card accents by role; menus map their groups onto these.
+const LEVEL_CARD_ACCENTS := {
+	&"LevelCardRust": GAME_ACCENT,
+	&"LevelCardInk": ARROW_NORMAL,
+	&"LevelCardEmber": ARROW_HOVER,
+}
 const SPACING := [4, 8, 12, 16, 24, 32, 48]
 const RADIUS_SMALL := 6
 const RADIUS_LARGE := 10
@@ -61,6 +86,7 @@ static func get_theme() -> Theme:
 	_theme.set_stylebox("panel", "GameSurface", panel)
 	_theme.set_constant("separation", "VBoxContainer", SPACING[2])
 	_theme.set_constant("separation", "HBoxContainer", SPACING[2])
+	ControlTheme.apply(_theme)
 	return _theme
 
 static func _set_label_role(role: StringName, font: Font, font_size: int, color: Color) -> void:

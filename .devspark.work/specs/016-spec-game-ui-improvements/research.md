@@ -47,7 +47,10 @@ Question ledger for planning decisions that needed evidence. Temporary; never re
   - **Rejected alternative:** setting the theme from the Main Menu. That misses the loading screen.
   - **Rejected alternative:** editing `opening.gd`. That is the CI allow-list risk.
   - The existing `$Layout` and Results assignments stay. They hand out the same cached Theme object, which keeps the puzzle scene self-contained when it is instanced alone (as the tests do). The scope assertion at `tests/puzzle_presentation_check.gd:311` therefore still holds unchanged.
-  - **To verify in the first implementation task:** whether Controls under a CanvasLayer (pause overlay, loading screen) inherit the root Window theme in Godot 4.4. Expected yes, because ThemeOwner falls back to the viewport. If not, the fallback is assigning the same theme on the CanvasLayer's top Control in the project's inherited overlay scenes.
+  - **Verified 2026-10-16 (Godot 4.4.1 headless probe, `evidence/probe_canvas_layer_theme.gd`):**
+    - A theme on the root Window reaches root Controls and popups, but **not** Controls under a CanvasLayer.
+    - Merging the theme into `ThemeDB.get_default_theme()` reaches all three, including CanvasLayers added later. It leaves undefined base-type items untouched.
+    - **Resolution:** `AppTheme` merges the app theme into the default theme instead of assigning the root Window theme. This is one global seam, and it replaces the per-overlay fallback.
 
 ## R3 — How does the Make Bold mark appear on the dark hero and splash without breaking brand rules?
 

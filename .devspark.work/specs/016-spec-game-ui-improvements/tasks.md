@@ -41,7 +41,7 @@ participants:
 
 ## Phase 1: Setup
 
-- [ ] T001 Probe whether Controls under a CanvasLayer inherit a theme set on the root Window in Godot 4.4.1. Use a throwaway SceneTree script in `.devspark.work/specs/016-spec-game-ui-improvements/evidence/`. Record yes/no in `research.md` R2, and select the overlay fallback if no (plan Reviewer Guidance, R2) (code_ref: pending | knowledge_ref: pending)
+- [X] T001 Probe whether Controls under a CanvasLayer inherit a theme set on the root Window in Godot 4.4.1. Use a throwaway SceneTree script in `.devspark.work/specs/016-spec-game-ui-improvements/evidence/`. Record yes/no in `research.md` R2, and select the overlay fallback if no (plan Reviewer Guidance, R2) (code_ref: n/a — throwaway probe in evidence/, no durable code | knowledge_ref: n/a — outcome recorded in research.md R2 and plan Implementation Notes)
 - [ ] T002 [P] Create `assets/brand/mark_tile.svg`: the unmodified paths of `web/theme/make-bold/logo-mark.svg` centred on a cream (#F8F6F2) rounded tile with ≥1× tallest-peak clear space (plan R3) (code_ref: pending | knowledge_ref: pending)
 - [ ] T003 [P] Author light-theme control icons in `assets/ui/` as SVGs in brand colors: checkbox on/off, radio on/off, toggle on/off, slider grabber and highlight, dropdown arrow, tree arrow and collapsed (plan expected_change_surface `assets/ui/`) (code_ref: pending | knowledge_ref: pending)
 

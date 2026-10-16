@@ -211,3 +211,7 @@ Planning bundle: `research.md` (R1–R6) and `qa-acceptance.md`. No `data-model.
 | Violation / Complexity | Why Needed | Simpler Alternative Rejected Because |
 |---|---|---|
 | New autoload `AppTheme` | Theme must reach the template loading screen, which renders before any editable project scene script | Project `gui/theme/custom` needs a saved resource duplicating the code-built theme; theming from Main Menu misses the loading screen; editing `opening.gd` collides with the CI error allow-list |
+
+## Implementation Notes
+
+- 2026-10-16, T001: the probe showed a root-Window theme does not reach Controls under a CanvasLayer (pause overlay, loading screen) in Godot 4.4.1. Merging into `ThemeDB.get_default_theme()` does, and it also reaches popups. `AppTheme` (T006) therefore merges the app theme into the default theme rather than assigning `root.theme`, and T016 needs no per-overlay theme assignment. This is a simpler seam with the same requirement coverage (FR-004, SC-002); no contract changes.
