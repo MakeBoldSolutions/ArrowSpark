@@ -83,10 +83,11 @@ def run_rule_regressions(godot: str, repo: Path) -> None:
         ):
             command = [godot, "--headless", "--path", str(root), *flags]
             print("Running:", " ".join(command), flush=True)
-            result = subprocess.run(command, env=env, check=True, timeout=45,
+            result = subprocess.run(command, env=env, check=False, timeout=45,
                                     capture_output=True, text=True)
             print(result.stdout, flush=True)
             print(result.stderr, flush=True)
+            result.check_returncode()
             if marker and marker not in result.stdout:
                 raise RuntimeError(f"Godot did not report {marker}")
 
@@ -110,10 +111,11 @@ def run_geometry_regressions(godot: str, repo: Path) -> None:
         for flags in (("--editor", "--quit"), ("--script", "arrow_departure_geometry_check.gd")):
             command = [godot, "--headless", "--path", str(root), *flags]
             print("Running:", " ".join(command), flush=True)
-            result = subprocess.run(command, env=env, check=True, timeout=45,
+            result = subprocess.run(command, env=env, check=False, timeout=45,
                                     capture_output=True, text=True)
             print(result.stdout, flush=True)
             print(result.stderr, flush=True)
+            result.check_returncode()
             if "--script" in flags and "ARROW_DEPARTURE_GEOMETRY_FAILURES=0" not in result.stdout:
                 raise RuntimeError("Godot did not report a completed passing arrow departure geometry regression run")
 
@@ -137,10 +139,11 @@ def run_viewport_transform_regressions(godot: str, repo: Path) -> None:
         for flags in (("--editor", "--quit"), ("--script", "puzzle_viewport_transform_check.gd")):
             command = [godot, "--headless", "--path", str(root), *flags]
             print("Running:", " ".join(command), flush=True)
-            result = subprocess.run(command, env=env, check=True, timeout=45,
+            result = subprocess.run(command, env=env, check=False, timeout=45,
                                     capture_output=True, text=True)
             print(result.stdout, flush=True)
             print(result.stderr, flush=True)
+            result.check_returncode()
             if "--script" in flags and "PUZZLE_VIEWPORT_FAILURES=0" not in result.stdout:
                 raise RuntimeError("Godot did not report a completed passing viewport transform regression run")
 

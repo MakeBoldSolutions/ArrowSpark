@@ -115,7 +115,7 @@ used them is not part of the project (it can be restored from
 settings and recovery behavior described above are therefore unaffected by
 starting, playing, replaying, or selecting the puzzle. Continue stays
 hidden on the main menu (its scene/script remains in source, unreachable
-from this menu); the `NewGameButton` tooltip reads "Starts the Reference Knot.
+from this menu); the `NewGameButton` tooltip reads "Starts the first ArrowSpark level.
 Existing level progress (Continue) is preserved even though it's hidden
 here." Puzzle entry also never touches the input-remap
 system: a keyboard/gamepad remap seeded before `new_game()`/

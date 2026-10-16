@@ -271,9 +271,9 @@ below enforces it.
   whole-word and case-insensitive (plurals included), on any surface a
   visitor reaches before playing: the built landing, Play and Journey pages
   (with their header, footer and unavailable-screen notice), the game's loading
-  shell, the text of `scenes/menus/**/*.tscn` and
-  `scenes/loading_screen/**/*.tscn`, and the string literals in
-  `scenes/menus/**/*.gd`. Only visible text is scanned (text nodes plus
+  shell, the text of `scenes/menus/**/*.tscn`, and the string literals in
+  `scenes/menus/**/*.gd`. (The loading screen is the template addon's own, with
+  no project text.) Only visible text is scanned (text nodes plus
   `alt`, `title` and `aria-label`).
 
 ## Hosting headers, caching and the Content-Security-Policy
