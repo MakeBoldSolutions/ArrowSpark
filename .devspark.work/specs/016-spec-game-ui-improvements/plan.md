@@ -215,3 +215,5 @@ Planning bundle: `research.md` (R1–R6) and `qa-acceptance.md`. No `data-model.
 ## Implementation Notes
 
 - 2026-10-16, T001: the probe showed a root-Window theme does not reach Controls under a CanvasLayer (pause overlay, loading screen) in Godot 4.4.1. Merging into `ThemeDB.get_default_theme()` does, and it also reaches popups. `AppTheme` (T006) therefore merges the app theme into the default theme rather than assigning `root.theme`, and T016 needs no per-overlay theme assignment. This is a simpler seam with the same requirement coverage (FR-004, SC-002); no contract changes.
+- 2026-10-16, T008: research R1 corrected. The real-project checks (layout, canvas, presentation, app theme) load `[display]` and the `AppTheme` autoload. With stretch enabled, both gates pass with unchanged expectations.
+- 2026-10-16, T039/T040: `_touch_slop()` reads the scale from `get_viewport().get_final_transform()` (probe `evidence/probe_stretch_scale.gd`: 2.0 at a 2560×1440 window). A mutation check (fix reverted) makes the new test fail, so the test discriminates.

@@ -10,7 +10,8 @@ Question ledger for planning decisions that needed evidence. Temporary; never re
   - `project.godot` sets only a 1280×720 viewport, with no stretch mode, so the UI is drawn 1:1 in physical pixels.
   - The web export uses `canvas_resize_policy=2` (adaptive). Godot's web canvas renders at device-pixel density, so a phone at DPR ≈3 currently draws 20 px text at about 6 CSS px.
   - `PuzzleViewportTransform` fits the board inside its own Control's logical size, and pointer and touch events arrive in logical coordinates.
-  - Both regression runners write a minimal `project.godot` without `[display]` settings and size the root directly, so a stretch setting never reaches the headless gates.
+  - Both regression runners write a minimal `project.godot` without `[display]` settings for the rule, geometry and viewport checks, so a stretch setting never reaches those.
+  - **Correction (2026-10-16, implementation):** the layout, canvas, presentation and app-theme checks run against the real project (`--path repo`), so they do load the stretch setting and the `AppTheme` autoload. Both gates still pass unchanged with stretch enabled; under stretch, a root size other than 1280×720 is laid out at the expanded logical size.
 - **Evidence pointer**: `project.godot` `[display]`; `export_presets.cfg` (`html/canvas_resize_policy=2`); `tests/run_puzzle_regressions.py:63`, `tests/run_regressions.py:32`; `scripts/presentation/puzzle_viewport_transform.gd`; `tests/puzzle_layout_check.gd:121`.
 - **Resolution**:
   - Use the engine's built-in `canvas_items` stretch with `expand` aspect and a 1280×720 base, at fractional scale.

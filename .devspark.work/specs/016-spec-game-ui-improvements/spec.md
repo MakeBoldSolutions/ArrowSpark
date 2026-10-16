@@ -113,7 +113,7 @@ minimum_sufficient_change:
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - Readable UI at any screen size (Priority: P1)
+### User Story 1 - Readable UI at any screen size (Priority: P1) ✅ Complete
 
 A player opens ArrowSpark on a large monitor, a high-density laptop, a browser tab or a landscape
 phone and sees menus, buttons and text at a comfortable, consistent size relative to the screen —

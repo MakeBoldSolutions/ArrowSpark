@@ -42,31 +42,32 @@ participants:
 ## Phase 1: Setup
 
 - [X] T001 Probe whether Controls under a CanvasLayer inherit a theme set on the root Window in Godot 4.4.1. Use a throwaway SceneTree script in `.devspark.work/specs/016-spec-game-ui-improvements/evidence/`. Record yes/no in `research.md` R2, and select the overlay fallback if no (plan Reviewer Guidance, R2) (code_ref: n/a — throwaway probe in evidence/, no durable code | knowledge_ref: n/a — outcome recorded in research.md R2 and plan Implementation Notes)
-- [ ] T002 [P] Create `assets/brand/mark_tile.svg`: the unmodified paths of `web/theme/make-bold/logo-mark.svg` centred on a cream (#F8F6F2) rounded tile with ≥1× tallest-peak clear space (plan R3) (code_ref: pending | knowledge_ref: pending)
-- [ ] T003 [P] Author light-theme control icons in `assets/ui/` as SVGs in brand colors: checkbox on/off, radio on/off, toggle on/off, slider grabber and highlight, dropdown arrow, tree arrow and collapsed (plan expected_change_surface `assets/ui/`) (code_ref: pending | knowledge_ref: pending)
+- [X] T002 [P] Create `assets/brand/mark_tile.svg`: the unmodified paths of `web/theme/make-bold/logo-mark.svg` centred on a cream (#F8F6F2) rounded tile with ≥1× tallest-peak clear space (plan R3) (code_ref: assets/brand/mark_tile.svg | knowledge_ref: n/a — asset only; documented with the branding update in T030)
+- [X] T003 [P] Author light-theme control icons in `assets/ui/` as SVGs in brand colors: checkbox on/off, radio on/off, toggle on/off, slider grabber and highlight, dropdown arrow, tree arrow and collapsed (plan expected_change_surface `assets/ui/`) (code_ref: assets/ui/{checkbox_checked,checkbox_unchecked,radio_checked,radio_unchecked,toggle_on,toggle_off,slider_grabber,slider_grabber_highlight,arrow_down,arrow_right}.svg | knowledge_ref: n/a — documented in the game-visual-system rewrite (T029))
 
 ## Phase 2: Foundational
 
-- [ ] T004 Add brand ramp tokens to `scripts/presentation/game_visual_style.gd`: rust-400/600 hover/pressed, ember-50/300 tints, ink-800/900 hero, scrim, positive-soft, plus three group accents. Keep every existing constant value unchanged (plan Decision Summary) (code_ref: pending | knowledge_ref: pending)
-- [ ] T005 Create `scripts/presentation/control_theme.gd`, which adds brand styles to the cached theme. It is called from `GameVisualStyle.get_theme()` and covers the plan's control list:
+- [X] T004 Add brand ramp tokens to `scripts/presentation/game_visual_style.gd`: rust-400/600 hover/pressed, ember-50/300 tints, ink-800/900 hero, scrim, positive-soft, plus three group accents. Keep every existing constant value unchanged (plan Decision Summary) (code_ref: scripts/presentation/game_visual_style.gd | knowledge_ref: n/a — palette table rewritten in T029)
+- [X] T005 Create `scripts/presentation/control_theme.gd`, which adds brand styles to the cached theme. It is called from `GameVisualStyle.get_theme()` and covers the plan's control list:
   - Button default states (≥48 px min height, hover one step darker, press one step darker plus a 1 px nudge, ember focus);
   - PrimaryButton rust states;
   - Label, Panel/PanelContainer, TabContainer/TabBar, H/VSlider, CheckBox/CheckButton (T003 icons), OptionButton/PopupMenu, ScrollBar, LineEdit, Tree, ProgressBar, RichTextLabel, TooltipPanel/TooltipLabel, embedded Window/AcceptDialog;
   - `LevelCard` variations per group and hero label roles.
 
-  Existing role values and variations stay unchanged (code_ref: pending | knowledge_ref: pending)
-- [ ] T006 Create the `scripts/app_theme.gd` autoload, which assigns `preload`ed `GameVisualStyle.get_theme()` to the root Window and sets the scene loader's loading-screen path via `/root/SceneLoader` node lookup (no autoload identifier). Register it in `project.godot` after the template autoloads (plan R2, Deviations) (code_ref: pending | knowledge_ref: pending)
-- [ ] T007 Create `tests/app_theme_check.gd` and register it in `tests/run_puzzle_regressions.py`, alongside the presentation check's isolated project files plus `control_theme.gd` and the `assets/ui/` icons. It checks that:
+  Existing role values and variations stay unchanged (code_ref: scripts/presentation/control_theme.gd, scripts/presentation/game_visual_style.gd::get_theme | knowledge_ref: n/a — documented in T029)
+- [X] T006 Create the `scripts/app_theme.gd` autoload, which assigns `preload`ed `GameVisualStyle.get_theme()` to the root Window and sets the scene loader's loading-screen path via `/root/SceneLoader` node lookup (no autoload identifier). Register it in `project.godot` after the template autoloads (plan R2, Deviations) (code_ref: scripts/app_theme.gd, project.godot [autoload] | knowledge_ref: n/a — documented in T029/T031)
+- [X] T007 Create `tests/app_theme_check.gd` and register it in `tests/run_puzzle_regressions.py`, alongside the presentation check's isolated project files plus `control_theme.gd` and the `assets/ui/` icons. It checks that:
   - each control type from T005 resolves non-default brand styles;
   - each type has an ember focus stylebox;
   - Button and PrimaryButton min height is ≥48;
   - body and title font sizes are ≥18 and ≥64;
   - every palette text/background pair used by the theme meets AA (4.5:1 body, 3:1 large and focus);
-  - `LevelCard` variations exist for every `PuzzleCatalog` group (QA-05) (Implements: FR-003, FR-008, FR-009)
+  - `LevelCard` variations exist; the per-group mapping assertion moved to T022, where the mapping exists (QA-05) (Implements: FR-003, FR-008, FR-009)
 
-  (code_ref: pending | knowledge_ref: pending)
+  (code_ref: tests/app_theme_check.gd, tests/run_puzzle_regressions.py | knowledge_ref: n/a — tests/README.md updated in T032)
 
 **Checkpoint**: Both gates pass with the new check green and every existing count still 0.
+**Checkpoint**: Phase complete — 2026-10-16 (Setup and Foundational; puzzle gate 10/10 counts 0 including APP_THEME_FAILURES, REGRESSION_FAILURES=0)
 
 ## Phase 3: User Story 1 — Readable UI at any screen size (Priority: P1)
 
@@ -74,13 +75,14 @@ participants:
 
 **Independent Test**: QA-01, QA-02 and QA-03; SC-001.
 
-- [ ] T008 [US1] Set `display/window/stretch/mode="canvas_items"`, `aspect="expand"` and fractional scale in `project.godot` (Implements: FR-001, FR-002) (code_ref: pending | knowledge_ref: pending)
-- [ ] T039 [US1] In `scenes/puzzle/puzzle_board.gd`, compare `_TOUCH_SLOP_PIXELS` in physical pixels by dividing it by the viewport's current stretch scale at the existing slop comparison. No new state or setting. Update `.knowledge/reference/touch-gestures.md` to state that the 32 px slop is physical and independent of UI scale (plan Decision Summary, R1) (Implements: FR-016) (code_ref: pending | knowledge_ref: pending)
-- [ ] T040 [US1] Add a headless touch check to `tests/puzzle_canvas_check.gd` at a non-1 stretch scale: a single-touch drag just under the physical slop still selects on release, and one just over it pans without selecting. Existing touch assertions are unchanged (Implements: FR-016) (code_ref: pending | knowledge_ref: pending)
-- [ ] T009 [US1] Extend `.devspark.work/specs/016-spec-game-ui-improvements/evidence/capture_menus.gd` runs to 1280×720, 1920×1080, 2560×1440, 3840×2160, 2560×1080 and 1280×960. Measure title and Play-button height fractions against the ±5% target, and record results in `evidence/` (QA-01, QA-02) (Implements: FR-001, FR-002, FR-003) (code_ref: pending | knowledge_ref: pending)
-- [ ] T010 [US1] Desktop smoke at 1280×720 and 2560×1440: play the first progression level and the Reference Knot with a recorded move sequence on `main` and on the branch. Compare moves, mistakes, score and fit/zoom/pan, and record in `evidence/` (QA-03) (Implements: FR-016) (code_ref: pending | knowledge_ref: pending)
+- [X] T008 [US1] Set `display/window/stretch/mode="canvas_items"`, `aspect="expand"` and fractional scale in `project.godot` (Implements: FR-001, FR-002) (code_ref: project.godot [display] window/stretch/mode, window/stretch/aspect | knowledge_ref: n/a — scaling described in the T029 game-visual-system rewrite)
+- [X] T039 [US1] In `scenes/puzzle/puzzle_board.gd`, compare `_TOUCH_SLOP_PIXELS` in physical pixels by dividing it by the viewport's current stretch scale at the existing slop comparison. No new state or setting. Update `.knowledge/reference/touch-gestures.md` to state that the 32 px slop is physical and independent of UI scale (plan Decision Summary, R1) (Implements: FR-016) (code_ref: scenes/puzzle/puzzle_board.gd::_touch_slop, scenes/puzzle/puzzle_board.gd::_drag_single_touch | knowledge_ref: .knowledge/reference/touch-gestures.md)
+- [X] T040 [US1] Add a headless touch check to `tests/puzzle_canvas_check.gd` at a non-1 stretch scale: a single-touch drag just under the physical slop still selects on release, and one just over it pans without selecting. Existing touch assertions are unchanged (Implements: FR-016) (code_ref: tests/puzzle_canvas_check.gd::_check_touch_slop_is_physical_under_scaling | knowledge_ref: .knowledge/reference/touch-gestures.md)
+- [X] T009 [US1] Extend `.devspark.work/specs/016-spec-game-ui-improvements/evidence/capture_menus.gd` runs to 1280×720, 1920×1080, 2560×1440, 3840×2160, 2560×1080 and 1280×960. Measure title and Play-button height fractions against the ±5% target, and record results in `evidence/` (QA-01, QA-02) (Implements: FR-001, FR-002, FR-003) (code_ref: n/a — verification only (evidence/us1/RESULTS.md, evidence/capture_menus.gd) | knowledge_ref: n/a — verification only)
+- [X] T010 [US1] Desktop smoke at 1280×720 and 2560×1440: play the first progression level and the Reference Knot with a recorded move sequence on `main` and on the branch. Compare moves, mistakes, score and fit/zoom/pan, and record in `evidence/` (QA-03) (Implements: FR-016) (code_ref: n/a — verification only (evidence/us1/RESULTS.md, evidence/gameplay_smoke.gd) | knowledge_ref: n/a — verification only)
 
 **Checkpoint**: SC-001 is met in captures, and gameplay is identical.
+**Checkpoint**: Phase complete — 2026-10-16 (SC-001 within 1.9%; main vs branch results identical at 1280×720 and 2560×1440)
 
 ## Phase 4: User Story 2 — One Make Bold look from launch to every screen (Priority: P1)
 
