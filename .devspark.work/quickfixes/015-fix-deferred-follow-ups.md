@@ -100,7 +100,7 @@ required_gates:
 
 - **Completed**: 2026-10-16
 - **Commit**: 568b07d (last fix commit; fixes in 62b6138, d001f45, 568b07d)
-- **PR**:
+- **PR**: https://github.com/MakeBoldSolutions/ArrowSpark/pull/11
 
 ---
 
