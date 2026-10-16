@@ -49,9 +49,7 @@ static func analyze(definition: PuzzleDefinition) -> Dictionary:
 
 	while state.remaining() > 0:
 		var active_heads: Array = state.get_snapshot()["active_arrows"].keys()
-		active_heads.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
-			return a.y < b.y or (a.y == b.y and a.x < b.x)
-		)
+		active_heads.sort_custom(PuzzleDefinition.head_less_than)
 
 		var legal_heads: Array = []
 		for head in active_heads:

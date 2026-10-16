@@ -27,7 +27,7 @@ static func of(definition: PuzzleDefinition) -> String:
 ## Directions are written by name, so reordering the enum cannot change a value.
 static func canonical_text(definition: PuzzleDefinition) -> String:
 	var heads: Array = definition.arrows.keys()
-	heads.sort_custom(func(a: Vector2i, b: Vector2i) -> bool: return a.y < b.y or (a.y == b.y and a.x < b.x))
+	heads.sort_custom(PuzzleDefinition.head_less_than)
 	var text := "w:%d;h:%d;" % [definition.width, definition.height]
 	for head in heads:
 		var cells: PackedStringArray = []

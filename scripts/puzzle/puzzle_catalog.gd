@@ -13,10 +13,9 @@ extends RefCounted
 ## than a typical window at a comfortable arrow size. Never instantiated; every member is static. Each entry
 ## pairs a stable id (independent of array position, title, or any filesystem
 ## path) with a display title and a zero-argument builder returning a freshly
-## constructed PuzzleDefinition — exactly PuzzleDefinition.create_fixed()'s
-## existing literal-construction style, so isolation (no shared mutable
-## substructure across calls) falls out of the construction pattern itself,
-## with no caching layer.
+## constructed PuzzleDefinition from literal data on every call, so isolation
+## (no shared mutable substructure across calls) falls out of the construction
+## pattern itself, with no caching layer.
 
 const GROUP_ARROWSPARK_LEVELS := "arrowspark_levels"
 const GROUP_FOUNDATIONS := "foundations"
@@ -155,8 +154,11 @@ static func get_definition(id: String) -> PuzzleDefinition:
 	return build.call()
 
 # --- Puzzle builders --------------------------------------------------------
-# Each builder mirrors PuzzleDefinition.create_fixed()'s literal-construction
-# style: dictionaries of arrows/tails passed directly to PuzzleDefinition.new().
+# Builders use one of three literal styles: arrow/tail dictionaries passed to
+# PuzzleDefinition.new() (the small boards, like PuzzleDefinition.create_fixed()),
+# a short computed loop (dense_unravel, composed_shaped), or [head, direction,
+# vertices] shapes passed to _from_shapes (the large-canvas, experiment and
+# progression boards).
 
 ## Six single-cell arrows, each facing straight off a board edge with an
 ## empty forward ray, so every one is legal from the very first state.
@@ -451,14 +453,7 @@ static func _build_canvas_validation() -> PuzzleDefinition:
 		[Vector2i(38, 13), d.DOWN, [Vector2i(38, 13), Vector2i(38, 11)]],
 		[Vector2i(7, 1), d.DOWN, [Vector2i(7, 1), Vector2i(7, 0), Vector2i(6, 0)]],
 	]
-	var arrows := {}
-	var tails := {}
-	for shape in shapes:
-		var vertices: Array[Vector2i] = []
-		vertices.assign(shape[2])
-		arrows[shape[0]] = shape[1]
-		tails[shape[0]] = _tail_along(vertices)
-	return PuzzleDefinition.new(40, 30, arrows, tails)
+	return _from_shapes(40, 30, shapes)
 
 ## Long bent paths test whether a long removal is satisfying without visual interweaving.
 static func _build_knot_long_geometry() -> PuzzleDefinition:
@@ -473,14 +468,7 @@ static func _build_knot_long_geometry() -> PuzzleDefinition:
 		[Vector2i(3, 10), d.LEFT, [Vector2i(3, 10)]],
 		[Vector2i(28, 15), d.RIGHT, [Vector2i(28, 15)]],
 	]
-	var arrows := {}
-	var tails := {}
-	for shape in shapes:
-		var vertices: Array[Vector2i] = []
-		vertices.assign(shape[2])
-		arrows[shape[0]] = shape[1]
-		tails[shape[0]] = _tail_along(vertices)
-	return PuzzleDefinition.new(32, 24, arrows, tails)
+	return _from_shapes(32, 24, shapes)
 
 ## Disjoint winding paths test whether following nearby intertwined routes increases tracing demand.
 static func _build_knot_interwoven_paths() -> PuzzleDefinition:
@@ -495,14 +483,7 @@ static func _build_knot_interwoven_paths() -> PuzzleDefinition:
 		[Vector2i(0, 10), d.RIGHT, [Vector2i(0, 10)]],
 		[Vector2i(31, 12), d.LEFT, [Vector2i(31, 12)]],
 	]
-	var arrows := {}
-	var tails := {}
-	for shape in shapes:
-		var vertices: Array[Vector2i] = []
-		vertices.assign(shape[2])
-		arrows[shape[0]] = shape[1]
-		tails[shape[0]] = _tail_along(vertices)
-	return PuzzleDefinition.new(32, 24, arrows, tails)
+	return _from_shapes(32, 24, shapes)
 
 ## Concentrated adjacent bent ribbons test tracing under a dense central knot.
 static func _build_knot_dense_core() -> PuzzleDefinition:
@@ -525,14 +506,7 @@ static func _build_knot_dense_core() -> PuzzleDefinition:
 		[Vector2i(21, 18), d.LEFT, [Vector2i(21, 18)]],
 		[Vector2i(25, 18), d.LEFT, [Vector2i(25, 18)]],
 	]
-	var arrows := {}
-	var tails := {}
-	for shape in shapes:
-		var vertices: Array[Vector2i] = []
-		vertices.assign(shape[2])
-		arrows[shape[0]] = shape[1]
-		tails[shape[0]] = _tail_along(vertices)
-	return PuzzleDefinition.new(36, 28, arrows, tails)
+	return _from_shapes(36, 28, shapes)
 
 ## Widely separated local groups test whether region boundaries make a large board approachable.
 static func _build_knot_regions() -> PuzzleDefinition:
@@ -552,14 +526,7 @@ static func _build_knot_regions() -> PuzzleDefinition:
 		[Vector2i(34, 31), d.DOWN, [Vector2i(34, 31)]],
 		[Vector2i(0, 9), d.RIGHT, [Vector2i(0, 9)]],
 	]
-	var arrows := {}
-	var tails := {}
-	for shape in shapes:
-		var vertices: Array[Vector2i] = []
-		vertices.assign(shape[2])
-		arrows[shape[0]] = shape[1]
-		tails[shape[0]] = _tail_along(vertices)
-	return PuzzleDefinition.new(48, 32, arrows, tails)
+	return _from_shapes(48, 32, shapes)
 
 ## One long path holds several arrows back, testing the visual payoff of its departure.
 static func _build_knot_single_release() -> PuzzleDefinition:
@@ -574,14 +541,7 @@ static func _build_knot_single_release() -> PuzzleDefinition:
 		[Vector2i(14, 28), d.DOWN, [Vector2i(14, 28)]],
 		[Vector2i(0, 29), d.RIGHT, [Vector2i(0, 29)]],
 	]
-	var arrows := {}
-	var tails := {}
-	for shape in shapes:
-		var vertices: Array[Vector2i] = []
-		vertices.assign(shape[2])
-		arrows[shape[0]] = shape[1]
-		tails[shape[0]] = _tail_along(vertices)
-	return PuzzleDefinition.new(40, 30, arrows, tails)
+	return _from_shapes(40, 30, shapes)
 
 ## Repeated winding bands intentionally test when geometric busy-ness becomes tedious.
 static func _build_knot_boundary() -> PuzzleDefinition:
@@ -616,14 +576,7 @@ static func _build_knot_boundary() -> PuzzleDefinition:
 		[Vector2i(23, 32), d.RIGHT, [Vector2i(23, 32), Vector2i(7, 32), Vector2i(7, 33), Vector2i(24, 33)]],
 		[Vector2i(45, 32), d.RIGHT, [Vector2i(45, 32), Vector2i(30, 32), Vector2i(30, 33), Vector2i(46, 33)]],
 	]
-	var arrows := {}
-	var tails := {}
-	for shape in shapes:
-		var vertices: Array[Vector2i] = []
-		vertices.assign(shape[2])
-		arrows[shape[0]] = shape[1]
-		tails[shape[0]] = _tail_along(vertices)
-	return PuzzleDefinition.new(48, 36, arrows, tails)
+	return _from_shapes(48, 36, shapes)
 
 ## Builds a definition from literal [head, direction, vertices] shapes, where
 ## the vertices run from the head through every bend to the tail end.
@@ -1135,11 +1088,4 @@ static func _build_reference_knot() -> PuzzleDefinition:
 		[Vector2i(9, 11), d.RIGHT, [Vector2i(9, 11), Vector2i(8, 11)]],
 		[Vector2i(21, 4), d.RIGHT, [Vector2i(21, 4), Vector2i(20, 4)]],
 	]
-	var arrows := {}
-	var tails := {}
-	for shape in shapes:
-		var vertices: Array[Vector2i] = []
-		vertices.assign(shape[2])
-		arrows[shape[0]] = shape[1]
-		tails[shape[0]] = _tail_along(vertices)
-	return PuzzleDefinition.new(46, 32, arrows, tails)
+	return _from_shapes(46, 32, shapes)

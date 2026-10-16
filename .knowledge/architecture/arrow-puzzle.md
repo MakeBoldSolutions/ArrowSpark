@@ -48,6 +48,42 @@ appliesTo:
 
 # Arrow Puzzle Rules, Presentation and Menu Integration
 
+## Code Responsibilities
+
+Every project script under `scripts/` and `scenes/` has one owner below. The
+dependency rule: rules and model code never depends on scenes, input,
+presentation or the template. Presentation and scene code reads the rules
+model, never the reverse. Shared definitions live with the rules model
+(`PuzzleDefinition.head_less_than`, `PuzzleDefinition.direction_vector`).
+
+| Responsibility | Scripts |
+|---|---|
+| Rules and model | `scripts/puzzle/puzzle_definition.gd` (board shape, validation, direction step, head ordering), `puzzle_state.gd` (blocking, removal, mistakes, Open Move, score), `puzzle_solver.gd`, `puzzle_analyzer.gd`, `puzzle_content_version.gd` |
+| Puzzle content | `scripts/puzzle/puzzle_catalog.gd` (entries, groups, builders) |
+| Session state | `scripts/puzzle_session.gd` (selected puzzle, Next Puzzle), `scripts/puzzle_scoreboard.gd` (session bests) |
+| Presentation | `scenes/puzzle/arrow_view.gd`, `scenes/puzzle/puzzle_results.gd`, `scripts/presentation/game_visual_style.gd`, `arrow_departure_geometry.gd`, `puzzle_viewport_transform.gd`, `scripts/puzzle/puzzle_feedback.gd` (animation constants), `puzzle_results_format.gd` (display formatting) |
+| Input and board canvas | `scenes/puzzle/puzzle_board.gd` (mouse, keyboard, gamepad and touch input; hit testing; zoom and pan through `PuzzleViewportTransform`; arrow view placement) |
+| Scene flow | `scenes/puzzle/arrow_puzzle.gd` (attempt lifecycle, HUD, results, navigation), `scenes/menus/main_menu/main_menu_with_animations.gd`, `puzzle_select_menu.gd` (Level Select), `scripts/presentation/web_attempt_emitter.gd` (completed-attempt hand-off to the web page) |
+| Template integration | Thin project extensions of template scenes: `scenes/opening/opening.gd`, `scenes/credits/credits.gd`, `scenes/overlaid_menus/pause_menu.gd`, and the options menu scripts under `scenes/menus/options_menu/`: `audio/audio_options_menu.gd`, `audio/audio_input_option_control.gd`, `game/game_options_menu.gd`, `game/reset_game_control/reset_game_control.gd`, `input/input_options_menu.gd`, `master_options_menu.gd`, `mini_options_menu_with_reset.gd`, `video/video_options_menu.gd` |
+| Template copies, unreferenced | Copied with the template and reached by nothing in the shipped game: `scenes/menus/main_menu/main_menu.gd` and `main_menu.tscn`; `scenes/menus/options_menu/mini_options_menu.gd` and `mini_options_menu.tscn`, `master_options_menu.tscn`, `video/video_options_menu.tscn`, `input/input_options_menu_with_mouse_sensitivity.tscn`; `scenes/opening/opening.tscn`; `scenes/overlaid_menus/overlaid_menu.gd`, `overlaid_menu.tscn`, `overlaid_menu_container.gd` and `overlaid_menu_container.tscn` and the five themes in `resources/themes/` (the game builds its theme in `GameVisualStyle.get_theme()`) |
+| Saved-data compatibility | `scripts/game_state.gd`, `scripts/level_state.gd`: no live gameplay use, but saved files serialize them by script path, so they stay (see `.knowledge/architecture/save-progression.md`) |
+
+The template's example game scene, levels, level select, won/lost overlays,
+end credits and level loading screens are not part of the project. Restore
+them from `addons/maaacks_game_template/examples/` if a level system is ever
+wanted.
+
+Where common behavior lives:
+
+| Behavior | Owner |
+|---|---|
+| Whether an arrow is blocked | `PuzzleState._is_head_blocked`, over `PuzzleDefinition.forward_ray_cells` |
+| Which arrow Open Move suggests | `PuzzleState.find_open_move` (first legal head by `PuzzleDefinition.head_less_than`) |
+| Score and accuracy | `PuzzleState.get_results` |
+| Next Puzzle within a group | `PuzzleSession.advance_to_next`, through `PuzzleCatalog.next_in_group` |
+| Pinch zoom, drag pan, tap | `PuzzleBoard` touch handling, applied through `PuzzleViewportTransform` |
+| Persisted saved progress and settings | The template's `GlobalState`, holding `GameState`/`LevelState`; puzzle play never writes to it |
+
 ## Rule Layer (Core Boundary)
 
 `PuzzleDefinition` (scripts/puzzle/puzzle_definition.gd) is an immutable
@@ -118,8 +154,9 @@ at every step, counting arrows, never cells.
 
 `PuzzleState` also holds `open_move_assists` (int, defaults 0) alongside
 `mistakes`. `find_open_move()` returns one currently-legal active head,
-chosen deterministically in the same (y, x)-ascending order
-`PuzzleSolver.analyze()` walks, or `null` only if no active arrow remains; it
+chosen deterministically in (y, x)-ascending order
+(`PuzzleDefinition.head_less_than`, the one ordering `PuzzleSolver.analyze()`,
+`PuzzleContentVersion` and `PuzzleAnalyzer` also use), or `null` only if no active arrow remains; it
 is a pure query reusing `_is_head_blocked` directly, never a second rules
 engine, and it is callable at any time — including while a departure
 animation from an earlier removal is still visually in progress, since it
@@ -287,13 +324,18 @@ only three shorter than eight), all four directions appear, long tails cross
 the rays of other arrows so most removals unlock several others, all four
 corner regions are occupied, and the initial open move (the first legal head
 in (y, x) order) is near the top-left. The layout is fixed literal data built
-from orthogonal path vertices expanded deterministically by
+by `PuzzleCatalog._from_shapes`, like every other vertex-path board, from
+orthogonal path vertices expanded deterministically by
 `PuzzleCatalog._tail_along`; it was found once by a seeded offline search that
 kept every step solvable and is not generated at runtime. It exists to
 exercise large-board navigation, off-screen assistance and long departures;
 its difficulty is deliberately untuned. The original fourteen entries' ids, order, dimensions and exact arrow/tail
 content are pinned by fingerprints, as is the complete `canvas_validation`
-geometry. The six geometric experiments follow it in the same registry, then the progression levels and the Reference Knot.
+geometry. In addition, every catalog entry is pinned in one table
+(`CATALOG_PINS` in `tests/puzzle_catalog_check.gd`): its id, title, group,
+catalog position and the content version of its exact geometry. Any change to
+an existing board fails the catalog gate and names the entry, and a new entry
+fails until its pin is recorded. The six geometric experiments follow it in the same registry, then the progression levels and the Reference Knot.
 They retain authored 32x24 to 48x36 canvases; their purpose and actual
 structural measurements are documented in
 `.knowledge/reference/gordian-knot-experiments.md`. They reuse the same
@@ -565,8 +607,9 @@ defined as the graph's longest **simple** directed path (no repeated node),
 which is always finite even when a geometric dependency cycle exists (a
 per-path visited set forbids revisiting a node, so a cycle simply ends that
 branch of the search rather than looping) — ties are broken deterministically
-by the lexicographically smallest head sequence under `PuzzleSolver`'s own
-existing (y, x)-ascending comparator. When the graph is acyclic (every solvable
+by the lexicographically smallest head sequence under
+`PuzzleDefinition.head_less_than`, the same (y, x)-ascending ordering the
+solver uses. When the graph is acyclic (every solvable
 definition) the chain is computed by dynamic programming in time linear in the
 edge count, returning exactly what the exhaustive simple-path search returns;
 only a graph containing a cycle runs that exhaustive search, which is

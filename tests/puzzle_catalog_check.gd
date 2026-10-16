@@ -544,7 +544,61 @@ func _check_reference_knot_content_version() -> void:
 	var other: PuzzleDefinition = PuzzleCatalog.get_definition("intro")
 	check(PuzzleContentVersion.of(other) != version, "a different puzzle has a different content version")
 
+## Every catalog entry, in catalog order: id, title, group and the content
+## version of its exact geometry. Any change to an existing board, its identity
+## or its position fails here and names the entry; a new entry fails until its
+## pin is recorded.
+const CATALOG_PINS: Array[Dictionary] = [
+	{"id": "intro", "title": "Simple Introduction", "group": "foundations", "version": "g1-95a75f0e6ec0"},
+	{"id": "first_bend", "title": "First Bend", "group": "foundations", "version": "g1-9d0fcfd77be0"},
+	{"id": "multi_bend", "title": "Multiple Bends", "group": "foundations", "version": "g1-0359fa394f4b"},
+	{"id": "dependency_chain", "title": "Dependency Chain", "group": "foundations", "version": "g1-9dbed2fe5668"},
+	{"id": "forced_sequence", "title": "Forced Sequence", "group": "foundations", "version": "g1-8a11ad329013"},
+	{"id": "multiple_choices", "title": "Multiple Choices", "group": "foundations", "version": "g1-bfc14580ef5f"},
+	{"id": "dense_board", "title": "Dense Board", "group": "foundations", "version": "g1-53bf4b1d0f55"},
+	{"id": "subtle_blockers", "title": "Subtle Blockers", "group": "foundations", "version": "g1-f46614de1bae"},
+	{"id": "nested_chain", "title": "Nested Chain", "group": "puzzle_lab", "version": "g1-fd81646ff78b"},
+	{"id": "cascade_key_arrow", "title": "Cascade / Key Arrow", "group": "puzzle_lab", "version": "g1-9bc5f37494d1"},
+	{"id": "dense_unravel", "title": "Dense Unravel", "group": "puzzle_lab", "version": "g1-7dc6715c8718"},
+	{"id": "bent_network", "title": "Bent Network", "group": "puzzle_lab", "version": "g1-e8a0c0855813"},
+	{"id": "long_range_blocker", "title": "Long-Range Blocker", "group": "puzzle_lab", "version": "g1-5d07507b3b23"},
+	{"id": "composed_shaped", "title": "Composed / Shaped", "group": "puzzle_lab", "version": "g1-945e9f86a158"},
+	{"id": "canvas_validation", "title": "Large Canvas Validation", "group": "puzzle_lab", "version": "g1-62013a335679"},
+	{"id": "knot_long_geometry", "title": "Long Geometry", "group": "puzzle_lab", "version": "g1-c8684bfa2502"},
+	{"id": "knot_interwoven_paths", "title": "Interwoven Paths", "group": "puzzle_lab", "version": "g1-8dec89447bc5"},
+	{"id": "knot_dense_core", "title": "Dense Core", "group": "puzzle_lab", "version": "g1-87b621609db4"},
+	{"id": "knot_regions", "title": "Distinct Regions", "group": "puzzle_lab", "version": "g1-d2398acdb422"},
+	{"id": "knot_single_release", "title": "Single Release", "group": "puzzle_lab", "version": "g1-3a442934b998"},
+	{"id": "knot_boundary", "title": "Boundary Knot", "group": "puzzle_lab", "version": "g1-06cd3944b28e"},
+	{"id": "first_knot", "title": "First Knot", "group": "arrowspark_levels", "version": "g1-8f675c5f02cc"},
+	{"id": "two_neighborhoods", "title": "Two Neighborhoods", "group": "arrowspark_levels", "version": "g1-ecf87d2e92ec"},
+	{"id": "the_bridge", "title": "The Bridge", "group": "arrowspark_levels", "version": "g1-1fa47c6f7736"},
+	{"id": "false_simplicity", "title": "False Simplicity", "group": "arrowspark_levels", "version": "g1-d324da959318"},
+	{"id": "the_rescan", "title": "The Rescan", "group": "arrowspark_levels", "version": "g1-6f5cf54bbf35"},
+	{"id": "major_release", "title": "Major Release", "group": "arrowspark_levels", "version": "g1-f916a6ea8496"},
+	{"id": "dense_weave", "title": "Dense Weave", "group": "arrowspark_levels", "version": "g1-030c1402781a"},
+	{"id": "almost_a_knot", "title": "Almost a Knot", "group": "arrowspark_levels", "version": "g1-76fa1582e5a2"},
+	{"id": "reference_knot", "title": "Reference Knot", "group": "arrowspark_levels", "version": "g1-7ce0942d4a5e"},
+]
+
+func _check_catalog_pins() -> void:
+	check(PuzzleCatalog.count() == CATALOG_PINS.size(),
+		"the catalog has %d entries, one per recorded pin (got %d)" % [CATALOG_PINS.size(), PuzzleCatalog.count()])
+	for index in range(PuzzleCatalog.count()):
+		var id := PuzzleCatalog.id_at(index)
+		if index >= CATALOG_PINS.size():
+			check(false, "entry `%s` has no recorded pin" % id)
+			continue
+		var pin: Dictionary = CATALOG_PINS[index]
+		check(id == pin["id"], "entry %d is `%s` (got `%s`)" % [index, pin["id"], id])
+		check(PuzzleCatalog.title_at(index) == pin["title"], "entry `%s` keeps its title" % id)
+		check(PuzzleCatalog.group_of(id) == pin["group"], "entry `%s` keeps its group" % id)
+		var version := PuzzleContentVersion.of(PuzzleCatalog.get_definition(id))
+		check(version == pin["version"],
+			"entry `%s` keeps its geometry %s (got %s)" % [id, pin["version"], version])
+
 func _initialize() -> void:
+	_check_catalog_pins()
 	_check_full_catalog_solvable()
 	_check_reference_knot_content_version()
 	_check_progression_levels()

@@ -83,9 +83,7 @@ func select_arrow(cell: Vector2i) -> SelectOutcome:
 ## -- it reuses _is_head_blocked directly rather than a second rules engine.
 func find_open_move() -> Variant:
 	var active_heads: Array = _active_arrows.keys()
-	active_heads.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
-		return a.y < b.y or (a.y == b.y and a.x < b.x)
-	)
+	active_heads.sort_custom(PuzzleDefinition.head_less_than)
 	for head in active_heads:
 		if not _is_head_blocked(head):
 			return head

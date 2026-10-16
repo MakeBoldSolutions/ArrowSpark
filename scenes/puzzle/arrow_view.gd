@@ -123,16 +123,7 @@ func set_presentation_layout_valid(valid: bool) -> void:
 	_presentation_layout_valid = valid
 
 func _direction_vector() -> Vector2:
-	match direction:
-		PuzzleDefinition.Direction.UP:
-			return Vector2(0, -1)
-		PuzzleDefinition.Direction.DOWN:
-			return Vector2(0, 1)
-		PuzzleDefinition.Direction.LEFT:
-			return Vector2(-1, 0)
-		PuzzleDefinition.Direction.RIGHT:
-			return Vector2(1, 0)
-	return Vector2.ZERO
+	return Vector2(PuzzleDefinition.direction_vector(direction))
 
 func _rebuild_geometry() -> void:
 	_body.clear_points()
