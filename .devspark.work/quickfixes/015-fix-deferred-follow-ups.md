@@ -67,10 +67,11 @@ required_gates:
 
 ## Validation Checklist
 
-- [ ] Change addresses stated problem (code_ref: pending | knowledge_ref: pending)
-- [ ] No unintended side effects identified
-- [ ] Relevant tests updated/added (if applicable) (code_ref: pending | knowledge_ref: n/a)
-- [ ] Documentation updated (if applicable) (code_ref: n/a | knowledge_ref: pending)
+- [x] Change addresses stated problem (code_ref: tests/run_puzzle_regressions.py (run_rule_regressions, run_geometry_regressions, run_viewport_transform_regressions), tests/run_regressions.py, web/scripts/check-content.mjs, scenes/menus/main_menu/main_menu_with_animations.tscn (NewGameButton tooltip_text) | knowledge_ref: .knowledge/architecture/web-showcase.md, .knowledge/architecture/save-progression.md, .knowledge/index.json)
+- [x] No unintended side effects identified (both gates, editor validation and `npm run check` green; see Implementation Notes)
+- [x] Relevant tests updated/added (if applicable) (code_ref: tests/run_puzzle_regressions.py, tests/run_regressions.py (runner output handling; proven by a forced-failure run) | knowledge_ref: n/a)
+- [x] Documentation updated (if applicable) (code_ref: n/a | knowledge_ref: .knowledge/architecture/web-showcase.md (scan list), .knowledge/architecture/save-progression.md (tooltip quote), .knowledge/index.json)
+- [ ] Manual smoke: main menu New Game tooltip and menu navigation on desktop, and the tooltip in one supported browser (code_ref: n/a: manual check | knowledge_ref: n/a: manual check)
 
 ## Gate Acknowledgements
 
@@ -81,6 +82,19 @@ required_gates:
   edit is a few lines and none touches architecture, contracts, schema or saved data.
 - `tests/run_regressions.py` was added to the scope of item 1 because it has the same defect at
   the same idiom, and it is the other required gate.
+- 2026-10-16: verification on Godot 4.4.1 (`/tmp/ArrowGame-Godot-4.4.1/...console.exe`).
+  - Forced failure, using the safe procedure: the catalog was `CLEAN`; line 515
+    (`_build_knot_regions`) was changed from `Vector2i(12, 5)` to `Vector2i(12, 6)`. Puzzle gate
+    exit 1, and its output now shows
+    `FAIL: entry `knot_regions` keeps its geometry g1-d2398acdb422 (got g1-3b9bb8570e77)` and
+    `PUZZLE_CATALOG_FAILURES=1`, followed by the CalledProcessError (before the fix there was only
+    the traceback). The edit was undone by hand, and `git diff --quiet` printed `RESTORED`.
+  - `run_puzzle_regressions.py` exit 0 (9 markers `=0`); `run_regressions.py` exit 0
+    (`REGRESSION_FAILURES=0`); `--headless --editor --quit` exit 0 with no errors.
+  - `npm run check`: astro check 0 errors; vitest 5 files / 58 tests passed; `check-content: ok`.
+  - `git grep 'Starts the Reference Knot'` outside planning bundles: no matches.
+  - Web export with Godot 4.4-stable (the only version with web templates installed), build
+    `568b07d`; `npm run build` exit 0; served by the existing preview on port 4329.
 
 ## Completion
 
