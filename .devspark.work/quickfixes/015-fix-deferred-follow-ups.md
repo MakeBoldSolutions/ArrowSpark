@@ -71,7 +71,7 @@ required_gates:
 - [x] No unintended side effects identified (both gates, editor validation and `npm run check` green; see Implementation Notes)
 - [x] Relevant tests updated/added (if applicable) (code_ref: tests/run_puzzle_regressions.py, tests/run_regressions.py (runner output handling; proven by a forced-failure run) | knowledge_ref: n/a)
 - [x] Documentation updated (if applicable) (code_ref: n/a | knowledge_ref: .knowledge/architecture/web-showcase.md (scan list), .knowledge/architecture/save-progression.md (tooltip quote), .knowledge/index.json)
-- [ ] Manual smoke: main menu New Game tooltip and menu navigation on desktop, and the tooltip in one supported browser (code_ref: n/a: manual check | knowledge_ref: n/a: manual check)
+- [x] Manual smoke: main menu New Game tooltip and menu navigation on desktop, and the tooltip in one supported browser. Reported passed by the developer on 2026-10-16 ("looks good"); the browser used was not named, so other supported browsers are recorded as not tested (code_ref: n/a: manual check | knowledge_ref: n/a: manual check)
 
 ## Gate Acknowledgements
 
@@ -98,8 +98,8 @@ required_gates:
 
 ## Completion
 
-- **Completed**:
-- **Commit**:
+- **Completed**: 2026-10-16
+- **Commit**: 568b07d (last fix commit; fixes in 62b6138, d001f45, 568b07d)
 - **PR**:
 
 ---
