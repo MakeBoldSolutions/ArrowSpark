@@ -25,6 +25,7 @@ Every surface around the puzzle board still renders with the engine and template
 ### Decision Summary
 
 - **Scaling (R1).** Use the engine's built-in `canvas_items` stretch with `expand` aspect, fractional scale and a 1280×720 base. There is no runtime clamp. Logical layout sizes never fall below the base, so the board's fit and zoom math and every verified layout are unchanged in logical terms.
+- **Touch slop stays physical (R1, owner decision).** PuzzleBoard's 32 px tap/pan slop was tuned in physical pixels. The existing comparison divides it by the viewport's current stretch scale, so the physical threshold is unchanged at every scale. This adds no state or setting, and it is the only change to gameplay input code (FR-016).
 - **One theme, one seam (R2).**
   - `GameVisualStyle.get_theme()` grows from puzzle-only roles into the full app theme, covering every standard control type.
   - A new project autoload, `AppTheme`, installs that same cached Theme on the root Window and points the scene loader at a branded loading screen before any scene runs.
@@ -101,6 +102,8 @@ The backdrop motif's per-frame drift is a presentation animation, not a backgrou
 ```yaml
 expected_change_surface:
   - {path: "project.godot", change: modify, why: "stretch mode/aspect, ink boot splash without engine image, cream default clear color, AppTheme autoload (R1–R3)"}
+  - {path: "scenes/puzzle/puzzle_board.gd", change: modify, why: "compare touch slop in physical pixels by dividing by the viewport stretch scale, preserving the tuned touch feel under scaling (R1; FR-016)"}
+  - {path: "tests/puzzle_canvas_check.gd", change: modify, why: "headless touch check at a non-1 stretch scale: a drag under the physical slop still taps, one over it pans"}
   - {path: "scripts/presentation/game_visual_style.gd", change: modify, why: "add brand ramp tokens (rust hover/pressed, ember tint, ink hero, scrim) and extend get_theme() into the full app theme incl. PrimaryButton states, LevelCard accents, hero roles"}
   - {path: "scripts/presentation/control_theme.gd", change: add, why: "styling for standard control types (Button, Label, Panel, TabContainer/TabBar, sliders, CheckBox/CheckButton, OptionButton/PopupMenu, ScrollBar, LineEdit, Tree, ProgressBar, RichTextLabel, tooltips, embedded windows) kept out of the vocabulary file"}
   - {path: "scripts/app_theme.gd", change: add, why: "AppTheme autoload: root Window theme + branded loading screen path (R2)"}
@@ -136,7 +139,7 @@ expected_change_surface:
 |---|---|
 | I. Simple, Maintainable Code | New files use snake_case. The single new abstraction (`control_theme.gd`) splits an otherwise ~300-line vocabulary file. One autoload is justified under Deviations. |
 | II. Prefer Project-Level Template Customization | All template changes go through inherited project scenes and exports. No addon edits are planned. If R2's fallback or the loading screen needs an addon change, it is documented then. |
-| III. Accessible, Configurable Controls (MUST) | Navigation and remapping code are untouched; Level Select entries remain focusable Buttons; an ember focus style on every control (FR-008). Verification: every menu path with keyboard, gamepad, mouse and touch (SC-005). |
+| III. Accessible, Configurable Controls (MUST) | Navigation and remapping code are untouched; Level Select entries remain focusable Buttons; an ember focus style on every control (FR-008). Verification: every menu path with keyboard, gamepad, mouse and touch (SC-005). The touch-slop correction in `puzzle_board.gd` is an input change: it is verified by a headless touch check at a non-1 scale and on the real phone (tap, drag-to-pan, pinch). |
 | IV. Responsive Gameplay | No gameplay frame-loop change. The backdrop updates one transform per frame only while menus are visible. Transitions never gate input. |
 | V. Practical Gameplay Verification (MUST) | Both gates; editor validation; desktop smoke test at 1280×720, 1920×1080, 2560×1440 and 3840×2160; local web build in Firefox and Chrome; real-phone landscape check. Untested browsers or devices are recorded as not tested. |
 | VI. Preserve Saved Progress and Settings (MUST) | No setting keys or saved data are added or changed. The existing Audio/Video/Input options keep their values (FR-017). |
@@ -167,6 +170,11 @@ context_resolved:
     via: direct (heading: Level Select; appliesTo main menu)
     hop: 0
     reason: Level Select and no-reset contracts the card redesign must preserve; settings persistence (FR-017)
+  - id: touch-gestures
+    kind: knowledge
+    via: direct (appliesTo scenes/puzzle/puzzle_board.gd)
+    hop: 0
+    reason: documents the 32 px touch slop and its real-phone verification; must state that the slop is physical pixels independent of UI scale
   - id: web-showcase
     kind: knowledge
     via: direct (heading: The game in the page)

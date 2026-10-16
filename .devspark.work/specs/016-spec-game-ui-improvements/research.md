@@ -22,6 +22,10 @@ Question ledger for planning decisions that needed evidence. Temporary; never re
   - **Accepted, bounded limitation:** a 960×540 CSS canvas at DPR 1 renders at 0.75×. FR-003's floors apply at the design resolution and on the phone. This is recorded for the rendered 960×540 check.
   - **Rejected alternative:** a scripted minimum-scale clamp. It is extra runtime machinery, and it would break FR-001's proportionality below the design size.
   - **Rejected alternative:** `integer` scale mode. It stays at 1× on 1080p displays, so it fails SC-001.
+  - **Touch slop (owner decision, 2026-10-16):**
+    - `scenes/puzzle/puzzle_board.gd:40` compares a 32 px slop against board-local positions. Under stretch, that would grow physically by the scale factor (about 2× on the reference phone) and change the tuned touch feel.
+    - The owner chose to preserve it: divide the slop by the viewport's current stretch scale at the existing comparison. No new state or setting.
+    - **Rejected alternative:** accepting the larger slop and re-verifying. It changes input feel that FR-016 freezes.
 
 ## R2 — Where is the single app theme installed so that every surface receives it?
 
