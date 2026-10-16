@@ -19,7 +19,12 @@ HISTORY_NAME = re.compile(r"(?i)(?:^|[-_])(adr|decision|rationale|history|archiv
 TEXT_EXTENSIONS = {".md", ".txt", ".py", ".ps1", ".sh", ".js", ".jsx", ".ts", ".tsx", ".cs", ".go", ".rs", ".json", ".yaml", ".yml", ".toml"}
 STRAY_RELEASE_ARTIFACT_NAME = re.compile(r"(?i)^release-(?:context|history)-.*\.json$")
 STATUS_COMPLETE = re.compile(r"(?im)^[^\S\n]*(?:[-*]\s*)?(?:\*\*)?status(?:\*\*)?[^\S\n]*:[^\S\n]*(?:\*\*)?[^\S\n]*complete\b")
+CLOSEOUT_PASS = re.compile(r"(?im)^status:[^\S\n]*pass\b")
+CLOSEOUT_COMPLETE = re.compile(r"(?im)^decision:[^\S\n]*complete\b")
 LINKAGE_FIELD = re.compile(r"(?i)\b(code_ref|knowledge_ref)[^\S\n]*:[^\S\n]*([^|\n\r]*)")
+# Linkage is only meaningful on a task/checklist item or a standalone field line. Prose that merely
+# documents the format (for example "every task ends with `(code_ref: pending | ...)`") is not linkage.
+LINKAGE_CARRIER = re.compile(r"(?i)^\s*(?:[-*]\s+\[[ x]\]|(?:[-*]\s*)?(?:\*\*)?(?:code_ref|knowledge_ref)\b)")
 # An explained `n/a` counts as populated per the release contract; only an absent or placeholder
 # value is treated as unpopulated linkage.
 UNPOPULATED_LINKAGE = {"", "pending", "tbd", "todo", "-", "none"}
@@ -111,10 +116,25 @@ def unpopulated_linkage(text: str) -> list[str]:
     return sorted(
         {
             field.lower()
-            for field, value in LINKAGE_FIELD.findall(text)
+            for line in text.splitlines()
+            if LINKAGE_CARRIER.match(line)
+            for field, value in LINKAGE_FIELD.findall(line)
             if value.strip().strip("*`").lower() in UNPOPULATED_LINKAGE
         }
     )
+
+
+def closeout_decided_complete(path: Path) -> bool:
+    """The lifecycle records completion in gates/closeout.md, so a passing closeout gate whose
+    decision is complete counts even when spec.md still carries a stale Status line."""
+    closeout = path / "gates" / "closeout.md" if path.is_dir() else None
+    if closeout is None or not closeout.is_file():
+        return False
+    try:
+        text = closeout.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        return False
+    return bool(CLOSEOUT_PASS.search(text) and CLOSEOUT_COMPLETE.search(text))
 
 
 def branch_exists(repo: Path, name: str) -> bool:
@@ -125,7 +145,7 @@ def classify_bundle(repo: Path, path: Path) -> dict[str, object]:
     """Decide archive eligibility mechanically: a bundle is eligible only when it is marked
     Complete and no code_ref/knowledge_ref is still unpopulated."""
     text = bundle_text(path)
-    complete = bool(STATUS_COMPLETE.search(text))
+    complete = bool(STATUS_COMPLETE.search(text)) or closeout_decided_complete(path)
     pending = unpopulated_linkage(text)
     blockers: list[str] = []
     if not complete:
