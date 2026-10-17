@@ -18,6 +18,11 @@ Author: Make Bold Solutions
 Source: Make Bold design system  
 License: Make Bold Solutions trademark, used by its owner. The splash and menu tile and the application icon place the unmodified mark on a cream tile.
 
+#### Interface sounds
+Author: Make Bold Solutions  
+Source: Original, synthesised for ArrowSpark  
+License: Project license (see LICENSE.txt)
+
 ## Tools
 #### Godot
 Author: [Juan Linietsky, Ariel Manzur, and contributors](https://godotengine.org/contact)  

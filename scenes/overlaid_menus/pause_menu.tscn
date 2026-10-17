@@ -1,8 +1,45 @@
-[gd_scene load_steps=4 format=3 uid="uid://gkvinfkbye6d"]
+[gd_scene load_steps=10 format=3 uid="uid://gkvinfkbye6d"]
 
 [ext_resource type="PackedScene" uid="uid://b5cd6sa8qq4vc" path="res://addons/maaacks_game_template/base/scenes/overlaid_menu/menus/pause_menu.tscn" id="1_xqxoo"]
 [ext_resource type="Script" uid="uid://5fodktyrftnv" path="res://scenes/overlaid_menus/pause_menu.gd" id="2_ii3ug"]
 [ext_resource type="PackedScene" uid="uid://4d0psd3ykbyc" path="res://scenes/overlaid_menus/mini_options_overlaid_menu.tscn" id="3_un3r1"]
+[ext_resource type="Script" uid="uid://b5oej1q4h7jvh" path="res://addons/maaacks_game_template/base/scripts/ui_sound_controller.gd" id="ui_sound"]
+[ext_resource type="AudioStream" uid="uid://77gcin1ra0gl" path="res://assets/audio/ui/focus.wav" id="ui_focus"]
+[ext_resource type="AudioStream" uid="uid://dejjyeut45m3e" path="res://assets/audio/ui/press.wav" id="ui_press"]
+[ext_resource type="AudioStream" uid="uid://dljbpy1psb0v" path="res://assets/audio/ui/tab.wav" id="ui_tab"]
+
+[sub_resource type="Animation" id="Animation_fade_in"]
+resource_name = "FadeIn"
+length = 0.2
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("BackgroundColor:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.2),
+"transitions": PackedFloat32Array(0.5, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("MenuPanelContainer:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.2),
+"transitions": PackedFloat32Array(0.5, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_pause"]
+_data = {
+&"FadeIn": SubResource("Animation_fade_in")
+}
 
 [node name="PauseMenu" instance=ExtResource("1_xqxoo")]
 script = ExtResource("2_ii3ug")
@@ -14,3 +51,16 @@ color = Color(0.117647, 0.117647, 0.117647, 0.6)
 
 [node name="CloseButton" parent="MenuPanelContainer/MarginContainer/BoxContainer/MenuButtonsMargin/MenuButtons" index="0"]
 theme_type_variation = &"PrimaryButton"
+
+[node name="FadeInPlayer" type="AnimationPlayer" parent="." index="5"]
+libraries = {
+&"": SubResource("AnimationLibrary_pause")
+}
+autoplay = "FadeIn"
+
+[node name="UISoundController" type="Node" parent="." index="6"]
+script = ExtResource("ui_sound")
+button_focused = ExtResource("ui_focus")
+button_pressed = ExtResource("ui_press")
+tab_changed = ExtResource("ui_tab")
+slider_drag_ended = ExtResource("ui_tab")

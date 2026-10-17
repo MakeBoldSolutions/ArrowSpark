@@ -8,6 +8,11 @@
 script = ExtResource("2_ff4py")
 next_scene = "res://scenes/menus/main_menu/main_menu_with_animations.tscn"
 images = Array[Texture2D]([ExtResource("3_mark")])
+fade_in_time = 0.3
+fade_out_time = 0.3
+visible_time = 0.8
+start_delay = 0.2
+end_delay = 0.2
 
 [node name="Background" type="ColorRect" parent="." index="0"]
 layout_mode = 1

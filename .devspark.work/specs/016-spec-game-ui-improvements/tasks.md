@@ -136,18 +136,19 @@ participants:
 
 **Independent Test**: QA-06 and QA-09; SC-004.
 
-- [ ] T024 [US4] Retime the work so that interactive Main Menu arrives in under 3 s and transitions take ≤300 ms with ease-out (QA-06):
+- [X] T024 [US4] Retime the work so that interactive Main Menu arrives in under 3 s and transitions take ≤300 ms with ease-out (QA-06):
   - the splash exports in `scenes/opening/opening_with_logo.tscn`;
   - the Intro, OpenMainMenu and OpenSubMenu animations in `scenes/menus/main_menu/main_menu_with_animations.tscn` (Intro about 1.0 s, staggered; sub-menu fades 200 ms);
   - a 200 ms pause-scrim fade in `scenes/overlaid_menus/` (Implements: FR-013)
 
-  (code_ref: pending | knowledge_ref: pending)
-- [ ] T025 [P] [US4] Create `scenes/menus/main_menu/menu_backdrop.gd`, a low-contrast arrow motif drawn once from `GameVisualStyle` geometry ratios with a slow single-transform drift (no per-frame rebuild), active only while the menu is visible. Add it behind the hero content in `main_menu_with_animations.tscn` (Implements: FR-014) (code_ref: pending | knowledge_ref: pending)
-- [ ] T026 [P] [US4] Author three original short UI sounds (focus tick, press, tab/slider) as `assets/audio/ui/*.wav` using an offline generator kept in `evidence/`, and record them as original in `ATTRIBUTION.md` (Implements: FR-015) (code_ref: pending | knowledge_ref: pending)
-- [ ] T027 [US4] Assign the T026 streams to the Main Menu's `UISoundController` in `main_menu_with_animations.tscn`, and add a `UISoundController` (SFX bus) to the project pause overlay scene. Puzzle HUD and Results get no controller (Implements: FR-015, FR-016) (code_ref: pending | knowledge_ref: pending)
-- [ ] T028 [US4] Rendered check (QA-06, QA-09): time a cold launch to an interactive menu, confirm skip inputs, and confirm transitions never block input. Then confirm menu and pause sounds play, are silent at SFX=0 and Master=0 (the spec's "UI volume" is the SFX control; no new control), and that HUD and Results stay silent. Record in `evidence/` (resolves: analyze-003) (Implements: FR-013, FR-014, FR-015) (code_ref: pending | knowledge_ref: pending)
+  (code_ref: scenes/opening/opening_with_logo.tscn (timing exports), scenes/menus/main_menu/main_menu_with_animations.tscn (Intro 0.8 s, OpenSubMenu/RESET fades), scenes/overlaid_menus/pause_menu.tscn (FadeInPlayer) | knowledge_ref: n/a — documented in T029)
+- [X] T025 [P] [US4] Create `scenes/menus/main_menu/menu_backdrop.gd`, a low-contrast arrow motif drawn once from `GameVisualStyle` geometry ratios with a slow single-transform drift (no per-frame rebuild), active only while the menu is visible. Add it behind the hero content in `main_menu_with_animations.tscn` (Implements: FR-014) (code_ref: scenes/menus/main_menu/menu_backdrop.gd, scenes/menus/main_menu/main_menu_with_animations.tscn (BackdropClip/Backdrop), tests/app_theme_check.gd (backdrop contrast) | knowledge_ref: n/a — documented in T029)
+- [X] T026 [P] [US4] Author three original short UI sounds (focus tick, press, tab/slider) as `assets/audio/ui/*.wav` using an offline generator kept in `evidence/`, and record them as original in `ATTRIBUTION.md` (Implements: FR-015) (code_ref: assets/audio/ui/focus.wav, assets/audio/ui/press.wav, assets/audio/ui/tab.wav, ATTRIBUTION.md (generator kept in evidence/generate_ui_sounds.py) | knowledge_ref: n/a — documented in T029/T030)
+- [X] T027 [US4] Assign the T026 streams to the Main Menu's `UISoundController` in `main_menu_with_animations.tscn`, and add a `UISoundController` (SFX bus) to the project pause overlay scene. Puzzle HUD and Results get no controller (Implements: FR-015, FR-016) (code_ref: scenes/menus/main_menu/main_menu_with_animations.tscn (UISoundController streams), scenes/overlaid_menus/pause_menu.tscn (UISoundController) | knowledge_ref: n/a — documented in T029)
+- [X] T028 [US4] Rendered check (QA-06, QA-09): time a cold launch to an interactive menu, confirm skip inputs, and confirm transitions never block input. Then confirm menu and pause sounds play, are silent at SFX=0 and Master=0 (the spec's "UI volume" is the SFX control; no new control), and that HUD and Results stay silent. Record in `evidence/` (resolves: analyze-003) (Implements: FR-013, FR-014, FR-015) (code_ref: n/a — verification only (evidence/us4/RESULTS.md, evidence/motion_sound_check.gd) | knowledge_ref: n/a — verification only)
 
 **Checkpoint**: SC-004 is met, and sounds respect volume settings.
+**Checkpoint**: Phase complete — 2026-10-16 (launch to interactive 2.6 s; fades ≤300 ms; backdrop drifts; menu and pause sounds on SFX→Master; HUD and Results silent)
 
 ## Final Phase: Polish & Cross-Cutting Concerns
 

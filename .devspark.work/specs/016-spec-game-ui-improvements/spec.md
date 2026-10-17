@@ -193,7 +193,7 @@ confirm layout, grouping, ordering and that selecting each card opens the same p
 
 ---
 
-### User Story 4 - Polished motion, background and sound (Priority: P3)
+### User Story 4 - Polished motion, background and sound (Priority: P3) ✅ Complete
 
 Screens transition with short, smooth fades/slides; buttons give subtle hover and press response;
 menus sit over a quiet animated background motif drawn from the game's own arrow shapes; and menu

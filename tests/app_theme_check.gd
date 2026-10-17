@@ -134,6 +134,8 @@ func _check_contrast() -> void:
 		["tagline on hero ink", S.HERO_SUPPORTING, S.HERO_BACKGROUND],
 		["tooltip text", S.TEXT_ON_ACCENT, S.TOOLTIP_BACKGROUND],
 		["success score on surface", S.GAME_SUCCESS, S.GAME_SURFACE],
+		["secondary text over the menu backdrop motif", S.TEXT_SECONDARY, MenuBackdrop.COLOR],
+		["primary text over the menu backdrop motif", S.TEXT_PRIMARY, MenuBackdrop.COLOR],
 	]
 	for pair in body_pairs:
 		var ratio := _contrast(pair[1], pair[2])

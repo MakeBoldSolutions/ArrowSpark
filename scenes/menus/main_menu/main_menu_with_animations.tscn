@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://d3ab284l3yd4r"]
+[gd_scene load_steps=24 format=3 uid="uid://d3ab284l3yd4r"]
 
 [ext_resource type="PackedScene" uid="uid://c6k5nnpbypshi" path="res://addons/maaacks_game_template/base/scenes/menus/main_menu/main_menu.tscn" id="1_6btwc"]
 [ext_resource type="Script" uid="uid://bjv2v4jhmcukd" path="res://scenes/menus/main_menu/main_menu_with_animations.gd" id="2_rr1rn"]
@@ -6,10 +6,14 @@
 [ext_resource type="PackedScene" uid="uid://da7uj8u87g24i" path="res://scenes/credits/credits.tscn" id="4_ixa71"]
 [ext_resource type="PackedScene" path="res://scenes/menus/main_menu/puzzle_select_menu.tscn" id="5_puzsel"]
 [ext_resource type="Texture2D" uid="uid://drvktkvagj2ih" path="res://assets/brand/mark_tile.svg" id="6_mark"]
+[ext_resource type="Script" path="res://scenes/menus/main_menu/menu_backdrop.gd" id="7_backdrop"]
+[ext_resource type="AudioStream" uid="uid://77gcin1ra0gl" path="res://assets/audio/ui/focus.wav" id="ui_focus"]
+[ext_resource type="AudioStream" uid="uid://dejjyeut45m3e" path="res://assets/audio/ui/press.wav" id="ui_press"]
+[ext_resource type="AudioStream" uid="uid://dljbpy1psb0v" path="res://assets/audio/ui/tab.wav" id="ui_tab"]
 
 [sub_resource type="Animation" id="1"]
 resource_name = "Intro"
-length = 2.4
+length = 0.8
 tracks/0/type = "method"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -17,7 +21,7 @@ tracks/0/path = NodePath(".")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(2.4),
+"times": PackedFloat32Array(0.8),
 "transitions": PackedFloat32Array(1),
 "values": [{
 "args": [],
@@ -31,8 +35,8 @@ tracks/1/path = NodePath("Hero/HeroContent/TitleRow:modulate")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
-"times": PackedFloat32Array(0, 0.8),
-"transitions": PackedFloat32Array(1, 1),
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(0.5, 1),
 "update": 0,
 "values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
 }
@@ -43,8 +47,8 @@ tracks/2/path = NodePath("Hero/HeroContent/Tagline:modulate")
 tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/keys = {
-"times": PackedFloat32Array(0, 0.8, 1.6),
-"transitions": PackedFloat32Array(1, 1, 1),
+"times": PackedFloat32Array(0, 0.15, 0.45),
+"transitions": PackedFloat32Array(1, 0.5, 1),
 "update": 0,
 "values": [Color(1, 1, 1, 0), Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
 }
@@ -55,8 +59,8 @@ tracks/3/path = NodePath("MenuContainer/MenuButtonsMargin/MenuButtonsContainer:m
 tracks/3/interp = 1
 tracks/3/loop_wrap = true
 tracks/3/keys = {
-"times": PackedFloat32Array(0, 1.6, 2.4),
-"transitions": PackedFloat32Array(1, 1, 1),
+"times": PackedFloat32Array(0, 0.3, 0.6),
+"transitions": PackedFloat32Array(1, 0.5, 1),
 "update": 0,
 "values": [Color(1, 1, 1, 0), Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
 }
@@ -67,7 +71,7 @@ tracks/4/path = NodePath("FlowControlContainer:mouse_filter")
 tracks/4/interp = 1
 tracks/4/loop_wrap = true
 tracks/4/keys = {
-"times": PackedFloat32Array(0, 2.4),
+"times": PackedFloat32Array(0, 0.8),
 "transitions": PackedFloat32Array(1, 1),
 "update": 1,
 "values": [0, 2]
@@ -79,8 +83,8 @@ tracks/5/path = NodePath("VersionMargin/VersionContainer:modulate")
 tracks/5/interp = 1
 tracks/5/loop_wrap = true
 tracks/5/keys = {
-"times": PackedFloat32Array(0, 1.6, 2.4),
-"transitions": PackedFloat32Array(1, 1, 1),
+"times": PackedFloat32Array(0, 0.3, 0.6),
+"transitions": PackedFloat32Array(1, 0.5, 1),
 "update": 0,
 "values": [Color(1, 1, 1, 0), Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
 }
@@ -236,6 +240,42 @@ tracks/3/keys = {
 "update": 0,
 "values": [Color(1, 1, 1, 1)]
 }
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("OptionsContainer:modulate")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0, 0.2),
+"transitions": PackedFloat32Array(0.5, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("CreditsContainer:modulate")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0, 0.2),
+"transitions": PackedFloat32Array(0.5, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+tracks/6/type = "value"
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/path = NodePath("LevelSelectContainer:modulate")
+tracks/6/interp = 1
+tracks/6/loop_wrap = true
+tracks/6/keys = {
+"times": PackedFloat32Array(0, 0.2),
+"transitions": PackedFloat32Array(0.5, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
 
 [sub_resource type="Animation" id="2"]
 length = 0.001
@@ -335,6 +375,42 @@ tracks/7/keys = {
 "update": 1,
 "values": [true]
 }
+tracks/8/type = "value"
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/path = NodePath("OptionsContainer:modulate")
+tracks/8/interp = 1
+tracks/8/loop_wrap = true
+tracks/8/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
+tracks/9/type = "value"
+tracks/9/imported = false
+tracks/9/enabled = true
+tracks/9/path = NodePath("CreditsContainer:modulate")
+tracks/9/interp = 1
+tracks/9/loop_wrap = true
+tracks/9/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
+tracks/10/type = "value"
+tracks/10/imported = false
+tracks/10/enabled = true
+tracks/10/path = NodePath("LevelSelectContainer:modulate")
+tracks/10/interp = 1
+tracks/10/loop_wrap = true
+tracks/10/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_2kqig"]
 _data = {
@@ -382,6 +458,12 @@ game_scene_path = "res://scenes/puzzle/arrow_puzzle.tscn"
 options_packed_scene = ExtResource("3_sr523")
 credits_packed_scene = ExtResource("4_ixa71")
 
+[node name="UISoundController" parent="." index="0"]
+button_focused = ExtResource("ui_focus")
+button_pressed = ExtResource("ui_press")
+tab_changed = ExtResource("ui_tab")
+slider_drag_ended = ExtResource("ui_tab")
+
 [node name="MenuAnimationPlayer" type="AnimationPlayer" parent="." index="1"]
 libraries = {
 &"": SubResource("AnimationLibrary_2kqig")
@@ -392,7 +474,25 @@ tree_root = SubResource("AnimationNodeStateMachine_vikuh")
 anim_player = NodePath("../MenuAnimationPlayer")
 parameters/conditions/intro_done = false
 
-[node name="Hero" type="ColorRect" parent="." index="5"]
+[node name="BackdropClip" type="Control" parent="." index="5"]
+clip_contents = true
+layout_mode = 1
+anchor_left = 0.4
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Backdrop" type="Control" parent="BackdropClip"]
+layout_mode = 1
+anchor_right = 1.0
+anchor_bottom = 2.2
+grow_horizontal = 2
+mouse_filter = 2
+script = ExtResource("7_backdrop")
+
+[node name="Hero" type="ColorRect" parent="." index="6"]
 layout_mode = 1
 anchor_right = 0.4
 anchor_bottom = 1.0
