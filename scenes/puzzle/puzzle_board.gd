@@ -369,7 +369,7 @@ func _handle_touch_drag(event: InputEventScreenDrag) -> void:
 
 func _drag_single_touch(position: Vector2, previous: Vector2) -> void:
 	if not _touch_panning:
-		if position.distance_to(_tap_start) <= _TOUCH_SLOP_PIXELS:
+		if position.distance_to(_tap_start) <= _touch_slop():
 			return
 		# Crossing the slop turns the touch into a pan and cancels the tap. Catch up from
 		# the touch-down point so the board does not jump or lose the first movement.
@@ -378,6 +378,13 @@ func _drag_single_touch(position: Vector2, previous: Vector2) -> void:
 		previous = _tap_start
 	if _navigation_eligible() and view_transform.pan_pixels(position - previous):
 		_apply_view_change()
+
+## The slop is measured in physical screen pixels, so UI scaling never changes how
+## far a finger may drift before a tap becomes a pan. Touch positions arrive in
+## logical (stretched) units; divide by the viewport's scale to compare.
+func _touch_slop() -> float:
+	var scale := get_viewport().get_final_transform().get_scale().x if is_inside_tree() else 1.0
+	return _TOUCH_SLOP_PIXELS / scale if scale > 0.0 else _TOUCH_SLOP_PIXELS
 
 func _pinch_points() -> Array:
 	var keys := _touches.keys()

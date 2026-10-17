@@ -64,8 +64,8 @@ model, never the reverse. Shared definitions live with the rules model
 | Presentation | `scenes/puzzle/arrow_view.gd`, `scenes/puzzle/puzzle_results.gd`, `scripts/presentation/game_visual_style.gd`, `arrow_departure_geometry.gd`, `puzzle_viewport_transform.gd`, `scripts/puzzle/puzzle_feedback.gd` (animation constants), `puzzle_results_format.gd` (display formatting) |
 | Input and board canvas | `scenes/puzzle/puzzle_board.gd` (mouse, keyboard, gamepad and touch input; hit testing; zoom and pan through `PuzzleViewportTransform`; arrow view placement) |
 | Scene flow | `scenes/puzzle/arrow_puzzle.gd` (attempt lifecycle, HUD, results, navigation), `scenes/menus/main_menu/main_menu_with_animations.gd`, `puzzle_select_menu.gd` (Level Select), `scripts/presentation/web_attempt_emitter.gd` (completed-attempt hand-off to the web page) |
-| Template integration | Thin project extensions of template scenes: `scenes/opening/opening.gd`, `scenes/credits/credits.gd`, `scenes/overlaid_menus/pause_menu.gd`, and the options menu scripts under `scenes/menus/options_menu/`: `audio/audio_options_menu.gd`, `audio/audio_input_option_control.gd`, `game/game_options_menu.gd`, `game/reset_game_control/reset_game_control.gd`, `input/input_options_menu.gd`, `master_options_menu.gd`, `mini_options_menu_with_reset.gd`, `video/video_options_menu.gd` |
-| Template copies, unreferenced | Copied with the template and reached by nothing in the shipped game: `scenes/menus/main_menu/main_menu.gd` and `main_menu.tscn`; `scenes/menus/options_menu/mini_options_menu.gd` and `mini_options_menu.tscn`, `master_options_menu.tscn`, `video/video_options_menu.tscn`, `input/input_options_menu_with_mouse_sensitivity.tscn`; `scenes/opening/opening.tscn`; `scenes/overlaid_menus/overlaid_menu.gd`, `overlaid_menu.tscn`, `overlaid_menu_container.gd` and `overlaid_menu_container.tscn` and the five themes in `resources/themes/` (the game builds its theme in `GameVisualStyle.get_theme()`) |
+| Template integration | `scripts/app_theme.gd` (the `AppTheme` autoload: installs the app theme and sets the branded loading screen) and `scenes/loading_screen/loading_screen.tscn` (inherits the template loading screen). Thin project extensions of template scenes: `scenes/opening/opening.gd`, `scenes/credits/credits.gd`, `scenes/overlaid_menus/pause_menu.gd`, and the options menu scripts under `scenes/menus/options_menu/`: `audio/audio_options_menu.gd`, `audio/audio_input_option_control.gd`, `game/game_options_menu.gd`, `game/reset_game_control/reset_game_control.gd`, `input/input_options_menu.gd`, `master_options_menu.gd`, `mini_options_menu_with_reset.gd`, `video/video_options_menu.gd` |
+| Template copies, unreferenced | Copied with the template and reached by nothing in the shipped game: `scenes/menus/main_menu/main_menu.gd` and `main_menu.tscn`; `scenes/menus/options_menu/mini_options_menu.gd` and `mini_options_menu.tscn`, `master_options_menu.tscn`, `video/video_options_menu.tscn`, `input/input_options_menu_with_mouse_sensitivity.tscn`; `scenes/opening/opening.tscn`; `scenes/overlaid_menus/overlaid_menu.gd`, `overlaid_menu.tscn`, `overlaid_menu_container.gd` and `overlaid_menu_container.tscn` (the game builds its theme in `GameVisualStyle.get_theme()`) |
 | Saved-data compatibility | `scripts/game_state.gd`, `scripts/level_state.gd`: no live gameplay use, but saved files serialize them by script path, so they stay (see `.knowledge/architecture/save-progression.md`) |
 
 The template's example game scene, levels, level select, won/lost overlays,
@@ -1101,8 +1101,11 @@ figures; the existing score uses success green. `puzzle_results.gd`'s
 move assists (`%OpenMoveAssistsLabel`, alongside mistakes rather than folded
 into it — see the Open Move Assistance and Session Scoring section below),
 score and accuracy; plus Replay, Main Menu and focus behavior, all unchanged
-in mechanism. No root/global theme reaches inherited pause/options screens.
-Source of truth: tests/puzzle_presentation_check.gd checks theme scope,
+in mechanism. The same theme is installed app-wide at startup by the
+`AppTheme` autoload, so pause, options, dialogs and menus share it; the puzzle
+also assigns it locally so the scene stands alone (see
+.knowledge/architecture/game-visual-system.md, App-wide theme, scaling and
+launch). Source of truth: tests/puzzle_presentation_check.gd checks theme scope,
 fonts, all five result fields' text and content bounds at both supported
 desktop sizes, and focus styles. Shared roles and font/license evidence are
 in .knowledge/architecture/game-visual-system.md.

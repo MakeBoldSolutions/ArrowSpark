@@ -1,0 +1,25 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" uid="uid://cd0jbh4metflb" path="res://addons/maaacks_game_template/base/scenes/loading_screen/loading_screen.tscn" id="1_base"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ink"]
+bg_color = Color(0.117647, 0.117647, 0.117647, 1)
+
+[node name="LoadingScreen" instance=ExtResource("1_base")]
+
+[node name="BackPanel" parent="Control" index="0"]
+theme_override_styles/panel = SubResource("StyleBoxFlat_ink")
+
+[node name="VBoxContainer" parent="Control" index="3"]
+anchor_left = 0.3
+anchor_right = 0.7
+offset_left = 0.0
+offset_right = 0.0
+theme_override_constants/separation = 24
+
+[node name="ProgressLabel" parent="Control/VBoxContainer" index="0"]
+theme_override_colors/font_color = Color(0.972549, 0.964706, 0.94902, 1)
+
+[node name="ProgressBar" parent="Control/VBoxContainer" index="1"]
+custom_minimum_size = Vector2(0, 12)
+show_percentage = false

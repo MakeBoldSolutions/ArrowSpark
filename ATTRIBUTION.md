@@ -12,11 +12,16 @@ Author: [Marek Belski and contributors](https://github.com/Maaack/Godot-Game-Tem
 Source: [github: Godot-Game-Template](https://github.com/Maaack/Godot-Game-Template)  
 License: [MIT License](LICENSE.txt)  
 
-## Sourced
-#### Godot Engine Logo
-Author: Andrea Calabró  
-Source: [godotengine.org : press](https://godotengine.org/press/)  
-License: [CC BY 4.0 International](https://github.com/godotengine/godot/blob/master/LOGO_LICENSE.txt) 
+## Brand
+#### Make Bold peak mark
+Author: Make Bold Solutions  
+Source: Make Bold design system  
+License: Make Bold Solutions trademark, used by its owner. The splash and menu tile and the application icon place the unmodified mark on a cream tile.
+
+#### Interface sounds
+Author: Make Bold Solutions  
+Source: Original, synthesised for ArrowSpark  
+License: Project license (see LICENSE.txt)
 
 ## Tools
 #### Godot

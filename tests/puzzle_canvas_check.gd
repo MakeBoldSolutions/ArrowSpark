@@ -746,6 +746,35 @@ func _touch_drag(board: PuzzleBoard, index: int, position: Vector2, relative: Ve
 	event.relative = relative
 	board._gui_input(event)
 
+## UI scaling must not change the touch feel: the tap/pan slop is a fixed distance in
+## physical pixels, so at a stretch scale of 2 it is half as many logical pixels.
+func _check_touch_slop_is_physical_under_scaling() -> void:
+	var puzzle := await _spawn(LARGE_ID, Vector2i(2560, 1440))
+	var board := _board(puzzle)
+	var scale := board.get_viewport().get_final_transform().get_scale().x
+	check(is_equal_approx(scale, 2.0), "a 2560x1440 window stretches the 1280x720 design by 2 (got %.2f)" % scale)
+	var clicked: Array[Vector2i] = []
+	board.cell_clicked.connect(func(cell: Vector2i): clicked.append(cell))
+	_working_view_at(board, Vector2(8, 4))
+	var start := _cell_center(board, Vector2i(1, 1))
+	var physical_slop: float = PuzzleBoard._TOUCH_SLOP_PIXELS
+	var center_before := board.view_transform.center_cells
+	var under := Vector2(physical_slop * 0.75 / scale, 0)
+	_touch(board, 0, true, start)
+	_touch_drag(board, 0, start + under, under)
+	_touch(board, 0, false, start + under)
+	check(board.view_transform.center_cells == center_before and clicked == [Vector2i(1, 1)],
+		"a drift under the physical slop still taps at a stretch scale of 2")
+	clicked.clear()
+	var over := Vector2(physical_slop * 1.25 / scale, 0)
+	_touch(board, 0, true, start)
+	_touch_drag(board, 0, start + over, over)
+	_touch(board, 0, false, start + over)
+	check(board.view_transform.center_cells != center_before and clicked.is_empty(),
+		"a drag past the physical slop pans and never selects at a stretch scale of 2")
+	await _dispose(puzzle)
+	await _apply_window(Vector2i(1280, 720))
+
 func _check_modeless_touch() -> void:
 	var puzzle := await _spawn(LARGE_ID)
 	var board := _board(puzzle)
@@ -1311,6 +1340,7 @@ func _initialize() -> void:
 	await _check_blocked_and_removed_selection_after_navigation()
 	await _check_pan_gestures_never_select()
 	await _check_modeless_touch()
+	await _check_touch_slop_is_physical_under_scaling()
 	await _check_off_screen_open_move_reveal()
 	await _check_completed_open_move_is_noop()
 	await _check_pending_reveal_after_invalid_area()

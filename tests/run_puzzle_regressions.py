@@ -37,6 +37,9 @@ Nine independent checks run, in execution order:
 9. Interaction, fonts and animation presentation checks
    (tests/puzzle_presentation_check.gd) against the real project, sharing
    the layout and canvas suites' isolated user-data root.
+10. App-wide theme checks (tests/app_theme_check.gd) against the real project:
+    the startup theme reaches every control type, including under a CanvasLayer,
+    with brand styles, visible focus, minimum target and text sizes, and AA contrast.
 """
 
 from pathlib import Path
@@ -157,6 +160,7 @@ def run_layout_check(godot: str, repo: Path) -> None:
             (("--script", "res://tests/puzzle_layout_check.gd"), "PUZZLE_LAYOUT_FAILURES=0"),
             (("--script", "res://tests/puzzle_canvas_check.gd"), "PUZZLE_CANVAS_FAILURES=0"),
             (("--script", "res://tests/puzzle_presentation_check.gd"), "PUZZLE_PRESENTATION_FAILURES=0"),
+            (("--script", "res://tests/app_theme_check.gd"), "APP_THEME_FAILURES=0"),
         )
         for flags, marker in checks:
             command = [godot, "--headless", "--path", str(repo), *flags]

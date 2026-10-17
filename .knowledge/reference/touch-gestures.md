@@ -17,7 +17,7 @@ How ArrowSpark handles touch, and what the research behind it found. Owner direc
 
 `PuzzleBoard._gui_input` tracks raw `InputEventScreenTouch` / `InputEventScreenDrag` events and feeds the one viewport authority, `PuzzleViewportTransform` (`zoom_at`, `pan_pixels`). No second zoom or hit-test model exists.
 
-- **Tap acts on release.** A touch is a pending tap. It emits one `cell_clicked` only on release, and only if no second finger appeared and movement stayed under `_TOUCH_SLOP_PIXELS` (32).
+- **Tap acts on release.** A touch is a pending tap. It emits one `cell_clicked` only on release, and only if no second finger appeared and movement stayed under `_TOUCH_SLOP_PIXELS` (32). The slop is 32 *physical* screen pixels: touch positions arrive in logical (UI-scaled) units, so `PuzzleBoard._touch_slop()` divides it by the viewport's stretch scale and UI scaling never changes how far a finger may drift before a tap becomes a pan. Source of truth: `tests/puzzle_canvas_check.gd` (touch slop at a stretch scale of 2).
 - **One-finger drag pans.** Crossing the slop cancels the tap and starts a pan; the board catches up from the touch-down point so it does not jump. It works with Pan mode off. Pan mode and the Pan button remain for mouse users.
 - **Two-finger pinch zooms** about the midpoint, and moving both fingers together pans. Bounds are the transform's own: the camera center may reach any point of the board (above the Fit scale), and the scale is between Fit and the maximum.
 - **After a pinch**, the remaining finger is locked out (no select, no pan) until every finger lifts.

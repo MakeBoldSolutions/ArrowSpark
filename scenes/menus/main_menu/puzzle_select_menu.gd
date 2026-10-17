@@ -2,13 +2,23 @@ extends Control
 ## Minimal, catalog-driven Level Select content: accordion group sections. Each
 ## purpose group has a header button that collapses or expands its entries,
 ## followed by one line saying what the group is for (never a ranking);
-## entries are keyboard/gamepad focus-navigable buttons numbered within their
-## group, emitting puzzle_selected(id) on selection. Collapsed entries are
+## entries are keyboard/gamepad focus-navigable card buttons in a two-column
+## grid, numbered within their group and edged in the group's accent,
+## emitting puzzle_selected(id) on selection. Collapsed entries are
 ## hidden, so focus skips them. Every group starts expanded. No locked/unlocked states —
 ## every catalog entry is always selectable. Built directly against
 ## PuzzleCatalog, not the addon example's GameState-backed script.
 
 signal puzzle_selected(id: String)
+
+## Card accent per purpose group (a GameVisualStyle LevelCard variation).
+const GROUP_CARD_VARIATIONS := {
+	PuzzleCatalog.GROUP_ARROWSPARK_LEVELS: &"LevelCardRust",
+	PuzzleCatalog.GROUP_FOUNDATIONS: &"LevelCardInk",
+	PuzzleCatalog.GROUP_PUZZLE_LAB: &"LevelCardEmber",
+}
+const CARD_COLUMNS := 2
+const CARD_WIDTH := 300
 
 ## One honest line per purpose group. Shown even when the group is collapsed.
 const GROUP_DESCRIPTIONS := {
@@ -32,7 +42,7 @@ func _ready() -> void:
 		header.button_pressed = true
 		header.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		header.focus_mode = Control.FOCUS_ALL
-		header.theme_type_variation = &"SecondaryButton"
+		header.theme_type_variation = &"LevelGroupHeader"
 		_list_container.add_child(header)
 		_header_buttons.append(header)
 		var description := Label.new()
@@ -42,13 +52,20 @@ func _ready() -> void:
 		description.focus_mode = Control.FOCUS_NONE
 		_list_container.add_child(description)
 		_description_labels.append(description)
-		var section := VBoxContainer.new()
-		section.add_theme_constant_override("separation", 8)
+		var section := GridContainer.new()
+		section.columns = CARD_COLUMNS
+		section.add_theme_constant_override("h_separation", 12)
+		section.add_theme_constant_override("v_separation", 12)
 		_list_container.add_child(section)
 		for id in members:
 			var button := Button.new()
 			button.text = "%d. %s" % [PuzzleCatalog.group_position(id), PuzzleCatalog.get_title(id)]
 			button.focus_mode = Control.FOCUS_ALL
+			button.theme_type_variation = GROUP_CARD_VARIATIONS.get(group_id, &"LevelCardInk")
+			button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+			button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+			button.custom_minimum_size = Vector2(CARD_WIDTH, 0)
+			button.tooltip_text = button.text
 			button.pressed.connect(_on_entry_pressed.bind(id))
 			section.add_child(button)
 			_entry_buttons.append(button)
