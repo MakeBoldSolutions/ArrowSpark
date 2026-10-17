@@ -335,11 +335,11 @@ All obligations are `pre-merge`: rendered desktop runs at the listed sizes, a lo
 Firefox and Chrome, and the reference real phone on a local build (`local-integration` evidence),
 plus both headless regression gates (`automated`).
 
-Deferred obligation (`stage: post-deploy`, accepted_by: project owner, 2026-10-17): the real-phone
-mobile-web-beta check is done after deployment instead of pre-merge. On the Pixel 7 Pro against the
-published showcase, menus must not be smaller than before (FR-003), and tap, one-finger drag-to-pan and
-pinch must feel unchanged (FR-016). It needs `deployed` evidence, the owner runs it, and it is captured in
-this spec's closeout record. All other obligations remain pre-merge.
+Real-phone mobile-web-beta verification is out of this spec's scope by owner decision (2026-10-17):
+re-verifying the scaled UI and touch feel on a real phone moves to a future spec (Future Work Plan in
+`.devspark.work/intake/`). This spec makes no claim about phone readability, and the web-showcase
+knowledge states that the larger phone menus await real-device re-verification. All other obligations
+are pre-merge.
 
 ## Assumptions
 

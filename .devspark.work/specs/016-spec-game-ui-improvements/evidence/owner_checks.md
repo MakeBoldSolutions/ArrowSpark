@@ -26,8 +26,7 @@ The owner reviewed the live build across the browsers above: "all look great, to
 | Physical gamepad menu walk | **Not tested** physically. Simulated D-pad navigation passed (evidence/us2/RESULTS.md). |
 | Real-key splash skip | **Not tested.** Synthetic skip behaves identically on main (pre-existing). |
 
-## T035: real-phone check, deferred by the owner to post-deploy
+## T035: real-phone check, moved out of this spec
 
-- Decision (owner, 2026-10-17): "defer pixel testing til spec is complete and deployed to web."
-- Stage: post-deploy. Owner: project owner. Evidence class required: deployed (the Pixel 7 Pro against the published showcase).
-- Recorded in spec.md (Verification, deferred obligation) and in tasks.md Gate Acknowledgements.
+- Owner decision (2026-10-17): "approve closing the task for mobile testing, we will address in a future spec, not hold up this one."
+- Preserved as a Future Work Plan: .devspark.work/intake/future-mobile-ui-scaling-verification-owner-2026-10-17.md

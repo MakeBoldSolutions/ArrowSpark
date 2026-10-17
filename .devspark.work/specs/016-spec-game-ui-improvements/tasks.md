@@ -168,7 +168,7 @@ participants:
 - [X] T041 Reword only the message of the assertion at `tests/puzzle_presentation_check.gd:311` so it says the puzzle carries its own theme reference (not that root overlays stay unthemed). The boolean expectation is unchanged (resolves: analyze-002) (code_ref: tests/puzzle_presentation_check.gd (message only; expectation unchanged) | knowledge_ref: n/a — test message only)
 - [X] T033 Run `--headless --editor --quit` validation (Godot 4.4.1, plus a fresh copy without `.godot/` to mirror CI) and confirm no new SCRIPT ERROR beyond the CI allow-list. Run both gates and record exit codes and failure counts (constitution V) (code_ref: n/a — verification (fresh-copy editor: 0 SCRIPT ERROR; puzzle gate 11/11 counts 0; REGRESSION_FAILURES=0) | knowledge_ref: n/a — verification only)
 - [X] T034 Export the Web build with Godot 4.4-stable (`node web/scripts/export-game.mjs`), then serve locally and smoke-test in Firefox and Chrome: launch hand-off, menus, pause and a puzzle at a 960×540 and a full-window canvas (QA-04 web, QA-10). Record any untested browser as not tested (constitution V) (code_ref: n/a — verification (evidence/owner_checks.md: Chrome, Firefox, Perplexity, VS Code browser pass; Edge not tested) | knowledge_ref: n/a — verification only)
-- [X] T035 ~~Real-phone landscape smoke~~ moved to a post-deploy obligation by the owner (2026-10-17); not a pre-merge task. See spec.md Verification (deferred obligation) and Gate Acknowledgements (code_ref: n/a — deferred to post-deploy by owner decision | knowledge_ref: n/a — web-showcase.md already records that larger phone menus await real-device re-verification)
+- [X] T035 ~~Real-phone landscape smoke~~ removed from this spec by owner decision (2026-10-17); preserved as a Future Work Plan in `.devspark.work/intake/future-mobile-ui-scaling-verification-owner-2026-10-17.md` (code_ref: n/a — moved to future spec by owner | knowledge_ref: n/a — web-showcase.md already records that larger phone menus await real-device re-verification)
 - [X] T036 Assemble the screenshot set (every screen at 1280×720, 1920×1080 and 3840×2160, plus phone) in `evidence/` and obtain the owner's sign-off (QA-11, SC-007) (code_ref: n/a — verification (evidence/owner_checks.md: owner approval 2026-10-17; screenshots in evidence/us1–us4) | knowledge_ref: n/a — verification only)
 - [ ] T037 Record `verify:end-to-end` evidence from T009, T010, T019, T023, T028 and T033–T036 in `gates/verify.md` via `/devspark-verify` (spec required_gates) (code_ref: pending | knowledge_ref: pending)
 - [X] T038 Scan durable changes (code, tests, `.knowledge/`, `ATTRIBUTION.md`, `README.md`) for spec/plan/task/FR/SC/QA identifiers or `.devspark.work` links. Populate every task's `code_ref`/`knowledge_ref`, and retain the complete feature directory in `.devspark.work/` (preamble §0) (code_ref: n/a — scan: 67 durable files changed, 0 planning identifiers in added lines; check-planning-references hits are pre-existing false positives in untouched files (addon PNGs, BeVietnamPro-Medium.ttf, repo-story history.json); linkage populated per task | knowledge_ref: n/a — verification only)
@@ -189,9 +189,9 @@ participants:
 ## Gate Acknowledgements
 
 - Gate: verify (constitution V, mobile web beta real-phone check)
-- Concern: the Pixel 7 Pro check (QA-10 phone, QA-07 touch) is not run before merge
-- Decision: proceed. The check is deferred to post-deploy against the published showcase and stays a closeout obligation.
-- Recorded By: project owner ("defer pixel testing til spec is complete and deployed to web")
+- Concern: the scaled UI and touch feel (QA-10 phone, QA-07 touch) are not verified on a real phone in this spec
+- Decision: proceed and close. Phone verification moves to a future spec (Future Work Plan in `.devspark.work/intake/`). No phone readability claim is made, and web-showcase knowledge discloses the gap.
+- Recorded By: project owner ("approve closing the task for mobile testing, we will address in a future spec, not hold up this one")
 - Date: 2026-10-17
 
 - Gate: verify (constitution III, supported input methods)
