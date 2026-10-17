@@ -101,6 +101,7 @@ participants:
 - [X] T019 [US2] Rendered inventory walk on desktop (QA-04): splash, loading, Main Menu, Level Select, the five Options tabs including dropdown popups and the reset confirmation, Credits, Pause, Results and tooltips, with screenshots in `evidence/`. Then walk every menu path with keyboard-only, gamepad-only and mouse-only input, and remap one key and one gamepad button across a restart, confirming existing audio/video settings load unchanged (QA-07; constitution III, VI) (Implements: FR-004, FR-008, FR-012, FR-017) (code_ref: n/a — verification (evidence/us2/RESULTS.md inventory, 0 default-styled surfaces; evidence/owner_checks.md: keyboard and mouse pass; physical gamepad and real-key splash skip not tested, disclosed) | knowledge_ref: n/a — verification only)
 
 **Checkpoint**: SC-002 shows 0 default-styled surfaces, the focus ring is visible everywhere, and remapping works.
+**Checkpoint**: Phase complete — 2026-10-17 (0 default-styled surfaces; owner keyboard and mouse walk passed; gamepad disclosed as not physically tested)
 
 ## Phase 5: User Story 3 — A Main Menu and Level Select that invite play (Priority: P2)
 

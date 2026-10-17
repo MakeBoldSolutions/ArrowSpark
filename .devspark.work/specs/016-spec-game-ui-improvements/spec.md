@@ -138,7 +138,7 @@ browser and the reference phone; compare Main Menu, Level Select, Options and Pa
 
 ---
 
-### User Story 2 - One Make Bold look from launch to every screen (Priority: P1)
+### User Story 2 - One Make Bold look from launch to every screen (Priority: P1) ✅ Complete
 
 From the moment the game starts, the player sees Make Bold branding and a single consistent visual
 system — cream surfaces, ink text, rust primary actions, ember highlights and focus — on the splash,
