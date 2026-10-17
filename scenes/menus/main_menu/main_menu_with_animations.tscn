@@ -1,10 +1,11 @@
-[gd_scene load_steps=19 format=3 uid="uid://d3ab284l3yd4r"]
+[gd_scene load_steps=20 format=3 uid="uid://d3ab284l3yd4r"]
 
 [ext_resource type="PackedScene" uid="uid://c6k5nnpbypshi" path="res://addons/maaacks_game_template/base/scenes/menus/main_menu/main_menu.tscn" id="1_6btwc"]
 [ext_resource type="Script" uid="uid://bjv2v4jhmcukd" path="res://scenes/menus/main_menu/main_menu_with_animations.gd" id="2_rr1rn"]
 [ext_resource type="PackedScene" uid="uid://dfycb1h41yhrw" path="res://scenes/menus/options_menu/master_options_menu_with_tabs.tscn" id="3_sr523"]
 [ext_resource type="PackedScene" uid="uid://da7uj8u87g24i" path="res://scenes/credits/credits.tscn" id="4_ixa71"]
 [ext_resource type="PackedScene" path="res://scenes/menus/main_menu/puzzle_select_menu.tscn" id="5_puzsel"]
+[ext_resource type="Texture2D" uid="uid://drvktkvagj2ih" path="res://assets/brand/mark_tile.svg" id="6_mark"]
 
 [sub_resource type="Animation" id="1"]
 resource_name = "Intro"
@@ -26,7 +27,7 @@ tracks/0/keys = {
 tracks/1/type = "value"
 tracks/1/imported = false
 tracks/1/enabled = true
-tracks/1/path = NodePath("MenuContainer/TitleMargin/TitleContainer:modulate")
+tracks/1/path = NodePath("Hero/HeroContent/TitleRow:modulate")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
@@ -38,7 +39,7 @@ tracks/1/keys = {
 tracks/2/type = "value"
 tracks/2/imported = false
 tracks/2/enabled = true
-tracks/2/path = NodePath("MenuContainer/SubTitleMargin/SubTitleContainer:modulate")
+tracks/2/path = NodePath("Hero/HeroContent/Tagline:modulate")
 tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/keys = {
@@ -90,7 +91,7 @@ length = 0.1
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("MenuContainer/TitleMargin/TitleContainer:modulate")
+tracks/0/path = NodePath("Hero/HeroContent/TitleRow:modulate")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
@@ -102,7 +103,7 @@ tracks/0/keys = {
 tracks/1/type = "value"
 tracks/1/imported = false
 tracks/1/enabled = true
-tracks/1/path = NodePath("MenuContainer/SubTitleMargin/SubTitleContainer:modulate")
+tracks/1/path = NodePath("Hero/HeroContent/Tagline:modulate")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
@@ -211,6 +212,30 @@ tracks/1/keys = {
 "update": 0,
 "values": [Color(1, 1, 1, 0)]
 }
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Hero/HeroContent/TitleRow:modulate")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Hero/HeroContent/Tagline:modulate")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
 
 [sub_resource type="Animation" id="2"]
 length = 0.001
@@ -229,7 +254,7 @@ tracks/0/keys = {
 tracks/1/type = "value"
 tracks/1/imported = false
 tracks/1/enabled = true
-tracks/1/path = NodePath("MenuContainer/TitleMargin/TitleContainer:modulate")
+tracks/1/path = NodePath("Hero/HeroContent/TitleRow:modulate")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
@@ -241,7 +266,7 @@ tracks/1/keys = {
 tracks/2/type = "value"
 tracks/2/imported = false
 tracks/2/enabled = true
-tracks/2/path = NodePath("MenuContainer/SubTitleMargin/SubTitleContainer:modulate")
+tracks/2/path = NodePath("Hero/HeroContent/Tagline:modulate")
 tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/keys = {
@@ -367,8 +392,89 @@ tree_root = SubResource("AnimationNodeStateMachine_vikuh")
 anim_player = NodePath("../MenuAnimationPlayer")
 parameters/conditions/intro_done = false
 
+[node name="Hero" type="ColorRect" parent="." index="5"]
+layout_mode = 1
+anchor_right = 0.4
+anchor_bottom = 1.0
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.117647, 0.117647, 0.117647, 1)
+
+[node name="HeroContent" type="VBoxContainer" parent="Hero"]
+layout_mode = 1
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = 64.0
+offset_top = -150.0
+offset_right = -48.0
+offset_bottom = 150.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="MarkTile" type="TextureRect" parent="Hero/HeroContent"]
+custom_minimum_size = Vector2(112, 112)
+layout_mode = 2
+size_flags_horizontal = 0
+mouse_filter = 2
+texture = ExtResource("6_mark")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TitleRow" type="HBoxContainer" parent="Hero/HeroContent"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 0
+
+[node name="HeroTitle" type="Label" parent="Hero/HeroContent/TitleRow"]
+layout_mode = 2
+theme_type_variation = &"HeroTitle"
+text = "Arrow"
+
+[node name="HeroAccent" type="Label" parent="Hero/HeroContent/TitleRow"]
+layout_mode = 2
+theme_type_variation = &"HeroAccent"
+text = "Spark"
+
+[node name="Tagline" type="Label" parent="Hero/HeroContent"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 2
+theme_type_variation = &"HeroTagline"
+text = "A Make Bold Spark Game"
+
 [node name="VersionContainer" parent="VersionMargin" index="0"]
 modulate = Color(1, 1, 1, 0)
+
+[node name="MenuContainer" parent="." index="6"]
+anchor_left = 0.4
+
+[node name="TitleMargin" parent="MenuContainer" index="0"]
+visible = false
+
+[node name="SubTitleMargin" parent="MenuContainer" index="1"]
+visible = false
+
+[node name="MenuButtonsMargin" parent="MenuContainer" index="2"]
+theme_override_constants/margin_top = 0
+
+[node name="OptionsContainer" parent="." index="7"]
+anchor_left = 0.4
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 88
+
+[node name="CreditsContainer" parent="." index="8"]
+anchor_left = 0.4
+
+[node name="FlowControlContainer" parent="." index="9"]
+anchor_left = 0.4
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_bottom = 24
 
 [node name="TitleContainer" parent="MenuContainer/TitleMargin" index="0"]
 modulate = Color(1, 1, 1, 0)
@@ -384,6 +490,10 @@ modulate = Color(1, 1, 1, 0)
 
 [node name="MenuButtonsBoxContainer" parent="MenuContainer/MenuButtonsMargin/MenuButtonsContainer" index="0"]
 lock = true
+offset_left = -160.0
+offset_top = -170.0
+offset_right = 160.0
+offset_bottom = 170.0
 
 [node name="NewGameButton" parent="MenuContainer/MenuButtonsMargin/MenuButtonsContainer/MenuButtonsBoxContainer" index="0"]
 theme_type_variation = &"PrimaryButton"
@@ -401,16 +511,17 @@ visible = true
 layout_mode = 2
 text = "Level Select"
 
-[node name="LevelSelectContainer" type="MarginContainer" parent="." index="9"]
+[node name="LevelSelectContainer" type="MarginContainer" parent="." index="11"]
 unique_name_in_owner = true
 layout_mode = 0
+anchor_left = 0.4
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 32
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 32
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 88
 
 [connection signal="pressed" from="MenuContainer/MenuButtonsMargin/MenuButtonsContainer/MenuButtonsBoxContainer/ContinueGameButton" to="." method="_on_continue_game_button_pressed"]
 [connection signal="pressed" from="MenuContainer/MenuButtonsMargin/MenuButtonsContainer/MenuButtonsBoxContainer/LevelSelectButton" to="." method="_on_level_select_button_pressed"]

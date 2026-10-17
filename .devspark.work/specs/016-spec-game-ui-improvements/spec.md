@@ -168,7 +168,7 @@ confirm none shows engine default styling, fonts or logo.
 
 ---
 
-### User Story 3 - A Main Menu and Level Select that invite play (Priority: P2)
+### User Story 3 - A Main Menu and Level Select that invite play (Priority: P2) ✅ Complete
 
 The Main Menu has a deliberate composed layout with the ArrowSpark wordmark, the "A Make Bold Spark
 Game" tagline and the Make Bold mark, and a clear Play call to action; Level Select presents puzzles

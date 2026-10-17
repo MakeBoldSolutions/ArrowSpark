@@ -572,6 +572,58 @@ func _check_level_select_accordion() -> void:
 	menu.queue_free()
 	await process_frame
 
+## The Main Menu hero carries the product title and stays decorative; actions keep their
+## order with Play as the one primary; Level Select shows each group as accented cards.
+func _check_menu_brand_layout() -> void:
+	var menu = load("res://scenes/menus/main_menu/main_menu_with_animations.tscn").instantiate()
+	get_root().add_child(menu)
+	await process_frame
+	await process_frame
+	var hero := menu.get_node_or_null("Hero") as Control
+	var title_row: Node = menu.get_node_or_null("Hero/HeroContent/TitleRow")
+	var title := ""
+	if title_row != null:
+		for part in title_row.get_children():
+			title += (part as Label).text
+	check(title == ProjectSettings.get_setting("application/config/name"), "the hero title reads the product name")
+	check(hero != null and hero.mouse_filter == Control.MOUSE_FILTER_IGNORE, "the hero ignores pointer input")
+	var focusable: Array = hero.find_children("*", "Control", true, false).filter(
+		func(c: Control) -> bool: return c.focus_mode != Control.FOCUS_NONE) if hero != null else []
+	check(focusable.is_empty(), "the hero holds no focusable controls")
+	var new_game: Button = menu.get_node("%NewGameButton")
+	check(new_game.theme_type_variation == &"PrimaryButton", "Play/New Game is the single primary action")
+	var order: Array[String] = []
+	for child in menu.get_node("%MenuButtonsBoxContainer").get_children():
+		if child is Button and child.visible:
+			order.append(child.name)
+	var expected: Array[String] = ["NewGameButton", "LevelSelectButton", "OptionsButton", "CreditsButton"]
+	if not OS.has_feature("web"):
+		expected.append("ExitButton")
+	check(order == expected, "Main Menu actions keep their order (%s)" % [order])
+	var level_select = menu.level_select_scene
+	var variations: Dictionary = level_select.GROUP_CARD_VARIATIONS
+	for group_id in PuzzleCatalog.group_ids():
+		check(variations.has(group_id) and GameVisualStyle.LEVEL_CARD_ACCENTS.has(variations[group_id]),
+			"group %s has a Level Select card variation" % group_id)
+	var buttons: Array[Button] = level_select.entry_buttons()
+	var expected_groups: Array[String] = []
+	for group_id in PuzzleCatalog.group_ids():
+		for id in PuzzleCatalog.ids_in_group(group_id):
+			expected_groups.append(group_id)
+	var all_cards := buttons.size() == expected_groups.size()
+	var all_grids := true
+	for i in range(mini(buttons.size(), expected_groups.size())):
+		if buttons[i].theme_type_variation != variations.get(expected_groups[i], &""):
+			all_cards = false
+		if not buttons[i].get_parent() is GridContainer:
+			all_grids = false
+	check(all_cards, "every Level Select entry uses its group's card variation")
+	check(all_grids, "each Level Select group lays its cards out in a grid")
+	check(level_select.header_buttons().all(func(h: Button) -> bool: return h.theme_type_variation == &"LevelGroupHeader"),
+		"group headers use the section heading style")
+	menu.queue_free()
+	await process_frame
+
 ## Each purpose group shows one honest line about what it is for, and none of
 ## them reads as a quality ranking.
 func _check_level_select_group_descriptions() -> void:
@@ -901,6 +953,7 @@ func _initialize() -> void:
 	await _check_level_select_request_opens_level_select()
 	await _check_level_select_accordion()
 	await _check_level_select_group_descriptions()
+	await _check_menu_brand_layout()
 	await _check_results_overlay_fills_scene_without_resize()
 	await _check_level_select_focus_after_collapse()
 	await _check_back_button()

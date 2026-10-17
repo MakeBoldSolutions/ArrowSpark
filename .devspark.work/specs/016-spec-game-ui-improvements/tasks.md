@@ -109,25 +109,26 @@ participants:
 
 **Independent Test**: QA-08 and QA-10; FR-010, FR-011.
 
-- [ ] T020 [US3] In `scenes/menus/main_menu/main_menu_with_animations.tscn`:
+- [X] T020 [US3] In `scenes/menus/main_menu/main_menu_with_animations.tscn`:
   - add a project hero panel (left about 40%, ink) holding the mark tile, a title label using the template config-name label script (cream, with "Spark" in ember), and the tagline;
   - re-anchor the inherited `MenuContainer`, `OptionsContainer`, `CreditsContainer`, `LevelSelectContainer` and `FlowControlContainer` to the right cream column;
   - hide the inherited title and subtitle labels (keeping the nodes) and retarget the animation tracks to the hero;
   - touch `main_menu_with_animations.gd` only if the ember "Spark" split cannot be expressed in the scene (Implements: FR-010, FR-012)
 
-  (code_ref: pending | knowledge_ref: pending)
-- [ ] T021 [US3] In `scenes/menus/main_menu/puzzle_select_menu.gd` and `.tscn`, change each group section to a `GridContainer` of card-styled entry Buttons using that group's `LevelCard` variation, and style headers as section headings. All pinned contracts listed above stay unchanged (Implements: FR-011) (code_ref: pending | knowledge_ref: pending)
-- [ ] T022 [US3] Update `tests/puzzle_layout_check.gd` to check that:
+  (code_ref: scenes/menus/main_menu/main_menu_with_animations.tscn (Hero panel, re-anchored containers, retargeted Intro/OpenMainMenu/OpenSubMenu/RESET tracks) | knowledge_ref: n/a — documented in T029/T030)
+- [X] T021 [US3] In `scenes/menus/main_menu/puzzle_select_menu.gd` and `.tscn`, change each group section to a `GridContainer` of card-styled entry Buttons using that group's `LevelCard` variation, and style headers as section headings. All pinned contracts listed above stay unchanged (Implements: FR-011) (code_ref: scenes/menus/main_menu/puzzle_select_menu.gd (GROUP_CARD_VARIATIONS, GridContainer sections, LevelGroupHeader); scenes/menus/main_menu/main_menu_with_animations.tscn (LevelSelectContainer margins) | knowledge_ref: n/a — documented in T031)
+- [X] T022 [US3] Update `tests/puzzle_layout_check.gd` to check that:
   - every entry uses its group's `LevelCard` variation;
   - each section is a grid;
   - the hero title text equals `config/name`;
   - `NewGameButton` uses `PrimaryButton`;
   - Main Menu action order is unchanged.
 
-  Existing assertions are untouched (Implements: FR-010, FR-011, FR-005) (code_ref: pending | knowledge_ref: pending)
-- [ ] T023 [US3] Rendered check (QA-08): open Level Select from the Main Menu and from Results at 1280×720 and 1920×1080. Confirm group order and numbering, collapse, and that the card opens the right puzzle. Capture the longest titles and the French locale Main Menu for clipping, and record in `evidence/` (Implements: FR-010, FR-011) (code_ref: pending | knowledge_ref: pending)
+  Existing assertions are untouched (Implements: FR-010, FR-011, FR-005) (code_ref: tests/puzzle_layout_check.gd::_check_menu_brand_layout | knowledge_ref: n/a — test only)
+- [X] T023 [US3] Rendered check (QA-08): open Level Select from the Main Menu and from Results at 1280×720 and 1920×1080. Confirm group order and numbering, collapse, and that the card opens the right puzzle. Capture the longest titles and the French locale Main Menu for clipping, and record in `evidence/` (Implements: FR-010, FR-011) (code_ref: n/a — verification only (evidence/us3/RESULTS.md, evidence/level_select_check.gd) | knowledge_ref: n/a — verification only)
 
 **Checkpoint**: Captures match the clarified layout, and the pinned contracts and gates stay green.
+**Checkpoint**: Phase complete — 2026-10-16 (hero split layout and accented Level Select cards rendered; 0 clipped titles; layout/canvas checks 0 failures)
 
 ## Phase 6: User Story 4 — Polished motion, background and sound (Priority: P3)
 
