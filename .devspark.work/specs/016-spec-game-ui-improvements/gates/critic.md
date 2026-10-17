@@ -80,7 +80,7 @@ findings:
     recommended_action: "Owner decides (a) accept-and-reverify or (b) preserve physical slop; then add the corresponding task (T035 note and touch-gestures.md update, or a one-line puzzle_board.gd change plus a headless touch check at a non-1 stretch scale)."
     execution_mode: manual
     status: resolved
-    outcome: "Owner chose (b): plan R1 keeps the slop physical; T039 implements, T040 proves it headlessly at a non-1 stretch scale, T035 re-checks on the phone."
+    outcome: "Owner chose (b): implemented in scenes/puzzle/puzzle_board.gd::_touch_slop; tests/puzzle_canvas_check.gd proves it at stretch scale 2 (fails if reverted); T035 phone re-check pending owner."
   - finding_id: critic-002
     owner: critic
     category: nfr-achievability
@@ -98,7 +98,7 @@ findings:
     recommended_action: "Record the limitation in T032's web-showcase.md update."
     execution_mode: auto
     status: resolved
-    outcome: "Accepted by Judge J-005; recorded in web-showcase.md via T032."
+    outcome: "Accepted by Judge J-005; documented in .knowledge/architecture/web-showcase.md (T032)."
 verification_obligations:
   - assumption: "Decorative full-rect nodes added to the opening scene, the Main Menu hero and the backdrop do not intercept pointer input."
     why_material: "The opening's click-to-skip is handled in the root Control's _gui_input (addons/.../opening/opening.gd `_gui_input`); a STOP-filter node above the image container would make the splash unskippable by click (FR-006, SC-004)."

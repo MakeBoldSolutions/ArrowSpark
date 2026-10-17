@@ -39,7 +39,7 @@ replace those interactive checks.
 Run `python tests/run_puzzle_regressions.py` (Python 3 and Godot on PATH), or
 use `python tests/run_puzzle_regressions.py --godot C:/path/to/godot.exe`.
 
-This runs nine independent headless checks, in execution order:
+This runs ten independent headless checks, in execution order:
 
 1. Pure rule regressions (`tests/puzzle_regression.gd`) against an isolated,
    unique temporary project containing only the puzzle's core scripts
@@ -153,6 +153,11 @@ This runs nine independent headless checks, in execution order:
    non-first puzzle with fresh state and no carried-over departing views,
    that Next Puzzle advances to the following catalog entry with fresh
    state, and that the last catalog puzzle's results omit `%NextPuzzleButton`.
+   It also checks the branded Main Menu and Level Select: the hero wordmark
+   reads the configured product name, the hero ignores input and holds nothing
+   focusable, New Game is the single primary action, the actions keep their
+   order, and every Level Select entry is a grid card in its group's accent
+   variation under a heading-style header.
    Success requires exit code zero and `PUZZLE_LAYOUT_FAILURES=0`.
 8. Integrated canvas checks (`tests/puzzle_canvas_check.gd`) against the real
    project and the same isolated user-data root: fit and layout of the large
@@ -166,8 +171,9 @@ This runs nine independent headless checks, in execution order:
    reveal (overview, off-screen, long arrow, pending during an invalid area),
    state/results/solver/analyzer/scoreboard parity across navigation, concurrent
    long departures under navigation/resize/pause/zero-area/replacement with
-   exactly-once completion, results gating, per-attempt view reset and
-   unchanged saved bytes. Success requires exit code zero and
+   exactly-once completion, results gating, per-attempt view reset,
+   unchanged saved bytes, and a touch slop that stays in physical pixels at a
+   stretch scale of 2 (a drift under it still taps, a drag past it pans). Success requires exit code zero and
    `PUZZLE_CANVAS_FAILURES=0`.
 9. Real-scene presentation checks (`tests/puzzle_presentation_check.gd`):
    ordered continuous geometry, cardinal heads, defensive copying, whole-cell
@@ -184,8 +190,19 @@ This runs nine independent headless checks, in execution order:
    independent of the authored catalog content — the layout check above is the
    catalog-generality coverage instead. Requires exit zero and
    `PUZZLE_PRESENTATION_FAILURES=0`.
+10. Real-project app theme checks (`tests/app_theme_check.gd`): the startup
+   `AppTheme` autoload installs the brand theme in the engine default theme
+   (including for a Label under a CanvasLayer) and points the scene loader at
+   the branded loading screen; every standard control type has brand styles
+   and a visible ember focus ring; buttons, toggles, dropdowns, line edits and
+   sliders are at least 48 px tall; body text is at least 18 px and the menu
+   title at least 64 px; and every text/background pair the theme uses,
+   including text over the menu backdrop motif, meets WCAG AA. Requires exit
+   zero and `APP_THEME_FAILURES=0`.
 
-The launcher imports the real project before all three scene checks, sharing one
+The real-project scene checks (layout, canvas, presentation, app theme) load
+the project's display stretch setting and autoloads. The launcher imports the
+real project before all four scene checks, sharing one
 temporary APPDATA/XDG_DATA_HOME root across import and scene processes. The
 pure-rule copy list remains independent of scenes and fonts. Each real-project
 process has a 180-second timeout (the canvas check alone takes about 35 seconds on an idle workstation and longer under load); missing markers, script errors and nonzero

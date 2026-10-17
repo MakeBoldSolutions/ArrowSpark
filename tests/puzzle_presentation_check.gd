@@ -308,7 +308,7 @@ func _check_departure_geometry() -> void:
 	long_view.free()
 
 func _check_theme(puzzle: Control) -> void:
-	check(puzzle.theme == null and puzzle.get_node("Layout").theme != null, "theme is scoped to Layout, leaving root overlays unchanged")
+	check(puzzle.theme == null and puzzle.get_node("Layout").theme != null, "the puzzle Layout carries its own theme reference, so the scene stands alone")
 	var background := puzzle.get_node_or_null("Background") as ColorRect
 	check(background != null, "gameplay has a local background")
 	if background:

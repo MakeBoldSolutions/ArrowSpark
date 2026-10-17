@@ -4,6 +4,15 @@ type: architecture
 title: Game Visual System
 appliesTo:
   - scripts/presentation/game_visual_style.gd
+  - scripts/presentation/control_theme.gd
+  - scripts/app_theme.gd
+  - scenes/menus/main_menu/menu_backdrop.gd
+  - scenes/loading_screen/**
+  - scenes/opening/opening_with_logo.tscn
+  - assets/ui/**
+  - assets/brand/**
+  - assets/audio/ui/**
+  - tests/app_theme_check.gd
   - scripts/presentation/arrow_departure_geometry.gd
   - scripts/presentation/puzzle_viewport_transform.gd
   - resources/fonts/**
@@ -168,10 +177,12 @@ verify that binary value instead of treating the heuristic as font weight.
 Headings are reusable roles; no extra heading is added merely to display them.
 Mixed caption/value HUD and results labels use the numeric font as a whole.
 
-The cached theme attaches to ArrowPuzzle's Layout and PuzzleResults only,
-never to the game root or project theme. Runtime inherited pause/options
-therefore keep their styling. The background ColorRect ignores input. Results
-retain four metrics, two actions, Replay focus and full-overlay absorption.
+The puzzle's Layout and PuzzleResults also assign the same cached theme
+directly, so the puzzle scene is self-contained when instanced on its own (as
+the presentation checks do). In the running game the same theme reaches every
+surface through the app-wide installation described below. The background
+ColorRect ignores input. Results retain four metrics, two actions, Replay focus
+and full-overlay absorption.
 SuccessText gives the existing score a restrained green cue. Focused buttons
 have an ember border expanded outside their normal bounds. Body text stays
 at readable logical sizes rather than scaling with cells.
@@ -180,6 +191,80 @@ Source of truth: tests/puzzle_presentation_check.gd verifies real families,
 weights, tabular digits, scoped theme, focus border, result arithmetic and
 text/control bounds at 1280x720 and 960x540. Physical navigation and rendered
 font quality require desktop checks in addition to those assertions.
+
+## App-wide theme, scaling and launch
+
+`GameVisualStyle.get_theme()` is the single app theme. Beyond the puzzle roles
+it holds `ControlTheme` (`scripts/presentation/control_theme.gd`) styles for
+every standard control type: Button, OptionButton and MenuButton, CheckBox and
+CheckButton (light-theme icons in `assets/ui/`), Label, RichTextLabel, Panel
+and PanelContainer, TabContainer and TabBar (rust underline on the selected
+tab), HSlider and VSlider, scrollbars, LineEdit, PopupMenu, Tree, ItemList,
+ProgressBar, tooltips and embedded dialog windows. Each type is set explicitly
+because the engine default theme has its own dark entry for each one.
+
+- Base buttons are white surfaces. Hover tints them ember-50 with an ember
+  border. Press darkens one step to ink-100 and nudges the label 1 px. The
+  focus state is the 2 px ember ring expanded 3 px. Sliders draw a 6 px track
+  centred in the full target height.
+- Every interactive target is at least 48 logical pixels tall. Body text is at
+  least 18 px, and the menu title is 72 px.
+- Every text/background pair the theme uses meets WCAG 2.1 AA: 4.5:1 for body
+  text, 3:1 for large text and focus indicators.
+- The brand faces ship without italics, so RichTextLabel emphasis uses the
+  semibold weight.
+
+The `AppTheme` autoload (`scripts/app_theme.gd`) runs before any scene and
+merges the app theme into the engine default theme. It deliberately does not
+assign the root Window theme: a root-Window theme does not reach Controls under
+a CanvasLayer (the pause overlay and loading screen) in Godot 4.4, while the
+default-theme merge reaches those and popups through one seam. It also points
+the template scene loader at the branded loading screen
+(`scenes/loading_screen/loading_screen.tscn`: ink background, cream text, rust
+bar), using a node path so fresh editor imports parse it before autoloads
+exist.
+
+The display stretches with `canvas_items` mode and `expand` aspect from the
+1280x720 design size at a fractional scale. In logical units the viewport is
+never smaller than 1280x720; wider or taller windows extend the background and
+keep content centred. All layout, fit and zoom math works in those logical
+units, so a 2560x1440 window renders the same layout at twice the pixels. The
+real-project checks (layout, canvas, presentation, app theme) load this
+setting. Touch input keeps a physical-pixel slop; see
+`.knowledge/reference/touch-gestures.md`.
+
+Launch carries Make Bold branding and no engine logo:
+
+1. The boot splash is ink with no image, continuing the dark web loading shell.
+2. The opening splash shows `assets/brand/mark_tile.svg` (the unmodified Make
+   Bold mark on a cream tile with clear space) on ink.
+3. The default clear color is cream.
+
+The application icon is a raster of the same tile.
+
+The Main Menu splits into an ink hero (40% width: the mark tile, "Arrow" in the
+HeroTitle role and "Spark" in the ember HeroAccent role, and the tagline in
+HeroTagline) and a cream column. The column holds the actions, with New Game in
+PrimaryButton, plus the Options, Credits and Level Select sub-menus and Back.
+The hero ignores input, holds nothing focusable, and stays visible behind
+sub-menus. Level Select shows each purpose group as a two-column grid of
+LevelCard buttons whose 6 px left edge carries the group accent (rust, ink or
+ember, mapped in `puzzle_select_menu.gd`) under LevelGroupHeader headings.
+
+Pause shows an ink scrim at 60% behind a white card, with Resume as the primary
+action. "In-game overlays" means the overlaid menus (pause and the Options
+opened from it); Results keeps its own full-panel presentation.
+
+Source of truth:
+
+- `tests/app_theme_check.gd`: installation (including under CanvasLayer),
+  loader wiring, control coverage, focus rings, 48 px targets, text sizes and AA
+  contrast.
+- `tests/puzzle_layout_check.gd`: hero title and passivity, action order, the
+  primary button and per-group cards.
+- `tests/puzzle_canvas_check.gd`: scaled touch slop.
+
+Rendered appearance at multiple window sizes requires desktop review.
 
 ## Semantic palette
 
@@ -195,9 +280,18 @@ font quality require desktop checks in addition to those assertions.
 | text_secondary | #56544F | Supporting text |
 | text_on_accent | #F8F6F2 | Primary-button text |
 | critical | #E8221A | Temporary blocked feedback |
-| surface_border | #DDD9D0 | Surface/button outline |
+| surface_border | #DDD9D0 | Surface/button outline; hero tagline |
+| ink_800 | #2C2C2B | Tooltip background |
+| ink_500 / ink_400 / ink_300 | #76736C / #9B988F / #C2BFB6 | Disabled text, scrollbar grips, field outlines |
+| ink_100 | #ECE9E2 | Pressed state; menu backdrop motif |
+| cream_deep | #EFECE4 | Disabled surfaces, scrollbar track |
+| ember_50 / ember_100 / ember_300 | #FDF1E6 / #F9DABC / #E88F3D | Hover tint, text selection, slider fill |
+| hero_background | #1E1E1E | Menu hero, splash, loading screen |
+| scrim | rgba(30,30,30,0.6) | Pause overlay |
 
-Rust and ember are accents, never the default arrow color. There is one
+Cream dominates, ink carries structure and text, and rust and ember are
+accents: rust for the single primary action per screen, ember for hover, focus
+and selection. Rust and ember are accents, never the default arrow color. There is one
 light system, no per-arrow color scheme and no persistent disabled arrow.
 
 ## Spacing, shape and motion vocabulary
@@ -220,6 +314,30 @@ frame-loop geometry rebuilding beyond that bounded pass occurs. The initial
 ratios and 1.10 pulse are retained; rendered acceptance is required before
 treating their appearance as approved. Palette and vocabulary authority: scripts/presentation/game_visual_style.gd;
 code-only for unused roles because they intentionally have no onscreen consumer.
+
+Menu motion follows the Make Bold motion tokens: quick, ease-out, no bounce,
+always skippable.
+
+- The opening splash fades in 0.3 s, holds 0.8 s and fades out 0.3 s, with
+  0.2 s lead-in and lead-out.
+- The Main Menu intro is 0.8 s: the title fades over 0.3 s, then the tagline,
+  then the buttons and version label. Any accept, cancel or click skips it at
+  once.
+- Sub-menus fade in over 0.2 s, and the pause scrim and card fade in over 0.2 s.
+- Hover and press are instant stylebox states, so motion never gates input.
+
+`MenuBackdrop` (`scenes/menus/main_menu/menu_backdrop.gd`) draws a field of the
+puzzle's own arrow shapes in ink-100 behind the cream menu column, once.
+Afterwards it only moves its own position upward at 6 px/s, and only while
+visible; it never takes input. It sits behind the column rather than the ink
+hero because any arrow lighter than about #212121 behind the ember title would
+drop that title below 3:1.
+
+Menu sounds are three short original clips in `assets/audio/ui/` (focus,
+press, tab/slider). They play through the template UI sound controller on the
+Main Menu and the pause overlay only, on the SFX bus (which sends to Master),
+so the existing SFX and Master volume and mute settings govern them. Gameplay
+HUD and Results buttons have no sound.
 
 ## Canvas rendering and feedback readability
 

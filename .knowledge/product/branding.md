@@ -9,6 +9,9 @@ appliesTo:
   - ATTRIBUTION.md
   - scenes/menus/main_menu/main_menu_with_animations.tscn
   - scenes/credits/credits.tscn
+  - scenes/opening/opening_with_logo.tscn
+  - assets/brand/**
+  - icon.png
   - web/src/components/site/SiteHeader.astro
   - web/src/components/site/SiteFooter.astro
 ---
@@ -26,12 +29,20 @@ ArrowSpark            -> product/game
       -> makeboldspark.com -> public destination
 ```
 
-`config/name` in `project.godot` is `ArrowSpark`; it drives both the OS window
-title and the Main Menu title label live (see `config_name_label.gd` in the
-Maaack template addon). The Main Menu subtitle carries the tagline
-"A Make Bold Spark Game". Creator credit and the public link live in Credits
-only (`ATTRIBUTION.md`, rendered by `scenes/credits/credits.gd`), not on the
-Main Menu.
+`config/name` in `project.godot` is `ArrowSpark` and drives the OS window
+title. The Main Menu hero shows the same name as a two-tone wordmark ("Arrow"
+in cream, "Spark" in ember) above the tagline "A Make Bold Spark Game"; a
+layout check asserts the wordmark still reads the configured name. Creator
+credit and the public link live in Credits only (`ATTRIBUTION.md`, rendered by
+`scenes/credits/credits.gd`), not on the Main Menu.
+
+The Make Bold peak mark appears on application-level surfaces as the "mark
+tile" (`assets/brand/mark_tile.svg`): the mark's paths unmodified, centred on a
+cream rounded tile with clear space of at least the tallest peak's height, so
+it is never recoloured or crowded even on ink. The tile is the opening splash
+image (on ink), the Main Menu hero mark, and, as a 256 px raster, the
+application icon (`icon.png`). No engine logo is shown at launch; Godot remains
+credited under Tools in Credits, and Credits lists the mark under Brand.
 
 ## The playable showcase
 
@@ -45,7 +56,7 @@ contains a puzzle game, not a separate game brand.
 
 ## Presentation principle
 
-Branding should establish identity at application-level surfaces (Main Menu,
-Credits) and then recede during gameplay. The puzzle HUD and Results keep
+Branding should establish identity at application-level surfaces (launch
+splash, Main Menu, Credits, application icon) and then recede during gameplay. The puzzle HUD and Results keep
 puzzle identity and metrics only — no product or company branding is added
 there, so gameplay stays the showcase once it begins.

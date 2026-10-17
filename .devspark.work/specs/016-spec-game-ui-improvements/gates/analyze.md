@@ -40,7 +40,7 @@ findings:
     recommended_action: "Add a task (or fold into T029/T033) to reword only the message to describe that the puzzle carries its own theme reference; the boolean expectation stays unchanged (FR-016)."
     execution_mode: auto
     status: resolved
-    outcome: "Resolved: T041 rewords only the assertion message."
+    outcome: "Resolved: T041 implemented; tests/puzzle_presentation_check.gd message reworded, expectation unchanged."
   - finding_id: analyze-003
     owner: analyze
     severity: low
@@ -50,7 +50,7 @@ findings:
     recommended_action: "Treat 'UI volume' as the SFX volume in T028 verification; optionally reword the spec scenario via /devspark-clarify."
     execution_mode: auto
     status: resolved
-    outcome: "Resolved: T028 verifies SFX and Master and records UI volume = SFX."
+    outcome: "Resolved: T028 implemented; evidence/us4/RESULTS.md records SFX→Master routing and UI volume = SFX."
 routed_findings:
   - routed_id: analyze-routed-001
     owner: critic

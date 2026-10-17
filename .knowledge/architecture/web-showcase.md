@@ -94,6 +94,17 @@ narrow screens.
   only on supported screens, so phones never download the engine. Clicking
   the frame focuses the game; the Play page says to click once for the
   keyboard. Audio starts on the first click, as browsers require.
+- **Game UI scaling and launch.** The game stretches its 1280x720 design to
+  the canvas (`canvas_items`, `expand`), and the Web export renders at device
+  pixel density, so menus and the HUD grow with the canvas's pixel size. A
+  high-density phone gets larger UI than before; a low-density canvas below
+  1280x720 pixels renders the UI proportionally smaller (for example 0.75x at
+  960x540 CSS on a density-1 display). Small low-density touch screens are
+  admitted by the capability rule but untested, and are not claimed. The engine
+  boot splash is ink with no image, so the dark loading shell hands off to the
+  ink Make Bold splash without a flash. Larger menus on the Pixel 7 Pro have not
+  yet been re-verified on the device; the phone limitation below stands until
+  they are.
 - **Page zoom outside the game.** `web/src/scripts/page-zoom-guard.ts`
   suppresses ctrl+wheel and gesture zoom only while the pointer is over the
   game frame's own border and title bar; everywhere else on the page,

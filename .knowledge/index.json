@@ -1,7 +1,7 @@
 {
   "generated": {
     "by": "build-knowledge-index",
-    "at": "2026-10-16T21:52:02Z"
+    "at": "2026-10-17T04:44:47Z"
   },
   "roots": [
     {
@@ -106,6 +106,15 @@
       "title": "Game Visual System",
       "appliesTo": [
         "scripts/presentation/game_visual_style.gd",
+        "scripts/presentation/control_theme.gd",
+        "scripts/app_theme.gd",
+        "scenes/menus/main_menu/menu_backdrop.gd",
+        "scenes/loading_screen/**",
+        "scenes/opening/opening_with_logo.tscn",
+        "assets/ui/**",
+        "assets/brand/**",
+        "assets/audio/ui/**",
+        "tests/app_theme_check.gd",
         "scripts/presentation/arrow_departure_geometry.gd",
         "scripts/presentation/puzzle_viewport_transform.gd",
         "resources/fonts/**",
@@ -123,6 +132,7 @@
         "Whole-arrow hover",
         "Feedback precedence and departures",
         "Typography and local theme",
+        "App-wide theme, scaling and launch",
         "Semantic palette",
         "Spacing, shape and motion vocabulary",
         "Canvas rendering and feedback readability"
