@@ -27,7 +27,7 @@ participants:
 
 **Feature Branch**: `016-spec-game-ui-improvements`
 **Created**: 2026-10-16
-**Status**: In Progress
+**Status**: Complete
 **Input**: User description: "Game UI Improvements — using this conversation and industry best practices, make the game prettier, more professional and look like a ready-for-consumer game, not a demo. NO functional change to game play or behavior."
 
 ## Product Owner TLDR
@@ -251,6 +251,10 @@ confirm transitions never block input and sounds respect volume settings.
 - **FR-003**: At the design resolution, body text MUST be at least 18 px, menu titles at least
   64 px, and every interactive target at least 48 px tall; on the smallest admitted phone surface
   text and targets MUST NOT be smaller than in the current build.
+  *Amendment 2026-10-17 (project owner, at closeout): the phone-surface clause is `stage: post-deploy`.
+  It needs `deployed` evidence on a real phone and is captured as the open Future Work Plan
+  `.devspark.work/intake/future-mobile-ui-scaling-verification-owner-2026-10-17.md`. The desktop
+  clauses stay pre-merge. Original text unchanged above.*
 
 **Brand look (Story 2)**
 
@@ -318,6 +322,14 @@ confirm transitions never block input and sounds respect volume settings.
   without skipping and immediately on any skip input.
 - **SC-005**: 100% of Main Menu, Level Select, Options, Pause and Credits paths are completed with
   keyboard-only, gamepad-only and mouse-only input, and touch on the reference phone.
+  *Amendment 2026-10-17 (project owner, at closeout):*
+  - *Gamepad-only is satisfied by simulated engine input events (D-pad navigation through the
+    project's ui actions) plus the existing gamepad remap regression gate. A physical controller walk
+    is recorded as not tested.*
+  - *Touch on the reference phone is `stage: post-deploy`, captured in the same Future Work Plan as
+    FR-003's phone clause.*
+  - *Keyboard-only and mouse-only stay pre-merge.*
+  - *Original text unchanged above.*
 - **SC-006**: Both existing automated regression gates pass with zero changes to their expected
   results, and a manual smoke play of the first progression level and the Reference Knot shows the
   same moves, mistakes and score as the current build.

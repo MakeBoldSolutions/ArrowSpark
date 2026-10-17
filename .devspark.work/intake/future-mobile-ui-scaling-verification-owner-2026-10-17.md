@@ -1,6 +1,10 @@
 # Future Work Plan: Verify the scaled game UI on a real phone
 
 **Type**: operational
+**Status**: open
+**Owner**: project owner
+**Required evidence**: `deployed`, meaning a real Pixel 7 Pro (Chrome) against the published showcase
+**Carries**: FR-003 phone-surface clause and SC-005 touch-on-phone clause of 016-spec-game-ui-improvements (both `stage: post-deploy`)
 
 ## Problem
 
