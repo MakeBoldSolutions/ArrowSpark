@@ -1,7 +1,7 @@
 {
   "generated": {
     "by": "build-knowledge-index",
-    "at": "2026-10-17T04:44:47Z"
+    "at": "2026-10-17T05:35:31Z"
   },
   "roots": [
     {
@@ -278,6 +278,9 @@
         "ATTRIBUTION.md",
         "scenes/menus/main_menu/main_menu_with_animations.tscn",
         "scenes/credits/credits.tscn",
+        "scenes/opening/opening_with_logo.tscn",
+        "assets/brand/**",
+        "icon.png",
         "web/src/components/site/SiteHeader.astro",
         "web/src/components/site/SiteFooter.astro"
       ],
