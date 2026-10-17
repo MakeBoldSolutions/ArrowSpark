@@ -1,7 +1,7 @@
 ---
 source: "BSW.DevSpark — © 2026 Baylor Scott & White Health. Source: https://bsw-devspark.bswhive.com"
 devspark_version: "9.2.0"
-spec_semantic_hash: "sem1:f6830b005f65b086ebb783d811f01d9a8e5df43bc233f6ce3238191d6654f10f"
+spec_semantic_hash: "sem1:b581f0436d7eac3c7a448ba5e273974b0a2cc0c581de3f647fdc4c70d9ff07c7"
 participants:
   owner: human
   planner: ai

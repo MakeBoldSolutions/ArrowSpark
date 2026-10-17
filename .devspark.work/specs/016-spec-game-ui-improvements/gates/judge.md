@@ -1,18 +1,18 @@
 ```yaml
 gate: judge
 devspark_version: "9.2.0"
-generated: "2026-10-16T21:34:40Z"
+generated: "2026-10-17T05:31:58Z"
 feature: "016-spec-game-ui-improvements"
 planning_review:
-  run_id: "pr-20261016T213351Z-298106"
-round: 3
+  run_id: "pr-20261017T053157Z-da7623"
+round: 4
 objective: "Make every non-gameplay surface scale to the screen and share one Make Bold look, with a branded launch, redesigned Main Menu and Level Select, and restrained motion and sound, without changing gameplay."
 children:
-  analyze: {artifact: gates/analyze.md, hash: "b4d8a80aaf5a4fcfc50acb1abb569909d6463dcf", semantic_hash: "sem1:8c067fd6f60573e3a71b80854deac2e298c8c1a0536976cda3e30c0ecac9d427", state: fresh, ran: true,
-            mode: generated, run_id: "pr-20261016T213351Z-298106"}
-  critic:  {artifact: gates/critic.md, hash: "ae4cb0261661a0c88b0be70285c5dab068e9f542", semantic_hash: "sem1:56a89775d957ea684643223664594b84062a398fa84c67701a6293573731ae30", state: fresh, ran: true,
+  analyze: {artifact: gates/analyze.md, hash: "45e4ff62d0306653cbc210d9dfbb3eb47fa4edd8", semantic_hash: "sem1:b7910b4dffb4676908c24713bdbc60d448e05322f0901c219a6c71eeee6c1aac", state: fresh, ran: true,
+            mode: generated, run_id: "pr-20261017T053157Z-da7623"}
+  critic:  {artifact: gates/critic.md, hash: "776a8bee42d7d4b22b607122f4eb391b79556834", semantic_hash: "sem1:65356e0b5222511c36a932daa1b2cd8f2758b860f87919263c997efbbc34678a", state: fresh, ran: true,
             applicable: true, signals: [cross-boundary-interaction, state-lifecycle],
-            mode: generated, run_id: "pr-20261016T213351Z-298106"}
+            mode: generated, run_id: "pr-20261017T053157Z-da7623"}
 concerns:
   - id: J-001
     sources: [critic-001]

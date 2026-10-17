@@ -1,23 +1,23 @@
 ```yaml
 gate: analyze
 devspark_version: "9.2.0"
-generated: "2026-10-16T21:33:52Z"
+generated: "2026-10-17T05:31:58Z"
 planning_review:
-  run_id: "pr-20261016T213351Z-298106"
+  run_id: "pr-20261017T053157Z-da7623"
 status: pass
 blocking: false
 severity: info
-summary: "RECHECK (FULL): analyze-002 and analyze-003 resolved by tasks T041 and T028; analyze-001 accepted (Judge J-002). New tasks T039–T041 are well-formed, traced and correctly ordered; 18/18 FRs covered by 41 tasks. No open findings."
+summary: "FOCUSED RECHECK after owner amendments: FR-003 phone clause and SC-005 phone-touch moved to stage post-deploy (captured in an open Future Work Plan), SC-005 gamepad accepted on simulated input, T035 removed with Gate Acknowledgements. Artifacts stay consistent (18/18 FRs covered; every task complete with linkage); constitution V satisfied through its disclose-and-leave-outstanding clause; no open findings."
 reviewed_artifacts:
   - path: spec.md
-    hash: "b49282f81f342a7054eadf86655e8686e1b885d7"
-    semantic_hash: "sem1:f6830b005f65b086ebb783d811f01d9a8e5df43bc233f6ce3238191d6654f10f"
+    hash: "8d09989dca9ef97d1fd482c1405ac2fa4abc007f"
+    semantic_hash: "sem1:b581f0436d7eac3c7a448ba5e273974b0a2cc0c581de3f647fdc4c70d9ff07c7"
   - path: plan.md
-    hash: "e902c8bbc06de2462bc20f607e79dbaf541f5661"
+    hash: "d8a9b90fe89376ab9b22f9459c4b6956d9ffd6d6"
     semantic_hash: "sem1:3ec711d836231bf71894a1996b0d33f6b5ee92eeb076ecfe53ac954f807c8354"
   - path: tasks.md
-    hash: "ea816cc92da517e668398297c8fbeb9e19271ac2"
-    semantic_hash: "sem1:d6963c43ad9bab8a3c3ceedd4151108cc83af9543508b9441feec8993510bfaa"
+    hash: "cb46a552a5bd202b413a8b057bebabc25064c57f"
+    semantic_hash: "sem1:492dbce992941a7a5ff9471a138b52ad6fec903e31d3e1985d4e0849e7d2441d"
   - path: qa-acceptance.md
     hash: "4a87543fb90b78d62089d22dae6b0fa8867d31e2"
 findings:
@@ -61,7 +61,16 @@ routed_findings:
 ## Specification Analysis Report
 
 **Scope**: FULL (spec + plan + tasks; qa-acceptance and research read)
-**Pass**: RECHECK. This pass confirms the disposition of the discovery findings only; no new discovery was run.
+**Pass**: RECHECK (round 2, 2026-10-17). This pass confirms the dispositions after the owner amendments; no new discovery was run.
+
+**Amendment consistency:**
+- spec FR-003/SC-005 amendments, the tasks.md T035 entry, the Gate Acknowledgements and `.devspark.work/intake/future-mobile-ui-scaling-verification-owner-2026-10-17.md` agree with each other.
+- The original criterion text is preserved and the stage is marked visibly.
+
+**Constitution:**
+- V ("if a required check cannot be run, disclose that limitation and leave it outstanding rather than claim completion"): the phone check is disclosed, left open in the Future Work Plan, and phone readability is not claimed in web-showcase knowledge. Compliant.
+- III: gamepad navigation was verified with simulated engine input, and the physical walk is disclosed as not tested with owner acceptance. Compliant through the same disclosure rule.
+- No constitution text changed.
 
 | ID | Category | Severity | Classification | Location(s) | Summary | Recommendation |
 |---|---|---|---|---|---|---|

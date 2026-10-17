@@ -1,31 +1,31 @@
 ```yaml
 gate: critic
 devspark_version: "9.2.0"
-generated: "2026-10-16T21:33:52Z"
+generated: "2026-10-17T05:31:58Z"
 planning_review:
-  run_id: "pr-20261016T213351Z-298106"
+  run_id: "pr-20261017T053157Z-da7623"
 status: pass
 blocking: false
 severity: info
-summary: "RECHECK: critic-001 resolved by the owner decision to keep touch slop physical (plan R1, T039, T040 headless check at a non-1 scale, T035 phone); critic-002 accepted and documented via T032. Four verification obligations remain with Verify."
+summary: "FOCUSED RECHECK after owner amendments: critic-001 remains resolved (physical touch slop implemented and mutation-checked); critic-002 accepted. The owner moved real-phone verification post-deploy, which leaves the critic-002 limitation and the phone feel unproven on a device but disclosed and captured. Verification obligations were discharged by verify (gates/verify.md). No open findings."
 applicability:
   applicable: true
   signals: [cross-boundary-interaction, state-lifecycle]
   invoked: automatic
 reviewed_artifacts:
   - path: spec.md
-    hash: "b49282f81f342a7054eadf86655e8686e1b885d7"
-    semantic_hash: "sem1:f6830b005f65b086ebb783d811f01d9a8e5df43bc233f6ce3238191d6654f10f"
+    hash: "8d09989dca9ef97d1fd482c1405ac2fa4abc007f"
+    semantic_hash: "sem1:b581f0436d7eac3c7a448ba5e273974b0a2cc0c581de3f647fdc4c70d9ff07c7"
   - path: plan.md
-    hash: "e902c8bbc06de2462bc20f607e79dbaf541f5661"
+    hash: "d8a9b90fe89376ab9b22f9459c4b6956d9ffd6d6"
     semantic_hash: "sem1:3ec711d836231bf71894a1996b0d33f6b5ee92eeb076ecfe53ac954f807c8354"
   - path: tasks.md
-    hash: "ea816cc92da517e668398297c8fbeb9e19271ac2"
-    semantic_hash: "sem1:d6963c43ad9bab8a3c3ceedd4151108cc83af9543508b9441feec8993510bfaa"
+    hash: "cb46a552a5bd202b413a8b057bebabc25064c57f"
+    semantic_hash: "sem1:492dbce992941a7a5ff9471a138b52ad6fec903e31d3e1985d4e0849e7d2441d"
   - path: scenes/puzzle/puzzle_board.gd
-    hash: "cb90196c6dbd0ccf169db1c993231d68d29fde25"
+    hash: "5fc649230cd566cedcac5c58cacb4b253ba26987"
   - path: .knowledge/reference/touch-gestures.md
-    hash: "87d54ec9860bddf09369726b978eab4d5520647a"
+    hash: "f2915c04256375ae87d47604fa93996140f651bb"
   - path: addons/maaacks_game_template/base/scenes/opening/opening.gd
     hash: "6ecb0b53925565e81e10de9e05549924dfbcb558"
   - path: scenes/puzzle/arrow_puzzle.gd
@@ -40,7 +40,7 @@ reviewed_artifacts:
 
 **Analysis Date:** 2026-10-16T21:15:19Z
 **Scope:** FULL
-**Pass:** RECHECK. This pass confirms the disposition of the discovery findings only; no new discovery was run.
+**Pass:** RECHECK (round 2, 2026-10-17). This pass confirms the dispositions after the owner amendments; no new discovery was run. puzzle_board.gd and touch-gestures.md changed only within the approved surface (the T039 correction). Per assurance §3.2, that execution evidence belongs to Verify and is not re-reviewed here.
 **Applicable:** true. Signals:
 - cross-boundary-interaction: the theme reaches template scenes, the loader path is set on a template autoload, and a sound controller is added to the template overlay.
 - state-lifecycle: the menu AnimationTree state-machine tracks are retargeted and retimed.
