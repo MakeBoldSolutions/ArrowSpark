@@ -21,13 +21,6 @@ STRAY_RELEASE_ARTIFACT_NAME = re.compile(r"(?i)^release-(?:context|history)-.*\.
 STATUS_COMPLETE = re.compile(r"(?im)^[^\S\n]*(?:[-*]\s*)?(?:\*\*)?status(?:\*\*)?[^\S\n]*:[^\S\n]*(?:\*\*)?[^\S\n]*complete\b")
 CLOSEOUT_PASS = re.compile(r"(?im)^status:[^\S\n]*pass\b")
 CLOSEOUT_COMPLETE = re.compile(r"(?im)^decision:[^\S\n]*complete\b")
-LINKAGE_FIELD = re.compile(r"(?i)\b(code_ref|knowledge_ref)[^\S\n]*:[^\S\n]*([^|\n\r]*)")
-# Linkage is only meaningful on a task/checklist item or a standalone field line. Prose that merely
-# documents the format (for example "every task ends with `(code_ref: pending | ...)`") is not linkage.
-LINKAGE_CARRIER = re.compile(r"(?i)^\s*(?:[-*]\s+\[[ x]\]|(?:[-*]\s*)?(?:\*\*)?(?:code_ref|knowledge_ref)\b)")
-# An explained `n/a` counts as populated per the release contract; only an absent or placeholder
-# value is treated as unpopulated linkage.
-UNPOPULATED_LINKAGE = {"", "pending", "tbd", "todo", "-", "none"}
 
 
 def git(repo: Path, *args: str) -> str:
@@ -112,18 +105,6 @@ def bundle_text(path: Path) -> str:
     return "\n".join(chunks)
 
 
-def unpopulated_linkage(text: str) -> list[str]:
-    return sorted(
-        {
-            field.lower()
-            for line in text.splitlines()
-            if LINKAGE_CARRIER.match(line)
-            for field, value in LINKAGE_FIELD.findall(line)
-            if value.strip().strip("*`").lower() in UNPOPULATED_LINKAGE
-        }
-    )
-
-
 def closeout_decided_complete(path: Path) -> bool:
     """The lifecycle records completion in gates/closeout.md, so a passing closeout gate whose
     decision is complete counts even when spec.md still carries a stale Status line."""
@@ -142,16 +123,12 @@ def branch_exists(repo: Path, name: str) -> bool:
 
 
 def classify_bundle(repo: Path, path: Path) -> dict[str, object]:
-    """Decide archive eligibility mechanically: a bundle is eligible only when it is marked
-    Complete and no code_ref/knowledge_ref is still unpopulated."""
+    """Decide archive eligibility mechanically: a bundle is eligible when it is marked Complete."""
     text = bundle_text(path)
     complete = bool(STATUS_COMPLETE.search(text)) or closeout_decided_complete(path)
-    pending = unpopulated_linkage(text)
     blockers: list[str] = []
     if not complete:
         blockers.append("not marked Complete")
-    if pending:
-        blockers.append(f"unpopulated linkage: {', '.join(pending)}")
     name = path.stem if path.is_file() else path.name
     return {
         "path": relative(repo, path),
@@ -162,9 +139,9 @@ def classify_bundle(repo: Path, path: Path) -> dict[str, object]:
     }
 
 
-def knowledge_index_current(repo: Path, knowledge_files: list[Path], index: Path) -> bool:
-    """Prefer the index builder's own staleness check; fall back to modification times only when
-    the builder is unavailable, since timestamps cannot see a semantically stale index."""
+def knowledge_builds(repo: Path) -> bool | None:
+    """True when the Knowledge engine builds the repository's Knowledge, False when it reports
+    a build error, None when no engine is available. Derived index files are never compared."""
     for candidate in (
         repo / ".devspark" / "scripts" / "build_knowledge_index.py",
         repo / "scripts" / "build_knowledge_index.py",
@@ -181,12 +158,11 @@ def knowledge_index_current(repo: Path, knowledge_files: list[Path], index: Path
                 check=False,
             )
         except (OSError, subprocess.SubprocessError):
-            break
+            return None
         if result.returncode in (0, 1):
             return result.returncode == 0
-        break
-    newest_source = max((path.stat().st_mtime for path in knowledge_files if path != index), default=0.0)
-    return index.is_file() and index.stat().st_mtime >= newest_source
+        return None
+    return None
 
 
 def planning_references(repo: Path, limit: int) -> list[dict[str, object]]:
@@ -231,8 +207,7 @@ def main() -> int:
     specs_root = work_root / "specs"
     quickfixes_root = work_root / "quickfixes"
     knowledge_files = bounded_files(knowledge_root, limit)
-    index = knowledge_root / "index.json"
-    index_current = knowledge_index_current(repo, knowledge_files, index)
+    knowledge_builds_ok = knowledge_builds(repo)
     bundles = [
         classify_bundle(repo, path)
         for path in [*bounded_dirs(specs_root, limit), *bounded_files(quickfixes_root, limit)]
@@ -279,8 +254,7 @@ def main() -> int:
             for path in knowledge_files
             if HISTORY_NAME.search(path.name) and path.name.lower() not in {"known-limitations.md"}
         ],
-        "KNOWLEDGE_INDEX_PRESENT": index.is_file(),
-        "KNOWLEDGE_INDEX_CURRENT": index_current,
+        "KNOWLEDGE_BUILDS": knowledge_builds_ok,
         "PLANNING_REFERENCES": planning_references(repo, limit),
         "STRAY_RELEASE_ARTIFACTS": stray_release_artifacts(repo, limit),
         "DRY_RUN": args.dry_run,

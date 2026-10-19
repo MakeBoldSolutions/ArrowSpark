@@ -38,7 +38,7 @@ Analyze owns, exclusively:
 - terminology drift and wording precision
 - task dependency and ordering validity
 - missing task anchors; tasks citing requirement ids that do not exist
-- completed tasks with no supporting linkage
+- completed tasks with no supporting evidence of work
 - identifier and field names contradicting a declared contract or schema
 - Spec/Plan Rationale Summary completeness and spec→plan Core-Problem alignment; Tasks remain a
   derivative action list and do not repeat rationale

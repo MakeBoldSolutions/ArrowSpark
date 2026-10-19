@@ -23,7 +23,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Routing Contract
 
-Completed planning records remain in `.devspark.work/` with their code/knowledge linkage for
+Completed planning records remain in `.devspark.work/` for
 in-sprint validation. Their presence is not unfinished implementation. Use existing lifecycle
 evidence to check completion; only Release archives eligible records. Do not warn about a missing
 spec or quickfix, search Git history for one, or reconstruct one. Keep the PR self-contained rather
@@ -38,8 +38,9 @@ and asks the user to confirm before creating or updating it.
 This command is advisory, with one exception: it is the **readiness boundary**. A successful run means
 DevSpark believes the committed, pushed HEAD is complete, internally consistent, and ready for other
 people to review. It never means "open the PR so `/devspark-pr-review` can find out whether the work is
-finished." A known deterministic committed-state Knowledge failure (`knowledge.readiness: blocked`)
-stops the command; see *Knowledge Readiness Boundary* below. Dirty trees, failed verification,
+finished." A known deterministic committed-state Knowledge failure (`knowledge.readiness: blocked`,
+meaning the Knowledge cannot be built) stops the command; see *Knowledge Readiness Boundary* below.
+Dirty trees, failed verification,
 code/knowledge mismatches, and unresolved review findings are otherwise warnings the agent must
 explain. Missing planning records are normal.
 
@@ -62,11 +63,10 @@ Use the script output as the source of truth for:
 - existing PR (number, URL, title, state, draft flag)
 - changed code, tests, and current `.knowledge/` nodes
 - `knowledge.readiness` (`ready`, `blocked`, `not-applicable`, `unknown`), `knowledge.blockers[]`
-  (`kind`, `path`, `source`, `source_date`, `last_verified`, `message`), `knowledge.stale_untouched_count`,
-  `knowledge.checked_head`, plus the legacy `knowledge.index_fresh` / `knowledge.gap_summary` — computed
-  by `build_knowledge_index.py --check` against the committed HEAD (`check_output` is display evidence
-  only). `unknown` means the engine or interpreter was unavailable: report it as a compatibility
-  warning, never as clean
+  (`kind`, `path`, `message`), `knowledge.checked_head`, and `knowledge.gap_summary` — computed
+  by `build_knowledge_index.py --check`, which proves the committed Knowledge builds (`check_output` is
+  display evidence only). `unknown` means the engine or interpreter was unavailable: report it as a
+  compatibility warning, never as clean
 - gate artifact scan results and severities
 - gate acknowledgements from tasks or quickfix records
 - `diff.lines_summary`, `diff.commit_log` (hash/subject/author/date), `diff.file_changes` (status/path)
@@ -106,29 +106,29 @@ Treat a failure here as a **stop**, not a nudge: route back to `/devspark-implem
 
 #### Knowledge Readiness Boundary (blocking)
 
-`.knowledge/index.json` carries `stale_entities`, which is computed from committed Git history. Nothing
-before the commit can prove it, so this command proves it against the HEAD it is about to submit
-(`checked_head`, which preflight requires to equal the remote branch tip).
+The only mechanical Knowledge check is whether the committed Knowledge **builds**. Derived files
+(`.knowledge/index.json`, `coverage.json`) and `last_verified` dates are not compared or required here:
+whether a document still matches the code is a content question for `/devspark-pr-review`, not a gate.
+This command proves the build against the HEAD it is about to submit (`checked_head`, which preflight
+requires to equal the remote branch tip).
 
-- **Blocked** (`knowledge.readiness: blocked`): the tracked index drifts from the committed HEAD
-  (`drift`), the Knowledge cannot build (`build-error`), or an entity touched by this PR is stale
-  (`stale-entity`). **Stop before drafting.** Print the headline and required action below, and do not
-  call create or update mode; the script refuses in both modes with the same message.
-- **Not blocking**: `ready`; `not-applicable` (no tracked index); `unknown` (compatibility warning);
-  `stale_untouched_count` above zero (a stale entity this PR does not touch is a note, never a block).
+- **Blocked** (`knowledge.readiness: blocked`, blocker `build-error`): a source or frontmatter error
+  stops the Knowledge from building. **Stop before drafting.** Print the headline and required action
+  below, and do not call create or update mode; the script refuses in both modes with the same message.
+- **Not blocking**: `ready`; `not-applicable` (no tracked `.knowledge/` content); `unknown`
+  (compatibility warning).
 
 No flag, mode or acknowledgement bypasses this: `--draft`, `--auto` and Gate Acknowledgements do not
 bypass it, and there is no readiness override. A developer who must open a PR anyway uses the platform
 CLI directly, outside this command.
 
-This command only detects readiness. It never regenerates files, edits Knowledge, bumps
-`last_verified`, amends a commit, creates a finalization commit, or runs a remediation step.
+This command only detects readiness. It never regenerates files, edits Knowledge, amends a commit,
+creates a finalization commit, or runs a remediation step.
 
-| Blocker | Headline | Required action |
-|---|---|---|
-| `drift` | `CREATE PR BLOCKED — COMMITTED KNOWLEDGE FINALIZATION REQUIRED` | Show the committed HEAD, `Knowledge index: DRIFT`, and any `STALE:` lines from `check_output`. Then: 1) re-verify any genuinely stale Knowledge before changing `last_verified`; 2) regenerate the index; 3) review the derived files; 4) commit the `.knowledge/**` changes; 5) push; 6) rerun `/devspark-create-pr`. |
-| `stale-entity` | `CREATE PR BLOCKED — KNOWLEDGE RE-VERIFICATION REQUIRED` | For each blocker show the document (`path`), `source`, `source_date` and `last_verified`. Then: 1) confirm current truth, using `/devspark-explain <topic>` where appropriate; 2) change `last_verified` only after genuine verification; 3) regenerate; 4) commit; 5) push; 6) rerun. |
-| `build-error` | `CREATE PR BLOCKED — KNOWLEDGE INDEX CANNOT BE BUILT` | Show the blocker `message`. Then: fix the source or frontmatter, regenerate, commit, push, rerun. |
+Headline: `CREATE PR BLOCKED — KNOWLEDGE CANNOT BE BUILT`. Show the committed HEAD and the blocker
+`message`. Then: 1) fix the source or frontmatter error; 2) confirm it builds with
+`build_knowledge_index.py --check`; 3) commit the `.knowledge/**` changes; 4) push; 5) rerun
+`/devspark-create-pr`.
 
 #### Verify Reminder (optional, non-blocking)
 
@@ -192,8 +192,8 @@ Build the body from the preflight JSON (keep total under 4,000 characters):
   carries a `fallback_reason`. A code-only entry with no adjacent reason is a note for the reviewer,
   not a blocker — surfaces the same signal `/devspark-pr-review` §6c checks mechanically, so a human
 sees it here without digging. Also state `knowledge.readiness` from the preflight JSON plainly
-  ("knowledge is ready" / "readiness unknown: <gap_summary>" / the unrelated `stale_untouched_count`) —
-  this is a real computed fact from `build_knowledge_index.py --check`, not a judgment call. Omit this
+  ("knowledge is ready" / "readiness unknown: <gap_summary>") — this is a real computed fact from
+  `build_knowledge_index.py --check`, not a judgment call. Omit this
   bullet entirely if the diff touches no `.knowledge/` nodes AND readiness is `ready`.
 - **Gate Acknowledgements** — explicit decisions to proceed (omit section if none)
 - **Notes** — warnings, reviewer hints, user-supplied notes

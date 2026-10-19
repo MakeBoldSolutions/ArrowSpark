@@ -133,6 +133,23 @@ discovered:
 
 The `discovered:` list is the overflow channel for everything the run surfaced that is not a proof result. It never affects any mode's `status`, and it is not a to-do list for this route — the closeout phase classifies each entry (see §6).
 
+## 4.1 Test Evidence Record
+
+Anyone who runs tests for a delta (`/devspark-implement`, `/devspark-verify`, `/devspark-pr-review`) records the run once so the next consumer can reuse it instead of repeating it. Append, newest first, to `FEATURE_DIR/gates/test-evidence.md` (spec and quickfix routes). `/devspark-pr-review` records its own runs in its review file's `## Test Evidence` section, which also serves a PR with no feature directory.
+
+```yaml
+- commit: <full 40-character HEAD SHA the tests ran against>
+  tree: clean | dirty
+  command: <exact command, including every explicit path>
+  result: "<N passed, N failed, N skipped>; exit <code>; failing: <ids or none>"
+  run_at: <ISO-8601 UTC>
+  run_by: implement | verify | pr-review | address-pr-review
+```
+
+A record is **reusable** only when all hold: `exit 0` and `tree: clean`; the command's scope covers what the consumer needs (the changed tests and the code they exercise); the recorded commit still exists; and every path changed since it is a planning or review artifact under `.devspark.work/specs/`, `.devspark.work/quickfixes/` or `.devspark.work/pr-review/` (`git diff --name-only <commit> HEAD`, plus uncommitted changes). A rebase, a merge from the base branch, a dependency change, a different runtime or environment from the recorded run (language version, required services, configuration), or any code, test, data or knowledge edit invalidates it. Reuse is cited by location, never re-recorded as a new run. A record is evidence of what was run, never a substitute for the failing-run output.
+
+A repository policy (constitution, `.devspark.work/templates/`, or a command override) may tighten this, for example by requiring the reviewer's own run for high-risk paths or when CI does not run the tests. Such a policy wins; the default here only removes repetition that no policy requires.
+
 ## 5. Non-Negotiables
 
 - **Never fabricate evidence.** If a proof mode can't be executed in this environment (no test runner, no traffic sample, no baseline artifact), the gate status is `fail` with the reason stated — not a hypothetical pass. A mode that needs a deployed environment that does not exist yet is the authoring defect described in §2.3, not a pass.

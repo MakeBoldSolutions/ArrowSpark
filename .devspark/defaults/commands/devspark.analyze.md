@@ -31,7 +31,7 @@ Load and obey the shared assurance contract at `/.devspark/templates/assurance-c
 
 Analyze is the **closed-world** half of planning assurance. Its test is mechanical: if something can be shown wrong solely because the planning artifacts contradict themselves or fail their declared structural contract, Analyze owns it. If establishing it requires knowing how the running system actually behaves, Analyze does not.
 
-Analyze **owns** (assurance-contract.md §2): spec↔plan↔tasks consistency; requirement coverage and requirement↔task traceability; duplicate, contradictory, or unanchored requirements; terminology drift and wording precision; task dependency and ordering validity; missing task anchors; tasks citing requirement ids that do not exist; completed tasks with no supporting linkage; identifier and field names contradicting a declared contract or schema; Spec/Plan Rationale Summary completeness and spec→plan Core-Problem alignment; `context_resolved` **validity**; artifact and schema conformance; planning bookkeeping correctness. Tasks are a derivative action list and must not duplicate rationale.
+Analyze **owns** (assurance-contract.md §2): spec↔plan↔tasks consistency; requirement coverage and requirement↔task traceability; duplicate, contradictory, or unanchored requirements; terminology drift and wording precision; task dependency and ordering validity; missing task anchors; tasks citing requirement ids that do not exist; completed tasks with no supporting evidence of work; identifier and field names contradicting a declared contract or schema; Spec/Plan Rationale Summary completeness and spec→plan Core-Problem alignment; `context_resolved` **validity**; artifact and schema conformance; planning bookkeeping correctness. Tasks are a derivative action list and must not duplicate rationale.
 
 Analyze does **NOT** own, and MUST NOT emit findings for (assurance-contract.md §4.1):
 
@@ -179,7 +179,7 @@ Focus on high-signal findings. Limit to 50 findings total; aggregate remainder i
 - Tasks with no mapped requirement/story
 - **Traceability hallucination**: a task whose `Implements: FR-###` directive references a requirement ID that does not exist in `spec.md` (CRITICAL — the task claims to satisfy an invented requirement)
 - **Missing requirement anchor**: a normative statement in `spec.md` that other artifacts must be able to cite, written without a stable `FR-###`/`SC-###` anchor — or an anchor duplicated across two different statements. An uncitable or ambiguous requirement makes every downstream traceability claim unverifiable (HIGH; CRITICAL when a task already cites the ambiguous anchor).
-- **Completion bookkeeping**: a task marked complete whose `code_ref`/`knowledge_ref` is still `pending`, empty, or an unexplained `n/a` — the task claims work that no recorded edit supports (HIGH). Likewise a task marked complete whose cited paths do not exist.
+- **Completion bookkeeping**: a task marked complete whose cited paths do not exist, or that claims work no recorded edit supports (HIGH).
 - Non-functional requirements not reflected in tasks (e.g., performance, security)
 - **Scope**: this pass only checks whether *stated* requirements have *stated* tasks, and whether the task record is internally honest. Whether the spec is *missing* operational tasks (observability, rollback, backups, runbooks) that no requirement called for is `/devspark-critic`'s responsibility.
 

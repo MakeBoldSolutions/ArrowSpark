@@ -37,7 +37,7 @@ Load and obey the shared assurance contract at `/.devspark/templates/assurance-c
 
 Critic is the **open-world** half of planning assurance. `/devspark-analyze` establishes that the artifacts are internally sound; Critic challenges that internally sound plan against repository and operating reality. The two are complementary, not two names for reviewing the work.
 
-Critic **owns**: requirements resting on false assumptions about existing code; conditions the baseline can never produce; behavior removed as "redundant" that is a sole required path; hidden coupling to existing consumers; missing rollback/disable/kill-switch posture; missing observability needed to operate the proposed behavior; unexamined external-dependency behavior; persistent-data limits; state-machine failure modes; compatibility assumptions; concurrency and async hazards visible from the design; NFR achievability; `context_resolved` **sufficiency**; architectural assumptions unsupported by current source.
+Critic **owns**: requirements resting on false assumptions about existing code; **a new mechanism where a closer existing implementation would satisfy the requirement (search the repository; do not trust the plan's claim that none exists)**; conditions the baseline can never produce; behavior removed as "redundant" that is a sole required path; hidden coupling to existing consumers; missing rollback/disable/kill-switch posture; missing observability needed to operate the proposed behavior; unexamined external-dependency behavior; persistent-data limits; state-machine failure modes; compatibility assumptions; concurrency and async hazards visible from the design; NFR achievability; `context_resolved` **sufficiency**; architectural assumptions unsupported by current source.
 
 Critic does **NOT** own, and MUST NOT emit normal findings for (assurance-contract.md §4.1):
 
@@ -130,22 +130,7 @@ Determine the repo archetype (drives which risk categories apply). Read in prior
 Archetype values:
 `web-service | library | cli | mobile-app | desktop-app | data-pipeline | ml-training | llm-application | infrastructure | embedded | browser-extension | game | monorepo | documentation-site`
 
-**Heuristic signals** (non-exhaustive):
-
-- `web-service`: Dockerfile + framework imports (FastAPI/Express/Spring/ASP.NET/Rails), `openapi.*`, k8s manifests
-- `library`: `pyproject.toml` without `[project.scripts]`, npm `"main"`/`"exports"` without server entry, `Cargo.toml` `[lib]`, published-package metadata
-- `cli`: `[project.scripts]`, `bin` in `package.json`, `Cargo.toml` `[[bin]]`, Cobra/Click/Typer imports
-- `mobile-app`: `android/`, `ios/`, `pubspec.yaml`, `*.xcodeproj`, React Native/Expo, MAUI
-- `desktop-app`: Electron, Tauri, WPF, Qt, GTK, Avalonia
-- `data-pipeline`: Airflow/Dagster/Prefect/Luigi/dbt, Spark/Beam jobs, `dags/` dir
-- `ml-training`: PyTorch/TF/JAX training loops, `train.py`, MLflow/W&B, notebooks under `experiments/`
-- `llm-application`: prompt/template directories (`prompts/`, `templates/prompts/`), LLM SDK imports (`openai`, `langchain`, `pydantic-ai`, `semantic-kernel`, `litellm`), eval/judge/referee workflows, model-routing or inference orchestration code
-- `infrastructure`: Terraform/Pulumi/Bicep/CloudFormation/Ansible without app code
-- `embedded`: PlatformIO, Zephyr, ESP-IDF, `*.ino`, linker scripts, `no_std` Rust
-- `browser-extension`: `manifest.json` with `manifest_version`
-- `game`: Unity/Unreal/Godot project files
-- `monorepo`: Nx/Turborepo/Lerna/pnpm workspaces/Bazel with ≥3 sibling packages
-- `documentation-site`: MkDocs/Docusaurus/Hugo/Jekyll without runtime code
+Infer from the repository's manifests, frameworks and layout when neither declares it (for example a Dockerfile plus a web framework or OpenAPI file is `web-service`; `[project.scripts]` or a `bin` entry is `cli`; prompt directories or LLM SDK imports are `llm-application`; Terraform/Bicep without app code is `infrastructure`).
 
 Print the detected archetype in the report header. If undetectable, default to `web-service` and record the inference in the header. Per assurance-contract.md §6.1, a missing or ambiguous archetype is **resolved and reported, never emitted as a finding**. If the ambiguity genuinely prevents meaningful review, say so in the Executive Summary and narrow the declared scope — that is a scope statement, not a defect.
 
@@ -467,54 +452,9 @@ verification_obligations:
 
 `classification` uses the canonical convergence vocabulary from `closeout-contract.md` §4. Severity and blocking are **separate dimensions**: a SHOWSTOPPER finding may be an Accepted Limitation and not block; a MEDIUM finding that violates a required invariant blocks.
 
-### Showstoppers
+### Summary Tables
 
-_(Render rows from findings where `effective_severity: showstopper`. Drop section if none.)_
-
-| ID  | Category | Location | Risk | Likely Impact | Mitigation |
-| --- | -------- | -------- | ---- | ------------- | ---------- |
-
-### Critical
-
-_(Render from `critical`. Drop if empty.)_
-
-| ID  | Category | Location | Risk | Likely Impact | Action |
-| --- | -------- | -------- | ---- | ------------- | ------ |
-
-### High
-
-_(Render from `high`. Drop if empty.)_
-
-| ID  | Category | Location | Issue | Impact | Suggestion |
-| --- | -------- | -------- | ----- | ------ | ---------- |
-
-### Missing Critical Tasks
-
-_(FULL scope only. Omit empty buckets. Documentation is **not** a Critic bucket — documentation
-drift belongs to `/devspark-analyze`; route it.)_
-
-- **Observability / Operations / Testing / Security:** […]
-
-### Questionable Assumptions
-
-1. **[Assumption]** → Failure mode: […]
-
-### Dependency Risk Assessment
-
-| Dependency | Concern | Alternative |
-| ---------- | ------- | ----------- |
-
-### Estimated Technical Debt at Launch
-
-- **Code / Operational / Testing Debt:** […]
-
-### Metrics
-
-- Showstopper / Critical / High counts (effective severity)
-- Material unique findings
-- Findings by category
-- Routed findings and verification obligations (counts only)
-- Missing operational tasks (FULL scope only)
+The YAML above is the single source of truth. Add at most one compact table per non-empty effective severity (`showstopper`, `critical`, `high`) with columns `ID | Category | Location | Risk | Mitigation`, one row per `finding_id`, and a one-line count of findings, routed findings and verification obligations. Missing operational tasks (FULL scope only), questionable assumptions and risky dependencies are findings, not separate sections. Documentation drift is never a Critic finding; route it to `/devspark-analyze`.
 
 **VERDICT:** STOP | CONDITIONAL | PROCEED
 
@@ -567,11 +507,7 @@ After producing the report:
 
 ### Adversarial Mindset
 
-- **Murphy's Law**: If it can fail, it will fail.
-- **Challenge optimism**: Estimates are optimistic; dependencies hide.
-- **Real-world bias**: Prioritize incidents you've seen in production.
-- **No benefit of doubt**: Vague = wrong; missing = will bite you.
-- **Be brutally honest**: Sugar-coating helps nobody.
+Assume it can fail and the estimates are optimistic. Vague means wrong and missing means it will bite. Prefer incidents seen in production, and be direct.
 
 ### Focus Areas (priority order, modulated by archetype)
 
@@ -593,56 +529,28 @@ After producing the report:
 
 ### Output Quality
 
-- **Be specific**: "Blocking sync DB driver on async runtime starves the event loop" — not "database concerns."
-- **Cite locations**: spec/plan/task section or line.
-- **Cite baseline evidence**: name the file and symbol behind any claim about how the system behaves today.
-- **Quantify impact**: "N+1 access in list path → 1000+ round trips per 1000 items."
-- **Suggest fixes**: Concrete remediation, not complaints — the least-complex mitigation first, new machinery only with a reason the lighter option fails.
-- **Translate across stacks**: Pair every named tool with its capability.
-- **Challenge NFRs concretely**: name the specific target, the mechanism that makes it unreachable, and what would have to change — never "this may not scale."
+- **Be specific and quantify**: "Blocking sync DB driver on async runtime starves the event loop", "N+1 access → 1000+ round trips per 1000 items" — not "database concerns".
+- **Cite locations and baseline evidence**: the spec/plan/task section, and the file and symbol behind any claim about how the system behaves today.
+- **Suggest fixes**: concrete remediation, the least-complex mitigation first, new machinery only with a reason the lighter option fails.
+- **Translate across stacks**: pair every named tool with its capability.
+- **Challenge NFRs concretely**: name the target, the mechanism that makes it unreachable, and what would have to change.
 
 ### Interaction Policy
 
-Critic having run is not by itself a reason to interrupt the developer (assurance-contract.md §10):
-
-| State | Behavior |
-| ----- | -------- |
-| `PROCEED`, no open consequential findings | Report and continue |
-| Non-blocking findings, already classified | Concise summary and continue |
-| An unresolved consequential human judgment | Ask exactly that question |
-| `STOP`, or a blocker needing authority or a scope decision | Stop |
-
-### Context Efficiency
-
-- Minimal high-signal tokens; progressive disclosure.
-- Limit each table to ≤30 rows; summarize overflow into a `findings_overflow` count.
-- Deterministic: same inputs → same `finding_id`s and counts.
+Critic having run is not by itself a reason to interrupt the developer. Report and continue on `PROCEED` or already-classified non-blocking findings; ask exactly the one question an unresolved consequential judgment needs; stop on `STOP` or a blocker needing authority or a scope decision (assurance-contract.md §10).
 
 ### Analysis Rules
 
 - **NEVER modify files** other than the gate artifact.
 - **NEVER hallucinate missing sections**; report absence accurately.
-- Prioritize showstoppers.
-- Report zero issues gracefully with a positive summary.
+- Be specific and cite locations and baseline evidence; keep each table to ≤30 rows (summarize overflow in `findings_overflow`); the same inputs give the same `finding_id`s.
+- Prioritize showstoppers. Report zero issues gracefully with a positive summary.
 
-## Key Differences from /devspark-analyze
-
-The canonical boundary lives in `assurance-contract.md` §2–§4. This table is a summary of it, not a second definition.
-
-| Aspect       | /devspark-analyze                      | /devspark-critic                         |
-| ------------ | -------------------------------------- | ---------------------------------------- |
-| Core question | Are the planning artifacts internally sound? | Is this sound plan wrong about the real system? |
-| World        | Closed — the authored artifacts        | Open — artifacts plus code, tests, knowledge |
-| Mindset      | Neutral validator                      | Adversarial skeptic                      |
-| Focus        | Alignment across artifacts             | Production failure modes                 |
-| Evidence     | The artifacts themselves               | Inspected source and current knowledge   |
-| Severity     | Quality issues                         | Business impact                          |
-| Output       | Remediation suggestions                | Derived STOP / CONDITIONAL / PROCEED     |
-| Constitution | CRITICAL violations                    | SHOWSTOPPER violations                   |
+The boundary with `/devspark-analyze` is defined in `assurance-contract.md` §2–§4: Analyze checks that the artifacts are internally sound (closed world), Critic challenges that sound plan against the real system (open world).
 
 ## Backward Compatibility
 
-If spec.md lacks `archetype`, `risk_profile`, or `change_type` frontmatter, the command still runs with sensible defaults (`web-service`, `internal`, `greenfield`). The inferred values are reported in the gate header and marked `inferred`. Per assurance-contract.md §6.1, missing metadata is **never** emitted as a finding — earlier versions emitted `archetype-ambiguity`, `missing-risk-profile`, and `missing-change-type` as HIGH findings; those are removed. Consumers that previously read them should read the gate header instead.
+If spec.md lacks `archetype`, `risk_profile`, or `change_type` frontmatter, the command runs with sensible defaults (`web-service`, `internal`, `greenfield`), reports the inferred values in the gate header marked `inferred`, and never emits missing metadata as a finding (assurance-contract.md §6.1).
 
 The `findings:` list gains `owner`, `evidence`, `root_cause`, and `classification`; the optional `routed_findings:` and `verification_obligations:` blocks are additive and omitted when empty. Existing consumers that read `finding_id`, severity, `status`, and `outcome` are unaffected.
 
