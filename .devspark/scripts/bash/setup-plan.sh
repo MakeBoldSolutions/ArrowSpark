@@ -70,12 +70,11 @@ else
     : > "$IMPL_PLAN"
 fi
 
-# Knowledge documents: parse
-# functional requirements out of the now-populated spec.md and emit/refresh
-# knowledge/fr-###.md + knowledge/feature.md's links.requirements. Gated by a
-# git hash-object staleness check (research.md) stored as an internal comment
-# in feature.md -- never part of the OKF frontmatter contract. Best-effort:
-# any failure here must not affect this script's output or exit code.
+# Knowledge overview: write knowledge/feature.md, which references (never copies) the spec
+# sections that carry consumed spec knowledge. No per-requirement records are generated.
+# Gated by a git hash-object staleness check stored as an internal comment in feature.md --
+# never part of the OKF frontmatter contract. Best-effort: any failure here must not affect
+# this script's output or exit code.
 {
     if [[ -f "$FEATURE_SPEC" ]]; then
         SPEC_HASH="$(git hash-object "$FEATURE_SPEC" 2>/dev/null || true)"
@@ -85,27 +84,6 @@ fi
             PRIOR_HASH="$(grep -m1 '^<!-- spec-hash: ' "$FEATURE_DOC" 2>/dev/null | sed -E 's/^<!-- spec-hash: (\S+) -->/\1/' || true)"
         fi
         if [[ -z "$SPEC_HASH" || "$PRIOR_HASH" != "$SPEC_HASH" ]]; then
-            FR_IDS_JSON="[]"
-            FR_IDS_ARR=()
-            while IFS= read -r fr_line; do
-                [[ -z "$fr_line" ]] && continue
-                fr_id="$(echo "$fr_line" | sed -E 's/^- \*\*(FR-[0-9]+)\*\*:.*/\1/' | tr '[:upper:]' '[:lower:]')"
-                # First-sentence heuristic: protect common abbreviations (e.g., i.e., etc.)
-                # from being mistaken for a sentence boundary, split on the first real
-                # ". " + uppercase, then restore (PR #61822 M-02, mirrors setup-plan.ps1).
-                fr_title="$(echo "$fr_line" | sed -E 's/^- \*\*FR-[0-9]+\*\*:\s*//')"
-                fr_title="$(printf '%s' "$fr_title" | sed -E 's/\b(e\.g|i\.e|etc)\./\1@DOT@/g')"
-                fr_title="$(printf '%s' "$fr_title" | sed -E 's/\.[[:space:]]+[A-Z].*$//')"
-                fr_title="$(printf '%s' "$fr_title" | sed -E 's/@DOT@/./g; s/\.$//')"
-                FR_IDS_ARR+=("$fr_id")
-                write_knowledge_document "$FEATURE_DIR" "$fr_id" requirement "$fr_title" draft \
-                    '{"feature":"feature","implemented_by":[]}' setup-plan || true
-            done < <(grep -E '^-\s+\*\*FR-[0-9]+\*\*:' "$FEATURE_SPEC" 2>/dev/null || true)
-
-            if [[ ${#FR_IDS_ARR[@]} -gt 0 ]]; then
-                FR_IDS_JSON="$(printf '%s\n' "${FR_IDS_ARR[@]}" | jq -R . | jq -s . 2>/dev/null || echo "[]")"
-            fi
-
             FEATURE_TITLE="$CURRENT_BRANCH"
             EXTRACTED_TITLE="$(grep -m1 -E '^# Feature Specification:' "$FEATURE_SPEC" 2>/dev/null | sed -E 's/^# Feature Specification:\s*//' || true)"
             [[ -n "$EXTRACTED_TITLE" ]] && FEATURE_TITLE="$EXTRACTED_TITLE"
@@ -125,7 +103,7 @@ fi
             ABSENT_JSON="$(printf '%s\n' "${SECTIONS_ABSENT[@]}" | jq -R . | jq -s . 2>/dev/null || echo '[]')"
             [[ ${#SECTIONS_PRESENT[@]} -eq 0 ]] && PRESENT_JSON='[]'
             [[ ${#SECTIONS_ABSENT[@]} -eq 0 ]] && ABSENT_JSON='[]'
-            LINKS_JSON="$(jq -cn --argjson reqs "$FR_IDS_JSON" --argjson present "$PRESENT_JSON" --argjson absent "$ABSENT_JSON" '{requirements:$reqs, spec_sections:$present, spec_sections_absent:$absent}' 2>/dev/null || echo '{"requirements":[]}')"
+            LINKS_JSON="$(jq -cn --argjson present "$PRESENT_JSON" --argjson absent "$ABSENT_JSON" '{requirements:[], spec_sections:$present, spec_sections_absent:$absent}' 2>/dev/null || echo '{"requirements":[]}')"
             if write_knowledge_document "$FEATURE_DIR" feature feature "$FEATURE_TITLE" draft "$LINKS_JSON" setup-plan && [[ -n "$SPEC_HASH" && -f "$FEATURE_DOC" ]]; then
                 # Below the closing frontmatter delimiter: above it, the YAML block stops being
                 # recognised and markdownlint reads the delimiters as setext headings.

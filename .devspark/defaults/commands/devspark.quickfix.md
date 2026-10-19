@@ -29,7 +29,7 @@ Also accepts **Code First** work: `[existing diff] → quickfix review and recon
 implementation finalization`. A completed or partially completed change needs no prior spec,
 plan, or tasks. Both entries use the same quickfix record and existing assurance mechanisms.
 
-- **Owns**: classification, targeted constitution check, a dedicated quickfix branch (`NNN-fix-<slug>`), a temporary product-owner change record (`NNN-fix-<slug>` with WHAT/WHY/HOW), a minimal `## Context Resolution` (whatever `.knowledge/` content the fix touches — flat documents, entities, entity layers, or decisions — if any), and complete `code_ref`/`knowledge_ref` linkage on the Validation Checklist. Before checking an item complete, record every affected production-code, test, and current `.knowledge/` path there; never reference the temporary quickfix record from a durable file.
+- **Owns**: classification, targeted constitution check, a dedicated quickfix branch (`NNN-fix-<slug>`), a temporary product-owner change record (`NNN-fix-<slug>` with WHAT/WHY/HOW), a minimal `## Context Resolution` (whatever `.knowledge/` content the fix touches — flat documents, entities, entity layers, or decisions — if any), and the Validation Checklist. Update the affected production code, tests, and current `.knowledge/` content in the same change; never reference the temporary quickfix record from a durable file.
 - **Does NOT own**: multi-file architectural changes, new user-facing features, or API/schema changes (→ `/devspark-specify`); interactive ambiguity resolution (→ `/devspark-clarify`); design artifacts (→ `/devspark-plan`); story-organized task lists (→ `/devspark-tasks`); adversarial risk review (→ `/devspark-critic`, `/devspark-analyze`) — quickfix's lightweight contract deliberately skips both gates entirely rather than running a lighter version of either; escalate to `/devspark-specify` if the change turns out to need them.
 - **If scope expands during implementation**: halt and recommend `/devspark-specify {original problem}` rather than stretching the quickfix.
 
@@ -43,10 +43,10 @@ Load and obey the shared preamble contract core at `/.devspark/templates/command
 
 This command enables rapid fixes without full-spec overhead. Its record lives under
 `.devspark.work/quickfixes/` for as long as it takes to reach `/devspark-implement`, which updates
-code, affected tests, and current knowledge, passes required verification, and populates the
-record's `code_ref`/`knowledge_ref` linkage. The record then stays live in `.devspark.work/quickfixes/`
+code, affected tests, and current knowledge, and passes required verification. The record then stays
+live in `.devspark.work/quickfixes/`
 — `/devspark-release` is the only command that later archives it to `.archive/{YYYY-MM-DD}/quickfixes/`
-once it's Complete and linkage-verified.
+once it's Complete.
 
 **Use Cases:**
 
@@ -151,7 +151,7 @@ If ACTION is "complete" and QUICKFIX_ID is provided:
 2. If it does not exist, report that it was already finalized or never existed.
 3. If it exists, do not mark it as completed here. Route to `/devspark-implement`, which owns
   verification and current-knowledge consistency; `/devspark-release` owns archiving the record
-  under `.archive/` once it's Complete and linkage-verified.
+  under `.archive/` once it's Complete.
 4. Stop execution.
 
 #### Action: `create` (Default)
@@ -186,13 +186,12 @@ scope or creating the same quickfix record.
 5. **Reconcile lasting Knowledge only when needed.** Inspect applicable `.knowledge/` owners and
    determine whether the diff changes a durable claim, contract, or operational guidance. Update
    the owning document when necessary; create Knowledge only for lasting engineering value, never
-   to satisfy a documentation checkbox. If no update is needed, explain why in Context Resolution
-   and use `knowledge_ref: n/a` on the relevant checklist items.
+   to satisfy a documentation checkbox. If no update is needed, explain why in Context Resolution.
 6. **Preserve chronology in the existing record.** Create or update the quickfix record now,
    stating that implementation preceded this review, what was already done, and what remains.
    Describe HOW as the observed implementation plus any prospective corrections. Use actual
    timestamps, test results, and approvals; never backdate a planning decision or human approval.
-   Populate `code_ref`/`knowledge_ref` with inspected paths, and check items only after evidence
+   Name the inspected paths in the record, and check items only after evidence
    supports them. Reuse a matching existing record rather than generating another for the same work.
 7. **Finalize through the existing route.** Apply steps 7-9 with branch confirmation and staging
    safety below, then load `/devspark-implement`'s Quickfix Route and Finalize Every Route using
@@ -347,10 +346,10 @@ required_gates: { Leave blank for low risk; otherwise checklist }
 
 ## Validation Checklist
 
-- [ ] Change addresses stated problem (code_ref: pending | knowledge_ref: pending)
-- [ ] No unintended side effects identified (code_ref: pending | knowledge_ref: n/a)
-- [ ] Relevant tests updated/added (if applicable) (code_ref: pending | knowledge_ref: n/a)
-- [ ] Documentation updated (if applicable) (code_ref: n/a | knowledge_ref: pending)
+- [ ] Change addresses stated problem
+- [ ] No unintended side effects identified
+- [ ] Relevant tests updated/added (if applicable)
+- [ ] Documentation updated (if applicable)
 
 ## Gate Acknowledgements
 

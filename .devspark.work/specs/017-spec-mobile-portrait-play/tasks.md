@@ -217,6 +217,8 @@ All file paths below resolve against the absolute repository root above. Tasks a
 
 ## Final Phase: Verification and Current-Knowledge Consistency
 
+**Checkpoint**: Pre-merge phase complete — 2026-10-19. T032 remains unchecked as the explicitly deferred post-deploy owner acceptance obligation.
+
 
 
 - [X] T029 Run pinned Godot validation, `tests/run_puzzle_regressions.py`, `tests/run_regressions.py`, and `npm run check`/`npm run build` from `web/`; export the changed game with `web/scripts/export-game.mjs`, bind its actual PUBLIC_GAME_BUILD and rebuild the candidate site per `quickstart.md`; record results in `.devspark.work/specs/017-spec-mobile-portrait-play/evidence/automated.md` (Implements: FR-012, FR-013, FR-014) (code_ref: tests/run_puzzle_regressions.py, tests/run_regressions.py, tests/portrait_menu_check.gd, tests/puzzle_presentation_check.gd, web/scripts/export-game.mjs | knowledge_ref: .knowledge/architecture/arrow-puzzle.md, .knowledge/architecture/game-visual-system.md, .knowledge/architecture/save-progression.md, .knowledge/architecture/web-showcase.md)

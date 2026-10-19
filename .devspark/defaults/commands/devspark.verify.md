@@ -120,6 +120,8 @@ Multi-app scope and the 2-tier override check for scripts are defined by the sha
    execution` on a `.knowledge/` node for this change — record it here, where the actual proof just
    ran, rather than leaving implement to reconstruct which test verified what.
 
+   Append the run of any regression command you executed to `FEATURE_DIR/gates/test-evidence.md` per verification contract §4.1, so `/devspark-pr-review` can reuse it instead of repeating it.
+
    - `status: pass` only if every declared mode's entry is `pass`.
    - `status: fail` if any declared mode is `fail`; `blocking: true` in that case.
    - Ensure `FEATURE_DIR/gates/` exists; replace the prior `verify.md` artifact if present, don't append.

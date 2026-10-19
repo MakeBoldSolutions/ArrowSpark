@@ -35,7 +35,7 @@ Load and obey the shared preamble contract core at `/.devspark/templates/command
 Every spec is temporary working state under `.devspark.work/specs/`. It exists only through
 implementation and required verification. `/devspark-implement` updates affected code, tests, and
 current `.knowledge/`, verifies their consistency, and removes planning identifiers from durable
-outputs. The completed bundle remains in `.devspark.work/` for linkage validation until
+outputs. The completed bundle remains in `.devspark.work/` until
 `/devspark-release` archives it. Durable outputs and downstream records must not link back to this
 spec.
 

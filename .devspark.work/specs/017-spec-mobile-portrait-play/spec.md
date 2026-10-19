@@ -77,7 +77,7 @@ minimum_sufficient_change:
 
 ## User Scenarios & Testing
 
-### User Story 1 - Play upright (Priority: P1)
+### User Story 1 - Play upright (Priority: P1) ✅ Complete
 
 As the owner playing on my phone, I want portrait play so I do not have to rotate the device.
 
@@ -91,7 +91,7 @@ As the owner playing on my phone, I want portrait play so I do not have to rotat
 2. **Given** visible browser chrome and unavailable fullscreen, **When** I start play, **Then** the game fits the available area and essential actions remain reachable.
 3. **Given** Reference Knot in portrait, **When** I pinch, drag and use Fit, **Then** I can inspect and reach every board corner without rotating.
 
-### User Story 2 - Give the puzzle space (Priority: P1)
+### User Story 2 - Give the puzzle space (Priority: P1) ✅ Complete
 
 As a player, I want minimal controls so I can focus on arrows and interact directly with the board.
 
@@ -106,7 +106,7 @@ As a player, I want minimal controls so I can focus on arrows and interact direc
 3. **Given** I need restart, navigation, options or help, **When** I open the menu, **Then** they are reachable and Resume returns to the same attempt.
 4. **Given** mouse, keyboard or gamepad input, **When** I navigate after toolbar removal, **Then** selection, zoom, pan and Fit remain available through supported input paths.
 
-### User Story 3 - Finish the portrait journey (Priority: P2)
+### User Story 3 - Finish the portrait journey (Priority: P2) ✅ Complete
 
 As a phone player, I want usable menus and Results so starting, pausing and continuing levels do not force rotation.
 

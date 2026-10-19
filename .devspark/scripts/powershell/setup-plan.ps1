@@ -54,12 +54,11 @@ if ($planExists -and -not $Reset) {
     New-Item -ItemType File -Path $paths.IMPL_PLAN -Force | Out-Null
 }
 
-# Knowledge documents: parse
-# functional requirements out of the now-populated spec.md and emit/refresh
-# knowledge/fr-###.md + knowledge/feature.md's links.requirements. Gated by a
-# git hash-object staleness check (research.md) stored as an internal comment
-# in feature.md -- never part of the OKF frontmatter contract. Best-effort:
-# any failure here must not affect this script's JSON output or exit code.
+# Knowledge overview: write knowledge/feature.md, which references (never copies) the spec
+# sections that carry consumed spec knowledge. No per-requirement records are generated.
+# Gated by a git hash-object staleness check stored as an internal comment in feature.md --
+# never part of the OKF frontmatter contract. Best-effort: any failure here must not affect
+# this script's JSON output or exit code.
 try {
     if (Test-Path $paths.FEATURE_SPEC) {
         $specHash = $null
@@ -72,18 +71,6 @@ try {
         }
         if (-not $specHash -or $priorHash -ne $specHash) {
             $specContent = Get-Content $paths.FEATURE_SPEC -Raw
-            $frIds = @()
-            [regex]::Matches($specContent, '(?m)^-\s+\*\*(FR-\d+)\*\*:\s*(.+)$') | ForEach-Object {
-                $frId = $_.Groups[1].Value.ToLower()
-                # First-sentence heuristic: split on ". " followed by an uppercase letter,
-                # but not when preceded by a common abbreviation (e.g., i.e., etc.) so
-                # titles aren't truncated mid-abbreviation (PR #61822 M-02).
-                $frTitle = ([regex]::Split($_.Groups[2].Value.Trim(), '(?<!e\.g)(?<!i\.e)(?<!etc)\.\s+(?=[A-Z])'))[0].TrimEnd('.')
-                $frIds += $frId
-                New-KnowledgeDocument -FeatureDir $paths.FEATURE_DIR -Id $frId -Type 'requirement' `
-                    -Title $frTitle -Status 'draft' -Links @{ feature = 'feature'; implemented_by = @() } `
-                    -GeneratedBy 'setup-plan' | Out-Null
-            }
             $featureTitle = $paths.CURRENT_BRANCH
             if ($specContent -match '(?m)^# Feature Specification:\s*(.+)$') { $featureTitle = $Matches[1].Trim() }
             # Reference (never copy) the spec sections that carry consumed spec knowledge; a
@@ -95,7 +82,7 @@ try {
             }
             $wrote = New-KnowledgeDocument -FeatureDir $paths.FEATURE_DIR -Id 'feature' -Type 'feature' `
                 -Title $featureTitle -Status 'draft' -GeneratedBy 'setup-plan' `
-                -Links @{ requirements = $frIds; spec_sections = $sectionPresent; spec_sections_absent = $sectionAbsent }
+                -Links @{ requirements = @(); spec_sections = $sectionPresent; spec_sections_absent = $sectionAbsent }
             if ($wrote -and $specHash -and (Test-Path $featureDocPath)) {
                 # Below the closing frontmatter delimiter: above it, the YAML block stops being
                 # recognised and markdownlint reads the delimiters as setext headings.
