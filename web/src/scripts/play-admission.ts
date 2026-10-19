@@ -8,7 +8,7 @@
 //   asks the visitor to rotate; anything smaller asks for a larger screen.
 // Touch and a fine pointer are independent: a device with both may qualify by either route.
 
-export type PlayVerdict = 'play' | 'rotate' | 'larger';
+export type PlayVerdict = 'play' | 'larger';
 
 export interface Capabilities {
   width: number;
@@ -18,13 +18,14 @@ export interface Capabilities {
 }
 
 export const DESKTOP_MIN = { width: 960, height: 540 } as const;
+export const PORTRAIT_MIN = { width: 360, height: 640 } as const;
 export const TOUCH_MIN = { width: 640, height: 320 } as const;
 
 export function decidePlay({ width, height, finePointer, touch }: Capabilities): PlayVerdict {
   if (finePointer && width >= DESKTOP_MIN.width && height >= DESKTOP_MIN.height) return 'play';
   if (touch) {
-    if (height > width) return 'rotate';
-    if (width >= TOUCH_MIN.width && height >= TOUCH_MIN.height) return 'play';
+    const minimum = height > width ? PORTRAIT_MIN : TOUCH_MIN;
+    if (width >= minimum.width && height >= minimum.height) return 'play';
   }
   return 'larger';
 }
@@ -36,9 +37,11 @@ export function isTouchFirst({ finePointer, touch }: Pick<Capabilities, 'finePoi
 }
 
 export function readCapabilities(win: Window = window): Capabilities {
+  const visible = win.visualViewport;
+  const useVisible = visible && Math.abs(visible.scale - 1) < 0.01;
   return {
-    width: win.innerWidth,
-    height: win.innerHeight,
+    width: useVisible ? visible.width : win.innerWidth,
+    height: useVisible ? visible.height : win.innerHeight,
     finePointer: win.matchMedia('(pointer: fine)').matches,
     touch: win.matchMedia('(any-pointer: coarse)').matches,
   };

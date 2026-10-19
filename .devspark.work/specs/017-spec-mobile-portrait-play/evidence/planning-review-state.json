@@ -1,0 +1,28 @@
+{
+  "state": "present",
+  "verdict": "PROCEED",
+  "needs_recheck": true,
+  "recheck_children": [
+    "analyze",
+    "critic"
+  ],
+  "judge_stale": false,
+  "pending_decisions": 0,
+  "plan_revision_count": 0,
+  "task_work_count": 0,
+  "plan_changed": false,
+  "spec_changed": false,
+  "tasks_changed": true,
+  "tasks_stale": false,
+  "plan_spec_state": "current",
+  "tasks_plan_state": "current",
+  "verify_required": true,
+  "required_modes": [
+    "end-to-end"
+  ],
+  "unmet_modes": [
+    "end-to-end"
+  ],
+  "verify_passed": false,
+  "closeout_decision": ""
+}

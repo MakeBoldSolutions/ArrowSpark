@@ -1,0 +1,40 @@
+npm notice run build
+npm notice run astro build && node scripts/build-csp.mjs && node scripts/check-content.mjs --dist
+22:17:26 [content] Syncing content
+22:17:26 [content] Synced content
+22:17:26 [types] Generated 591ms
+22:17:26 [build] output: "static"
+22:17:26 [build] mode: "static"
+22:17:26 [build] directory: C:\GitHub\MakeBoldSolutions\ArrowGame\web\dist\
+22:17:26 [build] Collecting build info...
+22:17:26 [build] ✓ Completed in 627ms.
+22:17:26 [build] Building static entrypoints...
+22:17:27 [vite] ✓ built in 858ms
+22:17:27 [vite] ✓ built in 246ms
+22:17:27 [build] Rearranging server assets...
+
+ generating static routes 
+22:17:27   ├─ /devspark/beck-retrospective/index.html (+13ms) 
+22:17:27   ├─ /devspark/index.html (+9ms) 
+22:17:27   ├─ /evidence/index.html (+6ms) 
+22:17:27   ├─ /journey/index.html (+4ms) 
+22:17:27   ├─ /licenses/index.html (+4ms) 
+22:17:27   ├─ /play/index.html (+4ms) 
+22:17:27   ├─ /story/finding-the-gap/index.html (+3ms) 
+22:17:27   ├─ /story/first-game-loop/index.html (+2ms) 
+22:17:27   ├─ /story/provably-solvable/index.html (+2ms) 
+22:17:27   ├─ /story/making-it-feel-right/index.html (+2ms) 
+22:17:27   ├─ /story/playtest-beat-the-dashboard/index.html (+2ms) 
+22:17:27   ├─ /story/contract-before-difficulty/index.html (+1ms) 
+22:17:27   ├─ /story/pulling-the-thread/index.html (+1ms) 
+22:17:27   ├─ /story/the-reference-knot/index.html (+2ms) 
+22:17:27   ├─ /story/index.html (+3ms) 
+22:17:27   ├─ /index.html (+3ms) 
+22:17:27 ✓ Completed in 95ms.
+
+22:17:27 [build] ✓ Completed in 1.31s.
+22:17:27 [build] 16 page(s) built in 1.96s
+22:17:27 [build] Complete!
+build-csp: wrote dist/staticwebapp.config.json
+build-csp: default-src 'self'; script-src 'self' 'wasm-unsafe-eval' 'sha256-2Ldm6DuuiGDyKrPLlvw1KM8vwXmp50Hf7MjXxu6SITw=' 'sha256-/JuP+6wegaxhHPYZRaF4N8W9vj2nVKbwTXXQsKMkd4w=' 'sha256-npFlZaYaDfe0iAANaPHG3v+TlHmiBPQAe0AqAKEBJR0=' 'sha256-Zoie9vC7EUdkD/alkw2FO1Qc8EqzQ727xBtVI59Xk7w='; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; worker-src 'self'; connect-src 'self'; media-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src 'self'; frame-ancestors 'self'
+check-content: ok

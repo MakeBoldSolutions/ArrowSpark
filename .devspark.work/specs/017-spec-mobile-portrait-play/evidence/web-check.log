@@ -1,0 +1,26 @@
+npm notice run check
+npm notice run astro check && vitest run && node scripts/check-content.mjs
+16:19:58 [content] Syncing content
+16:19:58 [content] Synced content
+16:19:58 [types] Generated 1.16s
+16:19:58 [check] Getting diagnostics for Astro files in C:\GitHub\MakeBoldSolutions\ArrowGame\web...
+[96msrc/scripts/page-start.ts[0m:[93m9[0m:[93m17[0m - [93mwarning[0m[90m ts(80006): [0mThis may be converted to an async function.
+
+[7m9[0m export function startPendingQueue(): Promise<void> {
+[7m [0m [93m                ~~~~~~~~~~~~~~~~~[0m
+
+Result (61 files): 
+- 0 errors
+- 0 warnings
+- 1 hint
+
+
+ RUN  v5.0.3 C:/GitHub/MakeBoldSolutions/ArrowGame/web
+
+
+ Test Files  5 passed (5)
+      Tests  59 passed (59)
+   Start at  16:20:03
+   Duration  10.53s (environment 99%, transform 1%)
+
+check-content: ok

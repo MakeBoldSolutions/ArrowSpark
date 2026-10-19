@@ -1,0 +1,1302 @@
+Godot Engine v4.4.stable.official.4c311cbee - https://godotengine.org
+
+PASS: Menu pauses through one guarded overlay
+PASS: duplicate menu request cannot stack pause overlays
+PASS: nested Options panel fits portrait: scene=(390.0, 784.0) panel=[P: (12.0, 72.0), S: (366.0, 640.0)]
+PASS: closing nested Options keeps the game paused
+PASS: Resume retains the attempt and restores pause state
+PORTRAIT area=(360, 580) board_fraction=0.84717432950192 chrome=90.0
+PASS: portrait board keeps at least three quarters of usable area
+PASS: portrait actions sit below the board
+PASS: only three persistent action controls
+PASS: portrait action meets target floor
+PASS: portrait action meets target floor
+PASS: portrait action meets target floor
+PORTRAIT area=(390, 784) board_fraction=0.88520408163265 chrome=90.0
+PASS: portrait board keeps at least three quarters of usable area
+PASS: portrait actions sit below the board
+PASS: only three persistent action controls
+PASS: portrait action meets target floor
+PASS: portrait action meets target floor
+PASS: portrait action meets target floor
+PORTRAIT area=(412, 855) board_fraction=0.89473684210526 chrome=90.0
+PASS: portrait board keeps at least three quarters of usable area
+PASS: portrait actions sit below the board
+PASS: only three persistent action controls
+PASS: portrait action meets target floor
+PASS: portrait action meets target floor
+PASS: portrait action meets target floor
+PASS: the coded blocked-feedback cue duration constant does not exceed its coded cap
+PASS: a bent tail's view bounding box covers its full 2x3 canonical cell extent
+PASS: the projected bounding box covers 2x3 displayed cells at 1280x720
+PASS: a click inside the tail-tip cell resolves to that tail cell's board coordinate
+PASS: the canonical view extent is unchanged after a resize to 960x540
+PASS: the projected bounding box relationship holds after a resize to 960x540
+PASS: the tail-tip cell still resolves through the inverse transform after the resize
+PASS: this puzzle has no session-best entry before its first completion in this process
+PASS: the first completion this session establishes the session best
+PASS: the overall session score increases by the newly-established best
+PASS: the Results screen displays the correct overall session score after establishing
+PASS: the two-assist replay genuinely scores lower than the one-assist baseline
+PASS: a worse replay is reported as not improving the session best
+PASS: a worse replay never lowers the overall session score
+PASS: repeating the same assist count reproduces the same score
+PASS: a tied replay is reported as matching, not improving, the session best
+PASS: a tied replay never changes the overall session score
+PASS: the perfect replay genuinely scores higher than the one-assist baseline
+PASS: a better replay is reported as improving the session best
+PASS: the overall session score increases by exactly the improvement (1 -> 6)
+PASS: HUD and board rects do not overlap at (1280, 720)
+PASS: HUD remains visible (nonzero size) at (1280, 720)
+PASS: board remains visible (nonzero size) at (1280, 720)
+PASS: HUD and board rects do not overlap at (960, 540)
+PASS: HUD remains visible (nonzero size) at (960, 540)
+PASS: board remains visible (nonzero size) at (960, 540)
+PASS: completed input does not add taps while departures drain
+PASS: resize preserves departure cell-distance progress without restarting
+PASS: resize keeps departing geometry canonical at the same cell-distance progress
+PASS: resize only rescales the parent projection of the departing geometry
+PASS: pause preserves pending departures and completion barrier
+PASS: results stay hidden immediately after the last of several queued removals
+PASS: results appear once every queued departure has fully cleared the grid edge
+PASS: each staggered exit decrements barrier exactly once
+PASS: a selection after completion is ignored and results remain shown
+PASS: both selected shapes are tracked as departing, distinct from active ownership
+PASS: the departure clip keeps the canonical occupied grid extent at (960.0, 540.0)
+PASS: the projected departure clip covers the occupied grid at (960.0, 540.0)
+PASS: resizing alone never completes a departure at (960.0, 540.0)
+PASS: the departure clip keeps the canonical occupied grid extent at (1280.0, 720.0)
+PASS: the projected departure clip covers the occupied grid at (1280.0, 720.0)
+PASS: resizing alone never completes a departure at (1280.0, 720.0)
+PASS: the departure clip keeps the canonical occupied grid extent at (800.0, 800.0)
+PASS: the projected departure clip covers the occupied grid at (800.0, 800.0)
+PASS: resizing alone never completes a departure at (800.0, 800.0)
+PASS: resize to zero extent while paused does not advance or corrupt frozen departure distance
+PASS: no completion is emitted from inside a layout callback, even at zero extent
+PASS: recovering a valid layout while still paused leaves frozen distance unchanged
+PASS: both concurrent departures of different route lengths finish exactly once after pause/resize/resume
+PASS: finished departing views are cleared from tracking
+PASS: setup replacement clears the departing collection
+PASS: a canceled departure never emits a stale completion into a replaced attempt
+PASS: a freshly instantiated puzzle scene starts with results hidden
+PASS: a freshly instantiated puzzle scene starts with the full remaining count
+PASS: 20 rapid selections on a blocked tail cell, interrupting its own pulse each time, count exactly once each
+PASS: rapid blocked tail-cell clicks never complete or otherwise disturb the attempt
+PASS: catalog entry 'intro': board active view count matches the definition's arrow count
+PASS: catalog entry 'intro': HUD puzzle label shows its group-relative number and title
+PASS: catalog entry 'intro': results appear once every queued departure clears
+PASS: catalog entry 'intro': the witness clears with zero mistakes
+PASS: catalog entry 'intro': a zero-mistake clear scores every arrow
+PASS: catalog entry 'intro': a zero-mistake clear has 100% accuracy
+PASS: catalog entry 'first_bend': board active view count matches the definition's arrow count
+PASS: catalog entry 'first_bend': HUD puzzle label shows its group-relative number and title
+PASS: catalog entry 'first_bend': results appear once every queued departure clears
+PASS: catalog entry 'first_bend': the witness clears with zero mistakes
+PASS: catalog entry 'first_bend': a zero-mistake clear scores every arrow
+PASS: catalog entry 'first_bend': a zero-mistake clear has 100% accuracy
+PASS: catalog entry 'multi_bend': board active view count matches the definition's arrow count
+PASS: catalog entry 'multi_bend': HUD puzzle label shows its group-relative number and title
+PASS: catalog entry 'multi_bend': results appear once every queued departure clears
+PASS: catalog entry 'multi_bend': the witness clears with zero mistakes
+PASS: catalog entry 'multi_bend': a zero-mistake clear scores every arrow
+PASS: catalog entry 'multi_bend': a zero-mistake clear has 100% accuracy
+PASS: catalog entry 'dependency_chain': board active view count matches the definition's arrow count
+PASS: catalog entry 'dependency_chain': HUD puzzle label shows its group-relative number and title
+PASS: catalog entry 'dependency_chain': results appear once every queued departure clears
+PASS: catalog entry 'dependency_chain': the witness clears with zero mistakes
+PASS: catalog entry 'dependency_chain': a zero-mistake clear scores every arrow
+PASS: catalog entry 'dependency_chain': a zero-mistake clear has 100% accuracy
+PASS: catalog entry 'forced_sequence': board active view count matches the definition's arrow count
+PASS: catalog entry 'forced_sequence': HUD puzzle label shows its group-relative number and title
+PASS: catalog entry 'forced_sequence': results appear once every queued departure clears
+PASS: catalog entry 'forced_sequence': the witness clears with zero mistakes
+PASS: catalog entry 'forced_sequence': a zero-mistake clear scores every arrow
+PASS: catalog entry 'forced_sequence': a zero-mistake clear has 100% accuracy
+PASS: catalog entry 'multiple_choices': board active view count matches the definition's arrow count
+PASS: catalog entry 'multiple_choices': HUD puzzle label shows its group-relative number and title
+PASS: catalog entry 'multiple_choices': results appear once every queued departure clears
+PASS: catalog entry 'multiple_choices': the witness clears with zero mistakes
+PASS: catalog entry 'multiple_choices': a zero-mistake clear scores every arrow
+PASS: catalog entry 'multiple_choices': a zero-mistake clear has 100% accuracy
+PASS: catalog entry 'dense_board': board active view count matches the definition's arrow count
+PASS: catalog entry 'dense_board': HUD puzzle label shows its group-relative number and title
+PASS: catalog entry 'dense_board': results appear once every queued departure clears
+PASS: catalog entry 'dense_board': the witness clears with zero mistakes
+PASS: catalog entry 'dense_board': a zero-mistake clear scores every arrow
+PASS: catalog entry 'dense_board': a zero-mistake clear has 100% accuracy
+PASS: catalog entry 'subtle_blockers': board active view count matches the definition's arrow count
+PASS: catalog entry 'subtle_blockers': HUD puzzle label shows its group-relative number and title
+PASS: catalog entry 'subtle_blockers': results appear once every queued departure clears
+PASS: catalog entry 'subtle_blockers': the witness clears with zero mistakes
+PASS: catalog entry 'subtle_blockers': a zero-mistake clear scores every arrow
+PASS: catalog entry 'subtle_blockers': a zero-mistake clear has 100% accuracy
+PASS: catalog entry 'nested_chain': board active view count matches the definition's arrow count
+PASS: catalog entry 'nested_chain': HUD puzzle label shows its group-relative number and title
+PASS: catalog entry 'nested_chain': results appear once every queued departure clears
+PASS: catalog entry 'nested_chain': the witness clears with zero mistakes
+PASS: catalog entry 'nested_chain': a zero-mistake clear scores every arrow
+PASS: catalog entry 'nested_chain': a zero-mistake clear has 100% accuracy
+PASS: catalog entry 'cascade_key_arrow': board active view count matches the definition's arrow count
+PASS: catalog entry 'cascade_key_arrow': HUD puzzle label shows its group-relative number and title
+PASS: catalog entry 'cascade_key_arrow': results appear once every queued departure clears
+PASS: catalog entry 'cascade_key_arrow': the witness clears with zero mistakes
+PASS: catalog entry 'cascade_key_arrow': a zero-mistake clear scores every arrow
+PASS: catalog entry 'cascade_key_arrow': a zero-mistake clear has 100% accuracy
+PASS: catalog entry 'dense_unravel': board active view count matches the definition's arrow count
+PASS: catalog entry 'dense_unravel': HUD puzzle label shows its group-relative number and title
+PASS: catalog entry 'dense_unravel': results appear once every queued departure clears
+PASS: catalog entry 'dense_unravel': the witness clears with zero mistakes
+PASS: catalog entry 'dense_unravel': a zero-mistake clear scores every arrow
+PASS: catalog entry 'dense_unravel': a zero-mistake clear has 100% accuracy
+PASS: catalog entry 'bent_network': board active view count matches the definition's arrow count
+PASS: catalog entry 'bent_network': HUD puzzle label shows its group-relative number and title
+PASS: catalog entry 'bent_network': results appear once every queued departure clears
+PASS: catalog entry 'bent_network': the witness clears with zero mistakes
+PASS: catalog entry 'bent_network': a zero-mistake clear scores every arrow
+PASS: catalog entry 'bent_network': a zero-mistake clear has 100% accuracy
+PASS: catalog entry 'long_range_blocker': board active view count matches the definition's arrow count
+PASS: catalog entry 'long_range_blocker': HUD puzzle label shows its group-relative number and title
+PASS: catalog entry 'long_range_blocker': results appear once every queued departure clears
+PASS: catalog entry 'long_range_blocker': the witness clears with zero mistakes
+PASS: catalog entry 'long_range_blocker': a zero-mistake clear scores every arrow
+PASS: catalog entry 'long_range_blocker': a zero-mistake clear has 100% accuracy
+PASS: catalog entry 'composed_shaped': board active view count matches the definition's arrow count
+PASS: catalog entry 'composed_shaped': HUD puzzle label shows its group-relative number and title
+PASS: catalog entry 'composed_shaped': results appear once every queued departure clears
+PASS: catalog entry 'composed_shaped': the witness clears with zero mistakes
+PASS: catalog entry 'composed_shaped': a zero-mistake clear scores every arrow
+PASS: catalog entry 'composed_shaped': a zero-mistake clear has 100% accuracy
+PASS: catalog entry 'canvas_validation': board active view count matches the definition's arrow count
+PASS: catalog entry 'canvas_validation': HUD puzzle label shows its group-relative number and title
+PASS: catalog entry 'canvas_validation': results appear once every queued departure clears
+PASS: catalog entry 'canvas_validation': the witness clears with zero mistakes
+PASS: catalog entry 'canvas_validation': a zero-mistake clear scores every arrow
+PASS: catalog entry 'canvas_validation': a zero-mistake clear has 100% accuracy
+PASS: catalog entry 'knot_long_geometry': board active view count matches the definition's arrow count
+PASS: catalog entry 'knot_long_geometry': HUD puzzle label shows its group-relative number and title
+PASS: catalog entry 'knot_long_geometry': results appear once every queued departure clears
+PASS: catalog entry 'knot_long_geometry': the witness clears with zero mistakes
+PASS: catalog entry 'knot_long_geometry': a zero-mistake clear scores every arrow
+PASS: catalog entry 'knot_long_geometry': a zero-mistake clear has 100% accuracy
+PASS: catalog entry 'knot_interwoven_paths': board active view count matches the definition's arrow count
+PASS: catalog entry 'knot_interwoven_paths': HUD puzzle label shows its group-relative number and title
+PASS: catalog entry 'knot_interwoven_paths': results appear once every queued departure clears
+PASS: catalog entry 'knot_interwoven_paths': the witness clears with zero mistakes
+PASS: catalog entry 'knot_interwoven_paths': a zero-mistake clear scores every arrow
+PASS: catalog entry 'knot_interwoven_paths': a zero-mistake clear has 100% accuracy
+PASS: catalog entry 'knot_dense_core': board active view count matches the definition's arrow count
+PASS: catalog entry 'knot_dense_core': HUD puzzle label shows its group-relative number and title
+PASS: catalog entry 'knot_dense_core': results appear once every queued departure clears
+PASS: catalog entry 'knot_dense_core': the witness clears with zero mistakes
+PASS: catalog entry 'knot_dense_core': a zero-mistake clear scores every arrow
+PASS: catalog entry 'knot_dense_core': a zero-mistake clear has 100% accuracy
+PASS: catalog entry 'knot_regions': board active view count matches the definition's arrow count
+PASS: catalog entry 'knot_regions': HUD puzzle label shows its group-relative number and title
+PASS: catalog entry 'knot_regions': results appear once every queued departure clears
+PASS: catalog entry 'knot_regions': the witness clears with zero mistakes
+PASS: catalog entry 'knot_regions': a zero-mistake clear scores every arrow
+PASS: catalog entry 'knot_regions': a zero-mistake clear has 100% accuracy
+PASS: catalog entry 'knot_single_release': board active view count matches the definition's arrow count
+PASS: catalog entry 'knot_single_release': HUD puzzle label shows its group-relative number and title
+PASS: catalog entry 'knot_single_release': results appear once every queued departure clears
+PASS: catalog entry 'knot_single_release': the witness clears with zero mistakes
+PASS: catalog entry 'knot_single_release': a zero-mistake clear scores every arrow
+PASS: catalog entry 'knot_single_release': a zero-mistake clear has 100% accuracy
+PASS: catalog entry 'knot_boundary': board active view count matches the definition's arrow count
+PASS: catalog entry 'knot_boundary': HUD puzzle label shows its group-relative number and title
+PASS: catalog entry 'knot_boundary': results appear once every queued departure clears
+PASS: catalog entry 'knot_boundary': the witness clears with zero mistakes
+PASS: catalog entry 'knot_boundary': a zero-mistake clear scores every arrow
+PASS: catalog entry 'knot_boundary': a zero-mistake clear has 100% accuracy
+PASS: catalog entry 'first_knot': board active view count matches the definition's arrow count
+PASS: catalog entry 'first_knot': HUD puzzle label shows its group-relative number and title
+PASS: catalog entry 'first_knot': results appear once every queued departure clears
+PASS: catalog entry 'first_knot': the witness clears with zero mistakes
+PASS: catalog entry 'first_knot': a zero-mistake clear scores every arrow
+PASS: catalog entry 'first_knot': a zero-mistake clear has 100% accuracy
+PASS: catalog entry 'two_neighborhoods': board active view count matches the definition's arrow count
+PASS: catalog entry 'two_neighborhoods': HUD puzzle label shows its group-relative number and title
+PASS: catalog entry 'two_neighborhoods': results appear once every queued departure clears
+PASS: catalog entry 'two_neighborhoods': the witness clears with zero mistakes
+PASS: catalog entry 'two_neighborhoods': a zero-mistake clear scores every arrow
+PASS: catalog entry 'two_neighborhoods': a zero-mistake clear has 100% accuracy
+PASS: catalog entry 'the_bridge': board active view count matches the definition's arrow count
+PASS: catalog entry 'the_bridge': HUD puzzle label shows its group-relative number and title
+PASS: catalog entry 'the_bridge': results appear once every queued departure clears
+PASS: catalog entry 'the_bridge': the witness clears with zero mistakes
+PASS: catalog entry 'the_bridge': a zero-mistake clear scores every arrow
+PASS: catalog entry 'the_bridge': a zero-mistake clear has 100% accuracy
+PASS: catalog entry 'false_simplicity': board active view count matches the definition's arrow count
+PASS: catalog entry 'false_simplicity': HUD puzzle label shows its group-relative number and title
+PASS: catalog entry 'false_simplicity': results appear once every queued departure clears
+PASS: catalog entry 'false_simplicity': the witness clears with zero mistakes
+PASS: catalog entry 'false_simplicity': a zero-mistake clear scores every arrow
+PASS: catalog entry 'false_simplicity': a zero-mistake clear has 100% accuracy
+PASS: catalog entry 'the_rescan': board active view count matches the definition's arrow count
+PASS: catalog entry 'the_rescan': HUD puzzle label shows its group-relative number and title
+PASS: catalog entry 'the_rescan': results appear once every queued departure clears
+PASS: catalog entry 'the_rescan': the witness clears with zero mistakes
+PASS: catalog entry 'the_rescan': a zero-mistake clear scores every arrow
+PASS: catalog entry 'the_rescan': a zero-mistake clear has 100% accuracy
+PASS: catalog entry 'major_release': board active view count matches the definition's arrow count
+PASS: catalog entry 'major_release': HUD puzzle label shows its group-relative number and title
+PASS: catalog entry 'major_release': results appear once every queued departure clears
+PASS: catalog entry 'major_release': the witness clears with zero mistakes
+PASS: catalog entry 'major_release': a zero-mistake clear scores every arrow
+PASS: catalog entry 'major_release': a zero-mistake clear has 100% accuracy
+PASS: catalog entry 'dense_weave': board active view count matches the definition's arrow count
+PASS: catalog entry 'dense_weave': HUD puzzle label shows its group-relative number and title
+PASS: catalog entry 'dense_weave': results appear once every queued departure clears
+PASS: catalog entry 'dense_weave': the witness clears with zero mistakes
+PASS: catalog entry 'dense_weave': a zero-mistake clear scores every arrow
+PASS: catalog entry 'dense_weave': a zero-mistake clear has 100% accuracy
+PASS: catalog entry 'almost_a_knot': board active view count matches the definition's arrow count
+PASS: catalog entry 'almost_a_knot': HUD puzzle label shows its group-relative number and title
+PASS: catalog entry 'almost_a_knot': results appear once every queued departure clears
+PASS: catalog entry 'almost_a_knot': the witness clears with zero mistakes
+PASS: catalog entry 'almost_a_knot': a zero-mistake clear scores every arrow
+PASS: catalog entry 'almost_a_knot': a zero-mistake clear has 100% accuracy
+PASS: catalog entry 'reference_knot': board active view count matches the definition's arrow count
+PASS: catalog entry 'reference_knot': HUD puzzle label shows its group-relative number and title
+PASS: catalog entry 'reference_knot': results appear once every queued departure clears
+PASS: catalog entry 'reference_knot': the witness clears with zero mistakes
+PASS: catalog entry 'reference_knot': a zero-mistake clear scores every arrow
+PASS: catalog entry 'reference_knot': a zero-mistake clear has 100% accuracy
+PASS: an in-flight departure exists immediately after the first clear-order removal
+PASS: the puzzle's current logical state (post-removal) still has a legal arrow to identify
+PASS: Show Me an Open Move responds immediately against the current logical state while a departure is still in flight, matching find_open_move()'s result -- no suppression or queuing
+PASS: the Open Move control is visible, enabled and keyboard/gamepad focusable
+PASS: the Open Move control can actually receive keyboard/gamepad focus
+PASS: the Open Move control's pressed signal is connected to a handler (Godot activates it from ui_accept on any input device once focused)
+PASS: activating the focused Open Move control (as ui_accept would, from keyboard or gamepad) identifies a legal arrow
+PASS: activating it counts as exactly one valid Open Move request
+PASS: results appear once every queued departure clears
+PASS: the attempt recorded exactly the two induced mistakes
+PASS: the attempt recorded exactly the one Open Move assist
+PASS: Results screen shows the correct total arrows
+PASS: Results screen shows the correct mistakes
+PASS: Results screen shows the open-move-assist count as a value distinct from mistakes
+PASS: Results screen shows the correct score, reflecting both mistakes and assists
+PASS: Results screen shows the correct accuracy, unaffected by the Open Move assist
+WARNING: res://scenes/menus/main_menu/main_menu_with_animations.tscn:4 - ext_resource, invalid UID: uid://bjv2v4jhmcukd - using text path instead: res://scenes/menus/main_menu/main_menu_with_animations.gd
+   at: load (scene/resources/resource_format_text.cpp:447)
+WARNING: res://scenes/menus/options_menu/master_options_menu_with_tabs.tscn:4 - ext_resource, invalid UID: uid://c7yy2phckplob - using text path instead: res://scenes/menus/options_menu/master_options_menu.gd
+   at: load (scene/resources/resource_format_text.cpp:447)
+WARNING: res://scenes/menus/options_menu/master_options_menu_with_tabs.tscn:6 - ext_resource, invalid UID: uid://b3gt8onndu07 - using text path instead: res://scenes/menus/options_menu/input/input_extras_menu.tscn
+   at: load (scene/resources/resource_format_text.cpp:447)
+WARNING: res://scenes/menus/options_menu/master_options_menu_with_tabs.tscn:7 - ext_resource, invalid UID: uid://bi0n676ih5b1f - using text path instead: res://scenes/menus/options_menu/audio/audio_options_menu.tscn
+   at: load (scene/resources/resource_format_text.cpp:447)
+WARNING: res://scenes/menus/options_menu/video/video_options_menu_with_extras.tscn:4 - ext_resource, invalid UID: uid://dcvhxth13iqi4 - using text path instead: res://scenes/menus/options_menu/video/video_options_menu.gd
+   at: load (scene/resources/resource_format_text.cpp:447)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+PASS: Level Select sub-menu is instantiated by _setup_level_select()
+PASS: Level Select's puzzle_selected signal is connected to the main menu's handler
+PASS: Level Select lists exactly one entry per catalog puzzle
+PASS: Level Select has one focusable accordion header per group
+PASS: Level Select entry 'first_knot' is neither locked nor hidden
+PASS: Level Select entry 'first_knot' shows its group-relative number and title in group order
+PASS: Level Select entry 'two_neighborhoods' is neither locked nor hidden
+PASS: Level Select entry 'two_neighborhoods' shows its group-relative number and title in group order
+PASS: Level Select entry 'the_bridge' is neither locked nor hidden
+PASS: Level Select entry 'the_bridge' shows its group-relative number and title in group order
+PASS: Level Select entry 'false_simplicity' is neither locked nor hidden
+PASS: Level Select entry 'false_simplicity' shows its group-relative number and title in group order
+PASS: Level Select entry 'the_rescan' is neither locked nor hidden
+PASS: Level Select entry 'the_rescan' shows its group-relative number and title in group order
+PASS: Level Select entry 'major_release' is neither locked nor hidden
+PASS: Level Select entry 'major_release' shows its group-relative number and title in group order
+PASS: Level Select entry 'dense_weave' is neither locked nor hidden
+PASS: Level Select entry 'dense_weave' shows its group-relative number and title in group order
+PASS: Level Select entry 'almost_a_knot' is neither locked nor hidden
+PASS: Level Select entry 'almost_a_knot' shows its group-relative number and title in group order
+PASS: Level Select entry 'reference_knot' is neither locked nor hidden
+PASS: Level Select entry 'reference_knot' shows its group-relative number and title in group order
+PASS: Level Select entry 'intro' is neither locked nor hidden
+PASS: Level Select entry 'intro' shows its group-relative number and title in group order
+PASS: Level Select entry 'first_bend' is neither locked nor hidden
+PASS: Level Select entry 'first_bend' shows its group-relative number and title in group order
+PASS: Level Select entry 'multi_bend' is neither locked nor hidden
+PASS: Level Select entry 'multi_bend' shows its group-relative number and title in group order
+PASS: Level Select entry 'dependency_chain' is neither locked nor hidden
+PASS: Level Select entry 'dependency_chain' shows its group-relative number and title in group order
+PASS: Level Select entry 'forced_sequence' is neither locked nor hidden
+PASS: Level Select entry 'forced_sequence' shows its group-relative number and title in group order
+PASS: Level Select entry 'multiple_choices' is neither locked nor hidden
+PASS: Level Select entry 'multiple_choices' shows its group-relative number and title in group order
+PASS: Level Select entry 'dense_board' is neither locked nor hidden
+PASS: Level Select entry 'dense_board' shows its group-relative number and title in group order
+PASS: Level Select entry 'subtle_blockers' is neither locked nor hidden
+PASS: Level Select entry 'subtle_blockers' shows its group-relative number and title in group order
+PASS: Level Select entry 'nested_chain' is neither locked nor hidden
+PASS: Level Select entry 'nested_chain' shows its group-relative number and title in group order
+PASS: Level Select entry 'cascade_key_arrow' is neither locked nor hidden
+PASS: Level Select entry 'cascade_key_arrow' shows its group-relative number and title in group order
+PASS: Level Select entry 'dense_unravel' is neither locked nor hidden
+PASS: Level Select entry 'dense_unravel' shows its group-relative number and title in group order
+PASS: Level Select entry 'bent_network' is neither locked nor hidden
+PASS: Level Select entry 'bent_network' shows its group-relative number and title in group order
+PASS: Level Select entry 'long_range_blocker' is neither locked nor hidden
+PASS: Level Select entry 'long_range_blocker' shows its group-relative number and title in group order
+PASS: Level Select entry 'composed_shaped' is neither locked nor hidden
+PASS: Level Select entry 'composed_shaped' shows its group-relative number and title in group order
+PASS: Level Select entry 'canvas_validation' is neither locked nor hidden
+PASS: Level Select entry 'canvas_validation' shows its group-relative number and title in group order
+PASS: Level Select entry 'knot_long_geometry' is neither locked nor hidden
+PASS: Level Select entry 'knot_long_geometry' shows its group-relative number and title in group order
+PASS: Level Select entry 'knot_interwoven_paths' is neither locked nor hidden
+PASS: Level Select entry 'knot_interwoven_paths' shows its group-relative number and title in group order
+PASS: Level Select entry 'knot_dense_core' is neither locked nor hidden
+PASS: Level Select entry 'knot_dense_core' shows its group-relative number and title in group order
+PASS: Level Select entry 'knot_regions' is neither locked nor hidden
+PASS: Level Select entry 'knot_regions' shows its group-relative number and title in group order
+PASS: Level Select entry 'knot_single_release' is neither locked nor hidden
+PASS: Level Select entry 'knot_single_release' shows its group-relative number and title in group order
+PASS: Level Select entry 'knot_boundary' is neither locked nor hidden
+PASS: Level Select entry 'knot_boundary' shows its group-relative number and title in group order
+PASS: opening Level Select places a visible, actionable keyboard/gamepad focus owner
+PASS: opening Level Select places initial focus on the first (ArrowSpark Levels) entry, not a hidden main-menu button
+PASS: selecting a non-first catalog id loads that exact puzzle, reflected in the gameplay HUD
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+PASS: a pending Level Select request opens Level Select when the main menu loads
+PASS: the requested Level Select opens with focus on its first entry
+WARNING: res://scenes/menus/main_menu/main_menu_with_animations.tscn:4 - ext_resource, invalid UID: uid://bjv2v4jhmcukd - using text path instead: res://scenes/menus/main_menu/main_menu_with_animations.gd
+   at: load (scene/resources/resource_format_text.cpp:447)
+WARNING: res://scenes/menus/options_menu/master_options_menu_with_tabs.tscn:4 - ext_resource, invalid UID: uid://c7yy2phckplob - using text path instead: res://scenes/menus/options_menu/master_options_menu.gd
+   at: load (scene/resources/resource_format_text.cpp:447)
+WARNING: res://scenes/menus/options_menu/master_options_menu_with_tabs.tscn:6 - ext_resource, invalid UID: uid://b3gt8onndu07 - using text path instead: res://scenes/menus/options_menu/input/input_extras_menu.tscn
+   at: load (scene/resources/resource_format_text.cpp:447)
+WARNING: res://scenes/menus/options_menu/master_options_menu_with_tabs.tscn:7 - ext_resource, invalid UID: uid://bi0n676ih5b1f - using text path instead: res://scenes/menus/options_menu/audio/audio_options_menu.tscn
+   at: load (scene/resources/resource_format_text.cpp:447)
+WARNING: res://scenes/menus/options_menu/video/video_options_menu_with_extras.tscn:4 - ext_resource, invalid UID: uid://dcvhxth13iqi4 - using text path instead: res://scenes/menus/options_menu/video/video_options_menu.gd
+   at: load (scene/resources/resource_format_text.cpp:447)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+PASS: the Level Select request is consumed and does not reopen on a later menu
+WARNING: res://scenes/menus/main_menu/main_menu_with_animations.tscn:4 - ext_resource, invalid UID: uid://bjv2v4jhmcukd - using text path instead: res://scenes/menus/main_menu/main_menu_with_animations.gd
+   at: load (scene/resources/resource_format_text.cpp:447)
+WARNING: res://scenes/menus/options_menu/master_options_menu_with_tabs.tscn:4 - ext_resource, invalid UID: uid://c7yy2phckplob - using text path instead: res://scenes/menus/options_menu/master_options_menu.gd
+   at: load (scene/resources/resource_format_text.cpp:447)
+WARNING: res://scenes/menus/options_menu/master_options_menu_with_tabs.tscn:6 - ext_resource, invalid UID: uid://b3gt8onndu07 - using text path instead: res://scenes/menus/options_menu/input/input_extras_menu.tscn
+   at: load (scene/resources/resource_format_text.cpp:447)
+WARNING: res://scenes/menus/options_menu/master_options_menu_with_tabs.tscn:7 - ext_resource, invalid UID: uid://bi0n676ih5b1f - using text path instead: res://scenes/menus/options_menu/audio/audio_options_menu.tscn
+   at: load (scene/resources/resource_format_text.cpp:447)
+WARNING: res://scenes/menus/options_menu/video/video_options_menu_with_extras.tscn:4 - ext_resource, invalid UID: uid://dcvhxth13iqi4 - using text path instead: res://scenes/menus/options_menu/video/video_options_menu.gd
+   at: load (scene/resources/resource_format_text.cpp:447)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+PASS: every Level Select group starts expanded
+PASS: an expanded header shows its collapse marker
+PASS: collapsing a group hides its entries and shows the expand marker
+PASS: collapsing one group leaves the others expanded
+PASS: collapsing hides entries without removing them
+PASS: expanding a group shows its entries again
+WARNING: res://scenes/menus/main_menu/main_menu_with_animations.tscn:4 - ext_resource, invalid UID: uid://bjv2v4jhmcukd - using text path instead: res://scenes/menus/main_menu/main_menu_with_animations.gd
+   at: load (scene/resources/resource_format_text.cpp:447)
+WARNING: res://scenes/menus/options_menu/master_options_menu_with_tabs.tscn:4 - ext_resource, invalid UID: uid://c7yy2phckplob - using text path instead: res://scenes/menus/options_menu/master_options_menu.gd
+   at: load (scene/resources/resource_format_text.cpp:447)
+WARNING: res://scenes/menus/options_menu/master_options_menu_with_tabs.tscn:6 - ext_resource, invalid UID: uid://b3gt8onndu07 - using text path instead: res://scenes/menus/options_menu/input/input_extras_menu.tscn
+   at: load (scene/resources/resource_format_text.cpp:447)
+WARNING: res://scenes/menus/options_menu/master_options_menu_with_tabs.tscn:7 - ext_resource, invalid UID: uid://bi0n676ih5b1f - using text path instead: res://scenes/menus/options_menu/audio/audio_options_menu.tscn
+   at: load (scene/resources/resource_format_text.cpp:447)
+WARNING: res://scenes/menus/options_menu/video/video_options_menu_with_extras.tscn:4 - ext_resource, invalid UID: uid://dcvhxth13iqi4 - using text path instead: res://scenes/menus/options_menu/video/video_options_menu.gd
+   at: load (scene/resources/resource_format_text.cpp:447)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+PASS: each Level Select group has one description line
+PASS: the arrowspark_levels group's description reads 'The intended ArrowSpark experience.'
+PASS: the arrowspark_levels description uses no ranking words
+PASS: the arrowspark_levels description never takes focus
+PASS: the foundations group's description reads 'Small boards that teach the rule.'
+PASS: the foundations description uses no ranking words
+PASS: the foundations description never takes focus
+PASS: the puzzle_lab group's description reads 'Development experiments, some deliberately over-tangled.'
+PASS: the puzzle_lab description uses no ranking words
+PASS: the puzzle_lab description never takes focus
+PASS: a collapsed group hides its entries but keeps its description line
+WARNING: res://scenes/menus/main_menu/main_menu_with_animations.tscn:4 - ext_resource, invalid UID: uid://bjv2v4jhmcukd - using text path instead: res://scenes/menus/main_menu/main_menu_with_animations.gd
+   at: load (scene/resources/resource_format_text.cpp:447)
+WARNING: res://scenes/menus/options_menu/master_options_menu_with_tabs.tscn:4 - ext_resource, invalid UID: uid://c7yy2phckplob - using text path instead: res://scenes/menus/options_menu/master_options_menu.gd
+   at: load (scene/resources/resource_format_text.cpp:447)
+WARNING: res://scenes/menus/options_menu/master_options_menu_with_tabs.tscn:6 - ext_resource, invalid UID: uid://b3gt8onndu07 - using text path instead: res://scenes/menus/options_menu/input/input_extras_menu.tscn
+   at: load (scene/resources/resource_format_text.cpp:447)
+WARNING: res://scenes/menus/options_menu/master_options_menu_with_tabs.tscn:7 - ext_resource, invalid UID: uid://bi0n676ih5b1f - using text path instead: res://scenes/menus/options_menu/audio/audio_options_menu.tscn
+   at: load (scene/resources/resource_format_text.cpp:447)
+WARNING: res://scenes/menus/options_menu/video/video_options_menu_with_extras.tscn:4 - ext_resource, invalid UID: uid://dcvhxth13iqi4 - using text path instead: res://scenes/menus/options_menu/video/video_options_menu.gd
+   at: load (scene/resources/resource_format_text.cpp:447)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+PASS: the hero title reads the product name
+PASS: the hero ignores pointer input
+PASS: the hero holds no focusable controls
+PASS: Play/New Game is the single primary action
+PASS: Main Menu actions keep their order (["NewGameButton", "LevelSelectButton", "OptionsButton", "CreditsButton", "ExitButton"])
+PASS: group arrowspark_levels has a Level Select card variation
+PASS: group foundations has a Level Select card variation
+PASS: group puzzle_lab has a Level Select card variation
+PASS: every Level Select entry uses its group's card variation
+PASS: each Level Select group lays its cards out in a grid
+PASS: group headers use the section heading style
+PASS: the results overlay covers the whole puzzle scene ((1280.0, 720.0) vs (1280.0, 720.0))
+WARNING: res://scenes/menus/main_menu/main_menu_with_animations.tscn:4 - ext_resource, invalid UID: uid://bjv2v4jhmcukd - using text path instead: res://scenes/menus/main_menu/main_menu_with_animations.gd
+   at: load (scene/resources/resource_format_text.cpp:447)
+WARNING: res://scenes/menus/options_menu/master_options_menu_with_tabs.tscn:4 - ext_resource, invalid UID: uid://c7yy2phckplob - using text path instead: res://scenes/menus/options_menu/master_options_menu.gd
+   at: load (scene/resources/resource_format_text.cpp:447)
+WARNING: res://scenes/menus/options_menu/master_options_menu_with_tabs.tscn:6 - ext_resource, invalid UID: uid://b3gt8onndu07 - using text path instead: res://scenes/menus/options_menu/input/input_extras_menu.tscn
+   at: load (scene/resources/resource_format_text.cpp:447)
+WARNING: res://scenes/menus/options_menu/master_options_menu_with_tabs.tscn:7 - ext_resource, invalid UID: uid://bi0n676ih5b1f - using text path instead: res://scenes/menus/options_menu/audio/audio_options_menu.tscn
+   at: load (scene/resources/resource_format_text.cpp:447)
+WARNING: res://scenes/menus/options_menu/video/video_options_menu_with_extras.tscn:4 - ext_resource, invalid UID: uid://dcvhxth13iqi4 - using text path instead: res://scenes/menus/options_menu/video/video_options_menu.gd
+   at: load (scene/resources/resource_format_text.cpp:447)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+PASS: reopening Level Select with the first group collapsed focuses a visible control
+PASS: reopening Level Select with the first group collapsed focuses the first visible entry
+PASS: reopening Level Select with every group collapsed focuses the first header
+PASS: the play surface has a visible, focusable Menu button
+PASS: the Back button is wired to its handler
+PASS: Menu opens the shared pause flow
+PASS: a non-first catalog puzzle loads correctly before any reload
+PASS: an in-flight departure exists on the attempt about to be reloaded
+PASS: reload_current_scene() constructs a fresh scene instance
+PASS: Replay/pause-menu Restart reload the currently selected puzzle, not puzzle 1 (PuzzleSession survives the reload)
+PASS: the reloaded attempt starts with a completely fresh PuzzleState
+PASS: the reloaded attempt carries over no departing views from the previous attempt
+PASS: Next Puzzle advances to the following catalog entry
+PASS: Next Puzzle starts a fresh attempt with no carried-over mistakes or removals
+PASS: a group-ending puzzle's results appear once every departure clears
+PASS: Next Puzzle is not shown on a group-ending puzzle's results
+PASS: Level Select is shown on a group-ending puzzle's results
+PASS: the attempt about to be replayed genuinely has nonzero mistakes and assists
+PASS: Replay constructs a fresh scene instance
+PASS: the replayed attempt's mistake count resets to zero
+PASS: the replayed attempt's open_move_assists resets to zero
+PASS: the replayed attempt's score reflects a completely fresh start, not the prior attempt's penalties
+PUZZLE_LAYOUT_FAILURES=0

@@ -1,6 +1,6 @@
 """Run headless Godot checks for the arrow puzzle without touching player data.
 
-Nine independent checks run, in execution order:
+Eleven independent checks run, in execution order:
 1. Pure rule regressions (tests/puzzle_regression.gd) against an isolated,
    unique temporary project containing the puzzle core scripts. No scenes,
    addons or autoloads are needed by the RefCounted rule classes.
@@ -40,6 +40,8 @@ Nine independent checks run, in execution order:
 10. App-wide theme checks (tests/app_theme_check.gd) against the real project:
     the startup theme reaches every control type, including under a CanvasLayer,
     with brand styles, visible focus, minimum target and text sizes, and AA contrast.
+11. Portrait menu geometry and scroll reachability (tests/portrait_menu_check.gd)
+    across actual narrow iframe widths and every Options tab.
 """
 
 from pathlib import Path
@@ -161,6 +163,7 @@ def run_layout_check(godot: str, repo: Path) -> None:
             (("--script", "res://tests/puzzle_canvas_check.gd"), "PUZZLE_CANVAS_FAILURES=0"),
             (("--script", "res://tests/puzzle_presentation_check.gd"), "PUZZLE_PRESENTATION_FAILURES=0"),
             (("--script", "res://tests/app_theme_check.gd"), "APP_THEME_FAILURES=0"),
+            (("--script", "res://tests/portrait_menu_check.gd"), "PORTRAIT_MENU_FAILURES=0"),
         )
         for flags, marker in checks:
             command = [godot, "--headless", "--path", str(repo), *flags]

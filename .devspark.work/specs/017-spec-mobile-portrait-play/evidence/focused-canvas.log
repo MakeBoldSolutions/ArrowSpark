@@ -1,0 +1,9 @@
+Godot Engine v4.4.stable.official.4c311cbee - https://godotengine.org
+
+PASS: cancelled touch cannot select or penalize
+PASS: valid resize clears pending contacts
+PASS: navigation remains available while departures drain before the results appear
+PASS: results appear once every departure clears
+PASS: showing results disables board navigation
+PASS: zoom and drag are ignored while the results cover the board
+CANVAS_FOCUSED_FAILURES=0

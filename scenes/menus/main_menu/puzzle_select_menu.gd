@@ -35,12 +35,15 @@ var _entry_buttons: Array[Button] = []
 var _description_labels: Array[Label] = []
 
 func _ready() -> void:
+	resized.connect(_reflow)
+	_reflow.call_deferred()
 	for group_id in PuzzleCatalog.group_ids():
 		var members := PuzzleCatalog.ids_in_group(group_id)
 		var header := Button.new()
 		header.toggle_mode = true
 		header.button_pressed = true
 		header.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		header.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		header.focus_mode = Control.FOCUS_ALL
 		header.theme_type_variation = &"LevelGroupHeader"
 		_list_container.add_child(header)
@@ -63,7 +66,7 @@ func _ready() -> void:
 			button.focus_mode = Control.FOCUS_ALL
 			button.theme_type_variation = GROUP_CARD_VARIATIONS.get(group_id, &"LevelCardInk")
 			button.alignment = HORIZONTAL_ALIGNMENT_LEFT
-			button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+			button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			button.custom_minimum_size = Vector2(CARD_WIDTH, 0)
 			button.tooltip_text = button.text
 			button.pressed.connect(_on_entry_pressed.bind(id))
@@ -119,3 +122,16 @@ func _first_visible_focus_target() -> Button:
 		if header.is_visible_in_tree():
 			return header
 	return null
+
+func _reflow() -> void:
+	if not is_node_ready():
+		return
+	var available := maxf(0.0, size.x - 28.0)
+	var columns := 2 if available >= CARD_WIDTH * 2 + 12 else 1
+	for section in _list_container.get_children():
+		if section is GridContainer:
+			section.columns = columns
+	for button in _entry_buttons:
+		button.custom_minimum_size.x = minf(CARD_WIDTH, maxf(0, (available - 12 * (columns - 1)) / columns))
+		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_list_container.custom_minimum_size.x = available

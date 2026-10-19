@@ -330,13 +330,17 @@ func _check_theme(puzzle: Control) -> void:
 	check(replay.has_focus(), "results preserve Replay focus")
 	var focus: StyleBox = replay.get_theme_stylebox("focus")
 	check(focus is StyleBoxFlat and focus.border_width_left > 0, "button focus has a visible border")
-	for dimensions in [Vector2i(1280, 720), Vector2i(960, 540)]:
+	for dimensions in [Vector2i(1280, 720), Vector2i(960, 540), Vector2i(320, 580), Vector2i(350, 784), Vector2i(372, 855)]:
 		root.size = dimensions
-		await process_frame
-		await process_frame
+		for settle in 8:
+			await process_frame
 		for node in [puzzle.get_node("%RemainingLabel"), puzzle.get_node("%MistakesLabel"), results.get_node("%TotalLabel"), results.get_node("%MistakesLabel"), results.get_node("%OpenMoveAssistsLabel"), results.get_node("%ScoreLabel"), results.get_node("%AccuracyLabel"), results.get_node("%SessionComparisonLabel"), results.get_node("%OverallSessionScoreLabel"), replay, results.get_node("%MainMenuButton")]:
 			check(node.size.x >= node.get_minimum_size().x and node.size.y >= node.get_minimum_size().y, "text/control fits minimum at %s" % dimensions)
-			check(Rect2(Vector2.ZERO, Vector2(dimensions)).encloses(node.get_global_rect()), "required content stays onscreen at %s" % dimensions)
+			if results.is_ancestor_of(node):
+				var scroll := results.get_node("CenterContainer") as ScrollContainer
+				scroll.ensure_control_visible(node)
+				await process_frame
+			check(root.get_visible_rect().encloses(node.get_global_rect()), "required content is reachable onscreen at %s: %s %s puzzle=%s viewport=%s" % [dimensions, node.name, node.get_global_rect(), puzzle.get_global_rect(), root.get_visible_rect()])
 			check(node.get_theme_font_size("font_size") >= 16, "text stays readable without shrinking with cells")
 	results.hide()
 

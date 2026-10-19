@@ -1,0 +1,49 @@
+{
+  "contract": 1,
+  "branch": "017-spec-mobile-portrait-play",
+  "branch_findings": [],
+  "id_findings": [
+    {
+      "path": ".knowledge/guides/repo-story/history.json",
+      "line": 703,
+      "match": "T025"
+    },
+    {
+      "path": ".knowledge/guides/repo-story/history.json",
+      "line": 703,
+      "match": "T026"
+    },
+    {
+      "path": "addons/maaacks_game_template/media/screenshot-5-xelu-1.png",
+      "line": 147,
+      "match": "T011"
+    },
+    {
+      "path": "addons/maaacks_game_template/media/screenshot-5-xelu-1.png",
+      "line": 423,
+      "match": "T022"
+    },
+    {
+      "path": "addons/maaacks_game_template/media/screenshot-6-input-sensitivity-4.png",
+      "line": 37,
+      "match": "T111"
+    },
+    {
+      "path": "addons/maaacks_game_template/media/screenshot-6-input-tree-5.png",
+      "line": 26,
+      "match": "T311"
+    },
+    {
+      "path": "addons/maaacks_game_template/media/screenshot-6-theme-selector-1.png",
+      "line": 370,
+      "match": "T700"
+    },
+    {
+      "path": "web/theme/make-bold/assets/fonts/BeVietnamPro-Medium.ttf",
+      "line": 1273,
+      "match": "T123"
+    }
+  ],
+  "linkage_findings": [],
+  "ok": false
+}

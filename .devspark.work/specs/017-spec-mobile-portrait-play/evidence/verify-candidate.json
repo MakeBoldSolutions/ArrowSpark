@@ -1,0 +1,362 @@
+{
+  "head": "5d99c022c0c5e0ff877a7667309fcfa61da4b9a7",
+  "branch": "017-spec-mobile-portrait-play",
+  "working_tree": true,
+  "build": "portrait",
+  "pack_sha256": "46659b910f79f4deb24561b717a0e226fb8aec3b159296cfbe739cb2ebfe1cd5",
+  "snapshot_code_differences": [],
+  "files": [
+    {
+      "path": "scripts/app_theme.gd",
+      "sha256": "8698af29f8549f46b50edf7990c1aaac6879f7c0edc6240f0d38d0cd32051560"
+    },
+    {
+      "path": "scripts/game_state.gd",
+      "sha256": "55b71a4207d9d529b3576579a7e73f754265328e2456a00f96a078027bdaef52"
+    },
+    {
+      "path": "scripts/level_state.gd",
+      "sha256": "103a7655f4d93033195fc81ddd1a5179fc821771be0a5a854433f17ed3183251"
+    },
+    {
+      "path": "scripts/puzzle_scoreboard.gd",
+      "sha256": "a2c1082491fec5058dd406ccaef33ab7a53fb7bef10b246ee780aa459a6e51aa"
+    },
+    {
+      "path": "scripts/puzzle_session.gd",
+      "sha256": "25a9cd2463bd7cbdaa6a8a2a5613a57095d92ff473307607f17e83ef6d6b0a66"
+    },
+    {
+      "path": "scripts/presentation/arrow_departure_geometry.gd",
+      "sha256": "2b5b1387edb3de86c5920e86a1cdde7ee4acb65d73a3e7598b3d0a43e3a1fa52"
+    },
+    {
+      "path": "scripts/presentation/control_theme.gd",
+      "sha256": "6290cd339cef897f2c391d0b34b0c1517bd25bc8e383306b97487f3b3c2675f4"
+    },
+    {
+      "path": "scripts/presentation/game_visual_style.gd",
+      "sha256": "80dc597f2af24c0137c98510efae503fbd73e71a37c2a9188a4d1e34134f570a"
+    },
+    {
+      "path": "scripts/presentation/puzzle_pause_controller.gd",
+      "sha256": "ffae6bcfa4346717d38e13c442830c036118f27b3eaeb87136aa9e10cc65b23f"
+    },
+    {
+      "path": "scripts/presentation/puzzle_viewport_transform.gd",
+      "sha256": "e1fc15b758764e60eb8886ae8cc6db7262e8cd175b4909d2b3fae4c679a6cb4f"
+    },
+    {
+      "path": "scripts/presentation/responsive_layout.gd",
+      "sha256": "be3c2966165902cac347230d7a8cee543c0b57e678a4c673a2826866f90ea6f5"
+    },
+    {
+      "path": "scripts/presentation/web_attempt_emitter.gd",
+      "sha256": "f54daf2b453b972bd4799fa58951c27042e8535fc8c96de49492e3451e9a48cb"
+    },
+    {
+      "path": "scripts/puzzle/puzzle_analyzer.gd",
+      "sha256": "9c1ba08a7341c2c65547db07abbc3bdf62f6edd289f2ca138b1251cbf617a648"
+    },
+    {
+      "path": "scripts/puzzle/puzzle_catalog.gd",
+      "sha256": "14b323a04848ecdf515c2f470eb94fa8b13569672584510c266431e0a8b2bcfd"
+    },
+    {
+      "path": "scripts/puzzle/puzzle_content_version.gd",
+      "sha256": "f8e2a2966e7d1426e48ee989b0c8f2e75bd0361e908079ddab059efd04897558"
+    },
+    {
+      "path": "scripts/puzzle/puzzle_definition.gd",
+      "sha256": "0e34b9b5734539d738eadd6c1e3106b297e13953cb2f00ac4d5aea21f7a9ac18"
+    },
+    {
+      "path": "scripts/puzzle/puzzle_feedback.gd",
+      "sha256": "cb9763d94d72a7834ecd06283780e67cc95e876ca5d3f0cc33e5ec8e79281eef"
+    },
+    {
+      "path": "scripts/puzzle/puzzle_results_format.gd",
+      "sha256": "ef7c5f71d2c21af6157301d4961a620bcb6d82c69487231511a3375519e2a0fe"
+    },
+    {
+      "path": "scripts/puzzle/puzzle_solver.gd",
+      "sha256": "598b1f6d2f23da7249be1d7992a2463edc47c7fb57f02897dd1bb4728a32e4af"
+    },
+    {
+      "path": "scripts/puzzle/puzzle_state.gd",
+      "sha256": "c4cd0bbb943cbac09ffda894327a166bc561f6cdedf483921c6de29fd14f74ed"
+    },
+    {
+      "path": "scenes/credits/credits.gd",
+      "sha256": "f84ef470c7cb8af0c9bb005f3b83c0802cdd2a9da00438a0648566416bb3a3c3"
+    },
+    {
+      "path": "scenes/credits/credits.tscn",
+      "sha256": "2c44c43487b960d52a833284a2e296e04f2fb6936cc909d4c8eae1fae0847270"
+    },
+    {
+      "path": "scenes/loading_screen/loading_screen.tscn",
+      "sha256": "3e06f4badd908638472d4cb7d575078d967ad49e06782f74034926199c1b5920"
+    },
+    {
+      "path": "scenes/opening/opening.gd",
+      "sha256": "bdf4557ee1f288ad25cec369f49a5db17cf2af31ac257960f409a9a5925482f0"
+    },
+    {
+      "path": "scenes/opening/opening.tscn",
+      "sha256": "580bbbd885d3d31231f8950cc0e1cb7d66f1f3f5b2bf13ff72d77fb984d0b7e1"
+    },
+    {
+      "path": "scenes/opening/opening_with_logo.tscn",
+      "sha256": "163a6f9a2ff1381a87c2ce765e394a5208f256cd2ac0143477a5e159d2e8ce09"
+    },
+    {
+      "path": "scenes/overlaid_menus/mini_options_overlaid_menu.gd",
+      "sha256": "94453139a4ebff526014a8a1a10c8d8790869a91bd1cd6a1066e11b47a67ba26"
+    },
+    {
+      "path": "scenes/overlaid_menus/mini_options_overlaid_menu.tscn",
+      "sha256": "8ac189571f7f42205da1a7660dd8a88da9dd0e23f9ebca7b405a036240eedaa8"
+    },
+    {
+      "path": "scenes/overlaid_menus/overlaid_menu.gd",
+      "sha256": "7f7d87eab6d5402cfbeb8ef3a2995025c86a6aa499b74ddf86efa1e78dc1e0ad"
+    },
+    {
+      "path": "scenes/overlaid_menus/overlaid_menu.tscn",
+      "sha256": "4140dd038802206a86c85ccdac8c7b99e57380c835ea22508cd133844f65ae9a"
+    },
+    {
+      "path": "scenes/overlaid_menus/overlaid_menu_container.gd",
+      "sha256": "6a8e771d3825caa4da46b03cefe217733eacfe66fca57afd2a5fcb9afe48ba07"
+    },
+    {
+      "path": "scenes/overlaid_menus/overlaid_menu_container.tscn",
+      "sha256": "e4ea05927cc382684afab7f34edb5c414ed4db81df9ec1d48f3d8ad2ef71479c"
+    },
+    {
+      "path": "scenes/overlaid_menus/pause_menu.gd",
+      "sha256": "37e83bba0e1ebedb564ff587b17a8bc023931521c2dd0d97a74f59b7f6416590"
+    },
+    {
+      "path": "scenes/overlaid_menus/pause_menu.tscn",
+      "sha256": "a917a021e6a2b4552c1b3882de12dc7f5615022aa50b99dcda08c6dee7d02230"
+    },
+    {
+      "path": "scenes/puzzle/arrow_puzzle.gd",
+      "sha256": "5ec9483d94ff3f4443008a8319f2a0f790c4525c259de074ae297aa742eaea70"
+    },
+    {
+      "path": "scenes/puzzle/arrow_puzzle.tscn",
+      "sha256": "11d8293b6dfa642cb12a46e898fa850db55d748e78e52427031abd7c11a2b9b0"
+    },
+    {
+      "path": "scenes/puzzle/arrow_view.gd",
+      "sha256": "9297020f13d1fa756056d0c5796e1e5fcdf2a8e1e03e8223271bc26177d32065"
+    },
+    {
+      "path": "scenes/puzzle/puzzle_board.gd",
+      "sha256": "675e5cdc21c949056c85e95676e8de169a97e0e20faaaff2ddf1dcbe36294799"
+    },
+    {
+      "path": "scenes/puzzle/puzzle_results.gd",
+      "sha256": "fcafc54508e33e632bfd470616f01f0adb2613df4eea07b73316eb915cadd71b"
+    },
+    {
+      "path": "scenes/puzzle/puzzle_results.tscn",
+      "sha256": "8b369cf81b1aa079ae9bd719791ae9b6fc52eddc759116e5d7e82d99cc5e1398"
+    },
+    {
+      "path": "scenes/menus/main_menu/main_menu.gd",
+      "sha256": "0357959ca680355288f2ca59fea0cdc679b89a7c46419dea23d132b959ecbe69"
+    },
+    {
+      "path": "scenes/menus/main_menu/main_menu.tscn",
+      "sha256": "4b00926bf8f2a103417e21264662c8ce87ea05b66cbf021fe07a0f0129b853cb"
+    },
+    {
+      "path": "scenes/menus/main_menu/main_menu_with_animations.gd",
+      "sha256": "9f652b0c7e851d0bac8013233aa72b0225800d6d8cb6c38a9ac3139867ec79b9"
+    },
+    {
+      "path": "scenes/menus/main_menu/main_menu_with_animations.tscn",
+      "sha256": "fac990b66f936e9288616dd52929170506a9df4aedfa975117008af5b059bdde"
+    },
+    {
+      "path": "scenes/menus/main_menu/menu_backdrop.gd",
+      "sha256": "38f2cc414b982add4843a07b619a6a9dada8bdcc5c20a2f5f620507f4b08dfcd"
+    },
+    {
+      "path": "scenes/menus/main_menu/puzzle_select_menu.gd",
+      "sha256": "424c72bc72d29098e76780b588dc079cd5b8a90641b84fda3124c7b0f8945e79"
+    },
+    {
+      "path": "scenes/menus/main_menu/puzzle_select_menu.tscn",
+      "sha256": "aa865afd7b22b11748e3b6a4f8ffd7844b3db23493a93c312e8798168b6ee7e0"
+    },
+    {
+      "path": "scenes/menus/options_menu/master_options_menu.gd",
+      "sha256": "3b4e111d3b8a4f0c8acff7635da5ff2196f3fa2e5629b1292402420d3adcbae5"
+    },
+    {
+      "path": "scenes/menus/options_menu/master_options_menu.tscn",
+      "sha256": "22bece1371c7887508e51d2152e8abb28efe9629f344b71645775e62a3010128"
+    },
+    {
+      "path": "scenes/menus/options_menu/master_options_menu_with_tabs.tscn",
+      "sha256": "33f2585e102b3d3a0d5659086d6a0a78ee384650f5867f7faf43f3f05d4b2a67"
+    },
+    {
+      "path": "scenes/menus/options_menu/mini_options_menu.gd",
+      "sha256": "f5f07eb55007711779490eb7b0f1fecddcdcb842fb31f63e8414679691a7d3f8"
+    },
+    {
+      "path": "scenes/menus/options_menu/mini_options_menu.tscn",
+      "sha256": "e9720f921ad4f4396931f9bd15a0af513521e82fb6c014c1aad86299f69c90ef"
+    },
+    {
+      "path": "scenes/menus/options_menu/mini_options_menu_with_reset.gd",
+      "sha256": "7c4904109063d10bfa2b6ac4fec4b5dad7fc22f80774ef4abf561d207e872077"
+    },
+    {
+      "path": "scenes/menus/options_menu/mini_options_menu_with_reset.tscn",
+      "sha256": "22c09aad358461c1c0e7ccefdd6530f5d7f0f80f3f8bfea5ab23fd7390da723d"
+    },
+    {
+      "path": "scenes/menus/options_menu/audio/audio_input_option_control.gd",
+      "sha256": "1800ca69355253d42410a8126538890b8dac63bbcd6b1e6ac7ba0e7144780933"
+    },
+    {
+      "path": "scenes/menus/options_menu/audio/audio_input_option_control.tscn",
+      "sha256": "e4d32b8cd4a8ea3e9afaf92fdd11e25c7ae19d8f4f658c2570916ac2cafa75c5"
+    },
+    {
+      "path": "scenes/menus/options_menu/audio/audio_options_menu.gd",
+      "sha256": "4896596658033205be0076a97879ec65fd419ac6c6a8619f264d0cf6dc316109"
+    },
+    {
+      "path": "scenes/menus/options_menu/audio/audio_options_menu.tscn",
+      "sha256": "d01ccdd149ddff0661fe650bbe6f90faac12827d8a549a7db25b5e9d0bf2eea3"
+    },
+    {
+      "path": "scenes/menus/options_menu/game/game_options_menu.gd",
+      "sha256": "2a380da343e3a079f7250c5fb5418e9c74aa8f2be05587f523b9bfbb9c089afb"
+    },
+    {
+      "path": "scenes/menus/options_menu/game/game_options_menu.tscn",
+      "sha256": "7dbe66012bab41491d38a194a46aa5497c392dfa7500e62454be84d31c1093e8"
+    },
+    {
+      "path": "scenes/menus/options_menu/input/input_extras_menu.tscn",
+      "sha256": "e8e0772c1869981a55b3a8c23822991120c941ebf9653d8374142d03af474c34"
+    },
+    {
+      "path": "scenes/menus/options_menu/input/input_options_menu.gd",
+      "sha256": "2d6a0918e8a7e0d054ebfa9b91c3f6034223015fd489349fda0b9e3c6d15b04b"
+    },
+    {
+      "path": "scenes/menus/options_menu/input/input_options_menu.tscn",
+      "sha256": "1aff66a4d4b8f88c13de23cdba502c041f67b15e0d58ccbf6ed8af18fef46bb3"
+    },
+    {
+      "path": "scenes/menus/options_menu/input/input_options_menu_with_mouse_sensitivity.tscn",
+      "sha256": "6cf5d42baa649673c79b3af475de88c26433178a4674e15c8aafde944cadfe20"
+    },
+    {
+      "path": "scenes/menus/options_menu/video/video_options_menu.gd",
+      "sha256": "a097d646828f2a1f179990b0bf1a55175767bfafe71c1755ac790b54f07ccf6a"
+    },
+    {
+      "path": "scenes/menus/options_menu/video/video_options_menu.tscn",
+      "sha256": "5c867b74d9dbef3da44b4aa703eca1cd0bd73b0d14a21144fab4c19f418a42a5"
+    },
+    {
+      "path": "scenes/menus/options_menu/video/video_options_menu_with_extras.tscn",
+      "sha256": "f23e50903d9af1f68004a4ef512c22207abab9b1251ef957f1381dcfee13ba5c"
+    },
+    {
+      "path": "scenes/menus/options_menu/game/reset_game_control/reset_game_control.gd",
+      "sha256": "98c7268d8a6af08214249053ec9e670ffebe42646c2979765d4fcd641665df59"
+    },
+    {
+      "path": "scenes/menus/options_menu/game/reset_game_control/reset_game_control.tscn",
+      "sha256": "685a0773c849813b2894494ca6a22525545c65495007105c203c896004e0e23f"
+    },
+    {
+      "path": "tests/app_theme_check.gd",
+      "sha256": "067382160748bfcdfd254f22c759cd6358b7cbedc6fda0580a12e34b8e4118b6"
+    },
+    {
+      "path": "tests/arrow_departure_geometry_check.gd",
+      "sha256": "6300e8ebef2afff1f848bc527d38800b59905c93b571a2f12a6c1fe3c4821983"
+    },
+    {
+      "path": "tests/arrow_departure_visual_check.gd",
+      "sha256": "613eb4d3a129ce7fe3499eb17eb61c5b69acfbfa687256f91bf2c231b64e654d"
+    },
+    {
+      "path": "tests/portrait_menu_check.gd",
+      "sha256": "8bd047b364a89c9e6c098871dd1f030125e264f09391a93a7aef0e6a80229bcc"
+    },
+    {
+      "path": "tests/puzzle_analyzer_check.gd",
+      "sha256": "8e1366781f08b87e6a6283a744f5f2bdb5c27cc415f6acb0cc26405c2aa340aa"
+    },
+    {
+      "path": "tests/puzzle_canvas_check.gd",
+      "sha256": "097e00a8e3aadb53899b8d53b9405fd1defd9724de11eea6b4e577b9bb881f9f"
+    },
+    {
+      "path": "tests/puzzle_canvas_visual_check.gd",
+      "sha256": "fda6be82116b0dcfe69c6128549b4ceb6717e4ee9ffe592b7667231763f2483a"
+    },
+    {
+      "path": "tests/puzzle_catalog_check.gd",
+      "sha256": "65477783ecedffeccc574b39d4a4c2ce38fa2f7754b861913e3b4d13bfaf81b8"
+    },
+    {
+      "path": "tests/puzzle_layout_check.gd",
+      "sha256": "fa8efa67e4c7b9d8395d6a30b73a7267928b3cfa7b54d96454689550403f2423"
+    },
+    {
+      "path": "tests/puzzle_presentation_check.gd",
+      "sha256": "7edf5df798112a835b3881c0307f0ccab3664f676abab6697b4665b475198c21"
+    },
+    {
+      "path": "tests/puzzle_regression.gd",
+      "sha256": "4c230e9ca4d385fa2f20e2a0dd44ffc0facf026e783396fa361e18b40b397e45"
+    },
+    {
+      "path": "tests/puzzle_scoreboard_check.gd",
+      "sha256": "09c38a02235176760281c0fc4af77ec643649025d0b6196e410d8dd5861516ce"
+    },
+    {
+      "path": "tests/puzzle_structural_report.gd",
+      "sha256": "75206d643678689a86e5221423eeb1d7574c5c87126ec980e39209ab6c44137f"
+    },
+    {
+      "path": "tests/puzzle_viewport_transform_check.gd",
+      "sha256": "a83ab0ffc8859c69580aaece2d33a3eeb63c577f9a24e77555393a960b4380df"
+    },
+    {
+      "path": "tests/run_puzzle_regressions.py",
+      "sha256": "ded47ea3852a71cbe4e082068fdbcdb01bdea00d54beedcd4b0e8aa4f0500885"
+    },
+    {
+      "path": "tests/run_puzzle_structural_report.py",
+      "sha256": "394aa4d21cc6ecd1d41cc3a5fa729559f8cf2131ec9b58ae68d6bb68b37660d2"
+    },
+    {
+      "path": "tests/run_regressions.py",
+      "sha256": "b37a0653b682db44a81c2842bb3e2d142f5174a85dfec42b45dcedc8d4696b0e"
+    },
+    {
+      "path": "tests/save_input_regression.gd",
+      "sha256": "1e63b28607560a995c47eb934a16d5bb50957954ba775ec0487a77a46e70002c"
+    },
+    {
+      "path": "tests/scene_loader_stub.gd",
+      "sha256": "3c7be0b1f077c10786fe57590169231c58baab9672c6a992e0902332ea3de2b8"
+    }
+  ]
+}

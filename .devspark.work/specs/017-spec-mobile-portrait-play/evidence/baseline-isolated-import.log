@@ -1,0 +1,32 @@
+Godot Engine v4.4.stable.official.4c311cbee - https://godotengine.org
+
+ERROR: Do not use progress dialog (task) while flushing the message queue or using call_deferred()!
+   at: add_task (editor/progress_dialog.cpp:183)
+ERROR: Condition "!tasks.has(p_task)" is true. Returning: canceled
+   at: task_step (editor/progress_dialog.cpp:217)
+ERROR: Condition "!tasks.has(p_task)" is true. Returning: canceled
+   at: task_step (editor/progress_dialog.cpp:217)
+ERROR: Condition "!tasks.has(p_task)" is true. Returning: canceled
+   at: task_step (editor/progress_dialog.cpp:217)
+ERROR: Condition "!tasks.has(p_task)" is true. Returning: canceled
+   at: task_step (editor/progress_dialog.cpp:217)
+ERROR: Condition "!tasks.has(p_task)" is true. Returning: canceled
+   at: task_step (editor/progress_dialog.cpp:217)
+ERROR: Condition "!tasks.has(p_task)" is true. Returning: canceled
+   at: task_step (editor/progress_dialog.cpp:217)
+ERROR: Condition "!tasks.has(p_task)" is true.
+   at: end_task (editor/progress_dialog.cpp:240)
+SCRIPT ERROR: Parse Error: Identifier "SceneLoader" not declared in the current scope.
+   at: GDScript::reload (res://addons/maaacks_game_template/base/scenes/opening/opening.gd:18)
+SCRIPT ERROR: Parse Error: Identifier "SceneLoader" not declared in the current scope.
+   at: GDScript::reload (res://addons/maaacks_game_template/base/scenes/opening/opening.gd:20)
+SCRIPT ERROR: Parse Error: Identifier "SceneLoader" not declared in the current scope.
+   at: GDScript::reload (res://addons/maaacks_game_template/base/scenes/opening/opening.gd:22)
+SCRIPT ERROR: Parse Error: Identifier "SceneLoader" not declared in the current scope.
+   at: GDScript::reload (res://addons/maaacks_game_template/base/scenes/opening/opening.gd:98)
+ERROR: Failed to load script "res://addons/maaacks_game_template/base/scenes/opening/opening.gd" with error "Parse error".
+   at: load (modules/gdscript/gdscript.cpp:3022)
+SCRIPT ERROR: Parse Error: Could not resolve class "res://addons/maaacks_game_template/base/scenes/opening/opening.gd".
+   at: GDScript::reload (res://scenes/opening/opening.gd:1)
+ERROR: Failed to load script "res://scenes/opening/opening.gd" with error "Parse error".
+   at: load (modules/gdscript/gdscript.cpp:3022)

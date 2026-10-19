@@ -24,6 +24,8 @@ func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 
 func _ready() -> void:
+	resized.connect(_layout_actions)
+	_layout_actions()
 	theme = GameVisualStyle.get_theme()
 	$Background.color = GameVisualStyle.GAME_BACKGROUND
 	_puzzle_label.theme_type_variation = &"SupportingText"
@@ -90,3 +92,8 @@ func _on_next_puzzle_button_pressed() -> void:
 
 func _on_level_select_button_pressed() -> void:
 	level_select_requested.emit()
+
+func _layout_actions() -> void:
+	if not is_node_ready():
+		return
+	$CenterContainer/VBoxContainer/ButtonRow.vertical = ResponsiveLayout.compact(size)

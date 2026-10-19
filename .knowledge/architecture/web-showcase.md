@@ -88,23 +88,13 @@ narrow screens.
   `failed`, which the synthetic check reads. The service-worker branch is
   removed (no PWA).
 - **Host.** `web/src/components/play/GameFrame.astro` renders a dark frame
-  with a title bar, a Fullscreen button (on the iframe) and a loading state,
+  with a title bar, a Fullscreen button (on the host) and a loading state,
   and a same-origin `<iframe>` whose source is `/game/<PUBLIC_GAME_BUILD>/index.html`
   with `allow="fullscreen; autoplay"`. The iframe source is set by script
   only on supported screens, so phones never download the engine. Clicking
   the frame focuses the game; the Play page says to click once for the
   keyboard. Audio starts on the first click, as browsers require.
-- **Game UI scaling and launch.** The game stretches its 1280x720 design to
-  the canvas (`canvas_items`, `expand`), and the Web export renders at device
-  pixel density, so menus and the HUD grow with the canvas's pixel size. A
-  high-density phone gets larger UI than before; a low-density canvas below
-  1280x720 pixels renders the UI proportionally smaller (for example 0.75x at
-  960x540 CSS on a density-1 display). Small low-density touch screens are
-  admitted by the capability rule but untested, and are not claimed. The engine
-  boot splash is ink with no image, so the dark loading shell hands off to the
-  ink Make Bold splash without a flash. Larger menus on the Pixel 7 Pro have not
-  yet been re-verified on the device; the phone limitation below stands until
-  they are.
+- **Game UI scaling and launch.** Wide desktop retains the 1280x720 canvas_items/expand design. Touch uses iframe CSS dimensions as logical content size through AppTheme, independent of rendering density. Menus reflow instead of shrinking the desktop layout. Portrait keeps status at top and Menu/Open Move/Fit in a bottom strip, with an expanding board. The engine boot splash remains ink and the branded launch is unchanged. The new portrait layout and effective phone targets await real-device acceptance; emulation is not device evidence.
 - **Page zoom outside the game.** `web/src/scripts/page-zoom-guard.ts`
   suppresses ctrl+wheel and gesture zoom only while the pointer is over the
   game frame's own border and title bar; everywhere else on the page,
@@ -122,8 +112,7 @@ narrow screens.
   - *Mobile web beta:* a touch-capable screen in landscape, at least 640 × 320
     CSS px. Touch and a fine pointer are independent, so a hybrid device may
     qualify by either route; the page never switches mode on the last input.
-  - *Otherwise:* portrait touch asks the visitor to rotate; anything smaller
-    asks for a larger screen. `PlayUnavailableNotice.astro` shows the message,
+  - *Otherwise:* screens below the applicable floor ask for a larger screen. `PlayUnavailableNotice.astro` shows the message,
     links to the story and offers to copy the link or open the visitor's own
     mail app with it. Nothing is collected.
 - **Desktop browsers: supported and verified.** The supported desktop browsers are Firefox, Chrome, and Chrome-derived (Chromium-based) browsers, as defined in the constitution's verification principle. The game loads and plays, with mouse wheel zoom, middle-button drag and keyboard menu navigation, in Chrome, Firefox, and two Chromium-based browsers (the VS Code internal browser and Perplexity's browser); versions were not recorded. Edge is Chromium-based and so inside the supported set, but it has not been tested individually. Safari is outside the set and not claimed.
@@ -136,10 +125,9 @@ narrow screens.
   works in the page's full-screen mode, and gestures inside the game do not
   scroll or zoom the page (`touch-action: none` on the game shell). **iPhone
   Safari has not been verified on a real device** and is admitted by the same
-  capability rule, not claimed as supported. Known limitations: controls are
-  small touch targets and fullscreen may be unavailable (the button is hidden
-  when the browser refuses it). Modeless touch (tap on release, one-finger drag pans, pinch zooms; see `.knowledge/reference/touch-gestures.md`) has since been verified on the same Pixel 7 Pro in Chrome: pinch zoom and one-finger drag worked without issue, and every level, including the larger ones, was played through by tapping (before the change, pinch did not work). The build was reached over HTTPS on a local network, because Godot's loader refuses a non-secure origin; that limit affects local testing only. Remaining limitations on the phone: the menus and Results screen between levels are small and hard to read, especially in fullscreen, and because the admission rule measures the visible page area, a landscape phone with the browser's address bar showing can be told the screen is too small until the bar hides. On touch screens in landscape the frame is sized to fit the visible height and the
-  site header scrolls away instead of covering the toolbar.
+  capability rule, not claimed as supported. Known limitations: current portrait controls await real-device sizing verification, and fullscreen may be unavailable (the button is hidden
+  when the browser refuses it). Modeless touch (tap on release, one-finger drag pans, pinch zooms; see `.knowledge/reference/touch-gestures.md`) has since been verified on the same Pixel 7 Pro in Chrome: pinch zoom and one-finger drag worked without issue, and every level, including the larger ones, was played through by tapping (before the change, pinch did not work). The build was reached over HTTPS on a local network, because Godot's loader refuses a non-secure origin; that limit affects local testing only. Current phone limitations: portrait sizing, target dimensions and gesture feel after the latest layout changes remain outstanding real-device checks. Capability admission may admit iPhone Safari, but support outside Pixel/Chrome is unverified. The Play-page copy states that limitation. Touch frames use the dynamic visible height in both orientations, with a scroll-away page header, safe-area padding, and touch-action/overscroll suppression on the stage and shell. Optional fullscreen targets the host so its padding remains effective. These layout changes do not reload the iframe or create a new game session.
+
 
 ## Completion bridge
 

@@ -84,7 +84,7 @@ them), so they appear, remap and reset like the existing actions: a remapped
 key, a remapped gamepad button or a mixed keyboard-plus-gamepad mapping is
 restored from the `[Input]` settings section without duplicating events, and
 reset-to-default restores the shipped keyboard and gamepad bindings. The
-zoom/pan/fit view, Pan mode and navigation eligibility are presentation-only and
+zoom/pan/fit view, menu-provided mouse Pan mode and navigation eligibility are presentation-only and
 reset with every attempt: nothing about the viewport is written to
 `user://global_state.tres` or the settings file, and navigating, replaying or
 changing puzzles never changes their bytes. tests/save_input_regression.gd
@@ -183,3 +183,7 @@ or crash-safe. Settings recovery covers parse/load failures, not semantic valida
 of every successfully parsed setting value.
 The recovery backup is retained for manual inspection; no automatic restoration or
 backup deletion policy is imposed.
+
+## Responsive options presentation
+
+Master options tabs retain original option instances inside focus-following vertical scroll panels. Narrow presentation wraps labels and bounds inherited minimum widths; it does not reset settings or replace input events. Mini options retains its inherited pause-aware overlay and reset confirmation. Source of truth: scenes/menus/options_menu/master_options_menu.gd, scenes/menus/options_menu/mini_options_menu_with_reset.gd and tests/save_input_regression.gd. Real-phone acceptance of the resulting menus remains outstanding.

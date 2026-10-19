@@ -41,7 +41,7 @@ const gameSrc = build ? `/game/${build}/index.html` : undefined;
 <script>
   import { startGameBridge } from '../../scripts/game-bridge';
   import { guardFrameChrome } from '../../scripts/page-zoom-guard';
-  import { decidePlay, isTouchFirst, readCapabilities } from '../../scripts/play-admission';
+  import { decidePlay, readCapabilities } from '../../scripts/play-admission';
 
   const host = document.querySelector<HTMLElement>('[data-game-host]');
   const iframe = document.querySelector<HTMLIFrameElement>('iframe[data-game-frame]');
@@ -68,16 +68,23 @@ const gameSrc = build ? `/game/${build}/index.html` : undefined;
       const capabilities = readCapabilities();
       const verdict = decidePlay(capabilities);
       root.dataset.play = verdict;
-      if (isTouchFirst(capabilities)) root.dataset.touch = '';
+      if (capabilities.touch) root.dataset.touch = '';
       else delete root.dataset.touch;
       if (verdict === 'play' && !iframe.getAttribute('src')) iframe.setAttribute('src', src);
     };
+    let pending = false;
+    const queueAdmission = () => {
+      if (pending) return;
+      pending = true;
+      requestAnimationFrame(() => { pending = false; admit(); });
+    };
     admit();
-    window.addEventListener('resize', admit);
-    window.addEventListener('orientationchange', admit);
+    window.addEventListener('resize', queueAdmission);
+    window.addEventListener('orientationchange', queueAdmission);
+    window.visualViewport?.addEventListener('resize', queueAdmission);
 
     fullscreen?.addEventListener('click', () => {
-      void iframe.requestFullscreen?.().then(() => iframe.focus()).catch(() => undefined);
+      void host?.requestFullscreen?.().then(() => iframe.focus()).catch(() => undefined);
     });
     // A click anywhere on the frame hands keyboard focus to the game.
     host?.addEventListener('click', (event) => {

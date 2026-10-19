@@ -18,6 +18,7 @@ func _initialize() -> void:
 
 func _run() -> void:
 	await process_frame
+	_check_responsive_sizing()
 	_check_installed()
 	await _check_canvas_layer_inheritance()
 	_check_control_types()
@@ -161,3 +162,10 @@ static func _luminance(c: Color) -> float:
 
 static func _linear(v: float) -> float:
 	return v / 12.92 if v <= 0.04045 else pow((v + 0.055) / 1.055, 2.4)
+
+func _check_responsive_sizing() -> void:
+	var policy = load("res://scripts/presentation/responsive_layout.gd")
+	for css in [Vector2i(360, 580), Vector2i(390, 784), Vector2i(412, 855), Vector2i(915, 352)]:
+		check(policy.base_size(css, true) == css, "touch content uses CSS-sized logical units at %s" % css)
+	check(policy.base_size(Vector2i(1920, 1080), false) == Vector2i(1280, 720), "wide desktop keeps its established design scale")
+	check(policy.base_size(Vector2i.ZERO, true) == Vector2i.ZERO, "zero CSS size is ignored rather than replacing a usable layout")
