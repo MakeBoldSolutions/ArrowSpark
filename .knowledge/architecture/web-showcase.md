@@ -103,13 +103,14 @@ narrow screens.
 - **Play admission (`web/src/scripts/play-admission.ts`).** A pure function of
   viewport size and input capabilities, never of the user agent, decides
   whether the Play page shows the game. The page script re-asks on resize and
-  orientation change and sets `html[data-play]` (`play`, `rotate` or `larger`)
+  orientation change and sets `html[data-play]` (`play` or `larger`)
   and `html[data-touch]`; CSS shows the game, the beta note or the notice from
   those attributes. The engine downloads only when the verdict is `play`, and a
   loaded game stays loaded (hidden) if the verdict later changes, so an attempt
   survives a rotation.
   - *Desktop:* a fine pointer and at least 960 × 540 CSS px (unchanged).
-  - *Mobile web beta:* a touch-capable screen in landscape, at least 640 × 320
+  - *Mobile web beta:* a touch-capable screen in either orientation: portrait
+    (taller than wide) at least 360 × 640 CSS px, landscape at least 640 × 320
     CSS px. Touch and a fine pointer are independent, so a hybrid device may
     qualify by either route; the page never switches mode on the last input.
   - *Otherwise:* screens below the applicable floor ask for a larger screen. `PlayUnavailableNotice.astro` shows the message,
@@ -117,8 +118,8 @@ narrow screens.
     mail app with it. Nothing is collected.
 - **Desktop browsers: supported and verified.** The supported desktop browsers are Firefox, Chrome, and Chrome-derived (Chromium-based) browsers, as defined in the constitution's verification principle. The game loads and plays, with mouse wheel zoom, middle-button drag and keyboard menu navigation, in Chrome, Firefox, and two Chromium-based browsers (the VS Code internal browser and Perplexity's browser); versions were not recorded. Edge is Chromium-based and so inside the supported set, but it has not been tested individually. Safari is outside the set and not claimed.
 - **Mobile web beta: what is verified.** Public wording is "ArrowSpark now
-  works on mobile web in beta. Landscape is recommended. Some touch gestures
-  are still being refined." Real-device evidence so far is one Google Pixel 7
+  works on mobile web in beta. Portrait play is available. Support outside
+  Pixel/Chrome, including iPhone Safari, is unverified." Real-device evidence so far is one Google Pixel 7
   Pro (Android 17) in Chrome 154 and Edge Beta 155: the game loads in the
   frame, taps select and remove arrows (the engine turns touch into the
   existing click path), the Zoom, Fit, Pan, Back and menu buttons work, play

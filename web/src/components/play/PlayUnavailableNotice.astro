@@ -58,11 +58,7 @@ const mailto = `mailto:?subject=${encodeURIComponent('ArrowSpark: try the game')
   .unavailable__status { margin-top: var(--space-3); font-size: var(--fs-sm); color: var(--text-muted); min-height: 1lh; }
 
   /* The page script (play-admission.ts) sets html[data-play]; with no script the larger-screen text shows. */
-  .unavailable__rotate { display: none; }
   :global(html[data-play='play']) .unavailable { display: none; }
   :global(html:not([data-play])) .unavailable,
-  :global(html[data-play='rotate']) .unavailable,
   :global(html[data-play='larger']) .unavailable { display: block; }
-  :global(html[data-play='rotate']) .unavailable__rotate { display: block; }
-  :global(html[data-play='rotate']) .unavailable__larger { display: none; }
 </style>

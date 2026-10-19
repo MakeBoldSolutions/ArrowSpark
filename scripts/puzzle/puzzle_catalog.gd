@@ -298,7 +298,7 @@ static func _build_nested_chain() -> PuzzleDefinition:
 ## A single key arrow (a bent, always-legal arrow whose shape must be traced
 ## to discover) whose removal simultaneously unblocks three others at once
 ## (PuzzleAnalyzer max_unlock_fan_out 3) -- the "cascade" primitive the
-## pre-Spec-006 research found untested anywhere in the baseline catalog.
+## the original baseline catalog never exercised.
 static func _build_cascade_key_arrow() -> PuzzleDefinition:
 	var d := PuzzleDefinition.Direction
 	var arrows := {

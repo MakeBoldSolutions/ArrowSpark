@@ -39,8 +39,9 @@ prefer explicit types where they aid clarity; keep changes small and justify new
 
 - Mobile web beta on the showcase Play page: `web/src/scripts/play-admission.ts` decides from viewport
   and input capabilities (not the user agent) whether the game shows (desktop: fine pointer and
-  at least 960 × 540; touch: landscape and at least 640 × 320), and
-  the beta is verified on one real Android phone only (iPhone not yet verified).
+  at least 960 × 540; touch: portrait at least 360 × 640 or landscape at least 640 × 320), and
+  the beta is verified on one real Android phone only (iPhone not yet verified; the portrait
+  layout still awaits real-device verification).
 
 - Modeless touch gestures in `PuzzleBoard` (tap acts on release, one-finger drag pans, two-finger
   pinch zooms, no Pan mode needed) plus `touch-action: none` on the Play page's game stage;
@@ -51,8 +52,8 @@ prefer explicit types where they aid clarity; keep changes small and justify new
   Level Select sections, group-relative numbering and group-scoped Next Puzzle, plus a
   hand-composed Reference Knot, with Play starting the first of eight progression levels that lead up to it — metadata only, no rule changes.
 
-- Spec 007 (in progress): extends `PuzzleState` with a deterministic Open Move
-  lookup/assist counter and a revised score formula, and adds a new
+- `PuzzleState` has a deterministic Open Move lookup/assist counter and a
+  revised score formula, plus a
   session-lifetime `PuzzleScoreboard` class for per-puzzle best scores and an
   overall session score — no new persistence, no second rules engine.
 

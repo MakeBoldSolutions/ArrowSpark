@@ -4,8 +4,8 @@
 //
 // - Desktop: a fine pointer and a viewport of at least 960 × 540 CSS px (unchanged since the
 //   first release).
-// - Mobile web beta: a touch-capable screen in landscape, at least 640 × 320 CSS px. Portrait
-//   asks the visitor to rotate; anything smaller asks for a larger screen.
+// - Mobile web beta: a touch-capable screen in portrait (taller than wide) at least 360 × 640
+//   CSS px, or in landscape at least 640 × 320 CSS px. Anything smaller asks for a larger screen.
 // Touch and a fine pointer are independent: a device with both may qualify by either route.
 
 export type PlayVerdict = 'play' | 'larger';
