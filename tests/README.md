@@ -285,3 +285,9 @@ godot --path . --script res://tests/puzzle_canvas_visual_check.gd -- <output-dir
 Run it with `APPDATA`/`XDG_DATA_HOME` redirected to a temporary directory (it
 writes no player data itself, but the project autoloads may) and record the
 machine, engine version and viewport with the numbers.
+
+## Portrait presentation checks
+
+The app-theme check covers responsive logical sizing without claiming device evidence. Layout checks measure board fraction and three-action target bounds in portrait, including bottom action placement. Canvas checks cover cancelled touch and valid resize interruption while preserving rule state. The browser smoke runner in web/scripts/check-portrait-play.mjs takes a candidate Play URL and an output directory, loads the actual export at the portrait/DPR/landscape/desktop matrix, and checks frame bounds and iframe retention. These automated checks do not replace real fingers or physical gamepad navigation. Real-phone acceptance of current portrait sizing and gestures remains outstanding until checked on the published game.
+
+`portrait_menu_check.gd` renders the narrow main menu, Level Select and each Options tab, checking 44-pixel action targets, 16-pixel text, horizontal bounds and vertical scroll reachability. The puzzle regression launcher includes this check.

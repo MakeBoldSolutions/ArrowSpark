@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://scenes/puzzle/arrow_puzzle.gd" id="1"]
 [ext_resource type="Script" path="res://scenes/puzzle/puzzle_board.gd" id="2"]
-[ext_resource type="Script" path="res://addons/maaacks_game_template/base/scripts/pause_menu_controller.gd" id="3"]
+[ext_resource type="Script" path="res://scripts/presentation/puzzle_pause_controller.gd" id="3"]
 [ext_resource type="PackedScene" path="res://scenes/overlaid_menus/pause_menu.tscn" id="4"]
 [ext_resource type="PackedScene" path="res://addons/maaacks_game_template/base/scenes/music_players/background_music_player.tscn" id="5"]
 [ext_resource type="PackedScene" path="res://scenes/puzzle/puzzle_results.tscn" id="6"]
@@ -31,6 +31,7 @@ pause_menu_packed = ExtResource("4")
 [node name="BackgroundMusicPlayer" parent="." instance=ExtResource("5")]
 
 [node name="Layout" type="VBoxContainer" parent="."]
+theme_override_constants/separation = 0
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -39,20 +40,15 @@ grow_vertical = 2
 
 [node name="HUDMargin" type="MarginContainer" parent="Layout"]
 layout_mode = 2
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 12
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 12
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 4
 
 [node name="HUD" type="HBoxContainer" parent="Layout/HUDMargin"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_constants/separation = 24
-
-[node name="BackButton" type="Button" parent="Layout/HUDMargin/HUD"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Back"
+theme_override_constants/separation = 12
 
 [node name="RemainingLabel" type="Label" parent="Layout/HUDMargin/HUD"]
 unique_name_in_owner = true
@@ -69,52 +65,39 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 horizontal_alignment = 2
-text = "1. Simple Introduction"
+text_overrun_behavior = 3
+text = "1. First Knot"
 
-[node name="OpenMoveButton" type="Button" parent="Layout/HUDMargin/HUD"]
+[node name="ActionMargin" type="MarginContainer" parent="Layout"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 4
+
+[node name="Actions" type="HBoxContainer" parent="Layout/ActionMargin"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Show Me an Open Move"
+theme_override_constants/separation = 8
 
-[node name="ToolbarMargin" type="MarginContainer" parent="Layout"]
-layout_mode = 2
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 8
-
-[node name="Toolbar" type="HFlowContainer" parent="Layout/ToolbarMargin"]
+[node name="MenuButton" type="Button" parent="Layout/ActionMargin/Actions"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_constants/h_separation = 8
-theme_override_constants/v_separation = 4
+size_flags_horizontal = 3
+text = "Menu"
 
-[node name="ZoomOutButton" type="Button" parent="Layout/ToolbarMargin/Toolbar"]
+[node name="OpenMoveButton" type="Button" parent="Layout/ActionMargin/Actions"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Zoom Out"
+size_flags_horizontal = 3
+text = "Open Move"
+tooltip_text = "Show one legal arrow; costs five mistakes."
 
-[node name="ZoomInButton" type="Button" parent="Layout/ToolbarMargin/Toolbar"]
+[node name="FitButton" type="Button" parent="Layout/ActionMargin/Actions"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Zoom In"
-
-[node name="FitButton" type="Button" parent="Layout/ToolbarMargin/Toolbar"]
-unique_name_in_owner = true
-layout_mode = 2
+size_flags_horizontal = 3
 text = "Fit Puzzle"
-
-[node name="PanButton" type="Button" parent="Layout/ToolbarMargin/Toolbar"]
-unique_name_in_owner = true
-layout_mode = 2
-toggle_mode = true
-text = "Pan"
-
-[node name="HelpLabel" type="Label" parent="Layout/ToolbarMargin/Toolbar"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(480, 0)
-layout_mode = 2
-size_flags_vertical = 4
-autowrap_mode = 3
 
 [node name="BoardArea" type="Control" parent="Layout"]
 layout_mode = 2

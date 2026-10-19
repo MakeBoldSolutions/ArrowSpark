@@ -1,7 +1,7 @@
 {
   "generated": {
     "by": "build-knowledge-index",
-    "at": "2026-10-17T05:35:31Z"
+    "at": "2026-10-18T21:34:55Z"
   },
   "roots": [
     {
@@ -48,6 +48,8 @@
         "scripts/presentation/arrow_departure_geometry.gd",
         "scripts/presentation/puzzle_viewport_transform.gd",
         "scenes/puzzle/arrow_puzzle.tscn",
+        "scripts/presentation/puzzle_pause_controller.gd",
+        "scenes/overlaid_menus/pause_menu.gd",
         "scenes/puzzle/arrow_puzzle.gd",
         "scenes/puzzle/puzzle_board.gd",
         "scenes/puzzle/arrow_view.gd",
@@ -94,7 +96,8 @@
         "Menu Integration and the No-Reset Guarantee",
         "Whole-arrow hover",
         "Feedback precedence and departures",
-        "Gameplay theme boundary"
+        "Gameplay theme boundary",
+        "Responsive menus and paused navigation"
       ]
     },
     {
@@ -108,6 +111,8 @@
         "scripts/presentation/game_visual_style.gd",
         "scripts/presentation/control_theme.gd",
         "scripts/app_theme.gd",
+        "scripts/presentation/responsive_layout.gd",
+        "scenes/overlaid_menus/mini_options_overlaid_menu.gd",
         "scenes/menus/main_menu/menu_backdrop.gd",
         "scenes/loading_screen/**",
         "scenes/opening/opening_with_logo.tscn",
@@ -115,6 +120,7 @@
         "assets/brand/**",
         "assets/audio/ui/**",
         "tests/app_theme_check.gd",
+        "tests/portrait_menu_check.gd",
         "scripts/presentation/arrow_departure_geometry.gd",
         "scripts/presentation/puzzle_viewport_transform.gd",
         "resources/fonts/**",
@@ -135,7 +141,8 @@
         "App-wide theme, scaling and launch",
         "Semantic palette",
         "Spacing, shape and motion vocabulary",
-        "Canvas rendering and feedback readability"
+        "Canvas rendering and feedback readability",
+        "Responsive logical sizing"
       ]
     },
     {
@@ -171,7 +178,8 @@
         "Session-Only Puzzle Entry vs. Preserved Legacy Storage",
         "Level Select",
         "Web builds",
-        "Validation and Limits"
+        "Validation and Limits",
+        "Responsive options presentation"
       ]
     },
     {

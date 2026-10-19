@@ -9,13 +9,9 @@ extends Control
 @onready var _remaining_label: Label = %RemainingLabel
 @onready var _mistakes_label: Label = %MistakesLabel
 @onready var _puzzle_label: Label = %PuzzleLabel
-@onready var _back_button: Button = %BackButton
+@onready var _menu_button: Button = %MenuButton
 @onready var _open_move_button: Button = %OpenMoveButton
-@onready var _zoom_out_button: Button = %ZoomOutButton
-@onready var _zoom_in_button: Button = %ZoomInButton
 @onready var _fit_button: Button = %FitButton
-@onready var _pan_button: Button = %PanButton
-@onready var _help_label: Label = %HelpLabel
 @onready var _results: Control = %PuzzleResults
 @onready var _pause_menu_controller: Node = %PauseMenuController
 
@@ -32,11 +28,10 @@ func _ready() -> void:
 	_remaining_label.theme_type_variation = &"NumericText"
 	_mistakes_label.theme_type_variation = &"NumericText"
 	_puzzle_label.theme_type_variation = &"SupportingText"
-	_back_button.theme_type_variation = &"SecondaryButton"
+	_menu_button.theme_type_variation = &"SecondaryButton"
 	_open_move_button.theme_type_variation = &"SecondaryButton"
-	for button in [_zoom_out_button, _zoom_in_button, _fit_button, _pan_button]:
+	for button in [_fit_button]:
 		button.theme_type_variation = &"SecondaryButton"
-	_help_label.theme_type_variation = &"SupportingText"
 	_results.replay_requested.connect(_on_results_replay_requested)
 	_results.main_menu_requested.connect(_on_results_main_menu_requested)
 	_results.next_puzzle_requested.connect(_on_results_next_puzzle_requested)
@@ -44,14 +39,11 @@ func _ready() -> void:
 	_board.cell_clicked.connect(_on_cell_clicked)
 	_board.hover_cell_changed.connect(_on_hover_cell_changed)
 	_board.departure_finished.connect(_on_departure_finished)
-	_back_button.pressed.connect(_on_back_button_pressed)
+	_menu_button.pressed.connect(_on_menu_button_pressed)
 	_open_move_button.pressed.connect(_on_open_move_button_pressed)
-	_zoom_out_button.pressed.connect(_board.zoom_out)
-	_zoom_in_button.pressed.connect(_board.zoom_in)
 	_fit_button.pressed.connect(_board.fit_puzzle)
-	_pan_button.toggled.connect(_board.set_pan_mode)
-	_board.pan_mode_changed.connect(_on_board_pan_mode_changed)
-	_configure_navigation_focus()
+	resized.connect(_layout_actions)
+	_layout_actions.call_deferred()
 	_refresh_navigation_help()
 	_start_new_attempt()
 
@@ -61,52 +53,41 @@ func _notification(what: int) -> void:
 	if what == NOTIFICATION_UNPAUSED and is_node_ready():
 		_refresh_navigation_help()
 
-## Tab order: Back, Open Move, Zoom Out, Zoom In, Fit, Pan, board, back to Back.
-## Directional (D-pad) neighbors always leave the toolbar and the board, so the
-## canvas controls can never trap focus.
+func _layout_actions() -> void:
+	if not is_node_ready():
+		return
+	var upright := ResponsiveLayout.portrait(size)
+	$Layout.move_child($Layout/ActionMargin, 2 if upright else 1)
+	_puzzle_label.visible = not upright
+	_fit_button.text = "Fit" if upright else "Fit Puzzle"
+	_configure_navigation_focus()
+
 func _configure_navigation_focus() -> void:
-	var chain: Array[Control] = [_back_button, _open_move_button, _zoom_out_button, _zoom_in_button, _fit_button, _pan_button, _board]
-	for i in range(chain.size()):
-		var control: Control = chain[i]
+	var chain: Array[Control] = [_menu_button, _open_move_button, _fit_button, _board]
+	if ResponsiveLayout.portrait(size):
+		chain = [_board, _menu_button, _open_move_button, _fit_button]
+	for i in chain.size():
+		var control := chain[i]
 		control.focus_next = control.get_path_to(chain[(i + 1) % chain.size()])
 		control.focus_previous = control.get_path_to(chain[(i - 1 + chain.size()) % chain.size()])
-	var toolbar: Array[Control] = [_zoom_out_button, _zoom_in_button, _fit_button, _pan_button]
-	_open_move_button.focus_neighbor_bottom = _open_move_button.get_path_to(_zoom_out_button)
-	for i in range(toolbar.size()):
-		var button: Control = toolbar[i]
-		button.focus_neighbor_top = button.get_path_to(_open_move_button)
+	for button in [_menu_button, _open_move_button, _fit_button]:
+		button.focus_neighbor_top = button.get_path_to(_board)
 		button.focus_neighbor_bottom = button.get_path_to(_board)
-		if i > 0:
-			button.focus_neighbor_left = button.get_path_to(toolbar[i - 1])
-		if i < toolbar.size() - 1:
-			button.focus_neighbor_right = button.get_path_to(toolbar[i + 1])
-	_board.focus_neighbor_top = _board.get_path_to(_pan_button)
+	_board.focus_neighbor_top = _board.get_path_to(_fit_button)
+	_board.focus_neighbor_bottom = _board.get_path_to(_menu_button)
 	_board.focus_neighbor_left = NodePath(".")
 	_board.focus_neighbor_right = NodePath(".")
-	_board.focus_neighbor_bottom = NodePath(".")
-
-func _on_board_pan_mode_changed(enabled: bool) -> void:
-	_pan_button.set_pressed_no_signal(enabled)
-	_refresh_navigation_help()
 
 func _refresh_navigation_help() -> void:
-	var zoom_in_key := _binding_text(&"canvas_zoom_in", true)
-	var zoom_out_key := _binding_text(&"canvas_zoom_out", true)
-	var fit_key := _binding_text(&"canvas_fit", true)
-	_zoom_out_button.tooltip_text = "Zoom out (%s)" % _binding_text(&"canvas_zoom_out")
-	_zoom_in_button.tooltip_text = "Zoom in (%s)" % _binding_text(&"canvas_zoom_in")
-	_fit_button.tooltip_text = "Fit the whole puzzle in view (%s)" % _binding_text(&"canvas_fit")
-	_pan_button.tooltip_text = "Toggle Pan mode: drag to move the view instead of selecting"
-	var zoom_hint := "Wheel or %s/%s: zoom" % [zoom_in_key, zoom_out_key]
-	if _board.is_pan_mode():
-		_help_label.text = "Pan mode: drag to move - %s - %s: fit" % [zoom_hint, fit_key]
-	else:
-		_help_label.text = "%s - Middle-drag or Pan: move - %s: fit" % [zoom_hint, fit_key]
-	_help_label.mouse_filter = Control.MOUSE_FILTER_PASS
-	_help_label.tooltip_text = ("Zoom: mouse wheel, or %s / %s with the board focused. Move: middle-drag, "
-		+ "Pan mode, or %s / left stick with the board focused. Fit: %s.") % [
-			_binding_text(&"canvas_zoom_in"), _binding_text(&"canvas_zoom_out"),
-			_movement_binding_text(), _binding_text(&"canvas_fit")]
+	_fit_button.tooltip_text = "Fit the whole puzzle (%s)" % _binding_text(&"canvas_fit")
+
+func control_help() -> String:
+	return "Touch: tap an arrow, drag with one finger to pan, pinch to zoom. Fit restores the overview.\nMouse: wheel to zoom, middle-drag to pan; enable Pan for a single-button mouse.\nKeyboard/gamepad: %s / %s zoom, %s pan, %s fit.\nOpen Move shows one legal arrow and costs five mistakes." % [
+		_binding_text(&"canvas_zoom_in"), _binding_text(&"canvas_zoom_out"), _movement_binding_text(), _binding_text(&"canvas_fit")]
+
+func _on_menu_button_pressed() -> void:
+	if not _results.visible and not _awaiting_completion:
+		_pause_menu_controller.open_menu()
 
 ## Compact, current text for one action's keyboard and gamepad bindings,
 ## derived from the live InputMap so remapped controls are described truthfully.

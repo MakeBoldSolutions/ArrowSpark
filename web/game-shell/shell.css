@@ -1,6 +1,7 @@
 /* Loader styles for the Godot Web shell (shell.html). Copied next to the exported game.
    Colors match the Make Bold ink and cream; the game document cannot load the site tokens. */
 html, body, #canvas {
+	overscroll-behavior: none;
 	margin: 0;
 	padding: 0;
 	border: 0;

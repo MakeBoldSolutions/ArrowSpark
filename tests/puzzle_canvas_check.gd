@@ -298,8 +298,8 @@ func _check_original_puzzles_fit_without_navigation() -> void:
 			if not readable:
 				check(false, "original puzzle '%s' is comfortable without navigation at %s (%.1f px/cell)" % [id, window, transform.cell_pixels])
 			var hud: Control = puzzle.get_node("%HUD")
-			var toolbar: Control = puzzle.get_node("%Toolbar")
-			var help: Control = puzzle.get_node("%HelpLabel")
+			var toolbar: Control = puzzle.get_node("%Actions")
+			var help: Control = toolbar
 			var overlaps := Rect2(hud.global_position, hud.size).intersects(Rect2(board.global_position, board.size)) \
 				or Rect2(toolbar.global_position, toolbar.size).intersects(Rect2(board.global_position, board.size)) \
 				or Rect2(help.global_position, help.size).intersects(Rect2(board.global_position, board.size))
@@ -342,50 +342,22 @@ func _await_departures_for(puzzle: Control) -> void:
 func _check_focus_loop_and_neighbors() -> void:
 	var puzzle := await _spawn(LARGE_ID)
 	var board := _board(puzzle)
-	var back: Control = puzzle.get_node("%BackButton")
-	var open_move: Control = puzzle.get_node("%OpenMoveButton")
-	var zoom_out: Control = puzzle.get_node("%ZoomOutButton")
-	var zoom_in: Control = puzzle.get_node("%ZoomInButton")
-	var fit: Control = puzzle.get_node("%FitButton")
-	var pan: Control = puzzle.get_node("%PanButton")
-	var cycle: Array[Control] = [back, open_move, zoom_out, zoom_in, fit, pan, board]
-	var all_focusable := true
-	for control in cycle:
-		if control.focus_mode != Control.FOCUS_ALL:
-			all_focusable = false
-	check(all_focusable, "the Back button, Open Move button, toolbar controls and board are all keyboard/gamepad focusable")
-	var tab_ok := true
-	for i in range(cycle.size()):
-		if cycle[i].find_next_valid_focus() != cycle[(i + 1) % cycle.size()]:
-			tab_ok = false
-		if cycle[i].find_prev_valid_focus() != cycle[(i - 1 + cycle.size()) % cycle.size()]:
-			tab_ok = false
-	check(tab_ok, "Tab and Shift+Tab cycle Back, Open Move, Zoom Out, Zoom In, Fit, Pan, board and back")
-	check(board.find_valid_focus_neighbor(SIDE_TOP) == pan, "D-pad up from the board returns to Pan")
-	check(board.find_valid_focus_neighbor(SIDE_LEFT) == board and board.find_valid_focus_neighbor(SIDE_BOTTOM) == board,
-		"the board keeps directional focus on itself for other directions")
-	var exits_ok := true
-	for button in [zoom_out, zoom_in, fit, pan]:
-		if button.find_valid_focus_neighbor(SIDE_BOTTOM) != board or button.find_valid_focus_neighbor(SIDE_TOP) != open_move:
-			exits_ok = false
-	check(exits_ok, "every toolbar control has directional neighbors that leave the toolbar")
-	check(zoom_out.find_valid_focus_neighbor(SIDE_RIGHT) == zoom_in and fit.find_valid_focus_neighbor(SIDE_LEFT) == zoom_in \
-			and fit.find_valid_focus_neighbor(SIDE_RIGHT) == pan, "directional focus walks the toolbar in order")
-
-	# Buttons work through their real pressed signals and never disable themselves.
-	var state_before := _snapshot(puzzle)
-	zoom_in.pressed.emit()
-	check(not board.view_transform.fit_mode, "Zoom In (button) changes the view")
-	zoom_out.pressed.emit()
-	zoom_in.pressed.emit()
+	var menu: Button = puzzle.get_node("%MenuButton")
+	var open_move: Button = puzzle.get_node("%OpenMoveButton")
+	var fit: Button = puzzle.get_node("%FitButton")
+	var cycle: Array[Control] = [menu, open_move, fit, board]
+	for i in cycle.size():
+		check(cycle[i].focus_mode == Control.FOCUS_ALL, "visible navigation control is focusable")
+		check(cycle[i].find_next_valid_focus() == cycle[(i + 1) % cycle.size()], "forward focus stays on visible controls")
+		check(cycle[i].find_prev_valid_focus() == cycle[(i - 1 + cycle.size()) % cycle.size()], "reverse focus stays on visible controls")
+	check(board.find_valid_focus_neighbor(SIDE_TOP) == fit, "board focus can reach Fit")
+	for button in [menu, open_move, fit]:
+		check(button.find_valid_focus_neighbor(SIDE_BOTTOM) == board, "action focus can return to board")
+	var before := _snapshot(puzzle)
+	board.zoom_in()
 	fit.pressed.emit()
-	check(board.view_transform.fit_mode, "Fit Puzzle (button) restores the overview")
-	check(not zoom_out.disabled and not zoom_in.disabled and not fit.disabled and not pan.disabled,
-		"toolbar controls stay enabled so a focused control is never lost")
-	pan.toggled.emit(true)
-	check(board.is_pan_mode(), "the Pan toggle enables Pan mode")
-	pan.toggled.emit(false)
-	check(state_before == _snapshot(puzzle), "toolbar navigation leaves the rule state untouched")
+	check(board.view_transform.fit_mode and before == _snapshot(puzzle), "visible Fit restores overview without changing rules")
+	check(not puzzle.has_node("%ZoomInButton") and not puzzle.has_node("%PanButton"), "redundant toolbar actions are absent")
 	await _dispose(puzzle)
 
 func _check_focused_actions() -> void:
@@ -449,7 +421,7 @@ func _check_focused_actions() -> void:
 	check(transform.center_cells.is_equal_approx(Vector2.ZERO), "held pan the other way stops at the near corner")
 
 	# Focus transfer: another focused control never lets the camera keep moving.
-	var pan_button: Button = puzzle.get_node("%PanButton")
+	var pan_button: Button = puzzle.get_node("%FitButton")
 	pan_button.grab_focus()
 	await process_frame
 	check(not board.has_focus(), "focus can leave the board for the toolbar")
@@ -578,15 +550,12 @@ func _check_input_actions_and_help() -> void:
 		fit_pad = fit_pad or (event is InputEventJoypadButton and event.button_index == JOY_BUTTON_Y)
 	check(fit_pad, "Fit is on gamepad Y by default")
 	var puzzle := await _spawn(LARGE_ID)
-	var help: Label = puzzle.get_node("%HelpLabel")
-	check(help.text.contains("Middle-drag") and help.text.contains("fit"), "the help line describes navigation")
-	check(help.text.contains(InputMap.action_get_events(&"canvas_fit")[0].as_text_physical_keycode()),
-		"the help line is derived from the live InputMap")
+	var help: String = puzzle.control_help()
+	check(help.contains("middle-drag") and help.contains("pinch"), "menu help describes mouse and touch navigation")
+	check(help.contains(InputMap.action_get_events(&"canvas_fit")[0].as_text_physical_keycode()), "menu help reflects live remaps")
 	var board := _board(puzzle)
 	board.set_pan_mode(true)
-	await process_frame
-	check(help.text.begins_with("Pan mode"), "the help line reflects Pan mode")
-	check((puzzle.get_node("%PanButton") as Button).button_pressed, "the Pan toggle shows its pressed state")
+	check(board.is_pan_mode(), "single-button mouse Pan capability remains")
 	await _dispose(puzzle)
 
 # --- Selection and Open Move help under a transformed view ---------------------
@@ -1183,7 +1152,8 @@ func _check_zero_area_pause_and_replacement() -> void:
 	await process_frame
 
 func _check_results_barrier_and_navigation_gating() -> void:
-	var puzzle := await _spawn("dependency_chain")
+	# Keep this fixture below the zoom ceiling; the larger board viewport can fit small puzzles at maximum scale.
+	var puzzle := await _spawn("dependency_chain", Vector2i(800, 600))
 	var board := _board(puzzle)
 	var results = puzzle.get_node("%PuzzleResults")
 	for head in _clear_order(board.definition):
@@ -1204,6 +1174,8 @@ func _check_results_barrier_and_navigation_gating() -> void:
 	check(is_equal_approx(board.view_transform.cell_pixels, scale_at_results) and board._drag_button == 0,
 		"zoom and drag are ignored while the results cover the board")
 	await _dispose(puzzle)
+	get_root().size = Vector2i(1280, 720)
+	await process_frame
 
 func _file_bytes(path: String) -> PackedByteArray:
 	return FileAccess.get_file_as_bytes(path) if FileAccess.file_exists(path) else PackedByteArray()
@@ -1232,7 +1204,7 @@ func _check_fresh_views_per_attempt_and_no_persistence() -> void:
 	check(not replay_board.is_pan_mode() and replay_board.is_navigation_enabled(), "a replayed attempt starts in Select mode with navigation enabled")
 	check(replay._state.remaining() == replay_board.definition.arrows.size(),
 		"a replayed attempt has fresh rule state")
-	check(not (replay.get_node("%PanButton") as Button).button_pressed, "the Pan toggle is reset for the new attempt")
+	check(not _board(replay).is_pan_mode(), "mouse Pan mode resets for a new attempt")
 	await _dispose(replay)
 
 	PuzzleSession.set_current_id(PuzzleCatalog.id_at(12))
@@ -1319,11 +1291,33 @@ func _check_new_experiments_navigate_and_select() -> void:
 			"experiment '%s' accepts a transformed legal selection" % id)
 		await _dispose(puzzle)
 
+func _check_cancelled_touch_and_resize() -> void:
+	var puzzle = await _spawn(LARGE_ID)
+	var board: PuzzleBoard = puzzle.get_node("%PuzzleBoard")
+	var initial := _snapshot(puzzle)
+	var down := InputEventScreenTouch.new()
+	down.index = 0
+	down.position = board.size / 2.0
+	down.pressed = true
+	board._gui_input(down)
+	var cancel := InputEventScreenTouch.new()
+	cancel.index = 0
+	cancel.position = down.position
+	cancel.canceled = true
+	board._gui_input(cancel)
+	check(_snapshot(puzzle) == initial, "cancelled touch cannot select or penalize")
+	board._gui_input(down)
+	board.size += Vector2(0, 20)
+	await process_frame
+	check(board._touches.is_empty() and not board._tap_pending, "valid resize clears pending contacts")
+	await _dispose(puzzle)
+
 # --- Runner -------------------------------------------------------------------
 
 func _initialize() -> void:
 	for head in PuzzleSolver.analyze(PuzzleCatalog.get_definition(LARGE_ID)).witness.slice(0, 5):
 		_long_heads.append(head)
+	await _check_cancelled_touch_and_resize()
 	await _check_initial_fit_and_large_board()
 	await _check_zoom_pan_corners_and_invariants()
 	_check_corner_reach_for_every_catalog_size()

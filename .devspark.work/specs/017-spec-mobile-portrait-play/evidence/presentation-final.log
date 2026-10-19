@@ -1,0 +1,548 @@
+Godot Engine v4.4.1.stable.official.49a5bc7b6 - https://godotengine.org
+
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: bends follow consecutive cells without closing neighboring endpoints
+PASS: bends follow consecutive cells without closing neighboring endpoints
+PASS: bends follow consecutive cells without closing neighboring endpoints
+PASS: view defensively copies shape offsets
+PASS: extent rebuild scales geometry without scaling parent
+PASS: extent rebuild scales geometry without scaling parent
+PASS: extent rebuild scales geometry without scaling parent
+PASS: extent rebuild scales geometry without scaling parent
+PASS: layout preserves unit parent scale
+PASS: bends follow consecutive cells without closing neighboring endpoints
+PASS: view defensively copies shape offsets
+PASS: extent rebuild scales geometry without scaling parent
+PASS: extent rebuild scales geometry without scaling parent
+PASS: layout preserves unit parent scale
+PASS: view defensively copies shape offsets
+PASS: extent rebuild scales geometry without scaling parent
+PASS: extent rebuild scales geometry without scaling parent
+PASS: layout preserves unit parent scale
+PASS: bends follow consecutive cells without closing neighboring endpoints
+PASS: view defensively copies shape offsets
+PASS: extent rebuild scales geometry without scaling parent
+PASS: extent rebuild scales geometry without scaling parent
+PASS: layout preserves unit parent scale
+PASS: view defensively copies shape offsets
+PASS: extent rebuild scales geometry without scaling parent
+PASS: extent rebuild scales geometry without scaling parent
+PASS: layout preserves unit parent scale
+PASS: view defensively copies shape offsets
+PASS: extent rebuild scales geometry without scaling parent
+PASS: extent rebuild scales geometry without scaling parent
+PASS: layout preserves unit parent scale
+PASS: view defensively copies shape offsets
+PASS: extent rebuild scales geometry without scaling parent
+PASS: extent rebuild scales geometry without scaling parent
+PASS: layout preserves unit parent scale
+PASS: view defensively copies shape offsets
+PASS: extent rebuild scales geometry without scaling parent
+PASS: extent rebuild scales geometry without scaling parent
+PASS: layout preserves unit parent scale
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: single-cell geometry stays inside owned cell
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: arrow uses connected body and head children
+PASS: body keeps only ordered path points
+PASS: head points in requested direction
+PASS: shaft endpoint overlaps filled head
+PASS: tail and orthogonal joins are rounded
+PASS: whole view stays passive for cell input
+PASS: bends follow consecutive cells without closing neighboring endpoints
+PASS: bends follow consecutive cells without closing neighboring endpoints
+PASS: bends follow consecutive cells without closing neighboring endpoints
+PASS: view defensively copies shape offsets
+PASS: extent rebuild scales geometry without scaling parent
+PASS: extent rebuild scales geometry without scaling parent
+PASS: extent rebuild scales geometry without scaling parent
+PASS: extent rebuild scales geometry without scaling parent
+PASS: layout preserves unit parent scale
+PASS: bends follow consecutive cells without closing neighboring endpoints
+PASS: view defensively copies shape offsets
+PASS: extent rebuild scales geometry without scaling parent
+PASS: extent rebuild scales geometry without scaling parent
+PASS: layout preserves unit parent scale
+PASS: view defensively copies shape offsets
+PASS: extent rebuild scales geometry without scaling parent
+PASS: extent rebuild scales geometry without scaling parent
+PASS: layout preserves unit parent scale
+PASS: bends follow consecutive cells without closing neighboring endpoints
+PASS: view defensively copies shape offsets
+PASS: extent rebuild scales geometry without scaling parent
+PASS: extent rebuild scales geometry without scaling parent
+PASS: layout preserves unit parent scale
+PASS: view defensively copies shape offsets
+PASS: extent rebuild scales geometry without scaling parent
+PASS: extent rebuild scales geometry without scaling parent
+PASS: layout preserves unit parent scale
+PASS: view defensively copies shape offsets
+PASS: extent rebuild scales geometry without scaling parent
+PASS: extent rebuild scales geometry without scaling parent
+PASS: layout preserves unit parent scale
+PASS: view defensively copies shape offsets
+PASS: extent rebuild scales geometry without scaling parent
+PASS: extent rebuild scales geometry without scaling parent
+PASS: layout preserves unit parent scale
+PASS: view defensively copies shape offsets
+PASS: extent rebuild scales geometry without scaling parent
+PASS: extent rebuild scales geometry without scaling parent
+PASS: layout preserves unit parent scale
+PASS: decorative geometry never changes domain occupancy
+PASS: the completion payload has exactly the eight contract keys (got ["contractVersion", "elapsedSeconds", "mistakes", "openMoveAssists", "puzzleId", "puzzleVersion", "score", "type"])
+PASS: the payload names its type and contract version 1
+PASS: the payload carries the completed puzzle's id
+PASS: the payload carries the puzzle content version, not the app version
+PASS: payload field contractVersion is an integer
+PASS: payload field mistakes is an integer
+PASS: payload field openMoveAssists is an integer
+PASS: payload field score is an integer
+PASS: payload field elapsedSeconds is an integer
+PASS: the payload copies mistakes, Open Move assists and score unchanged
+PASS: 1,260.4 s of play is reported as 1260 whole seconds
+PASS: elapsed time rounds to the nearest whole second
+PASS: elapsed time is never negative
+PASS: the payload carries no 'accuracy' data
+PASS: the payload carries no 'total_arrows' data
+PASS: the payload carries no 'player' data
+PASS: the payload carries no 'visitor' data
+PASS: the payload carries no 'session' data
+PASS: the payload carries no 'device' data
+PASS: the payload carries no 'timestamp' data
+PASS: the payload carries no 'date' data
+PASS: the serialized payload fits the 1,024-character limit
+PASS: emit() does nothing outside a Web build
+PASS: blocked feedback colors whole arrow red
+PASS: pulse stays restrained
+PASS: repeated blocked cue restarts at baseline
+PASS: departure synchronously normalizes every pulse phase
+PASS: terminal departure ignores stale effects and duplicate starts
+PASS: departure emits completion exactly once
+PASS: blocked feedback colors whole arrow red
+PASS: pulse stays restrained
+PASS: repeated blocked cue restarts at baseline
+PASS: departure synchronously normalizes every pulse phase
+PASS: terminal departure ignores stale effects and duplicate starts
+PASS: departure emits completion exactly once
+PASS: blocked feedback colors whole arrow red
+PASS: pulse stays restrained
+PASS: repeated blocked cue restarts at baseline
+PASS: departure synchronously normalizes every pulse phase
+PASS: terminal departure ignores stale effects and duplicate starts
+PASS: departure emits completion exactly once
+PASS: hover exit cannot overwrite active red feedback
+PASS: blocked completion immediately restores eligible ember
+PASS: blocked completion without hover restores ink
+PASS: departure cancels in-progress hover before next frame
+PASS: departure begins with the identical static silhouette, no first-frame geometry jump, for direction 0
+PASS: head/body overlap is preserved once departing for direction 0
+PASS: head keeps its cardinal orientation while departing for direction 0
+PASS: departure begins with the identical static silhouette, no first-frame geometry jump, for direction 1
+PASS: head/body overlap is preserved once departing for direction 1
+PASS: head keeps its cardinal orientation while departing for direction 1
+PASS: departure begins with the identical static silhouette, no first-frame geometry jump, for direction 2
+PASS: head/body overlap is preserved once departing for direction 2
+PASS: head keeps its cardinal orientation while departing for direction 2
+PASS: departure begins with the identical static silhouette, no first-frame geometry jump, for direction 3
+PASS: head/body overlap is preserved once departing for direction 3
+PASS: head keeps its cardinal orientation while departing for direction 3
+PASS: equal elapsed time partitioned into more/smaller steps advances the same total cell distance
+PASS: a longer route requires strictly more cell-distance to fully clear than a shorter one
+PASS: the short route never signals completion before its own full-tail clearance
+PASS: the short route never signals completion before its own full-tail clearance
+PASS: the short route never signals completion before its own full-tail clearance
+PASS: the short route never signals completion before its own full-tail clearance
+PASS: the short route never signals completion before its own full-tail clearance
+PASS: the short route never signals completion before its own full-tail clearance
+PASS: the short route never signals completion before its own full-tail clearance
+PASS: the short route never signals completion before its own full-tail clearance
+PASS: the short route never signals completion before its own full-tail clearance
+PASS: the short route never signals completion before its own full-tail clearance
+PASS: the short route never signals completion before its own full-tail clearance
+PASS: the short route never signals completion before its own full-tail clearance
+PASS: the short route never signals completion before its own full-tail clearance
+PASS: the short route never signals completion before its own full-tail clearance
+PASS: the short route never signals completion before its own full-tail clearance
+PASS: both routes eventually finish exactly once via repeated per-frame advancement
+PASS: real puzzle instantiates all eight views
+PASS: the puzzle Layout carries its own theme reference, so the scene stands alone
+PASS: gameplay has a local background
+PASS: light background never intercepts input
+PASS: major heading uses bundled Be Vietnam Pro ExtraBold
+PASS: heading binaries carry required weights
+PASS: UI uses bundled Inter Tight 600
+PASS: supporting role uses weight 400
+PASS: results retain numeric behavior
+PASS: results display the open-move-assist count as its own value
+PASS: results display the session-best comparison outcome
+PASS: results display the overall session score
+PASS: existing score supplies success cue
+PASS: results preserve Replay focus
+PASS: button focus has a visible border
+PASS: text/control fits minimum at (1280, 720)
+PASS: required content is reachable onscreen at (1280, 720): RemainingLabel [P: (8.0, 4.0), S: (111.0, 25.0)] puzzle=[P: (0.0, 0.0), S: (1280.0, 720.0)] viewport=[P: (0.0, 0.0), S: (1280.0, 720.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (1280, 720)
+PASS: required content is reachable onscreen at (1280, 720): MistakesLabel [P: (131.0, 4.0), S: (98.0, 25.0)] puzzle=[P: (0.0, 0.0), S: (1280.0, 720.0)] viewport=[P: (0.0, 0.0), S: (1280.0, 720.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (1280, 720)
+PASS: required content is reachable onscreen at (1280, 720): TotalLabel [P: (8.0, 227.0), S: (1264.0, 25.0)] puzzle=[P: (0.0, 0.0), S: (1280.0, 720.0)] viewport=[P: (0.0, 0.0), S: (1280.0, 720.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (1280, 720)
+PASS: required content is reachable onscreen at (1280, 720): MistakesLabel [P: (8.0, 264.0), S: (1264.0, 25.0)] puzzle=[P: (0.0, 0.0), S: (1280.0, 720.0)] viewport=[P: (0.0, 0.0), S: (1280.0, 720.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (1280, 720)
+PASS: required content is reachable onscreen at (1280, 720): OpenMoveAssistsLabel [P: (8.0, 301.0), S: (1264.0, 25.0)] puzzle=[P: (0.0, 0.0), S: (1280.0, 720.0)] viewport=[P: (0.0, 0.0), S: (1280.0, 720.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (1280, 720)
+PASS: required content is reachable onscreen at (1280, 720): ScoreLabel [P: (8.0, 338.0), S: (1264.0, 25.0)] puzzle=[P: (0.0, 0.0), S: (1280.0, 720.0)] viewport=[P: (0.0, 0.0), S: (1280.0, 720.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (1280, 720)
+PASS: required content is reachable onscreen at (1280, 720): AccuracyLabel [P: (8.0, 375.0), S: (1264.0, 25.0)] puzzle=[P: (0.0, 0.0), S: (1280.0, 720.0)] viewport=[P: (0.0, 0.0), S: (1280.0, 720.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (1280, 720)
+PASS: required content is reachable onscreen at (1280, 720): SessionComparisonLabel [P: (8.0, 412.0), S: (1264.0, 20.0)] puzzle=[P: (0.0, 0.0), S: (1280.0, 720.0)] viewport=[P: (0.0, 0.0), S: (1280.0, 720.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (1280, 720)
+PASS: required content is reachable onscreen at (1280, 720): OverallSessionScoreLabel [P: (8.0, 444.0), S: (1264.0, 20.0)] puzzle=[P: (0.0, 0.0), S: (1280.0, 720.0)] viewport=[P: (0.0, 0.0), S: (1280.0, 720.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (1280, 720)
+PASS: required content is reachable onscreen at (1280, 720): ReplayButton [P: (451.0, 476.0), S: (90.0, 49.0)] puzzle=[P: (0.0, 0.0), S: (1280.0, 720.0)] viewport=[P: (0.0, 0.0), S: (1280.0, 720.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (1280, 720)
+PASS: required content is reachable onscreen at (1280, 720): MainMenuButton [P: (701.0, 476.0), S: (128.0, 49.0)] puzzle=[P: (0.0, 0.0), S: (1280.0, 720.0)] viewport=[P: (0.0, 0.0), S: (1280.0, 720.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (960, 540)
+PASS: required content is reachable onscreen at (960, 540): RemainingLabel [P: (8.0, 3.0), S: (111.0, 25.33333)] puzzle=[P: (0.0, 0.0), S: (1280.0, 720.0)] viewport=[P: (0.0, 0.0), S: (1280.0, 720.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (960, 540)
+PASS: required content is reachable onscreen at (960, 540): MistakesLabel [P: (131.0, 3.0), S: (98.0, 25.33333)] puzzle=[P: (0.0, 0.0), S: (1280.0, 720.0)] viewport=[P: (0.0, 0.0), S: (1280.0, 720.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (960, 540)
+PASS: required content is reachable onscreen at (960, 540): TotalLabel [P: (8.0, 225.0), S: (1264.0, 25.33333)] puzzle=[P: (0.0, 0.0), S: (1280.0, 720.0)] viewport=[P: (0.0, 0.0), S: (1280.0, 720.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (960, 540)
+PASS: required content is reachable onscreen at (960, 540): MistakesLabel [P: (8.0, 262.0), S: (1264.0, 25.33333)] puzzle=[P: (0.0, 0.0), S: (1280.0, 720.0)] viewport=[P: (0.0, 0.0), S: (1280.0, 720.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (960, 540)
+PASS: required content is reachable onscreen at (960, 540): OpenMoveAssistsLabel [P: (8.0, 299.0), S: (1264.0, 25.33333)] puzzle=[P: (0.0, 0.0), S: (1280.0, 720.0)] viewport=[P: (0.0, 0.0), S: (1280.0, 720.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (960, 540)
+PASS: required content is reachable onscreen at (960, 540): ScoreLabel [P: (8.0, 336.0), S: (1264.0, 25.33333)] puzzle=[P: (0.0, 0.0), S: (1280.0, 720.0)] viewport=[P: (0.0, 0.0), S: (1280.0, 720.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (960, 540)
+PASS: required content is reachable onscreen at (960, 540): AccuracyLabel [P: (8.0, 373.0), S: (1264.0, 25.33333)] puzzle=[P: (0.0, 0.0), S: (1280.0, 720.0)] viewport=[P: (0.0, 0.0), S: (1280.0, 720.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (960, 540)
+PASS: required content is reachable onscreen at (960, 540): SessionComparisonLabel [P: (8.0, 411.0), S: (1264.0, 20.0)] puzzle=[P: (0.0, 0.0), S: (1280.0, 720.0)] viewport=[P: (0.0, 0.0), S: (1280.0, 720.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (960, 540)
+PASS: required content is reachable onscreen at (960, 540): OverallSessionScoreLabel [P: (8.0, 443.0), S: (1264.0, 20.0)] puzzle=[P: (0.0, 0.0), S: (1280.0, 720.0)] viewport=[P: (0.0, 0.0), S: (1280.0, 720.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (960, 540)
+PASS: required content is reachable onscreen at (960, 540): ReplayButton [P: (451.0, 475.0), S: (90.0, 50.0)] puzzle=[P: (0.0, 0.0), S: (1280.0, 720.0)] viewport=[P: (0.0, 0.0), S: (1280.0, 720.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (960, 540)
+PASS: required content is reachable onscreen at (960, 540): MainMenuButton [P: (701.0, 475.0), S: (128.0, 50.0)] puzzle=[P: (0.0, 0.0), S: (1280.0, 720.0)] viewport=[P: (0.0, 0.0), S: (1280.0, 720.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (320, 580)
+PASS: required content is reachable onscreen at (320, 580): RemainingLabel [P: (8.0, 4.0), S: (111.0, 25.0)] puzzle=[P: (0.0, 0.0), S: (320.0, 580.0)] viewport=[P: (0.0, 0.0), S: (320.0, 580.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (320, 580)
+PASS: required content is reachable onscreen at (320, 580): MistakesLabel [P: (131.0, 4.0), S: (98.0, 25.0)] puzzle=[P: (0.0, 0.0), S: (320.0, 580.0)] viewport=[P: (0.0, 0.0), S: (320.0, 580.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (320, 580)
+PASS: required content is reachable onscreen at (320, 580): TotalLabel [P: (8.0, 96.0), S: (304.0, 25.0)] puzzle=[P: (0.0, 0.0), S: (320.0, 580.0)] viewport=[P: (0.0, 0.0), S: (320.0, 580.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (320, 580)
+PASS: required content is reachable onscreen at (320, 580): MistakesLabel [P: (8.0, 133.0), S: (304.0, 25.0)] puzzle=[P: (0.0, 0.0), S: (320.0, 580.0)] viewport=[P: (0.0, 0.0), S: (320.0, 580.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (320, 580)
+PASS: required content is reachable onscreen at (320, 580): OpenMoveAssistsLabel [P: (8.0, 170.0), S: (304.0, 25.0)] puzzle=[P: (0.0, 0.0), S: (320.0, 580.0)] viewport=[P: (0.0, 0.0), S: (320.0, 580.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (320, 580)
+PASS: required content is reachable onscreen at (320, 580): ScoreLabel [P: (8.0, 207.0), S: (304.0, 25.0)] puzzle=[P: (0.0, 0.0), S: (320.0, 580.0)] viewport=[P: (0.0, 0.0), S: (320.0, 580.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (320, 580)
+PASS: required content is reachable onscreen at (320, 580): AccuracyLabel [P: (8.0, 244.0), S: (304.0, 25.0)] puzzle=[P: (0.0, 0.0), S: (320.0, 580.0)] viewport=[P: (0.0, 0.0), S: (320.0, 580.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (320, 580)
+PASS: required content is reachable onscreen at (320, 580): SessionComparisonLabel [P: (8.0, 281.0), S: (304.0, 20.0)] puzzle=[P: (0.0, 0.0), S: (320.0, 580.0)] viewport=[P: (0.0, 0.0), S: (320.0, 580.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (320, 580)
+PASS: required content is reachable onscreen at (320, 580): OverallSessionScoreLabel [P: (8.0, 313.0), S: (304.0, 20.0)] puzzle=[P: (0.0, 0.0), S: (320.0, 580.0)] viewport=[P: (0.0, 0.0), S: (320.0, 580.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (320, 580)
+PASS: required content is reachable onscreen at (320, 580): ReplayButton [P: (8.0, 345.0), S: (304.0, 49.0)] puzzle=[P: (0.0, 0.0), S: (320.0, 580.0)] viewport=[P: (0.0, 0.0), S: (320.0, 580.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (320, 580)
+PASS: required content is reachable onscreen at (320, 580): MainMenuButton [P: (8.0, 467.0), S: (304.0, 49.0)] puzzle=[P: (0.0, 0.0), S: (320.0, 580.0)] viewport=[P: (0.0, 0.0), S: (320.0, 580.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (350, 784)
+PASS: required content is reachable onscreen at (350, 784): RemainingLabel [P: (8.0, 4.0), S: (111.0, 25.0)] puzzle=[P: (0.0, 0.0), S: (350.0, 784.0)] viewport=[P: (0.0, 0.0), S: (350.0, 784.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (350, 784)
+PASS: required content is reachable onscreen at (350, 784): MistakesLabel [P: (131.0, 4.0), S: (98.0, 25.0)] puzzle=[P: (0.0, 0.0), S: (350.0, 784.0)] viewport=[P: (0.0, 0.0), S: (350.0, 784.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (350, 784)
+PASS: required content is reachable onscreen at (350, 784): TotalLabel [P: (8.0, 198.0), S: (334.0, 25.0)] puzzle=[P: (0.0, 0.0), S: (350.0, 784.0)] viewport=[P: (0.0, 0.0), S: (350.0, 784.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (350, 784)
+PASS: required content is reachable onscreen at (350, 784): MistakesLabel [P: (8.0, 235.0), S: (334.0, 25.0)] puzzle=[P: (0.0, 0.0), S: (350.0, 784.0)] viewport=[P: (0.0, 0.0), S: (350.0, 784.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (350, 784)
+PASS: required content is reachable onscreen at (350, 784): OpenMoveAssistsLabel [P: (8.0, 272.0), S: (334.0, 25.0)] puzzle=[P: (0.0, 0.0), S: (350.0, 784.0)] viewport=[P: (0.0, 0.0), S: (350.0, 784.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (350, 784)
+PASS: required content is reachable onscreen at (350, 784): ScoreLabel [P: (8.0, 309.0), S: (334.0, 25.0)] puzzle=[P: (0.0, 0.0), S: (350.0, 784.0)] viewport=[P: (0.0, 0.0), S: (350.0, 784.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (350, 784)
+PASS: required content is reachable onscreen at (350, 784): AccuracyLabel [P: (8.0, 346.0), S: (334.0, 25.0)] puzzle=[P: (0.0, 0.0), S: (350.0, 784.0)] viewport=[P: (0.0, 0.0), S: (350.0, 784.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (350, 784)
+PASS: required content is reachable onscreen at (350, 784): SessionComparisonLabel [P: (8.0, 383.0), S: (334.0, 20.0)] puzzle=[P: (0.0, 0.0), S: (350.0, 784.0)] viewport=[P: (0.0, 0.0), S: (350.0, 784.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (350, 784)
+PASS: required content is reachable onscreen at (350, 784): OverallSessionScoreLabel [P: (8.0, 415.0), S: (334.0, 20.0)] puzzle=[P: (0.0, 0.0), S: (350.0, 784.0)] viewport=[P: (0.0, 0.0), S: (350.0, 784.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (350, 784)
+PASS: required content is reachable onscreen at (350, 784): ReplayButton [P: (8.0, 447.0), S: (334.0, 49.0)] puzzle=[P: (0.0, 0.0), S: (350.0, 784.0)] viewport=[P: (0.0, 0.0), S: (350.0, 784.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (350, 784)
+PASS: required content is reachable onscreen at (350, 784): MainMenuButton [P: (8.0, 569.0), S: (334.0, 49.0)] puzzle=[P: (0.0, 0.0), S: (350.0, 784.0)] viewport=[P: (0.0, 0.0), S: (350.0, 784.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (372, 855)
+PASS: required content is reachable onscreen at (372, 855): RemainingLabel [P: (8.0, 4.0), S: (111.0, 25.0)] puzzle=[P: (0.0, 0.0), S: (372.0, 855.0)] viewport=[P: (0.0, 0.0), S: (372.0, 855.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (372, 855)
+PASS: required content is reachable onscreen at (372, 855): MistakesLabel [P: (131.0, 4.0), S: (98.0, 25.0)] puzzle=[P: (0.0, 0.0), S: (372.0, 855.0)] viewport=[P: (0.0, 0.0), S: (372.0, 855.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (372, 855)
+PASS: required content is reachable onscreen at (372, 855): TotalLabel [P: (8.0, 233.0), S: (356.0, 25.0)] puzzle=[P: (0.0, 0.0), S: (372.0, 855.0)] viewport=[P: (0.0, 0.0), S: (372.0, 855.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (372, 855)
+PASS: required content is reachable onscreen at (372, 855): MistakesLabel [P: (8.0, 270.0), S: (356.0, 25.0)] puzzle=[P: (0.0, 0.0), S: (372.0, 855.0)] viewport=[P: (0.0, 0.0), S: (372.0, 855.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (372, 855)
+PASS: required content is reachable onscreen at (372, 855): OpenMoveAssistsLabel [P: (8.0, 307.0), S: (356.0, 25.0)] puzzle=[P: (0.0, 0.0), S: (372.0, 855.0)] viewport=[P: (0.0, 0.0), S: (372.0, 855.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (372, 855)
+PASS: required content is reachable onscreen at (372, 855): ScoreLabel [P: (8.0, 344.0), S: (356.0, 25.0)] puzzle=[P: (0.0, 0.0), S: (372.0, 855.0)] viewport=[P: (0.0, 0.0), S: (372.0, 855.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (372, 855)
+PASS: required content is reachable onscreen at (372, 855): AccuracyLabel [P: (8.0, 381.0), S: (356.0, 25.0)] puzzle=[P: (0.0, 0.0), S: (372.0, 855.0)] viewport=[P: (0.0, 0.0), S: (372.0, 855.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (372, 855)
+PASS: required content is reachable onscreen at (372, 855): SessionComparisonLabel [P: (8.0, 418.0), S: (356.0, 20.0)] puzzle=[P: (0.0, 0.0), S: (372.0, 855.0)] viewport=[P: (0.0, 0.0), S: (372.0, 855.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (372, 855)
+PASS: required content is reachable onscreen at (372, 855): OverallSessionScoreLabel [P: (8.0, 450.0), S: (356.0, 20.0)] puzzle=[P: (0.0, 0.0), S: (372.0, 855.0)] viewport=[P: (0.0, 0.0), S: (372.0, 855.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (372, 855)
+PASS: required content is reachable onscreen at (372, 855): ReplayButton [P: (8.0, 482.0), S: (356.0, 49.0)] puzzle=[P: (0.0, 0.0), S: (372.0, 855.0)] viewport=[P: (0.0, 0.0), S: (372.0, 855.0)]
+PASS: text stays readable without shrinking with cells
+PASS: text/control fits minimum at (372, 855)
+PASS: required content is reachable onscreen at (372, 855): MainMenuButton [P: (8.0, 604.0), S: (356.0, 49.0)] puzzle=[P: (0.0, 0.0), S: (372.0, 855.0)] viewport=[P: (0.0, 0.0), S: (372.0, 855.0)]
+PASS: text stays readable without shrinking with cells
+PASS: new overlay clears stationary owner hover without mouse motion
+PASS: viewport cursor target refresh does not retain covered board
+PASS: board provides canonical-owner hover routing
+PASS: head motion hovers whole owner
+PASS: moving within owner does not restart transition
+PASS: owner change clears previous hover
+PASS: empty cell clears hover
+PASS: pause clears hover and invalidates cell cache
+PASS: focus loss clears hover
+PASS: pointer exit clears hover
+PASS: outside cell clears hover
+PASS: hover never changes taps or active arrows
+PASS: button release never selects
+PASS: blank space in occupied tail cell selects once
+PASS: logical removal immediately clears owner hover
+PASS: departed cells cannot select or hover visible departure
+PASS: bundled Inter Tight supports tabular figures
+PASS: numeric digit 0 has tabular advance
+PASS: numeric digit 1 has tabular advance
+PASS: numeric digit 2 has tabular advance
+PASS: numeric digit 3 has tabular advance
+PASS: numeric digit 4 has tabular advance
+PASS: numeric digit 5 has tabular advance
+PASS: numeric digit 6 has tabular advance
+PASS: numeric digit 7 has tabular advance
+PASS: numeric digit 8 has tabular advance
+PASS: numeric digit 9 has tabular advance
+PUZZLE_PRESENTATION_FAILURES=0

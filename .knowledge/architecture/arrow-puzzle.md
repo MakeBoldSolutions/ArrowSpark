@@ -17,6 +17,8 @@ appliesTo:
   - scripts/presentation/arrow_departure_geometry.gd
   - scripts/presentation/puzzle_viewport_transform.gd
   - scenes/puzzle/arrow_puzzle.tscn
+  - scripts/presentation/puzzle_pause_controller.gd
+  - scenes/overlaid_menus/pause_menu.gd
   - scenes/puzzle/arrow_puzzle.gd
   - scenes/puzzle/puzzle_board.gd
   - scenes/puzzle/arrow_view.gd
@@ -767,12 +769,7 @@ Showing results disables the `PauseMenuController`'s unhandled input
 (`set_process_unhandled_input(false)`) so a pause overlay cannot appear
 behind the results panel; a fresh attempt re-enables it.
 
-`arrow_puzzle.tscn`'s `Layout` is a `VBoxContainer` with the HUD
-(`HUDMargin`) and a navigation toolbar row (`ToolbarMargin`/`Toolbar`, an
-`HFlowContainer` holding Zoom Out, Zoom In, Fit Puzzle, a Pan toggle and a
-one-line help label that wraps below the buttons when narrow) stacked above
-`BoardArea`/`PuzzleBoard`; a container stack
-cannot overlap its children by construction at every window size. `PuzzleResults` is `mouse_filter = MOUSE_FILTER_STOP` and covers the
+`arrow_puzzle.tscn` stacks passive status, an expanding `BoardArea` and three actions (Menu, Open Move, Fit Puzzle). Portrait places actions below the board; landscape/desktop place them above. There is no permanent Zoom/Pan toolbar or help row. Full input help and the optional mouse Pan toggle live in the pause menu. Containers reserve space for actions rather than overlaying arrows. `PuzzleResults` is `mouse_filter = MOUSE_FILTER_STOP` and covers the
 full rect as the last child (so it draws above the board), absorbing
 background input while shown. Because it is hidden while its parent is first
 sized, `show_results()` re-applies the full-rect anchors and offsets before
@@ -941,12 +938,7 @@ second (normalized diagonals, board-focused and window-focused only, polled per
 frame); events matching these actions are consumed by the focused board so a
 stick push cannot also move GUI focus. Focus navigation is never consumed
 whatever the remapping: Tab/Shift+Tab and D-pad buttons always keep a way off the
-board. Tab order is Back, Open Move, Zoom Out, Zoom In, Fit Puzzle, Pan, board,
-then back to Back; the board's D-pad up returns to Pan and every toolbar control has
-directional neighbors that leave the toolbar. The board draws a visible focus
-outline; toolbar controls are never disabled at a limit. The toolbar's help
-line and tooltips derive their key names from the live `InputMap` (refreshed on
-unpause after a remap). This adds navigation only — there is no new
+board. Portrait focus order follows board, Menu, Open Move, Fit, then board; landscape/desktop starts at Menu. Action neighbors return to the board, and no hidden toolbar control takes focus. Menu help and Fit tooltips derive current bindings from InputMap. This adds navigation only — there is no new
 keyboard/gamepad arrow-selection system; arrow selection remains a primary
 mouse press.
 
@@ -1109,3 +1101,7 @@ launch). Source of truth: tests/puzzle_presentation_check.gd checks theme scope,
 fonts, all five result fields' text and content bounds at both supported
 desktop sizes, and focus styles. Shared roles and font/license evidence are
 in .knowledge/architecture/game-visual-system.md.
+
+## Responsive menus and paused navigation
+
+The project pause controller routes the visible Menu and cancel action into one guarded overlay. Existing OverlaidMenu owns pause restoration and nested Options focus; Level Select uses PuzzleSession.request_level_select. Results blocks further pause opening. Results and options panels scroll vertically and retain their original metric, score and settings instances. Main Menu stacks its hero at compact width and Level Select uses fitting one/two-column cards. Source of truth: scenes/menus/main_menu/main_menu_with_animations.gd, scenes/menus/main_menu/puzzle_select_menu.gd, scenes/overlaid_menus/pause_menu.gd and tests/puzzle_layout_check.gd. Physical-device UI acceptance is outstanding; emulation is not device evidence.

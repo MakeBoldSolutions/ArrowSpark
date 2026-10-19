@@ -6,6 +6,8 @@ appliesTo:
   - scripts/presentation/game_visual_style.gd
   - scripts/presentation/control_theme.gd
   - scripts/app_theme.gd
+  - scripts/presentation/responsive_layout.gd
+  - scenes/overlaid_menus/mini_options_overlaid_menu.gd
   - scenes/menus/main_menu/menu_backdrop.gd
   - scenes/loading_screen/**
   - scenes/opening/opening_with_logo.tscn
@@ -13,6 +15,7 @@ appliesTo:
   - assets/brand/**
   - assets/audio/ui/**
   - tests/app_theme_check.gd
+  - tests/portrait_menu_check.gd
   - scripts/presentation/arrow_departure_geometry.gd
   - scripts/presentation/puzzle_viewport_transform.gd
   - resources/fonts/**
@@ -224,14 +227,7 @@ the template scene loader at the branded loading screen
 bar), using a node path so fresh editor imports parse it before autoloads
 exist.
 
-The display stretches with `canvas_items` mode and `expand` aspect from the
-1280x720 design size at a fractional scale. In logical units the viewport is
-never smaller than 1280x720; wider or taller windows extend the background and
-keep content centred. All layout, fit and zoom math works in those logical
-units, so a 2560x1440 window renders the same layout at twice the pixels. The
-real-project checks (layout, canvas, presentation, app theme) load this
-setting. Touch input keeps a physical-pixel slop; see
-`.knowledge/reference/touch-gestures.md`.
+Wide desktop stretches with canvas_items/expand from 1280x720; touch-web content instead uses the iframe CSS size, and narrow native fixture windows use actual dimensions. AppTheme applies that policy at startup and resize, including while paused, through ResponsiveLayout. Existing font/target units are CSS-sized on touch rather than a shrunken desktop canvas; high-density rendering remains enabled. Invalid zero sizes preserve the last usable sizing. The board transform continues to own all fit/zoom math and touch slop remains physical. Source of truth: tests/app_theme_check.gd and scripts/app_theme.gd. Emulation does not establish real-device readability; updated phone sizing remains outstanding.
 
 Launch carries Make Bold branding and no engine logo:
 
@@ -346,10 +342,16 @@ Working scale is 64 pixels per cell; overview may be smaller and zoom reaches
 Navigation, for the transform and input contract). Hover, blocked and Open
 Move feedback are unchanged in color and pulse amplitude at any zoom. The
 board shows a 2-pixel ember focus outline while it owns keyboard/gamepad focus,
-and the Pan toggle uses the standard pressed-button vocabulary. Selecting the
+and the menu-provided mouse Pan toggle uses the standard pressed-button vocabulary. Selecting the
 head of a long arrow reveals it at a readable scale with padding before the
 existing pulse. Antialiased Line2D/Polygon2D readability across zoom levels is a
 rendered-desktop review item, not a headless assertion:
 tests/puzzle_canvas_visual_check.gd (non-headless, manual) records navigation-
 handler and frame times on the large fixture and saves overview/working-scale/
 maximum-zoom captures for that review.
+
+## Responsive logical sizing
+
+AppTheme applies ResponsiveLayout at startup and coalesced window resize, including while paused. Touch-web content dimensions use the iframe's CSS dimensions, so existing theme units remain CSS-sized independently of display density. Wide fine-pointer desktop retains its 1280x720 design baseline; narrow native windows use their actual size for rendered checks. Invalid zero sizes retain the last usable scale. The change is runtime presentation only and writes no settings. Source of truth: scripts/app_theme.gd and tests/app_theme_check.gd::_check_responsive_sizing. Physical-device sizing remains outstanding; emulation is not device evidence.
+
+The portrait menu check renders Main Menu, every Level Select action and all Options tabs at the actual narrow iframe widths (320, 350 and 372 logical pixels). It checks target/text floors, horizontal bounds and scroll access; it is automated evidence, not physical-device acceptance.

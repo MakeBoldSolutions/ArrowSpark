@@ -59,6 +59,7 @@ def main():
             repo / "scenes/menus/main_menu/main_menu_with_animations.gd",
             root / "main_menu_with_animations.gd",
         )
+        shutil.copyfile(repo / "scripts/presentation/responsive_layout.gd", root / "responsive_layout.gd")
         shutil.copyfile(repo / "tests/scene_loader_stub.gd", root / "scene_loader_stub.gd")
         shutil.copyfile(repo / "tests/save_input_regression.gd", root / "regression.gd")
         for flags in (("--editor", "--quit"), ("--script", "regression.gd")):

@@ -1,0 +1,155 @@
+{
+  "browser": "155.0",
+  "results": [
+    {
+      "width": 360,
+      "height": 640,
+      "dpr": 1,
+      "touch": true,
+      "host": {
+        "width": 320,
+        "height": 640
+      },
+      "overflow": false,
+      "touchAction": "none",
+      "overscroll": "none",
+      "src": "/game/portrait/index.html",
+      "errors": []
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "dpr": 1,
+      "touch": true,
+      "host": {
+        "width": 350,
+        "height": 844
+      },
+      "overflow": false,
+      "touchAction": "none",
+      "overscroll": "none",
+      "src": "/game/portrait/index.html",
+      "errors": []
+    },
+    {
+      "width": 412,
+      "height": 915,
+      "dpr": 1,
+      "touch": true,
+      "host": {
+        "width": 372,
+        "height": 915
+      },
+      "overflow": false,
+      "touchAction": "none",
+      "overscroll": "none",
+      "src": "/game/portrait/index.html",
+      "errors": []
+    },
+    {
+      "width": 360,
+      "height": 640,
+      "dpr": 3,
+      "touch": true,
+      "host": {
+        "width": 320,
+        "height": 640
+      },
+      "overflow": false,
+      "touchAction": "none",
+      "overscroll": "none",
+      "src": "/game/portrait/index.html",
+      "errors": []
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "dpr": 3,
+      "touch": true,
+      "host": {
+        "width": 350,
+        "height": 844
+      },
+      "overflow": false,
+      "touchAction": "none",
+      "overscroll": "none",
+      "src": "/game/portrait/index.html",
+      "errors": []
+    },
+    {
+      "width": 412,
+      "height": 915,
+      "dpr": 3,
+      "touch": true,
+      "host": {
+        "width": 372,
+        "height": 915
+      },
+      "overflow": false,
+      "touchAction": "none",
+      "overscroll": "none",
+      "src": "/game/portrait/index.html",
+      "errors": []
+    },
+    {
+      "width": 640,
+      "height": 320,
+      "dpr": 1,
+      "touch": true,
+      "host": {
+        "width": 588.7999877929688,
+        "height": 320
+      },
+      "overflow": false,
+      "touchAction": "none",
+      "overscroll": "none",
+      "src": "/game/portrait/index.html",
+      "errors": []
+    },
+    {
+      "width": 915,
+      "height": 412,
+      "dpr": 1,
+      "touch": true,
+      "host": {
+        "width": 841.7999877929688,
+        "height": 412
+      },
+      "overflow": false,
+      "touchAction": "none",
+      "overscroll": "none",
+      "src": "/game/portrait/index.html",
+      "errors": []
+    },
+    {
+      "width": 1280,
+      "height": 720,
+      "dpr": 1,
+      "touch": false,
+      "host": {
+        "width": 1177.5999755859375,
+        "height": 712
+      },
+      "overflow": false,
+      "touchAction": "none",
+      "overscroll": "none",
+      "src": "/game/portrait/index.html",
+      "errors": []
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "dpr": 1,
+      "touch": false,
+      "host": {
+        "width": 1232,
+        "height": 742.5999755859375
+      },
+      "overflow": false,
+      "touchAction": "none",
+      "overscroll": "none",
+      "src": "/game/portrait/index.html",
+      "errors": []
+    }
+  ]
+}

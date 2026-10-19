@@ -9,7 +9,7 @@ var failures: int = 0
 
 ## A head order that fully clears the given definition with zero mistakes,
 ## resolved via the same solver every attempt's legality already agrees
-## with — never a hardcoded order tied to one specific board.
+## with â€” never a hardcoded order tied to one specific board.
 func _clear_order_for(definition: PuzzleDefinition) -> Array[Vector2i]:
 	var result: Dictionary = PuzzleSolver.analyze(definition)
 	var witness: Array[Vector2i] = []
@@ -345,7 +345,7 @@ func _check_setup_replacement_disposes_departures() -> void:
 	check(stale_completions[0] == 0, "a canceled departure never emits a stale completion into a replaced attempt")
 	board.queue_free()
 
-## A second, independent instance of the puzzle scene starts fully fresh —
+## A second, independent instance of the puzzle scene starts fully fresh â€”
 ## the same guarantee Replay/Restart rely on by reloading the scene. Reused
 ## below to exercise rapid repeated clicks on a TAIL cell while its blocked
 ## pulse is still playing: catalog entry "multi_bend"'s multi-bend arrow is
@@ -375,7 +375,7 @@ func _check_fresh_instance_starts_clean_and_rapid_tail_clicks() -> void:
 	PuzzleSession.set_current_id(PuzzleCatalog.id_at(0))
 
 ## US1 independent test: every one of the fifteen catalog puzzles is playable
-## start-to-finish through the real, unmodified scene — proving engine
+## start-to-finish through the real, unmodified scene â€” proving engine
 ## generality end-to-end, not only via the pure solver gate. For each: the
 ## board's active view count matches the definition's arrow count, the HUD
 ## puzzle label matches the catalog title, and the same witness-replay
@@ -724,11 +724,11 @@ func _check_back_button() -> void:
 	var puzzle: Control = load("res://scenes/puzzle/arrow_puzzle.tscn").instantiate()
 	get_root().add_child(puzzle)
 	await process_frame
-	var back: Button = puzzle.get_node("%BackButton")
-	check(back.visible and back.focus_mode == Control.FOCUS_ALL and back.text == "Back",
-		"the play HUD has a visible, focusable Back button")
+	var back: Button = puzzle.get_node("%MenuButton")
+	check(back.visible and back.focus_mode == Control.FOCUS_ALL and back.text == "Menu",
+		"the play surface has a visible, focusable Menu button")
 	check(back.pressed.get_connections().size() > 0, "the Back button is wired to its handler")
-	check(puzzle.has_method("_on_back_button_pressed"), "the Back handler exists (it opens Level Select, not a live scene change here)")
+	check(puzzle.has_method("_on_menu_button_pressed"), "Menu opens the shared pause flow")
 	puzzle.queue_free()
 	await process_frame
 	PuzzleSession.set_current_id("")
@@ -926,7 +926,72 @@ func _check_replay_resets_open_move_fields() -> void:
 
 	PuzzleSession.set_current_id(PuzzleCatalog.id_at(0))
 
+func _check_nested_pause_portrait() -> void:
+	for settle in 4:
+		root.size = Vector2i(390, 784)
+		await process_frame
+	var scene: Control = load("res://scenes/puzzle/arrow_puzzle.tscn").instantiate()
+	root.add_child(scene)
+	var previous := current_scene
+	current_scene = scene
+	await process_frame
+	var controller = scene.get_node("%PauseMenuController")
+	var remaining: int = scene._state.remaining()
+	controller.open_menu()
+	controller.open_menu()
+	await process_frame
+	var menu = controller._menu
+	check(paused and is_instance_valid(menu), "Menu pauses through one guarded overlay")
+	var overlay_count := 0
+	for child in scene.get_children():
+		if child.get_script() != null and child.get_script().resource_path == "res://scenes/overlaid_menus/pause_menu.gd":
+			overlay_count += 1
+	check(overlay_count == 1, "duplicate menu request cannot stack pause overlays")
+	menu.open_options_menu()
+	for i in 5:
+		await process_frame
+	var nested = menu.get_child(menu.get_child_count() - 1)
+	var panel: Control = nested.get_node("%MenuPanelContainer")
+	check(Rect2(Vector2.ZERO, scene.size).encloses(panel.get_rect()), "nested Options panel fits portrait: scene=%s panel=%s" % [scene.size, panel.get_rect()])
+	nested.close()
+	await process_frame
+	check(paused, "closing nested Options keeps the game paused")
+	menu.close()
+	await process_frame
+	check(not paused and scene._state.remaining() == remaining, "Resume retains the attempt and restores pause state")
+	current_scene = previous
+	scene.queue_free()
+	await process_frame
+	root.size = Vector2i(1280, 720)
+	await process_frame
+
+func _check_portrait_action_strip() -> void:
+	for area in [Vector2i(320, 580), Vector2i(350, 784), Vector2i(372, 855)]:
+		for retry in 3:
+			root.size = area
+			await process_frame
+		var scene: Control = load("res://scenes/puzzle/arrow_puzzle.tscn").instantiate()
+		root.add_child(scene)
+		await process_frame
+		await process_frame
+		var board: Control = scene.get_node("%PuzzleBoard")
+		var actions: Control = scene.get_node("%Actions")
+		var ratio := board.size.x * board.size.y / (scene.size.x * scene.size.y)
+		print("PORTRAIT area=", area, " board_fraction=", ratio, " chrome=", scene.size.y - board.size.y)
+		check(scene.size.x <= area.x and scene.get_node("Layout").size.x <= area.x, "game surface fits actual iframe width")
+		check(ratio >= 0.75, "portrait board keeps at least three quarters of usable area")
+		check(actions.global_position.y >= board.global_position.y + board.size.y, "portrait actions sit below the board")
+		check(actions.get_child_count() == 3, "only three persistent action controls")
+		for action in actions.get_children():
+			check(action.size.x >= 44 and action.size.y >= 44, "portrait action meets target floor")
+		scene.queue_free()
+		await process_frame
+	root.size = Vector2i(1280, 720)
+	await process_frame
+
 func _initialize() -> void:
+	await _check_nested_pause_portrait()
+	await _check_portrait_action_strip()
 	check(PuzzleFeedback.BLOCKED_CUE_DURATION_SECONDS <= PuzzleFeedback.BLOCKED_CUE_DURATION_CAP_SECONDS,
 		"the coded blocked-feedback cue duration constant does not exceed its coded cap")
 

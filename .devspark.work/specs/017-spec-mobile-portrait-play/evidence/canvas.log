@@ -1,0 +1,733 @@
+Godot Engine v4.4.stable.official.4c311cbee - https://godotengine.org
+
+PASS: cancelled touch cannot select or penalize
+PASS: valid resize clears pending contacts
+PASS: a new attempt starts fitted with a valid layout
+PASS: the initial scale is the fit scale
+PASS: the 40x30 fixture is below the comfortable selection scale at overview
+PASS: World scale is the displayed cell size over the canonical extent
+PASS: the fitted world lies entirely inside the board area
+PASS: the fitted world is centered in the board area
+PASS: the board clips its contents to the viewport
+PASS: departing arrows are not clipped at the board edge, which the camera can now show
+PASS: World is a child of the board and owns the departure clip
+PASS: World and the departure clip ignore mouse input
+PASS: every active view is a passive child of World
+PASS: every view is built once at the canonical 64-pixel extent
+PASS: button zoom leaves fit mode
+PASS: wheel zoom keeps the point under the pointer fixed
+PASS: wheel zoom reaches the 64-pixel working scale
+PASS: corner cell (0, 0) can be brought fully into view at the working scale
+PASS: corner cell (0, 0) resolves under its own center after panning
+PASS: board corner (0.0, 0.0) is brought to the middle of the viewport
+PASS: corner cell (39, 0) can be brought fully into view at the working scale
+PASS: corner cell (39, 0) resolves under its own center after panning
+PASS: board corner (40.0, 0.0) is brought to the middle of the viewport
+PASS: corner cell (0, 29) can be brought fully into view at the working scale
+PASS: corner cell (0, 29) resolves under its own center after panning
+PASS: board corner (0.0, 30.0) is brought to the middle of the viewport
+PASS: corner cell (39, 29) can be brought fully into view at the working scale
+PASS: corner cell (39, 29) resolves under its own center after panning
+PASS: board corner (40.0, 30.0) is brought to the middle of the viewport
+PASS: navigation leaves the rule state untouched
+PASS: navigation keeps every arrow view instance
+PASS: navigation never rebuilds or resizes canonical view geometry
+PASS: Fit Puzzle restores the overview in one action
+PASS: Fit Puzzle leaves the rule state untouched
+PASS: the catalog has 23 distinct board sizes to check
+PASS: every catalog board size can bring each corner to the viewport center (176 cases, 0 misses)
+PASS: repeated zoom in saturates at the maximum scale
+PASS: zooming in at the maximum changes nothing
+PASS: repeated zoom out saturates at the fit scale
+PASS: a full wheel notch zooms by exactly one 1.2x step
+PASS: a fractional (trackpad) event zooms by less than a full step
+PASS: a huge event factor is clamped to one step and cannot overshoot
+PASS: wheel down zooms back out
+PASS: all 14 original puzzles were laid out at (1280, 720)
+PASS: all 14 original puzzles were laid out at (960, 540)
+PASS: all 14 original puzzles were laid out at (800, 800)
+PASS: all 14 original puzzles were laid out at (1920, 1080)
+PASS: removing arrows never refits to the remaining geometry
+PASS: Fit after removals is centered on the original board dimensions
+PASS: visible navigation control is focusable
+PASS: forward focus stays on visible controls
+PASS: reverse focus stays on visible controls
+PASS: visible navigation control is focusable
+PASS: forward focus stays on visible controls
+PASS: reverse focus stays on visible controls
+PASS: visible navigation control is focusable
+PASS: forward focus stays on visible controls
+PASS: reverse focus stays on visible controls
+PASS: visible navigation control is focusable
+PASS: forward focus stays on visible controls
+PASS: reverse focus stays on visible controls
+PASS: board focus can reach Fit
+PASS: action focus can return to board
+PASS: action focus can return to board
+PASS: action focus can return to board
+PASS: visible Fit restores overview without changing rules
+PASS: redundant toolbar actions are absent
+PASS: the board can take keyboard/gamepad focus
+PASS: canvas_zoom_in zooms one step about the view center
+PASS: canvas_zoom_out zooms back one step
+PASS: canvas_fit restores the overview
+PASS: a released action does nothing
+PASS: focused move_right pans the camera toward +x only
+PASS: focused pan moves 600 screen pixels per second independent of zoom
+PASS: diagonal pan is normalized to the same speed as a straight pan
+PASS: held keyboard or stick pan stops with the far board corner at the center
+PASS: held pan the other way stops at the near corner
+PASS: focus can leave the board for the toolbar
+PASS: without board focus the pan actions never move the camera
+PASS: the default move_up key is treated as a canvas action while focused
+PASS: Tab is never consumed by the board
+PASS: the left stick is consumed so it cannot also move GUI focus
+PASS: D-pad buttons still navigate focus
+PASS: a movement action remapped to Tab is never consumed, so Tab always leaves the board
+PASS: a movement action remapped to a D-pad button is never consumed
+PASS: focus can still leave the board by Tab order and by D-pad up
+PASS: an ordinary remapped movement key is honored
+PASS: a middle press captures a navigation drag
+PASS: pause cancels a captured drag
+PASS: navigation is ignored while the tree is paused
+PASS: window focus loss cancels a captured drag
+PASS: hiding the board cancels a captured drag
+PASS: the window losing focus cancels a captured drag
+PASS: disabled navigation ignores zoom and drag input
+PASS: re-enabled navigation works again
+PASS: canvas_zoom_in exists with default bindings
+PASS: canvas_zoom_out exists with default bindings
+PASS: canvas_fit exists with default bindings
+PASS: zoom in has keyboard keys and the right shoulder by default
+PASS: Fit is on gamepad Y by default
+PASS: menu help describes mouse and touch navigation
+PASS: menu help reflects live remaps
+PASS: single-button mouse Pan capability remains
+PASS: the head cell resolves through the inverse transform
+PASS: a press on an empty cell emits exactly that cell
+PASS: an empty-cell press changes no rule state, counter or assist
+PASS: pointer motion over a tail cell samples that cell through the inverse transform
+PASS: a press on a tail cell emits the tail cell (the controller resolves the owner)
+PASS: the controller maps the tail cell to its canonical head
+PASS: a press outside the authored board emits no cell
+PASS: the fixture's blocked long arrow owns its tail cell
+PASS: a zoomed, panned tail-cell press on a blocked arrow counts exactly one mistake and one tap
+PASS: the blocked arrow's view remains active
+PASS: selecting the open head after panning removes exactly that arrow
+PASS: the removed arrow's view moves to the departing collection
+PASS: departed cells cannot be selected again
+PASS: in Select mode an unmodified primary press selects once and a drag never pans
+PASS: a middle drag pans and never emits a selection
+PASS: a simultaneous primary press during a middle drag emits no selection
+PASS: Pan mode can be enabled
+PASS: in Pan mode a primary drag pans and emits no selection
+PASS: releasing outside the board ends the drag with no selection
+PASS: motion reporting no held button cancels the drag
+PASS: leaving Pan mode mid-gesture cancels it without a selection
+PASS: no gesture changed the rule state (the only presses landed on empty cells)
+PASS: selection works again in Select mode after all gestures
+PASS: touch checks run with Pan mode off
+PASS: a touch selects nothing on touch-down
+PASS: a tap selects exactly once, on release
+PASS: movement under the slop does not pan
+PASS: a one-finger drag never selects
+PASS: a one-finger drag pans without Pan mode
+PASS: spreading two fingers zooms in without any mode
+PASS: the finger left after a pinch neither selects nor zooms
+PASS: a fresh tap after a pinch selects normally
+PASS: touch-emulated mouse events never select
+PASS: a 2560x1440 window stretches the 1280x720 design by 2 (got 2.00)
+PASS: a drift under the physical slop still taps at a stretch scale of 2
+PASS: a drag past the physical slop pans and never selects at a stretch scale of 2
+PASS: the overview is below the readable scale
+PASS: one request charges exactly one assist
+PASS: revealing from the overview raises the scale to at least 48 px per cell
+PASS: the head cell is fully visible with 8 px padding
+PASS: the revealed head pulses through the existing suggestion feedback
+PASS: a repeated request is charged once more
+PASS: a target that is already readable and visible does not move the view
+PASS: the open head is off-screen after panning away
+PASS: an off-screen request is charged exactly once
+PASS: the off-screen head is revealed with padding
+PASS: reveal never lowers the working scale
+PASS: a long arrow's head is revealed at maximum zoom even though its tail cannot fit
+PASS: reveal keeps the current larger scale
+PASS: each request charged once (four so far)
+PASS: the revealed head is the rule authority's open move
+PASS: an Open Move request after completion is a no-op with no assist charge
+PASS: a completed request leaves the view unchanged
+PASS: a zero-size board has an invalid layout
+PASS: an invalid area keeps the reveal pending
+PASS: nothing is revealed while the area is invalid
+PASS: valid recovery applies the pending reveal exactly once
+PASS: the recovered reveal shows the head cell
+PASS: the suggestion pulse stays active through the invalid interval
+PASS: clearing a suggestion cancels its pending reveal
+PASS: a cancelled reveal never moves the view after recovery
+PASS: the witness completes the board while navigating between selections
+PASS: results with navigation match a pure-state replay exactly
+PASS: navigation adds no mistake, assist or score change
+PASS: the session best equals the pure-state result
+PASS: solver and analyzer outputs are identical before and after navigation flows
+PASS: the transform still describes the original board after completion
+PASS: five arrows depart concurrently with five pending departures
+PASS: zoom, pan and fit leave every departing view's route, progress and canonical geometry untouched
+PASS: the departure clip keeps the full logical board extent under World
+PASS: off-screen departures keep advancing while their view is not visible
+PASS: a long departing view at (4, 1) keeps canonical route geometry mid-flight
+PASS: a long departing view at (5, 1) keeps canonical route geometry mid-flight
+PASS: a long departing view at (6, 2) keeps canonical route geometry mid-flight
+PASS: a long departing view at (0, 6) keeps canonical route geometry mid-flight
+PASS: a long departing view at (6, 16) keeps canonical route geometry mid-flight
+PASS: each concurrent departure reports completion exactly once
+PASS: every departing view emitted exit_finished exactly once
+PASS: the departure barrier drains fully
+PASS: a long arrow's finish distance covers its whole route plus edge clearance
+PASS: the finish distance is independent of the current zoom
+PASS: a departure watched at maximum zoom still clears the full board
+PASS: a fit view refits to the new area on resize
+PASS: a resize leaves the departing view's canonical extent and parent alone
+PASS: a manual view keeps its absolute scale across a resize
+PASS: the board reports an invalid layout at zero area
+PASS: departures do not advance while the area is invalid
+PASS: the canonical extent and route survive an invalid area
+PASS: direct advance calls are also refused while the layout is invalid
+PASS: hit testing is suspended while invalid
+PASS: a usable area restores the layout
+PASS: departures resume from their frozen progress after recovery
+PASS: paused departures do not advance
+PASS: all departures completed exactly once after pause, zero-area and recovery
+PASS: no departing view completed twice
+PASS: replacing the puzzle clears the departing collection
+PASS: a replacement puzzle starts at a fresh overview
+PASS: a replaced attempt's departures never signal completion
+ERROR: FAIL: navigation remains available while departures drain before the results appear
+   at: push_error (core/variant/variant_utility.cpp:1098)
+PASS: results appear once every departure clears
+PASS: showing results disables board navigation
+PASS: zoom and drag are ignored while the results cover the board
+PASS: the first attempt is navigated and in Pan mode
+PASS: a replayed attempt starts with a fresh complete-board overview
+PASS: a replayed attempt starts in Select mode with navigation enabled
+PASS: a replayed attempt has fresh rule state
+PASS: mouse Pan mode resets for a new attempt
+PASS: Next from an earlier puzzle advances the session
+PASS: the next catalog entry starts fitted at its own dimensions
+PASS: a newly selected puzzle starts fitted
+PASS: navigation, replay and puzzle changes never write the save file
+PASS: navigation, replay and puzzle changes never write the settings file
+PASS: no viewport field is persisted in settings
+WARNING: res://scenes/menus/main_menu/main_menu_with_animations.tscn:4 - ext_resource, invalid UID: uid://bjv2v4jhmcukd - using text path instead: res://scenes/menus/main_menu/main_menu_with_animations.gd
+   at: load (scene/resources/resource_format_text.cpp:447)
+WARNING: res://scenes/menus/options_menu/master_options_menu_with_tabs.tscn:4 - ext_resource, invalid UID: uid://c7yy2phckplob - using text path instead: res://scenes/menus/options_menu/master_options_menu.gd
+   at: load (scene/resources/resource_format_text.cpp:447)
+WARNING: res://scenes/menus/options_menu/master_options_menu_with_tabs.tscn:6 - ext_resource, invalid UID: uid://b3gt8onndu07 - using text path instead: res://scenes/menus/options_menu/input/input_extras_menu.tscn
+   at: load (scene/resources/resource_format_text.cpp:447)
+WARNING: res://scenes/menus/options_menu/master_options_menu_with_tabs.tscn:7 - ext_resource, invalid UID: uid://bi0n676ih5b1f - using text path instead: res://scenes/menus/options_menu/audio/audio_options_menu.tscn
+   at: load (scene/resources/resource_format_text.cpp:447)
+WARNING: res://scenes/menus/options_menu/video/video_options_menu_with_extras.tscn:4 - ext_resource, invalid UID: uid://dcvhxth13iqi4 - using text path instead: res://scenes/menus/options_menu/video/video_options_menu.gd
+   at: load (scene/resources/resource_format_text.cpp:447)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Can't change orientation of HBoxContainer.
+   at: set_vertical (scene/gui/box_container.cpp:312)
+ERROR: Can't change orientation of HBoxContainer.
+   at: set_vertical (scene/gui/box_container.cpp:312)
+ERROR: Can't change orientation of HBoxContainer.
+   at: set_vertical (scene/gui/box_container.cpp:312)
+ERROR: Can't change orientation of HBoxContainer.
+   at: set_vertical (scene/gui/box_container.cpp:312)
+ERROR: Can't change orientation of HBoxContainer.
+   at: set_vertical (scene/gui/box_container.cpp:312)
+ERROR: Can't change orientation of HBoxContainer.
+   at: set_vertical (scene/gui/box_container.cpp:312)
+ERROR: Can't change orientation of HBoxContainer.
+   at: set_vertical (scene/gui/box_container.cpp:312)
+ERROR: Can't change orientation of HBoxContainer.
+   at: set_vertical (scene/gui/box_container.cpp:312)
+ERROR: Can't change orientation of HBoxContainer.
+   at: set_vertical (scene/gui/box_container.cpp:312)
+ERROR: Can't change orientation of HBoxContainer.
+   at: set_vertical (scene/gui/box_container.cpp:312)
+ERROR: Can't change orientation of HBoxContainer.
+   at: set_vertical (scene/gui/box_container.cpp:312)
+ERROR: Can't change orientation of HBoxContainer.
+   at: set_vertical (scene/gui/box_container.cpp:312)
+ERROR: Can't change orientation of HBoxContainer.
+   at: set_vertical (scene/gui/box_container.cpp:312)
+ERROR: Can't change orientation of HBoxContainer.
+   at: set_vertical (scene/gui/box_container.cpp:312)
+PASS: Level Select lists the full catalog at (960, 540)
+PASS: Level Select scrolls vertically and follows keyboard/gamepad focus at (960, 540)
+PASS: every Level Select entry can be focused fully into view at (960, 540)
+WARNING: res://scenes/menus/main_menu/main_menu_with_animations.tscn:4 - ext_resource, invalid UID: uid://bjv2v4jhmcukd - using text path instead: res://scenes/menus/main_menu/main_menu_with_animations.gd
+   at: load (scene/resources/resource_format_text.cpp:447)
+WARNING: res://scenes/menus/options_menu/master_options_menu_with_tabs.tscn:4 - ext_resource, invalid UID: uid://c7yy2phckplob - using text path instead: res://scenes/menus/options_menu/master_options_menu.gd
+   at: load (scene/resources/resource_format_text.cpp:447)
+WARNING: res://scenes/menus/options_menu/master_options_menu_with_tabs.tscn:6 - ext_resource, invalid UID: uid://b3gt8onndu07 - using text path instead: res://scenes/menus/options_menu/input/input_extras_menu.tscn
+   at: load (scene/resources/resource_format_text.cpp:447)
+WARNING: res://scenes/menus/options_menu/master_options_menu_with_tabs.tscn:7 - ext_resource, invalid UID: uid://bi0n676ih5b1f - using text path instead: res://scenes/menus/options_menu/audio/audio_options_menu.tscn
+   at: load (scene/resources/resource_format_text.cpp:447)
+WARNING: res://scenes/menus/options_menu/video/video_options_menu_with_extras.tscn:4 - ext_resource, invalid UID: uid://dcvhxth13iqi4 - using text path instead: res://scenes/menus/options_menu/video/video_options_menu.gd
+   at: load (scene/resources/resource_format_text.cpp:447)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Can't change orientation of HBoxContainer.
+   at: set_vertical (scene/gui/box_container.cpp:312)
+ERROR: Can't change orientation of HBoxContainer.
+   at: set_vertical (scene/gui/box_container.cpp:312)
+ERROR: Can't change orientation of HBoxContainer.
+   at: set_vertical (scene/gui/box_container.cpp:312)
+ERROR: Can't change orientation of HBoxContainer.
+   at: set_vertical (scene/gui/box_container.cpp:312)
+ERROR: Can't change orientation of HBoxContainer.
+   at: set_vertical (scene/gui/box_container.cpp:312)
+ERROR: Can't change orientation of HBoxContainer.
+   at: set_vertical (scene/gui/box_container.cpp:312)
+ERROR: Can't change orientation of HBoxContainer.
+   at: set_vertical (scene/gui/box_container.cpp:312)
+ERROR: Can't change orientation of HBoxContainer.
+   at: set_vertical (scene/gui/box_container.cpp:312)
+ERROR: Can't change orientation of HBoxContainer.
+   at: set_vertical (scene/gui/box_container.cpp:312)
+ERROR: Can't change orientation of HBoxContainer.
+   at: set_vertical (scene/gui/box_container.cpp:312)
+ERROR: Can't change orientation of HBoxContainer.
+   at: set_vertical (scene/gui/box_container.cpp:312)
+ERROR: Can't change orientation of HBoxContainer.
+   at: set_vertical (scene/gui/box_container.cpp:312)
+ERROR: Can't change orientation of HBoxContainer.
+   at: set_vertical (scene/gui/box_container.cpp:312)
+ERROR: Can't change orientation of HBoxContainer.
+   at: set_vertical (scene/gui/box_container.cpp:312)
+PASS: Level Select lists the full catalog at (800, 800)
+PASS: Level Select scrolls vertically and follows keyboard/gamepad focus at (800, 800)
+PASS: every Level Select entry can be focused fully into view at (800, 800)
+WARNING: res://scenes/menus/main_menu/main_menu_with_animations.tscn:4 - ext_resource, invalid UID: uid://bjv2v4jhmcukd - using text path instead: res://scenes/menus/main_menu/main_menu_with_animations.gd
+   at: load (scene/resources/resource_format_text.cpp:447)
+WARNING: res://scenes/menus/options_menu/master_options_menu_with_tabs.tscn:4 - ext_resource, invalid UID: uid://c7yy2phckplob - using text path instead: res://scenes/menus/options_menu/master_options_menu.gd
+   at: load (scene/resources/resource_format_text.cpp:447)
+WARNING: res://scenes/menus/options_menu/master_options_menu_with_tabs.tscn:6 - ext_resource, invalid UID: uid://b3gt8onndu07 - using text path instead: res://scenes/menus/options_menu/input/input_extras_menu.tscn
+   at: load (scene/resources/resource_format_text.cpp:447)
+WARNING: res://scenes/menus/options_menu/master_options_menu_with_tabs.tscn:7 - ext_resource, invalid UID: uid://bi0n676ih5b1f - using text path instead: res://scenes/menus/options_menu/audio/audio_options_menu.tscn
+   at: load (scene/resources/resource_format_text.cpp:447)
+WARNING: res://scenes/menus/options_menu/video/video_options_menu_with_extras.tscn:4 - ext_resource, invalid UID: uid://dcvhxth13iqi4 - using text path instead: res://scenes/menus/options_menu/video/video_options_menu.gd
+   at: load (scene/resources/resource_format_text.cpp:447)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Not supported by this display server.
+   at: keyboard_get_keycode_from_physical (servers/display_server.cpp:740)
+ERROR: Can't change orientation of HBoxContainer.
+   at: set_vertical (scene/gui/box_container.cpp:312)
+ERROR: Can't change orientation of HBoxContainer.
+   at: set_vertical (scene/gui/box_container.cpp:312)
+ERROR: Can't change orientation of HBoxContainer.
+   at: set_vertical (scene/gui/box_container.cpp:312)
+ERROR: Can't change orientation of HBoxContainer.
+   at: set_vertical (scene/gui/box_container.cpp:312)
+ERROR: Can't change orientation of HBoxContainer.
+   at: set_vertical (scene/gui/box_container.cpp:312)
+ERROR: Can't change orientation of HBoxContainer.
+   at: set_vertical (scene/gui/box_container.cpp:312)
+ERROR: Can't change orientation of HBoxContainer.
+   at: set_vertical (scene/gui/box_container.cpp:312)
+ERROR: Can't change orientation of HBoxContainer.
+   at: set_vertical (scene/gui/box_container.cpp:312)
+ERROR: Can't change orientation of HBoxContainer.
+   at: set_vertical (scene/gui/box_container.cpp:312)
+ERROR: Can't change orientation of HBoxContainer.
+   at: set_vertical (scene/gui/box_container.cpp:312)
+ERROR: Can't change orientation of HBoxContainer.
+   at: set_vertical (scene/gui/box_container.cpp:312)
+ERROR: Can't change orientation of HBoxContainer.
+   at: set_vertical (scene/gui/box_container.cpp:312)
+ERROR: Can't change orientation of HBoxContainer.
+   at: set_vertical (scene/gui/box_container.cpp:312)
+ERROR: Can't change orientation of HBoxContainer.
+   at: set_vertical (scene/gui/box_container.cpp:312)
+PASS: Level Select lists the full catalog at (1280, 720)
+PASS: Level Select scrolls vertically and follows keyboard/gamepad focus at (1280, 720)
+PASS: every Level Select entry can be focused fully into view at (1280, 720)
+PASS: experiment 'knot_long_geometry' fits its full authored canvas
+PASS: experiment 'knot_long_geometry' has a complete witness
+PASS: experiment 'knot_long_geometry' keeps a zoomed legal head selectable
+PASS: experiment 'knot_long_geometry' navigation does not change rule state
+PASS: experiment 'knot_long_geometry' accepts a transformed legal selection
+PASS: experiment 'knot_interwoven_paths' fits its full authored canvas
+PASS: experiment 'knot_interwoven_paths' has a complete witness
+PASS: experiment 'knot_interwoven_paths' keeps a zoomed legal head selectable
+PASS: experiment 'knot_interwoven_paths' navigation does not change rule state
+PASS: experiment 'knot_interwoven_paths' accepts a transformed legal selection
+PASS: experiment 'knot_dense_core' fits its full authored canvas
+PASS: experiment 'knot_dense_core' has a complete witness
+PASS: experiment 'knot_dense_core' keeps a zoomed legal head selectable
+PASS: experiment 'knot_dense_core' navigation does not change rule state
+PASS: experiment 'knot_dense_core' accepts a transformed legal selection
+PASS: experiment 'knot_regions' fits its full authored canvas
+PASS: experiment 'knot_regions' has a complete witness
+PASS: experiment 'knot_regions' keeps a zoomed legal head selectable
+PASS: experiment 'knot_regions' navigation does not change rule state
+PASS: experiment 'knot_regions' accepts a transformed legal selection
+PASS: experiment 'knot_single_release' fits its full authored canvas
+PASS: experiment 'knot_single_release' has a complete witness
+PASS: experiment 'knot_single_release' keeps a zoomed legal head selectable
+PASS: experiment 'knot_single_release' navigation does not change rule state
+PASS: experiment 'knot_single_release' accepts a transformed legal selection
+PASS: experiment 'knot_boundary' fits its full authored canvas
+PASS: experiment 'knot_boundary' has a complete witness
+PASS: experiment 'knot_boundary' keeps a zoomed legal head selectable
+PASS: experiment 'knot_boundary' navigation does not change rule state
+PASS: experiment 'knot_boundary' accepts a transformed legal selection
+PUZZLE_CANVAS_FAILURES=1

@@ -1,0 +1,32 @@
+Godot Engine v4.4.1.stable.official.49a5bc7b6 - https://godotengine.org
+
+PASS: Menu pauses through one guarded overlay
+PASS: duplicate menu request cannot stack pause overlays
+PASS: nested Options panel fits portrait: scene=(390.0, 784.0) panel=[P: (12.0, 72.0), S: (366.0, 640.0)]
+PASS: closing nested Options keeps the game paused
+PASS: Resume retains the attempt and restores pause state
+PORTRAIT area=(320, 580) board_fraction=0.8448275862069 chrome=90.0
+PASS: game surface fits actual iframe width
+PASS: portrait board keeps at least three quarters of usable area
+PASS: portrait actions sit below the board
+PASS: only three persistent action controls
+PASS: portrait action meets target floor
+PASS: portrait action meets target floor
+PASS: portrait action meets target floor
+PORTRAIT area=(350, 784) board_fraction=0.88520408163265 chrome=90.0
+PASS: game surface fits actual iframe width
+PASS: portrait board keeps at least three quarters of usable area
+PASS: portrait actions sit below the board
+PASS: only three persistent action controls
+PASS: portrait action meets target floor
+PASS: portrait action meets target floor
+PASS: portrait action meets target floor
+PORTRAIT area=(372, 855) board_fraction=0.89473684210526 chrome=90.0
+PASS: game surface fits actual iframe width
+PASS: portrait board keeps at least three quarters of usable area
+PASS: portrait actions sit below the board
+PASS: only three persistent action controls
+PASS: portrait action meets target floor
+PASS: portrait action meets target floor
+PASS: portrait action meets target floor
+PORTRAIT_FOCUSED_FAILURES=0

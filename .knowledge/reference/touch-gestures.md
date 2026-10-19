@@ -18,9 +18,10 @@ How ArrowSpark handles touch, and what the research behind it found. Owner direc
 `PuzzleBoard._gui_input` tracks raw `InputEventScreenTouch` / `InputEventScreenDrag` events and feeds the one viewport authority, `PuzzleViewportTransform` (`zoom_at`, `pan_pixels`). No second zoom or hit-test model exists.
 
 - **Tap acts on release.** A touch is a pending tap. It emits one `cell_clicked` only on release, and only if no second finger appeared and movement stayed under `_TOUCH_SLOP_PIXELS` (32). The slop is 32 *physical* screen pixels: touch positions arrive in logical (UI-scaled) units, so `PuzzleBoard._touch_slop()` divides it by the viewport's stretch scale and UI scaling never changes how far a finger may drift before a tap becomes a pan. Source of truth: `tests/puzzle_canvas_check.gd` (touch slop at a stretch scale of 2).
-- **One-finger drag pans.** Crossing the slop cancels the tap and starts a pan; the board catches up from the touch-down point so it does not jump. It works with Pan mode off. Pan mode and the Pan button remain for mouse users.
+- **One-finger drag pans.** Crossing the slop cancels the tap and starts a pan; the board catches up from the touch-down point so it does not jump. It works with Pan mode off. Mouse Pan mode remains available as a toggle in the game menu; the active game surface has no Pan button. Middle-drag pans directly, while primary mouse press selects unless Pan mode is enabled.
 - **Two-finger pinch zooms** about the midpoint, and moving both fingers together pans. Bounds are the transform's own: the camera center may reach any point of the board (above the Fit scale), and the scale is between Fit and the maximum.
 - **After a pinch**, the remaining finger is locked out (no select, no pan) until every finger lifts.
+- **Cancellation and resizing discard pending taps.** Explicit cancelled touch, all board resizes, pause and focus loss clear tracked contacts before further input; a delayed release cannot select an arrow.
 - **Emulated mouse is ignored.** Godot synthesizes mouse events from touch with `device == InputEvent.DEVICE_ID_EMULATION`; the board drops them so one touch never selects twice or before release.
 - Tests: `_check_modeless_touch` in `tests/puzzle_canvas_check.gd` synthesizes touch events (headless cannot test real fingers).
 
@@ -35,7 +36,7 @@ How ArrowSpark handles touch, and what the research behind it found. Owner direc
 
 ## Web: the browser can take the gesture first
 
-On the web the browser decides whether a gesture belongs to the page or the game. Chrome combines `touch-action` across the iframe boundary, so `touch-action: none` inside the game shell (`web/game-shell/shell.css`) is not enough: the host page must also set it on the frame (`.game-frame__stage` in `web/src/styles/arrowspark.css`). Without it the page can claim a two-finger gesture as page zoom and the game only receives a cancel. This was the leading explanation for pinch failing on a real Pixel 7 Pro; it is a hypothesis until re-tested on the device. Side effect: dragging on the game area does not scroll the page.
+On the web the browser decides whether a gesture belongs to the page or the game. Chrome combines `touch-action` across the iframe boundary, so `touch-action: none` inside the game shell (`web/game-shell/shell.css`) is not enough: the host page must also set it on the frame (`.game-frame__stage` in `web/src/styles/arrowspark.css`). Without it the page can claim a two-finger gesture as page zoom and the game only receives a cancel. This was the leading explanation for pinch failing on a real Pixel 7 Pro; it is a hypothesis until re-tested on the device. The host stage and shell also set overscroll-behavior: none to prevent scroll chaining and browser pull-to-refresh from board drags. Scrolling and browser zoom outside the game remain available.
 
 ## Libraries considered and not adopted
 

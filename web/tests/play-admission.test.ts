@@ -23,9 +23,12 @@ describe('decidePlay', () => {
     expect(decidePlay(phone({ width: 640, height: 320 }))).toBe('play');
   });
 
-  it('asks a touch device in portrait to rotate', () => {
-    expect(decidePlay(phone({ width: 411, height: 891 }))).toBe('rotate');
-    expect(decidePlay(phone({ width: 820, height: 1180 }))).toBe('rotate');
+  it('admits portrait at the visible-area floor', () => {
+    expect(decidePlay(phone({ width: 411, height: 891 }))).toBe('play');
+    expect(decidePlay(phone({ width: 360, height: 640 }))).toBe('play');
+    expect(decidePlay(phone({ width: 359, height: 640 }))).toBe('larger');
+    expect(decidePlay(phone({ width: 360, height: 639 }))).toBe('larger');
+    expect(decidePlay(phone({ width: 820, height: 1180 }))).toBe('play');
   });
 
   it('asks a too-small touch landscape screen for a larger one', () => {
@@ -42,7 +45,7 @@ describe('decidePlay', () => {
     const hybrid = (width: number, height: number): Capabilities => ({ width, height, finePointer: true, touch: true });
     expect(decidePlay(hybrid(1440, 900))).toBe('play');
     expect(decidePlay(hybrid(800, 450))).toBe('play'); // too small for the desktop route, fine for touch landscape
-    expect(decidePlay(hybrid(450, 800))).toBe('rotate');
+    expect(decidePlay(hybrid(450, 800))).toBe('play');
     expect(decidePlay(hybrid(600, 300))).toBe('larger');
   });
 });
@@ -63,5 +66,14 @@ describe('readCapabilities', () => {
       matchMedia: (q: string) => ({ matches: q === '(any-pointer: coarse)' }),
     } as unknown as Window;
     expect(readCapabilities(win)).toEqual({ width: 850, height: 411, finePointer: false, touch: true });
+  });
+});
+
+describe('visible viewport', () => {
+  it('uses a normal-zoom visual viewport but preserves outside-page pinch zoom', () => {
+    const win = { innerWidth: 412, innerHeight: 915, visualViewport: { width: 390, height: 700, scale: 1 }, matchMedia: () => ({ matches: true }) } as unknown as Window;
+    expect(readCapabilities(win).height).toBe(700);
+    Object.assign(win.visualViewport!, { width: 195, height: 350, scale: 2 });
+    expect(readCapabilities(win).height).toBe(915);
   });
 });

@@ -217,6 +217,7 @@ func _apply_view_change() -> void:
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_RESIZED:
+		_cancel_drag()
 		view_transform.resize_view(size)
 		_apply_view_change()
 	elif what == NOTIFICATION_PAUSED or what == NOTIFICATION_APPLICATION_FOCUS_OUT \
@@ -326,6 +327,10 @@ func _gui_input(event: InputEvent) -> void:
 ## A touch is a pending tap. It selects only on release, and only if no second finger
 ## appeared, it stayed under the slop, and it did not turn into a pan.
 func _handle_touch(event: InputEventScreenTouch) -> void:
+	if event.canceled:
+		_cancel_drag()
+		accept_event()
+		return
 	if event.pressed:
 		_touches[event.index] = event.position
 		if _touches.size() == 1:

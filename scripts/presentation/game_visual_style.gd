@@ -86,6 +86,8 @@ static func get_theme() -> Theme:
 	_theme.set_stylebox("panel", "GameSurface", panel)
 	_theme.set_constant("separation", "VBoxContainer", SPACING[2])
 	_theme.set_constant("separation", "HBoxContainer", SPACING[2])
+	_set_label_role(&"CompactHero", HEADING_FONT, 36, HERO_TEXT)
+	_set_label_role(&"CompactHeroAccent", HEADING_FONT, 36, HERO_ACCENT)
 	ControlTheme.apply(_theme)
 	return _theme
 
