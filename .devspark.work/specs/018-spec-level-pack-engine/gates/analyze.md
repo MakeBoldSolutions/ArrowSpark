@@ -1,90 +1,63 @@
 ```yaml
 gate: analyze
 devspark_version: "9.3.0"
-generated: "2026-10-23T06:49:06Z"
+generated: "2026-10-23T13:57:24Z"
 planning_review:
-  run_id: "pr-20261023T064703Z-b23c59"
-status: warn
+  run_id: "pr-20261023T135651Z-52e84c"
+status: pass
 blocking: false
-severity: warning
-summary: "FULL analysis: 23/23 FRs covered, context_resolved valid, no constitution conflict; one success criterion (SC-004) is only partly covered by the planned proof."
+severity: info
+summary: "FULL rerun after owner-authorized revision: 23/23 FRs covered by 30 tasks, revised FR-010/012/014/016/019 and SC-003/004 consistent across spec, plan, data model, contract, quickstart and tasks; analyze-001 resolved by T020."
 reviewed_artifacts:
   - path: spec.md
-    hash: "4ae5a3e4f304a0820cf645ec871c8c2f831695f9"
-    semantic_hash: "sem1:5f6bc6aa66ba9fe5e48269dde709109c86b2fd0e2d7344b92071add3c020144c"
+    hash: "5281ae4377618b615c11480dc6c89991f6805f24"
+    semantic_hash: "sem1:d97d78d6e5bc5fd2cd45daef92050b94a6890ab751b730f2b0cda43ffbe95528"
   - path: plan.md
-    hash: "605e483e9c86c8ecc02915a2bd2814ecab31530a"
-    semantic_hash: "sem1:3ff47d123d190502005d56cabe849bf3b797c4e963db79c323ff6122d0ea6517"
+    hash: "9d0f132f457c618dbb2a24dcf2c1cac6dfab1bd6"
+    semantic_hash: "sem1:c0e26606a36f65ba2bf8af4e44d2843e26f89c17a843534044e7f2d16ca47db8"
   - path: tasks.md
-    hash: "a54117246630da4cfc9ecb3396efb789527ea61c"
-    semantic_hash: "sem1:40dcf39d4422d18bdfff25b06914ec47eeb5374c143259470d44fccfd4b57f8a"
+    hash: "6d3cf8eee1612347f680fea850e82bbf6c4d8fda"
+    semantic_hash: "sem1:4428e88f4504bbdccab4fe005fb23064454aa91552a3e457298f152e8766f5d7"
   - path: data-model.md
-    hash: "ad9898bd0cc03e4e31878eed484c8d709db4deb8"
+    hash: "5dda85e076fc63ac52cb8d938b0c9bbfe781d621"
   - path: contracts/pack-build-cli.md
-    hash: "b297c3c80a36b965e6e6c93ad607c942859f4ae8"
+    hash: "eaec290ae0962a6f8c15da250c5e88a8c4ff38a5"
   - path: quickstart.md
-    hash: "f055a0b824bb085693e7288b49cc871ec2400dac"
+    hash: "1106766cf7348558f2af5e4e1f58bfc34dc96f88"
 findings:
   - finding_id: analyze-001
     owner: analyze
     severity: medium
     classification: blocking-defect
-    description: "SC-004 requires the same profile and seed to give the same content version 3 times in separate runs. The tasks prove 3 identical results within one process (T010) and only 2 separate-process runs (the T017 build plus one T019 --check), so SC-004 as written is never fully demonstrated."
+    description: "SC-004 requires three separate-process runs; the previous task list proved only two."
     intent_cue: ""
-    recommended_action: "In tasks.md T019, run the --check build twice (three separate processes with T017) and record all three in gates/verify.md; or have verification gather the third run as SC-004 evidence."
+    recommended_action: "Run --check twice after the write and record all three processes."
     execution_mode: auto
-    status: open
-    outcome: ""
+    status: resolved
+    outcome: "Resolved by the revised SC-004 wording and T020 (one write plus two --check processes with identical level lines and byte-identical packs); quickstart §3 matches."
 ```
 
 ## Specification Analysis Report
 
-**Scope:** FULL (spec + plan + tasks), with data-model, contract, research and quickstart support artifacts.
+**Scope:** FULL (spec + plan + tasks), with data-model, contract and quickstart. This is a rerun after an owner-authorized revision.
 
-| ID | Category | Severity | Classification | Location(s) | Summary | Recommendation |
-| ----------- | -------- | -------- | --------------- | ------------------------------------------------ | ---------------------------------------------------------------- | ----------------------------------------------------- |
-| analyze-001 | Coverage | MEDIUM | blocking-defect | spec.md SC-004; tasks.md T010, T017, T019 | SC-004's "3 separate runs" is only proven as 3 in-process plus 2 separate runs | Run `--check` once more and record the three runs |
+No open findings. analyze-001 is resolved: SC-004 now says "3 independent processes", T020 runs one write plus two `--check` runs, and quickstart §3 and the contract's output guarantees agree.
 
-**Coverage Summary Table:**
+**Revised-requirement consistency checks:**
 
-| Requirement Key | Has Task? | Task IDs | Notes |
-| --------------- | --------- | -------- | ----- |
-| FR-001 | Yes | T005, T007, T020 | |
-| FR-002 | Yes | T002, T004 | |
-| FR-003 | Yes | T005 | Isolation reuses the existing `_check_fresh_and_isolated_definitions` |
-| FR-004 | Yes | T005 | |
-| FR-005 | Yes | T001, T004, T008 | |
-| FR-006 | Yes | T006, T022, T027 | |
-| FR-007 | Yes | T005 | |
-| FR-008 | Yes | T003, T018 | |
-| FR-009 | Yes | T003 | |
-| FR-010 | Yes | T002, T003, T005 | |
-| FR-011–FR-016 | Yes | T010, T011 | |
-| FR-017 | Yes | T013, T014, T020, T023 | |
-| FR-018 | Yes | T012, T013 | |
-| FR-019 | Yes | T013, T014, T019 | |
-| FR-020 | Yes | T002, T014, T019 | |
-| FR-021 | Yes | T017 | |
-| FR-022 | Yes | T015, T016, T017, T018, T020 | |
-| FR-023 | Yes | T016, T018 | |
+| Revised item | Spec | Plan / data model / contract | Tasks |
+| --- | --- | --- | --- |
+| Hard playable cap | FR-012 | Decision Summary "Playable cap, acceptance"; data-model `initial_playable_cap`, `ok` | T011, T012, T020 |
+| Single rejection rule | FR-016 | Decision Summary "Profile rejection, one rule"; data-model "Rejected before searching" | T011, T012 |
+| Bounded construction | FR-014 | Decision Summary "Bounded construction"; data-model `MAX_HEAD_TRIES` | T011, T012 |
+| Malformed-input negatives | FR-010 | Decision Summary "Negative coverage"; `load_catalog` / `audit_levels` | T002, T004 |
+| Atomic write and first build | FR-019, edge cases | Build tool flow steps 2 and 5; contract write mode | T014, T015, T018, T020 |
+| Four groups, TLDR | SC-003, TLDR | — | T028 |
 
-**Constitution Alignment Issues:** None. Principles I, III, IV, V and VI are each addressed (plan Constitution Check, T025–T027). Principle V's browser rule (Firefox, Chrome, Chromium-derived, with untested ones recorded as not tested) matches T027.
+**Coverage Summary:** Every FR-001–FR-023 has at least one task. The new T004 covers FR-010. T030 (Gate Remediation) carries `resolves: critic-001`.
 
-**Context Resolution validity:** All six `context_resolved` ids resolve (`arrow-puzzle`, `progression-design-learning`, `reference-puzzle-design-report`, `gordian-knot-experiments`, `web-showcase`, `arrowgame-constitution`). Every entry has `kind: knowledge`, hop 0, and a `via` that matches its lexical or appliesTo route.
+**Constitution Alignment Issues:** None.
 
-**Knowledge and test coverage:** The `.knowledge/` owners of the changed files (arrow-puzzle, progression-design-learning, gordian-knot-experiments, reference-puzzle-design-report, web-showcase) each have an update task (T020–T022). The tests delta is non-empty and tasked (T003, T010, T012, T018, T019).
+**Context Resolution validity:** Unchanged and valid (six `kind: knowledge` ids, hop 0).
 
-**Cross-Repo Dependencies:** None declared.
-
-**Unmapped Tasks:** T009, T021, T024, T025, T026 and T028 carry no `Implements` directive. Each is verification, knowledge or linkage work with a stated forcing source.
-
-**Metrics:**
-
-- Total Requirements: 23 FR, 8 SC
-- Total Tasks: 28
-- Coverage: 100% of FRs have at least one task
-- Ambiguity Count: 0
-- Duplication Count: 0
-- Critical Issues Count: 0
-
-**Next Actions:** analyze-001 is a one-line proof gap, adjudicated by Judge in this Planning Review.
+**Metrics:** 23 FR, 8 SC, 30 tasks, 100% FR coverage, 0 ambiguity, 0 duplication, 0 critical.
