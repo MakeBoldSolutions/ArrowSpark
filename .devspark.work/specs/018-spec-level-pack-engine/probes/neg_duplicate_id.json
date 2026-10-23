@@ -1,0 +1,40 @@
+{
+  "format": "arrowspark-recipe/1",
+  "pack": "generated_sample",
+  "group": "generated",
+  "profiles": {
+    "starter": {
+      "width": 7,
+      "height": 6,
+      "arrows": [
+        6,
+        6
+      ],
+      "initial_playable": [
+        2,
+        3
+      ],
+      "depth": [
+        2,
+        4
+      ],
+      "placement": {
+        "layering": "center_out",
+        "initial_playable_cap": 3,
+        "arrow_length": [
+          2,
+          5
+        ]
+      },
+      "attempts": 200
+    }
+  },
+  "levels": [
+    {
+      "id": "intro",
+      "title": "Clash",
+      "profile": "starter",
+      "seed": 101
+    }
+  ]
+}

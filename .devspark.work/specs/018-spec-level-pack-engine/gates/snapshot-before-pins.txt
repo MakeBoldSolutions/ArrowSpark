@@ -1,0 +1,30 @@
+0|intro|Simple Introduction|foundations|1|first_bend|g1-95a75f0e6ec0
+1|first_bend|First Bend|foundations|2|multi_bend|g1-9d0fcfd77be0
+2|multi_bend|Multiple Bends|foundations|3|dependency_chain|g1-0359fa394f4b
+3|dependency_chain|Dependency Chain|foundations|4|forced_sequence|g1-9dbed2fe5668
+4|forced_sequence|Forced Sequence|foundations|5|multiple_choices|g1-8a11ad329013
+5|multiple_choices|Multiple Choices|foundations|6|dense_board|g1-bfc14580ef5f
+6|dense_board|Dense Board|foundations|7|subtle_blockers|g1-53bf4b1d0f55
+7|subtle_blockers|Subtle Blockers|foundations|8||g1-f46614de1bae
+8|nested_chain|Nested Chain|puzzle_lab|1|cascade_key_arrow|g1-fd81646ff78b
+9|cascade_key_arrow|Cascade / Key Arrow|puzzle_lab|2|dense_unravel|g1-9bc5f37494d1
+10|dense_unravel|Dense Unravel|puzzle_lab|3|bent_network|g1-7dc6715c8718
+11|bent_network|Bent Network|puzzle_lab|4|long_range_blocker|g1-e8a0c0855813
+12|long_range_blocker|Long-Range Blocker|puzzle_lab|5|composed_shaped|g1-5d07507b3b23
+13|composed_shaped|Composed / Shaped|puzzle_lab|6|canvas_validation|g1-945e9f86a158
+14|canvas_validation|Large Canvas Validation|puzzle_lab|7|knot_long_geometry|g1-62013a335679
+15|knot_long_geometry|Long Geometry|puzzle_lab|8|knot_interwoven_paths|g1-c8684bfa2502
+16|knot_interwoven_paths|Interwoven Paths|puzzle_lab|9|knot_dense_core|g1-8dec89447bc5
+17|knot_dense_core|Dense Core|puzzle_lab|10|knot_regions|g1-87b621609db4
+18|knot_regions|Distinct Regions|puzzle_lab|11|knot_single_release|g1-d2398acdb422
+19|knot_single_release|Single Release|puzzle_lab|12|knot_boundary|g1-3a442934b998
+20|knot_boundary|Boundary Knot|puzzle_lab|13||g1-06cd3944b28e
+21|first_knot|First Knot|arrowspark_levels|1|two_neighborhoods|g1-8f675c5f02cc
+22|two_neighborhoods|Two Neighborhoods|arrowspark_levels|2|the_bridge|g1-ecf87d2e92ec
+23|the_bridge|The Bridge|arrowspark_levels|3|false_simplicity|g1-1fa47c6f7736
+24|false_simplicity|False Simplicity|arrowspark_levels|4|the_rescan|g1-d324da959318
+25|the_rescan|The Rescan|arrowspark_levels|5|major_release|g1-6f5cf54bbf35
+26|major_release|Major Release|arrowspark_levels|6|dense_weave|g1-f916a6ea8496
+27|dense_weave|Dense Weave|arrowspark_levels|7|almost_a_knot|g1-030c1402781a
+28|almost_a_knot|Almost a Knot|arrowspark_levels|8|reference_knot|g1-76fa1582e5a2
+29|reference_knot|Reference Knot|arrowspark_levels|9||g1-7ce0942d4a5e

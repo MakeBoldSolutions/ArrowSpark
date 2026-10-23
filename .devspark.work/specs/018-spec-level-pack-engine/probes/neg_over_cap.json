@@ -1,0 +1,31 @@
+{
+  "format": "arrowspark-recipe/1",
+  "pack": "generated_sample",
+  "group": "generated",
+  "profiles": {
+    "capped": {
+      "width": 4,
+      "height": 4,
+      "arrows": [
+        12,
+        12
+      ],
+      "placement": {
+        "initial_playable_cap": 1,
+        "arrow_length": [
+          1,
+          1
+        ]
+      },
+      "attempts": 20
+    }
+  },
+  "levels": [
+    {
+      "id": "gen_neg_cap",
+      "title": "Over Cap",
+      "profile": "capped",
+      "seed": 7
+    }
+  ]
+}
