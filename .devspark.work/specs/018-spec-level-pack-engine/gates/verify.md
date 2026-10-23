@@ -1,10 +1,10 @@
 ```yaml
 gate: verify
 devspark_version: "9.3.0"
-generated: "2026-10-23T14:30:00Z"
-status: fail
-blocking: true
-summary: "snapshot-neutral passes (30 migrated levels unchanged). end-to-end is partial: the Web export ships and loads every pack and plays levels from all four groups in a Chromium-based browser; Firefox and a real phone are not yet tested, so the mode is not yet a pass."
+generated: "2026-10-23T15:10:00Z"
+status: pass
+blocking: false
+summary: "snapshot-neutral passes (30 migrated levels unchanged); end-to-end passes: Web export ships and loads every pack, all four groups play in a Chromium-based browser (agent-run), and the developer reports Firefox, a real phone and a native desktop run with mouse, keyboard and gamepad passing. Gates re-run green on committed b36c041."
 modes:
   - mode: snapshot-neutral
     evidence_class: automated
@@ -31,7 +31,7 @@ modes:
       group position, next-in-group and content version for all 30 levels.
   - mode: end-to-end
     evidence_class: local-integration
-    status: fail
+    status: pass
     evidence: |
       Export (Godot 4.4-stable editor with the installed 4.4.stable Web templates):
         node web/scripts/export-game.mjs --godot "<...>/Godot_v4.4-stable_win64.exe" --build levelpacks   -> exit 0, 7 s
@@ -55,8 +55,19 @@ modes:
           with 0 mistakes, accuracy 100.0%; Next Puzzle opened "2. Tangle" (10 arrows) in the same group.
         - New Game opened ArrowSpark Levels "1. First Knot" (9 arrows).
         - Puzzle Lab "7. Large Canvas Validation" opened with 52 arrows (40x30 board).
-      NOT TESTED (required before this mode can pass): Firefox; at least one real phone in a mobile browser.
-      Chrome itself was not tested separately; the built-in browser is Chromium-based.
+      Developer-reported manual results, 2026-10-23 (run by the developer against the same local build, not by
+      the agent; device model and browser versions were not specified):
+        - Firefox (desktop): smoke test passed.
+        - A real phone in a mobile browser: smoke test passed.
+        - Native desktop run with mouse, keyboard and a physical gamepad (Level Select's four sections, a
+          generated level, Next Puzzle scope): passed.
+      Chrome itself was not tested separately from the Chromium-based built-in browser; no browser or device
+      beyond those above is claimed.
+      Re-run on the committed tree (b36c041), Godot 4.4.1:
+        python tests/run_puzzle_regressions.py -> exit 0; all 13 *_FAILURES=0 markers (CATALOG with 34 entries)
+        python tests/run_regressions.py        -> exit 0; REGRESSION_FAILURES=0
+        python tests/run_level_pack_build.py --recipe levels/recipes/generated_sample.json --check -> exit 0;
+          "Check passed: levels/packs/generated_sample.json is byte-identical to a fresh build."
 discovered:
   - "A headless --editor --quit against the working repository (whose .godot cache predates this change) did not finish within ~5 minutes and was stopped. The CI-style validation of a fresh copy without .godot/.git/web (two --editor --quit passes, Godot 4.4.1) finished in about 5 s each with 0 script errors, and the layout launcher's --import of the real project passes; tests/README.md already says to validate 4.4 from a copy without .godot when the cache came from another editor."
   - "Fast repeated key presses (Tab or Down x30-40) delivered through the browser automation were mostly dropped by the Web canvas; mouse wheel and clicks worked. Not a product finding: keyboard reachability of every Level Select section is covered by tests/puzzle_layout_check.gd and stays a manual desktop check."

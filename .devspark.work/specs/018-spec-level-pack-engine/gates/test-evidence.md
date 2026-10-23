@@ -1,4 +1,22 @@
 ```yaml
+- commit: b36c041b032afbc3fc80651684a51996a0de540f
+  tree: clean
+  command: python tests/run_puzzle_regressions.py --godot "$LOCALAPPDATA/Temp/ArrowGame-Godot-4.4.1/bin/Godot_v4.4.1-stable_win64_console.exe"
+  result: "13 suites, every *_FAILURES=0 marker present (CATALOG with 34 entries); exit 0; failing: none"
+  run_at: 2026-10-23T15:05:02Z
+  run_by: verify
+- commit: b36c041b032afbc3fc80651684a51996a0de540f
+  tree: clean
+  command: python tests/run_regressions.py --godot "$LOCALAPPDATA/Temp/ArrowGame-Godot-4.4.1/bin/Godot_v4.4.1-stable_win64_console.exe"
+  result: "REGRESSION_FAILURES=0; exit 0; failing: none"
+  run_at: 2026-10-23T15:07:52Z
+  run_by: verify
+- commit: b36c041b032afbc3fc80651684a51996a0de540f
+  tree: clean
+  command: python tests/run_level_pack_build.py --godot "$LOCALAPPDATA/Temp/ArrowGame-Godot-4.4.1/bin/Godot_v4.4.1-stable_win64_console.exe" --recipe levels/recipes/generated_sample.json --check
+  result: "byte-identical pack, 4 levels; exit 0; failing: none"
+  run_at: 2026-10-23T15:07:56Z
+  run_by: verify
 - commit: 5e4c2f44a3de1e2d6479dd35d65288a7fd7c3bda
   tree: dirty
   command: python tests/run_puzzle_regressions.py --godot "$LOCALAPPDATA/Temp/ArrowGame-Godot-4.4.1/bin/Godot_v4.4.1-stable_win64_console.exe"

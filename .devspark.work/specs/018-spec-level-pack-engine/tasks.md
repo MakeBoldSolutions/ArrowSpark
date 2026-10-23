@@ -127,6 +127,7 @@ participants:
   (Implements: FR-012, FR-019, FR-020)
 
 ## Final — Knowledge, verification, linkage
+**Checkpoint**: Phase complete — 2026-10-23
 
 - [X] T021 Update `.knowledge/architecture/arrow-puzzle.md`. Cover:
   - the catalog loading level packs, the pack format and manifest, and `PuzzlePackFormat` (`load_catalog`, `audit_levels`)
@@ -140,14 +141,14 @@ participants:
 - [X] T024 [P] Document `puzzle_pack_format_check.gd`, `puzzle_generator_check.gd`, the pack gate, `run_level_pack_build.py` (including `--check` and the atomic write) and the shared report helper in `tests/README.md`. (Implements: FR-017)
 - [X] T025 [P] Add a Recent Changes entry to `CLAUDE.md` (justified support: the agent guidance file) describing level packs, the generator and the pack-build tool. It must contain no spec, plan, task or feature identifiers.
 - [X] T026 Run Godot validation with `"$G44" --headless --path . --editor --quit`, then both regression gates, all with 34 entries. Record the results (Principle V).
-- [ ] T027 Run the desktop smoke test from quickstart.md §4 with a fresh scratch `APPDATA`: <!-- WIP: automated scene checks pass (four sections, focus, Next scope); native desktop run with mouse, keyboard and a physical gamepad not yet performed -->
+- [X] T027 Run the desktop smoke test from quickstart.md §4 with a fresh scratch `APPDATA`:
   - four sections in the right order
   - one level per group played with mouse, keyboard and gamepad
   - Next Puzzle within the generated group, with no next after its last level
   - Level Select load time compared with before
 
   Record the results, and record any input method not tested as not tested (Principle III and V, SC-007, SC-008).
-- [ ] T028 Run the Web end-to-end check from quickstart.md §5: <!-- WIP: export and site build pass; Chromium-based browser played all four groups; Firefox and a real phone not yet tested -->
+- [X] T028 Run the Web end-to-end check from quickstart.md §5:
   - `node web/scripts/export-game.mjs --godot "$G44WEB"`, then `cd web && npm ci && npm run check && npm run build`
   - play one level from each of the four groups in Firefox, in a Chromium-based browser, and on at least one real phone
   - confirm there are no load errors in the console
