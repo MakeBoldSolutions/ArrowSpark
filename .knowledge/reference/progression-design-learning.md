@@ -4,6 +4,8 @@ type: authoritative-reference
 title: Progression Levels Design Learning
 appliesTo:
   - scripts/puzzle/puzzle_catalog.gd
+  - levels/packs/arrowspark_levels.json
+  - scripts/puzzle/puzzle_generator.gd
   - tests/puzzle_catalog_check.gd
   - tests/puzzle_analyzer_check.gd
   - tests/puzzle_structural_report.gd
@@ -11,7 +13,7 @@ appliesTo:
 
 # Progression Levels Design Learning
 
-What the eight progression levels (`first_knot` to `almost_a_knot`, between the Foundations and the Reference Knot) show about how levels are built and measured. This is a record of observations, kept so a later generator specification could use them as constraints. It commits to building nothing. Facts are separated from judgments and open questions.
+What the eight progression levels (`first_knot` to `almost_a_knot`, between the Foundations and the Reference Knot) show about how levels are built and measured. This is a record of observations; the in-repo generator (`PuzzleGenerator`, with the pack-build tool `tests/run_level_pack_build.py`) builds on the placement methods recorded here. Facts are separated from judgments and open questions.
 
 Evidence base: one designer, and the structural tooling (`PuzzleAnalyzer`, `PuzzleSolver`). The designer played all eight levels on desktop and on a phone; their notes are in the last section and are aggregate, not per level. The measured facts below do not depend on them.
 
@@ -41,7 +43,7 @@ Per-level structure that was checked directly, beyond the tooling's summary. The
 
 ## Observed facts: how the levels were found
 
-- Boards are fixed literal data. They were found by a seeded offline search that places arrows in reverse solve order, so each new arrow's path is clear of everything placed before it and every board is solvable by construction. The game's solver then confirmed all eight, including a complete order-independence check along every branch.
+- Boards are fixed data, now stored in `levels/packs/arrowspark_levels.json`. They were found by a seeded offline search that places arrows in reverse solve order, so each new arrow's path is clear of everything placed before it and every board is solvable by construction. The game's solver then confirmed all eight, including a complete order-independence check along every branch.
 - The search needed a different construction for different intents: separate regions for `two_neighborhoods`, a hand-placed long arrow between two clusters for `the_bridge`, five parallel rows plus one crossing arrow for `major_release`, a cap on playable arrows for `false_simplicity` and `the_rescan`.
 - Uniform random placement saturates at roughly half to three-fifths of the board, because each late arrow needs a clear path to the edge. Dense boards needed center-outward layering, building the middle first and the outer ring last.
 - Keeping few arrows playable at the start conflicts with density. The dense levels needed caps of 12 and 16 playable arrows to reach 70 and 80 percent fill; the Reference Knot has six playable of 115 at 92 percent fill, which this search did not reach.
@@ -49,7 +51,7 @@ Per-level structure that was checked directly, beyond the tooling's summary. The
 
 ## Designer judgments
 
-- Recorded so far: once a search existed, finding a level for a given profile was cheap; placing dense boards by coordinates is slow, which is why the Reference Knot also grew from a hand-composed skeleton filled out by a seeded search (see its builder comment in the catalog).
+- Recorded so far: once a search existed, finding a level for a given profile was cheap; placing dense boards by coordinates is slow, which is why the Reference Knot also grew from a hand-composed skeleton filled out by a seeded search (see its `notes` in `levels/packs/arrowspark_levels.json`).
 - After playing every level on desktop and phone, the designer judged the new boards to be at the right level of difficulty and the progression to be good, and the game play to be what they wanted. This is one person's judgment and was not given level by level.
 - Pinch zoom and one-finger drag on the phone raised no issue and were described as fun.
 
@@ -58,7 +60,7 @@ Per-level structure that was checked directly, beyond the tooling's summary. The
 - The jump from `almost_a_knot` to the Reference Knot in structural terms is large: dependency depth 12 to 33, average arrow length 7.4 to 11.7, playable arrows at the start 16 to 6, fill 0.80 to 0.92. The designer reported a good progression overall and did not single out that step, so no cliff was reported; whether the step feels natural to a first-time player is untested.
 - Structure is not perceived difficulty. Whether `false_simplicity` looks easier than it is, whether `the_rescan` forces rescans in play, and whether `dense_weave` reads as dense and not as a pile of short arrows, are untested.
 - Components, depth and fan-out describe a graph the player never sees. Which of them predict the experience of a level, if any, is open; a single designer is too small an evidence base to say.
-- Whether a generator could produce these profiles without the per-level constructions above is untested.
+- Whether a generator could produce these profiles without the per-level constructions above is untested. The in-repo generator implements reverse-solve-order placement, centre-outward layering and a playable cap as one general method, with no per-level constructions such as hand-placed long arrows or separate regions; it has produced only the four small sample levels so far, and it does not reach Reference-Knot-class density (about 92% fill with very few arrows playable at the start).
 
 ## Playtest notes
 

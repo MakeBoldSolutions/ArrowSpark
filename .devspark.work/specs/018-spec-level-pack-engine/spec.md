@@ -28,7 +28,7 @@ participants:
 
 **Feature Branch**: `018-spec-level-pack-engine`
 **Created**: 2026-10-23
-**Status**: Draft
+**Status**: In Progress
 **Input**: User description: "Phases 1 and 2 of the level engine plan. Phase 1 — level pack format and loader: move level geometry out of the catalog's code builders into committed data packs (id, title, group/pack, board size, shapes, a pinned content version, provenance), keep the catalog's public behavior, migrate all 30 existing levels with every content version unchanged, and make the Web build include the packs. Phase 2 — an in-repo deterministic seeded generator that reuses the existing rules, solver and analyzer (no second rules engine), placing arrows in reverse solve order with center-outward layering and an initial-playable cap, scoring candidates against profiles of analyzer metric ranges; a headless pack-build tool that builds a pack from a recipe and prints a structural report. Gates: every pack level valid, solvable, content version matches, no duplicate boards; same profile and seed give the same board. Out of scope: difficulty model, persisted progress, Level Select redesign, runtime/daily generation, new content beyond a small sample proving the tool."
 
 ## Product Owner TLDR
@@ -87,7 +87,7 @@ minimum_sufficient_change:
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - Existing levels play exactly as before from level packs (Priority: P1)
+### User Story 1 - Existing levels play exactly as before from level packs (Priority: P1) ✅ Complete
 
 A player opens ArrowSpark on desktop or in a browser and plays any of the 30 existing levels. Behind the scenes those levels now come from level packs instead of code, and nothing the player can see or do has changed: same levels, same order, same groups, same numbering, same Next Puzzle behavior, same boards.
 
@@ -104,7 +104,7 @@ A player opens ArrowSpark on desktop or in a browser and plays any of the 30 exi
 
 ---
 
-### User Story 2 - Developer generates a reproducible level from a profile (Priority: P2)
+### User Story 2 - Developer generates a reproducible level from a profile (Priority: P2) ✅ Complete
 
 A developer describes the kind of level they want as a profile — target ranges for board size, arrow count, fill, initially playable arrows, dependency depth, components, bends and arrow lengths — plus a seed, and asks the generator for a level. They get a valid, solvable board that falls within the profile, or a clear report of how close the best candidate came. Running again with the same profile and seed gives exactly the same board.
 
@@ -121,7 +121,7 @@ A developer describes the kind of level they want as a profile — target ranges
 
 ---
 
-### User Story 3 - Developer builds a level pack from a recipe (Priority: P3)
+### User Story 3 - Developer builds a level pack from a recipe (Priority: P3) ✅ Complete
 
 A developer writes a recipe naming a pack, its group, and a list of levels each with an id, title, profile and seed, then runs one command. The tool writes a level pack ready to commit and prints a structural report for every level, so the developer can curate before committing.
 

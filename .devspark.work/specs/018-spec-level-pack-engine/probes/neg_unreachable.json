@@ -1,0 +1,28 @@
+{
+  "format": "arrowspark-recipe/1",
+  "pack": "generated_sample",
+  "group": "generated",
+  "profiles": {
+    "deep": {
+      "width": 6,
+      "height": 6,
+      "arrows": [
+        6,
+        8
+      ],
+      "depth": [
+        40,
+        50
+      ],
+      "attempts": 20
+    }
+  },
+  "levels": [
+    {
+      "id": "gen_neg_deep",
+      "title": "Too Deep",
+      "profile": "deep",
+      "seed": 1
+    }
+  ]
+}

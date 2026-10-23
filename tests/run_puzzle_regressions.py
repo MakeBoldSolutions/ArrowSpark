@@ -68,21 +68,30 @@ def run_rule_regressions(godot: str, repo: Path) -> None:
         (root / "project.godot").write_text(
             f'config_version=5\n[application]\nconfig/name="{name}"\n', encoding="utf-8"
         )
-        for script in ("puzzle_definition", "puzzle_state", "puzzle_solver", "puzzle_analyzer", "puzzle_feedback", "puzzle_results_format", "puzzle_catalog", "puzzle_content_version"):
+        for script in ("puzzle_definition", "puzzle_state", "puzzle_solver", "puzzle_analyzer", "puzzle_feedback",
+                       "puzzle_results_format", "puzzle_catalog", "puzzle_content_version", "puzzle_pack_format",
+                       "puzzle_generator"):
             shutil.copyfile(
                 repo / "scripts/puzzle" / f"{script}.gd",
                 root / f"{script}.gd",
             )
+        # The catalog reads its levels from res://levels, so the packs keep
+        # their relative path in the isolated project.
+        shutil.copytree(repo / "levels", root / "levels", ignore=shutil.ignore_patterns("recipes"))
         shutil.copyfile(repo / "scripts/puzzle_session.gd", root / "puzzle_session.gd")
         shutil.copyfile(repo / "scripts/puzzle_scoreboard.gd", root / "puzzle_scoreboard.gd")
         shutil.copyfile(repo / "tests/puzzle_regression.gd", root / "puzzle_regression.gd")
         shutil.copyfile(repo / "tests/puzzle_catalog_check.gd", root / "puzzle_catalog_check.gd")
         shutil.copyfile(repo / "tests/puzzle_analyzer_check.gd", root / "puzzle_analyzer_check.gd")
         shutil.copyfile(repo / "tests/puzzle_scoreboard_check.gd", root / "puzzle_scoreboard_check.gd")
+        shutil.copyfile(repo / "tests/puzzle_pack_format_check.gd", root / "puzzle_pack_format_check.gd")
+        shutil.copyfile(repo / "tests/puzzle_generator_check.gd", root / "puzzle_generator_check.gd")
         for flags, marker in (
             (("--editor", "--quit"), None),
             (("--script", "puzzle_regression.gd"), "PUZZLE_FAILURES=0"),
             (("--script", "puzzle_analyzer_check.gd"), "PUZZLE_ANALYZER_FAILURES=0"),
+            (("--script", "puzzle_pack_format_check.gd"), "PUZZLE_PACK_FORMAT_FAILURES=0"),
+            (("--script", "puzzle_generator_check.gd"), "PUZZLE_GENERATOR_FAILURES=0"),
             (("--script", "puzzle_catalog_check.gd"), "PUZZLE_CATALOG_FAILURES=0"),
             (("--script", "puzzle_scoreboard_check.gd"), "PUZZLE_SCOREBOARD_FAILURES=0"),
         ):

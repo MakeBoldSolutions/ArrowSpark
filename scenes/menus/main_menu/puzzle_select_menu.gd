@@ -16,6 +16,7 @@ const GROUP_CARD_VARIATIONS := {
 	PuzzleCatalog.GROUP_ARROWSPARK_LEVELS: &"LevelCardRust",
 	PuzzleCatalog.GROUP_FOUNDATIONS: &"LevelCardInk",
 	PuzzleCatalog.GROUP_PUZZLE_LAB: &"LevelCardEmber",
+	PuzzleCatalog.GROUP_GENERATED: &"LevelCardEmber",
 }
 const CARD_COLUMNS := 2
 const CARD_WIDTH := 300
@@ -25,6 +26,7 @@ const GROUP_DESCRIPTIONS := {
 	PuzzleCatalog.GROUP_ARROWSPARK_LEVELS: "The intended ArrowSpark experience.",
 	PuzzleCatalog.GROUP_FOUNDATIONS: "Small boards that teach the rule.",
 	PuzzleCatalog.GROUP_PUZZLE_LAB: "Development experiments, some deliberately over-tangled.",
+	PuzzleCatalog.GROUP_GENERATED: "Boards built by the level generator; an untuned first sample.",
 }
 
 @onready var _list_container: VBoxContainer = %PuzzleListContainer

@@ -72,7 +72,10 @@ narrow screens.
 
 - **Export.** `export_presets.cfg` defines one "Web" preset: no threads, no
   extensions, release, adaptive canvas resize, and the custom HTML shell
-  `web/game-shell/shell.html`. The engine is pinned to Godot 4.4-stable for
+  `web/game-shell/shell.html`. Its include filter names the level data
+  (`levels/catalog.json`, `levels/packs/*.json`) explicitly, so the packs the
+  catalog reads always ship in the `.pck`, and its exclude filter drops
+  `tests/*` and the generator recipes (`levels/recipes/*`). The engine is pinned to Godot 4.4-stable for
   the export, both regression gates and CI. `web/.gdignore` keeps Godot from
   importing the site tree. `node web/scripts/export-game.mjs --godot <4.4>`
   exports into `web/public/game/<build>/` (git-ignored; `<build>` defaults to

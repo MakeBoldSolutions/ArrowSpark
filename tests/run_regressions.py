@@ -49,12 +49,17 @@ def main():
         (root / "scripts").mkdir(exist_ok=True)
         for script in ("game_state", "level_state", "puzzle_session", "puzzle_scoreboard"):
             shutil.copyfile(repo / "scripts" / f"{script}.gd", root / "scripts" / f"{script}.gd")
+        # PuzzleCatalog reads the level packs through PuzzlePackFormat, whose
+        # pack audit needs the solver and content-version scripts, so the
+        # whole dependency set is copied along with res://levels itself.
         (root / "scripts/puzzle").mkdir(exist_ok=True)
-        for script in ("puzzle_definition", "puzzle_catalog"):
+        for script in ("puzzle_definition", "puzzle_state", "puzzle_solver", "puzzle_content_version",
+                       "puzzle_pack_format", "puzzle_catalog"):
             shutil.copyfile(
                 repo / "scripts/puzzle" / f"{script}.gd",
                 root / "scripts/puzzle" / f"{script}.gd",
             )
+        shutil.copytree(repo / "levels", root / "levels", ignore=shutil.ignore_patterns("recipes"))
         shutil.copyfile(
             repo / "scenes/menus/main_menu/main_menu_with_animations.gd",
             root / "main_menu_with_animations.gd",

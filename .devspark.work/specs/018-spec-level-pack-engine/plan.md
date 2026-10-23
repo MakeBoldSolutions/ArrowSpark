@@ -215,3 +215,14 @@ Planning bundle: [research.md](research.md), [data-model.md](data-model.md), [co
 |------------------------|------------|--------------------------------------|
 | Separate `PuzzlePackFormat` class | Reader (catalog) and writer (build tool, migration) must share one byte-exact format | Serializer inside `PuzzleCatalog` would make the runtime registry own a developer-only write path |
 | Every launcher copies `levels/` | The isolated temp projects resolve `res://` against the temp root | Pointing the catalog at an absolute repo path would break the export and the isolation the launchers exist for |
+
+## Implementation Notes
+
+- 2026-10-23, T002: the arrow encoding stores heads in `head_less_than` order. The analyzer only counts over its key iterations, and the BEFORE/AFTER structural report is byte-identical, which confirms the order has no effect.
+- 2026-10-23, T002: JSON is parsed with a `JSON` instance rather than `JSON.parse_string`, so malformed-JSON errors carry the line and message. The project's default GDScript warning level treats Variant inference as an error, so every new script uses explicit types where a value comes from a Variant.
+- 2026-10-23, T005: the migration probe ran in an isolated temp project (all `scripts/puzzle/*.gd`), not the working repository, because a headless `--editor --quit` on the working repository with its existing `.godot` cache hung (stopped after about 5 minutes). Every builder's doc comment was found and carried into `notes`, and no note refers to deleted code.
+- 2026-10-23, T012: the generator also rejects unknown profile and placement keys, and an unknown layering, as detectable contradictions under the single rejection rule. This catches recipe typos and adds no new mechanism.
+- 2026-10-23, T019: two existing assertions encoded "three groups" facts and were restated rather than weakened. The catalog check's "Reference Knot is the last catalog entry" became "the Reference Knot ends ArrowSpark Levels at its unchanged position 29", and `tests/puzzle_layout_check.gd`'s pinned group descriptions gained the generated group's line. Both are justified test support.
+- 2026-10-23, T013: `PuzzleReportFormat` lives in `tests/puzzle_report_format.gd` as a `class_name` helper. The structural report output is byte-identical to the BEFORE snapshot.
+- 2026-10-23, T026: Godot validation used the CI fresh-copy pattern (copy without `.godot`, `.git` and `web`, two `--editor --quit` passes): exit 0 and 0 script errors.
+- 2026-10-23, T028: the Web `.pck` also carries `puzzle_generator.gd` because `scripts/` is exported wholesale. Nothing in the shipped game calls it.
