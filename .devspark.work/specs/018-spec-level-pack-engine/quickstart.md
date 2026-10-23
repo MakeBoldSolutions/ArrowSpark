@@ -36,7 +36,11 @@ python tests/run_level_pack_build.py --godot "$G44" --recipe levels/recipes/gene
 python tests/run_level_pack_build.py --godot "$G44" --recipe levels/recipes/generated_sample.json --check
 ```
 
-The second command must exit 0, which proves the build is byte-identical across separate processes (SC-004, SC-005, FR-020). Also run one negative case by hand: a temporary recipe with an unreachable profile must exit non-zero, name the level and write nothing.
+Run the `--check` command twice more after the write. Together that is three independent processes, and all three must print identical `level: <id> <content_version>` lines, with both `--check` runs exiting 0 on a byte-identical pack (SC-004, SC-005, FR-020).
+
+Negative cases (FR-019): first record `git hash-object levels/packs/generated_sample.json`. Then, using temporary recipes that target `generated_sample` under `probes/`, run one with an unreachable profile, one with a duplicate id, and one with a level that would exceed its playable cap. Each must exit non-zero and name the level. Afterwards the pack's hash must be unchanged, and no `.generated_sample.json.tmp` may remain.
+
+The malformed-input negative checks (FR-010) run inside step 2's puzzle regression gate (`puzzle_pack_format_check.gd`).
 
 ## 4. Desktop smoke test (Principle V)
 

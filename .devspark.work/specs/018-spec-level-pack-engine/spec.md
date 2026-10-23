@@ -33,7 +33,7 @@ participants:
 
 ## Product Owner TLDR
 
-ArrowSpark's 30 levels are currently written by hand as program code, which makes adding levels slow and keeps the level-finding search that produced the best of them outside the repository. This change stores every level as plain data in level packs, moves the existing 30 across with proof that not a single board changed, and brings a seeded level generator and a pack-building tool into the repository. Players see no difference yet; the payoff is that the next step — producing hundreds of levels — becomes a matter of writing recipes and curating results rather than typing coordinates.
+ArrowSpark's 30 levels are currently written by hand as program code, which makes adding levels slow and keeps the level-finding search that produced the best of them outside the repository. This change stores every level as plain data in level packs, moves the existing 30 across with proof that not a single board changed, and brings a seeded level generator and a pack-building tool into the repository. The existing levels stay exactly as they are, and players also get four generated sample levels in a new Generated Levels section; the bigger payoff is that the next step — producing hundreds of levels — becomes a matter of writing recipes and curating results rather than typing coordinates.
 
 ## Rationale Summary
 
@@ -149,6 +149,8 @@ A developer writes a recipe naming a pack, its group, and a list of levels each 
 - A seed is reused for a different profile: allowed; determinism is defined by the pair of profile and seed.
 - A generated board happens to equal an existing hand-authored level: treated as a duplicate and rejected.
 - Very large profiles: generation is a developer tool, so it may take noticeable time, but it must finish within a stated attempt budget rather than run unbounded.
+- First build of a new pack: the pack is listed in the manifest before its file exists. The build tool checks against every other pack and treats the not-yet-built pack as empty, rather than as a catalog error; the game and the regression gate still treat a missing listed pack as an error.
+- A build fails, or is interrupted, while an earlier version of the pack exists: the existing pack file is left byte-identical.
 
 ## Requirements *(mandatory)*
 
@@ -168,22 +170,22 @@ A developer writes a recipe naming a pack, its group, and a list of levels each 
 
 - **FR-008**: The required puzzle regression gate MUST check, for every level in every pack: structural validity, solvability, that the stored content version equals the content version recomputed from its geometry, a known group, and unique ids across all packs.
 - **FR-009**: The gate MUST fail if any two levels across all packs have the same board (the same content version).
-- **FR-010**: The gate MUST fail loudly, naming the pack and level, when a pack cannot be read or a level is malformed.
+- **FR-010**: The gate MUST fail loudly, naming the pack and level, when a pack cannot be read or a level is malformed. This covers at least: malformed JSON, a fractional or non-numeric coordinate, invalid vertices (diagonal or zero-length steps, or an arrow that fails board validation), a pack listed in the manifest whose file is missing, duplicate ids, duplicate boards, and an unknown group. Each of these cases MUST have a negative check proving the diagnostic names the problem and the gate fails.
 
 **Generator**
 
 - **FR-011**: The generator MUST be deterministic: the same profile and seed MUST always produce a board with the same content version on the project's regression engine version.
-- **FR-012**: The generator MUST place arrows in reverse solve order so that every candidate is solvable by construction, and MUST support center-outward layering and a cap on the number of arrows playable at the start.
+- **FR-012**: The generator MUST place arrows in reverse solve order so that every candidate is solvable by construction, and MUST support center-outward layering and a cap on the number of arrows playable at the start. The cap is a hard acceptance constraint: a board with more initially playable arrows than the cap is never reported as meeting the profile and never enters a pack, even when the profile sets no initial-playable range.
 - **FR-013**: A profile MUST be able to set target ranges on board size, arrow count, fill, initially playable arrows, dependency depth, component count, bends and arrow length; any metric a profile leaves out is unconstrained.
-- **FR-014**: The generator MUST score candidates by their distance from the profile's target ranges and keep the best one within a bounded attempt budget.
+- **FR-014**: The generator MUST score candidates by their distance from the profile's target ranges and keep the best one within a bounded attempt budget. Building each candidate MUST also be bounded, so every run ends even when arrows cannot be placed.
 - **FR-015**: The generator MUST report the result with every profiled metric against its target range, and MUST say clearly when no candidate met the profile.
-- **FR-016**: The generator MUST reject a contradictory or impossible profile before searching, with a message naming the problem.
+- **FR-016**: The generator MUST reject, before searching and with a message naming the problem, a profile with a detectable contradiction: a range whose minimum exceeds its maximum, a value outside its allowed range, or no permitted board size able to hold the minimum arrow count at the minimum arrow length. Otherwise it MUST generate only from feasible combinations of board size and arrow count. Proving that every combination of structural targets is unreachable is not required; such a profile ends as a reported miss (FR-015).
 
 **Pack-build tool**
 
 - **FR-017**: A headless pack-build tool MUST build one level pack from a recipe naming the pack, its group, and its levels (each with id, title, profile and seed) with a single command.
 - **FR-018**: The tool MUST print a structural report for every level built, using the same measures as the existing structural report.
-- **FR-019**: The tool MUST NOT write a pack if any level fails its profile, fails validation or solvability, or duplicates an existing board; it MUST name each failing level.
+- **FR-019**: The tool MUST NOT write or alter a pack if any level fails its profile, fails validation or solvability, or duplicates an existing board; it MUST name each failing level. A successful build MUST replace the pack file atomically, so a failed or interrupted build leaves any existing pack byte-identical.
 - **FR-020**: Running the tool twice on the same recipe MUST produce an identical pack.
 - **FR-021**: One small sample recipe and the pack it produces MUST be committed to prove the tool end to end.
 - **FR-022**: The sample pack's levels MUST appear to players in their own new group, as a fourth Level Select section after the existing three, using the existing section behavior: a header with title, level count and a one-line description, group-relative numbering, and Next Puzzle staying within the group. The group's title and description are chosen during planning and must make clear these are generated levels.
@@ -215,8 +217,8 @@ A developer writes a recipe naming a pack, its group, and a list of levels each 
 
 - **SC-001**: 30 of 30 existing levels keep identical id, title, group, catalog position and content version after migration (snapshot comparison before vs. after shows zero differences).
 - **SC-002**: Both required headless regression gates pass after the change, and the puzzle regression gate checks 100% of levels in all packs for validity, solvability, content-version match and uniqueness.
-- **SC-003**: A level from each of the three groups loads and plays in the exported Web build in Firefox, in a Chromium-based browser, and on at least one real phone.
-- **SC-004**: Generating from the same profile and seed 3 times in separate runs yields the same content version all 3 times.
+- **SC-003**: A level from each of the four groups loads and plays in the exported Web build in Firefox, in a Chromium-based browser, and on at least one real phone.
+- **SC-004**: Building the same recipe in 3 independent processes yields the same content version for every level all 3 times, and the written pack is byte-identical each time.
 - **SC-005**: The sample recipe builds with one command, produces a pack whose levels are 100% valid, solvable and within profile, and a second build is identical to the first.
 - **SC-006**: Adding a new level requires no change to program code: only a pack (or a recipe plus one build command) and its regression pin.
 - **SC-007**: Opening Level Select and starting a level take no perceptibly longer than before the change on desktop and in the Web build.
@@ -227,6 +229,11 @@ A developer writes a recipe naming a pack, its group, and a list of levels each 
 ### Session 2026-10-23
 
 - Q: Should the generated sample pack appear in the game? → A: Yes, in its own new group shown as a fourth Level Select section (FR-022, FR-023, SC-008).
+- Q: Is the initial-playable cap a preference or a constraint? → A: A hard acceptance constraint, even when no initial-playable range is set (FR-012).
+- Q: Which profiles are rejected before searching? → A: Only detectably contradictory ones, including no feasible board size for the minimum arrow count; the generator samples only feasible combinations, and unreachable structural targets end as a reported miss (FR-016).
+- Q: What does "no partial pack" mean on disk? → A: Write beside the destination and replace it atomically; a failed or interrupted build leaves an existing pack byte-identical (FR-019).
+- Q: How is malformed input proven to fail? → A: Negative checks for each malformed-input case listed in FR-010.
+- Q: What evidence satisfies SC-004? → A: Three independent build processes with matching content versions and byte-identical packs (SC-004).
 
 ## Assumptions
 

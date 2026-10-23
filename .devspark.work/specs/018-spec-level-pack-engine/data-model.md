@@ -57,7 +57,9 @@ All files are UTF-8 JSON, committed, read-only at runtime. Coordinates are integ
 
 ### Conversion rules
 
-- **Record → definition**: `arrows[head] = direction`, and `tails[head]` is the vertex path expanded cell by cell (the former `_tail_along`). The result must pass `PuzzleDefinition.get_validation_errors()`. A record that fails is reported in `load_errors()` and not added.
+- **Record → definition**: `arrows[head] = direction`, and `tails[head]` is the vertex path expanded cell by cell (the former `_tail_along`). Consecutive vertices must differ and share a row or column; a diagonal or zero-length step is a parse error. The result must pass `PuzzleDefinition.get_validation_errors()`. A record that fails is reported in `load_errors()` and not added.
+- **Loading**: `PuzzlePackFormat.load_catalog(root, skip_pack := "")` reads `<root>/catalog.json` and each listed pack, returning `{levels, errors}`. A listed pack whose file is missing is an error, unless it is `skip_pack`. Errors name the pack, and the level id or index when one is known.
+- **Auditing**: `PuzzlePackFormat.audit_levels(levels, known_groups)` returns the invariant violations below. The catalog gate and the build tool share it.
 - **Definition → record** (migration, build tool): heads in `PuzzleDefinition.head_less_than` order. Each tail is compressed to its turning points plus the last cell.
 - **Serialization** is deterministic: a fixed key order (`id, title, group, width, height, content_version, provenance, notes, arrows`), two-space indent, and one arrow per line. A trailing newline. Provenance profile keys are sorted.
 
@@ -100,9 +102,15 @@ All files are UTF-8 JSON, committed, read-only at runtime. Coordinates are integ
 | `max_length` | `geometry.max_length` |
 | `average_length` | `geometry.average_length` |
 
-- `placement.layering` is `center_out` (the default) or `uniform`. `initial_playable_cap` is an optional int of at least 1. `arrow_length` is the per-arrow cell-count range, default `[1, 8]`.
+- `placement.layering` is `center_out` (the default) or `uniform`. `arrow_length` is the per-arrow cell-count range, default `[1, 8]`.
+- `placement.initial_playable_cap` is an optional int of at least 1. It is a **hard acceptance constraint**: a candidate whose measured `initial_legal_count` exceeds it gets a `misses` entry with metric `initial_playable_cap`, adds to the score, and is never `ok`, whether or not `initial_playable` is set.
 - `attempts` is the candidate budget, 1–5000, default 200.
-- Rejected before searching: any `min > max`, a dimension under 2, `arrows.min` greater than `width × height`, a density outside (0, 1], an `arrow_length.min` under 1, or `attempts` out of range.
+- **Rejected before searching** (detectable contradictions only; result has `profile_errors`, `attempts_used == 0`):
+  - any range with `min > max`
+  - an out-of-range value: a dimension under 2, density outside (0, 1], `arrow_length.min` under 1, a cap under 1, or `attempts` outside 1–5000
+  - no feasible board size: no permitted (width, height) satisfies `width × height ≥ arrows.min × arrow_length.min`
+- Otherwise the generator draws (width, height) only from the feasible pairs, enumerated in (height, width) ascending order. A profile whose structural targets cannot all be met is not rejected; it ends with `ok == false` and `misses`.
+- **Bounded construction**: at most `MAX_HEAD_TRIES` head attempts per arrow; a tail walk stops at its drawn length or a dead end; an arrow shorter than `arrow_length.min` is discarded and counts as a failed head try.
 
 ## Generator result
 
@@ -110,7 +118,7 @@ All files are UTF-8 JSON, committed, read-only at runtime. Coordinates are integ
 
 | Key | Meaning |
 |---|---|
-| `ok` | `true` when the best candidate meets every profiled range |
+| `ok` | `true` when the best candidate meets every profiled range and the playable cap |
 | `profile_errors` | Non-empty when the profile was rejected; no search ran |
 | `definition` | Best `PuzzleDefinition`, or `null` if none was valid |
 | `metrics` | Profiled metric → measured value for the best candidate |
@@ -134,7 +142,7 @@ All files are UTF-8 JSON, committed, read-only at runtime. Coordinates are integ
 
 - Every level's `profile` must name a key in `profiles`. Ids must be unique within the recipe and must not exist in any other pack.
 - The built pack carries the full resolved profile inline in each level's provenance.
-- The pack must already be listed in `levels/catalog.json`, or the build fails with a message to add it, so a built pack is never orphaned.
+- The pack must already be listed in `levels/catalog.json`, or the build fails with a message to add it, so a built pack is never orphaned. On a first build the listed pack's file does not exist yet; the build skips it rather than reporting it missing.
 
 ## Sample pack (FR-021, FR-022)
 

@@ -1,7 +1,7 @@
 ---
 source: "BSW.DevSpark — © 2026 Baylor Scott & White Health. Source: https://bsw-devspark.bswhive.com"
 devspark_version: "9.3.0"
-spec_semantic_hash: "sem1:5f6bc6aa66ba9fe5e48269dde709109c86b2fd0e2d7344b92071add3c020144c"
+spec_semantic_hash: "sem1:d97d78d6e5bc5fd2cd45daef92050b94a6890ab751b730f2b0cda43ffbe95528"
 participants:
   owner: human
   planner: ai
@@ -27,7 +27,7 @@ Level geometry lives in per-level GDScript builders and the search that found th
 **Closest existing pattern**: `PuzzleCatalog` (`scripts/puzzle/puzzle_catalog.gd`) — a static registry whose `_entries` hold `{id, title, group, build}` and whose `_from_shapes`/`_tail_along` already express most boards as `[head, direction, vertices]`. It is **extended**: the entry's `build` Callable is replaced by a parsed level record, and the public API is unchanged. The regression side reuses `tests/puzzle_catalog_check.gd` (`CATALOG_PINS`, already pinning id, title, group, position and content version for all 30 levels) and the isolated temp-project launchers `tests/run_puzzle_regressions.py` / `tests/run_puzzle_structural_report.py`. The build tool copies the structural-report launcher pattern.
 
 **New mechanism**:
-1. `PuzzlePackFormat` (`scripts/puzzle/puzzle_pack_format.gd`) — parse, convert and deterministically serialize level packs. Needed because both the catalog (read) and the build tool (write) must agree byte-for-byte on one format (FR-002, FR-020); putting it inside `PuzzleCatalog` would make the catalog a writer. Lighter option rejected: Godot `JSON.stringify` alone — it cannot produce the one-arrow-per-line layout that keeps a 115-arrow board reviewable.
+1. `PuzzlePackFormat` (`scripts/puzzle/puzzle_pack_format.gd`) — load, audit, convert and deterministically serialize level packs. Needed because both the catalog (read) and the build tool (write) must agree byte-for-byte on one format (FR-002, FR-020); putting it inside `PuzzleCatalog` would make the catalog a writer. Lighter option rejected: Godot `JSON.stringify` alone — it cannot produce the one-arrow-per-line layout that keeps a 115-arrow board reviewable.
 2. `PuzzleGenerator` (`scripts/puzzle/puzzle_generator.gd`) — the seeded generator (FR-011–FR-016). Nothing in the repo proposes boards; the analyzer and solver only measure them. It never decides validity, solvability or metrics itself (architectural constraint).
 3. The pack-build tool (`tests/run_level_pack_build.py` + `tests/level_pack_build.gd`) — FR-017–FR-020. It is a sibling of the structural-report launcher and lives under `tests/`, which the Web export already excludes.
 
@@ -38,21 +38,36 @@ Decisions (evidence in [research.md](research.md)):
 - **Groups stay in code.** `GROUP_*` constants, `GROUP_TITLES` and `group_ids()` stay in `PuzzleCatalog`; one constant, `GROUP_GENERATED := "generated"`, is added. Its title is "Generated Levels" and its description is "Boards built by the level generator; an untuned first sample." `group_ids()` appends it last (FR-022). The menu reuses the existing `&"LevelCardEmber"` card variation, so no theme change is needed. There are only four groups, and moving group metadata into data would buy nothing.
 - **Arrow encoding: `[direction_name, vertices]`.** `vertices[0]` is the head, followed by each bend, then the tail end. This is the `_from_shapes` form. Direction names (`up/down/left/right`) match `PuzzleContentVersion`. Migration compresses each existing tail into vertices. Because the `g1` hash is computed from the expanded cells, a lossless round trip is proved by equal content versions (FR-005).
 - **Hand-authored provenance keeps each builder's doc comment as `notes`.** That prose is the only per-level design record (for example, why `false_simplicity` exists). Deleting the builders (FR-007) must not delete it.
-- **Loader failure is loud, not fatal.** `_ensure_entries` collects parse and shape errors into `PuzzleCatalog.load_errors()` and calls `push_error` for each, naming the pack and level. A malformed level is never added. The catalog gate asserts `load_errors()` is empty. The game does not crash on a bad pack in a player's build, but the gate makes that state unshippable (edge cases, FR-010).
+- **Loading and auditing live in one place, `PuzzlePackFormat`, parameterised by a root directory.**
+  - `load_catalog(root, skip_pack := "")` reads `<root>/catalog.json` and each listed pack, returning `{levels, errors}`. A missing pack file is an error, except the one named by `skip_pack`. The catalog calls `load_catalog("res://levels")`.
+  - `audit_levels(levels, known_groups)` returns errors for: an invalid board, an unsolvable board, a stored content version that doesn't match, a duplicate id, a duplicate content version, and an unknown group.
+  - The catalog gate and the build tool both call `audit_levels`, so the checks exist once. Because the root is a parameter, a negative check can load fixture files written to `user://` (the launchers isolate `APPDATA`) without touching the real `levels/`.
+- **Loader failure is loud, not fatal.** `_ensure_entries` stores `load_catalog`'s errors as `PuzzleCatalog.load_errors()` and calls `push_error` for each, naming the pack and level. A malformed level is never added. The catalog gate asserts both `load_errors()` and `audit_levels()` are empty. The game does not crash on a bad pack in a player's build, but the gate makes that state unshippable (edge cases, FR-010).
+- **Negative coverage for malformed input** goes in `tests/puzzle_pack_format_check.gd`. It parses inline text for: malformed JSON, fractional and non-numeric coordinates, diagonal and zero-length vertex steps, and an arrow that fails board validation. It writes fixture manifests to `user://` for a missing pack, and builds duplicate-id, duplicate-board and unknown-group fixtures for `audit_levels`. Each case asserts a non-empty error that names the pack and level (FR-010).
 - **Lookup uses an id→index Dictionary** built once in `_ensure_entries` (FR-004). `get_definition` builds a new `PuzzleDefinition` from the stored record on every call. The constructor's `duplicate(true)` keeps definitions isolated (FR-003).
 - **The generator is a pure static function**: `PuzzleGenerator.generate(profile, seed) -> Dictionary`.
   - **Determinism**: one `RandomNumberGenerator` with `seed` set, and iteration only over Arrays it builds in a fixed order.
   - **Placement**: reverse solve order. A new arrow's head is accepted only if its forward ray is clear of every already-placed cell. Its tail is a random walk over empty cells that never enters its own ray. So the last arrow placed is the first removable, and the board is solvable by construction (FR-012).
   - **Layering**: `center_out` orders candidate heads by distance from the board centre with seeded jitter; `uniform` shuffles them.
-  - **Playable cap**: while the number of arrows with a clear ray exceeds `initial_playable_cap`, the tail walk prefers cells on currently-clear arrows' rays.
-  - **Scoring**: each candidate is measured only through `PuzzleDefinition.get_validation_errors()` and `PuzzleAnalyzer.analyze()`, which runs `PuzzleSolver`. Its score is the sum of each profiled metric's normalized distance outside its range. The search stops at the first score of 0 or when the attempt budget runs out, keeping the lowest score (the first one on ties). The result reports every metric against its range (FR-013–FR-015). A profile is rejected before any search if a min exceeds its max, a dimension is under 2, the maximum arrow count exceeds the cell count, density is outside (0, 1], or the budget is outside 1–5000 (FR-016).
+  - **Playable cap, steering**: while the number of arrows with a clear ray exceeds `initial_playable_cap`, the tail walk prefers cells on currently-clear arrows' rays. This only steers the search.
+  - **Playable cap, acceptance** (FR-012): the cap is enforced on the measured result. A candidate whose `initial_legal_count` exceeds the cap gets a `misses` entry `initial_playable_cap`, adds to the score, and can never be `ok`, even when the profile has no `initial_playable` range. The build tool also rejects any level that is not `ok`.
+  - **Scoring**: each candidate is measured only through `PuzzleDefinition.get_validation_errors()` and `PuzzleAnalyzer.analyze()`, which runs `PuzzleSolver`. Its score is the sum of each profiled metric's normalized distance outside its range, plus the cap. The search stops at the first score of 0 or when the attempt budget runs out, keeping the lowest score (the first one on ties). The result reports every metric against its range (FR-013–FR-015).
+  - **Profile rejection, one rule** (FR-016): reject before searching only for detectable contradictions:
+    - any `[min, max]` with min greater than max
+    - a value outside its allowed range: a dimension under 2, density outside (0, 1], `arrow_length.min` under 1, a cap under 1, or `attempts` outside 1–5000
+    - no feasible board size, meaning no permitted (width, height) has `width × height ≥ arrows.min × arrow_length.min`
+
+    Otherwise the generator builds the list of feasible (width, height) pairs in a fixed order and picks only from it. Unreachable structural targets are not proven impossible; they end as a reported miss.
+  - **Bounded construction** (FR-014): each candidate draws a target arrow count. Head placement tries at most `MAX_HEAD_TRIES` (a constant, for example 64) candidate cells per arrow. A tail walk stops at the drawn length or when no step is legal. An arrow whose tail can't reach `arrow_length.min` is discarded and counts as one failed head try. The candidate ends when its target count is reached or a head try budget is exhausted. Total work is therefore at most `attempts × arrows.max × MAX_HEAD_TRIES` placement steps plus one analyzer run per candidate.
   - **Scheme stamp**: provenance records `generator: "gen1"`, so a later algorithm change is visible next to the pinned content version.
 - **Build tool flow** (the build is atomic; FR-019):
   1. Python copies the puzzle scripts and `levels/` into a fresh temp project.
-  2. Godot generates every level, then checks validity, solvability, the profile, and that no id or content version repeats one in another pack or in the recipe itself. Levels already in the pack being rebuilt are ignored, so a rebuild doesn't collide with itself.
-  3. It prints the structural report for each level, plus the serialized pack between `PACK_BEGIN` and `PACK_END` markers and `PACK_BUILD_FAILURES=<n>`.
-  4. Python writes `levels/packs/<pack>.json` only when the failure count is 0.
-  5. The recipe's profile is stored inline in each level's provenance, so a level can be regenerated without the recipe.
+  2. Godot loads the other packs with `load_catalog("res://levels", skip_pack = <target>)`. On a first build the target file doesn't exist yet and is simply skipped, not reported as an error; on a rebuild its old levels are ignored, so the pack doesn't collide with itself. Any other load error fails the build.
+  3. Godot generates every level and requires `ok`. It then runs `audit_levels` over the other packs plus the new levels, which covers validity, solvability, duplicate ids and boards against other packs and within the recipe, and groups.
+  4. It prints the structural report for each level, plus the serialized pack between `PACK_BEGIN` and `PACK_END` markers and `PACK_BUILD_FAILURES=<n>`.
+  5. Python writes only when the failure count is 0. It writes the bytes to `levels/packs/.<pack>.json.tmp` beside the destination, flushes and `fsync`s it, then calls `os.replace` onto `levels/packs/<pack>.json`, which is atomic on the same volume on Windows and POSIX. On any failure the temp file is removed and the destination is never opened for writing.
+  6. The recipe's profile is stored inline in each level's provenance, so a level can be regenerated without the recipe.
+  7. Each run prints a per-level `id content_version` line. That line is the SC-004 evidence: three independent processes (one write and two `--check` runs) must print identical lines, and `--check` also confirms the pack bytes match.
 - **Structural report printing is shared.** `_print_entry` moves into `tests/puzzle_report_format.gd` as a static helper used by both the structural report and the build tool (FR-018), so the two reports cannot diverge.
 - **The 30 levels are migrated once by a throwaway probe**, kept under `.devspark.work/` and never committed. It reads the current builders, writes the three packs through `PuzzlePackFormat.serialize_pack`, and copies each builder's doc comment into `notes`. The builders are then deleted. The proof is the existing pins plus the before/after snapshot in [quickstart.md](quickstart.md).
 
@@ -65,6 +80,7 @@ Decisions (evidence in [research.md](research.md)):
 ### Reviewer Guidance
 
 - Check that `PuzzleGenerator` imports no rule logic: every legality, validity or metric value must come from `PuzzleDefinition`, `PuzzleSolver` or `PuzzleAnalyzer`. The only geometry it computes itself is the placement-time clear-ray and empty-cell tests that propose candidates. Those are proposals, re-checked by the solver.
+- Check that the playable cap is enforced on the measured result (never only steered), that profile rejection follows the single feasibility rule, and that a failed build leaves an existing pack byte-identical.
 - Check that the snapshot evidence diffs the full structural report (which includes witnesses) and the pins dump, before and after, for all 30 levels.
 
 ## Technical Context
@@ -83,7 +99,9 @@ Decisions (evidence in [research.md](research.md)):
 
 ```yaml
 expected_change_surface:
-  - {path: "scripts/puzzle/puzzle_pack_format.gd", change: add, why: "PuzzlePackFormat: parse/validate pack and manifest text, record -> PuzzleDefinition, definition -> vertex arrows, deterministic serialize_pack"}
+  - {path: "scripts/puzzle/puzzle_pack_format.gd", change: add, why: "PuzzlePackFormat: load_catalog(root, skip_pack), audit_levels, parse pack text, record -> PuzzleDefinition, definition -> vertex arrows, deterministic serialize_pack"}
+  - {path: "tests/puzzle_pack_format_check.gd", change: add, why: "negative checks for every FR-010 malformed-input case, via inline text and user:// fixtures"}
+  - {path: ".github/workflows/godot-regression-tests.yml", change: modify, why: "add levels/** and export_presets.cfg to both path filters (developer decision D-001)"}
   - {path: "scripts/puzzle/puzzle_generator.gd", change: add, why: "PuzzleGenerator: seeded reverse-solve-order placement, profile validation, scoring via PuzzleAnalyzer"}
   - {path: "scripts/puzzle/puzzle_catalog.gd", change: modify, why: "load manifest + packs, id->index map, load_errors(), GROUP_GENERATED; delete all _build_* builders, _from_shapes and _tail_along (moved into PuzzlePackFormat); public API unchanged"}
   - {path: "levels/catalog.json", change: add, why: "ordered pack manifest (catalog order)"}
@@ -99,8 +117,8 @@ expected_change_surface:
   - {path: "tests/puzzle_report_format.gd", change: add, why: "shared structural-report entry printer"}
   - {path: "tests/puzzle_structural_report.gd", change: modify, why: "use the shared printer"}
   - {path: "tests/level_pack_build.gd", change: add, why: "headless build: generate, gate, report, emit serialized pack"}
-  - {path: "tests/run_level_pack_build.py", change: add, why: "launcher: temp project, run build, atomically write pack on zero failures"}
-  - {path: "tests/run_puzzle_regressions.py", change: modify, why: "copy levels/ and the new scripts into the temp project; run puzzle_generator_check.gd"}
+  - {path: "tests/run_level_pack_build.py", change: add, why: "launcher: temp project, run build, temp-file + os.replace on zero failures, --check byte comparison"}
+  - {path: "tests/run_puzzle_regressions.py", change: modify, why: "copy levels/ and the new scripts into the temp project; run puzzle_generator_check.gd and puzzle_pack_format_check.gd"}
   - {path: "tests/run_puzzle_structural_report.py", change: modify, why: "copy levels/, puzzle_pack_format and the shared printer"}
   - {path: "tests/run_regressions.py", change: modify, why: "its temp project copies puzzle_catalog; add puzzle_pack_format and levels/"}
   - {path: "tests/README.md", change: modify, why: "document the generator check and the pack-build tool"}
@@ -183,6 +201,7 @@ scripts/puzzle/
 └── puzzle_generator.gd          # new
 tests/
 ├── puzzle_generator_check.gd    # new
+├── puzzle_pack_format_check.gd  # new (malformed-input negative checks)
 ├── puzzle_report_format.gd      # new (shared report printer)
 ├── level_pack_build.gd          # new
 └── run_level_pack_build.py      # new

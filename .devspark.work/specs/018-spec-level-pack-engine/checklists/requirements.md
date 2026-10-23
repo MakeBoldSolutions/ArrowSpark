@@ -40,4 +40,5 @@
 - Both verify modes are pre-merge; no post-deploy obligation.
 - The single marker was answered directly by the owner during specify and integrated into Requirements and Success Criteria.
 - Validation pass 2 (after clarification): all items pass.
+- Validation pass 3 (2026-10-23, after owner plan feedback revised FR-010, FR-012, FR-014, FR-016, FR-019, SC-003, SC-004, the TLDR and edge cases): all items pass; no markers.
 - Items marked incomplete require spec updates before `/devspark-clarify` or `/devspark-plan`.
