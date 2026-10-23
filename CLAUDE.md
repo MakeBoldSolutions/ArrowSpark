@@ -62,7 +62,6 @@ prefer explicit types where they aid clarity; keep changes small and justify new
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->
 
-
 <!-- DEVSPARK SHARED CONTEXT:START -->
 # AGENTS.md
 
@@ -81,7 +80,8 @@ prefer explicit types where they aid clarity; keep changes small and justify new
 ## Active Technologies
 
 - Godot 4.4 and GDScript with Maaack's Game Template; Python 3.11+ regression launchers.
+- Static showcase site in `web/`: Astro and strict TypeScript (static output only), Node/npm, Vitest; the game ships to it as a Godot Web export (no threads). Run `npm run check` in `web/` for site changes; web builds also need a browser smoke test.
 - Puzzle rules use RefCounted classes independently of scenes and input. Preserve this boundary when extending the rule core.
 - Run `python tests/run_puzzle_regressions.py --godot <executable>` and `python tests/run_regressions.py --godot <executable>` for isolated regression checks; gameplay changes also require Godot validation and desktop smoke testing.
-
 <!-- DEVSPARK SHARED CONTEXT:END -->
+
