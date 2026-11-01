@@ -42,7 +42,12 @@ static func _ensure_entries() -> void:
 		push_error(message)
 	for record in result["levels"]:
 		if _index_by_id.has(record["id"]):
-			continue # reported by the catalog gate's pack audit
+			var first_pack: String = _entries[_index_by_id[record["id"]]].get("pack", "?")
+			var message := "pack '%s' level '%s': duplicate id, also in pack '%s'; skipped" % [
+					record.get("pack", "?"), record["id"], first_pack]
+			_load_errors.append(message)
+			push_error(message)
+			continue
 		_index_by_id[record["id"]] = _entries.size()
 		_entries.append(record)
 
