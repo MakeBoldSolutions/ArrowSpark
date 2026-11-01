@@ -1,6 +1,6 @@
 ---
 source: "BSW.DevSpark — © 2026 Baylor Scott & White Health. Source: https://bsw-devspark.bswhive.com"
-description: Run Analyze, Critic when applicable, and Judge as one bounded planning review that returns a single planning decision before implementation.
+description: For an existing specification bundle, run Analyze, Critic when applicable, and Judge as one bounded planning decision before implementation. On a work branch, Judge only adjudicates a genuine conflict on demand.
 handoffs:
   - label: Implement
     agent: devspark-implement
@@ -48,7 +48,9 @@ Done when `FEATURE_DIR/gates/judge.md` exists, `judge.sh validate` passes, `guar
 
 ### 1. Resolve the Feature Once
 
-`{SCRIPT}` has resolved the active feature (`FEATURE_DIR`, `feature`, and `handoff`). Do not resolve it again. If it reports an error (ambiguous or unknown), stop and ask the developer which feature — never guess.
+`{SCRIPT}` has resolved the active feature (`FEATURE_DIR`, `feature`, and `handoff`). Do not resolve it again. If it reports an error (ambiguous or unknown), stop and ask the developer which feature — never guess. If it reports `work-branch`, follow **Work Branch Adjudication** below instead of steps 2–7.
+
+**Work Branch Adjudication.** A `NNN-work-*` branch has no planning bundle to review, so nothing runs Analyze and Critic for you here and nothing writes `gates/judge.md`. Judge stays available on demand under assurance-contract.md §13: adjudicate only findings the developer brings that genuinely conflict, or a consequential trade-off between viable options. Apply the `judge-contract.md` principles (§2), classification and resolution vocabulary (§8), reclassification authority (§9) and proportionality (§10) — without its gate artifact, run ids or convergence rounds — and report the §13 result block with `Capability: judge`. When the outcome needs authority the developer does not hold, the disposition is `decision needed` and names who holds it. Record an accepted decision under `work.md` `## Material Decisions` only when it must survive the session, then return to `/devspark-implement`. Running Analyze or Critic never obliges a Judge run.
 
 Every child step below carries this **Planning Review hand-off**: `FEATURE_DIR` is the resolved directory, any script a child runs executes with `DEVSPARK_FEATURE` set to the resolved `feature` name, and `PLANNING_REVIEW_RUN_ID` is the run id `{SCRIPT}` generated once for this run (`run_id`). Every child that runs stamps it into its gate header as `planning_review.run_id`. A child never re-derives the feature from the branch name, which can differ from the spec directory.
 

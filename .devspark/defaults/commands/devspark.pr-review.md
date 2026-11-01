@@ -3,7 +3,7 @@ source: "BSW.DevSpark — © 2026 Baylor Scott & White Health. Source: https://b
 description: Perform constitution-aware pull request review with actionable feedback for any PR in the repository
 handoffs:
   - label: Address Current Findings
-    agent: devspark-pr-review
+    agent: devspark-address-pr-review
     prompt: Address the current unresolved review findings.
 scripts:
   sh: .devspark/scripts/bash/get-pr-context.sh $ARGUMENTS --json

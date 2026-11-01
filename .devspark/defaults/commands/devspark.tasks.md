@@ -1,15 +1,11 @@
 ---
 source: "BSW.DevSpark — © 2026 Baylor Scott & White Health. Source: https://bsw-devspark.bswhive.com"
-description: Generate an actionable, dependency-ordered tasks.md for the feature based on available design artifacts.
+description: Coordinate dependency-ordered work when it is useful. Generates tasks.md for existing specification bundles; on work branches identifies deliverables and persists them only when continuity or coordination requires it.
 handoffs:
-  - label: Analyze For Consistency
-    agent: devspark-analyze
-    prompt: Run a project analysis for consistency
-    send: true
-  - label: Run Planning Review
-    agent: devspark-planning-review
-    prompt: Run Planning Review (Analyze, Critic when applicable, and Judge) before implementing
-    send: true
+  - label: Recommend Next Step
+    agent: devspark-next
+    prompt: Recommend the next step for this branch
+    send: false
 scripts:
   sh: .devspark/scripts/bash/check-prerequisites.sh --json --require-plan
   ps: .devspark/scripts/powershell/check-prerequisites.ps1 -Json -RequirePlan
@@ -30,10 +26,41 @@ You **MUST** consider the user input before proceeding (if not empty).
 - **Owns**: a complete, dependency-ordered, story-organized temporary `tasks.md` immediately executable by `/devspark-implement`, including affected current-knowledge updates, tests, and verification. A task states the files it changes; `/devspark-implement` records nothing back into it beyond the checkbox.
 - **Does NOT own**: revisiting WHAT/WHY (spec is authoritative); redesigning architecture/stack/contracts (→ `/devspark-plan`); resolving `[NEEDS CLARIFICATION]` (→ `/devspark-clarify`); gate artifacts beyond the opt-in `## Gate Acknowledgements` note (→ `/devspark-analyze`, `/devspark-critic`).
 - **Pre-flight**: if `plan.md` is missing or `spec.md` still contains `[NEEDS CLARIFICATION]` markers, halt and route back to the appropriate earlier step.
+- **Work branches** (`NNN-work-*`, whatever its directory holds): coordination is optional and needs no plan; follow **Work Branch Coordination**. The authoring chain, pre-flight, Derivative Contract and Planning Review handoff above apply only to existing full-spec bundles.
+
+## Work Branch Coordination (no specification)
+
+Tasks here coordinate meaningful deliverables; they are not a workflow stage. Simple or
+single-deliverable work needs no decomposition: say so and continue with `/devspark-implement`.
+
+1. **Establish context** from the developer's request, the branch diff and commits, current code and
+   tests, relevant `.knowledge/`, and `work.md` or `plan.md` when `AVAILABLE_DOCS` lists them. A plan
+   is never required.
+2. **Identify deliverables**: a short dependency-ordered list of independently verifiable outcomes
+   (behaviour, contract, test or Knowledge change), not one entry per file edit. Name each
+   dependency, and the owner when several developers share the branch. A deliverable that needs a
+   material decision nobody has made is surfaced to the developer (who may run `/devspark-plan`),
+   not invented here.
+3. **Coordinate in session** with your agent's built-in task tracking when it exists, and report the
+   list in chat. Write nothing to the repository for this.
+4. **Persist only when justified**: when the list must survive a new session, spans substantial
+   dependencies, or coordinates several developers, record it in `FEATURE_DIR/work.md` under
+   `## Remaining Deliverables` as `- [ ] <outcome> (after: <deliverable>)`, following the resume-note
+   rules of `/devspark-specify` (`**Status**: In Progress` while work remains). Preserve existing
+   entries and check them off rather than regenerating. Do not create `tasks.md`, `spec.md`,
+   `plan.md`, a checklist or a gate artifact, and do not copy the in-session list there unless one
+   of these needs applies.
+5. **Add no process**: no Task IDs, `Implements:` directives or `plan_semantic_hash`; no Analyze,
+   Critic, Judge or Planning Review. Open deliverables are coordination, not a completion gate: the
+   work is done when `/devspark-implement` establishes its outcome and verification.
+6. **Report and hand back**: report the deliverables, where they are tracked, and the next one. The
+   next step is `/devspark-implement`.
 
 ## Definition of Done
 
 Done when: `tasks.md` is a coherent, dependency-ordered projection of the approved Plan with required checklist fields. Re-runs select re-projection or authorized task remediation from the Plan fingerprint, protect completed work and report the focused-review handoff. A correction need not append a new task or remediation heading. This command stops after writing tasks.md; it does not begin implementation. Chat output: report only the step-6 summary (counts, MVP scope); the task list itself lives in the file.
+
+On a work branch, Done when the developer has a dependency-ordered list of deliverables (or a statement that none is needed) tracked where **Work Branch Coordination** places it.
 
 ## Constitution Authority
 
@@ -44,6 +71,7 @@ Load `/.knowledge/governance/constitution.md` before generating tasks. It is **n
 Load and obey the shared preamble contract core at `/.devspark/templates/command-preamble-contract.md` (installed repos) or `templates/command-preamble-contract.md` (source repos) before step 1 — it covers multi-app scope resolution and the 2-tier override check for scripts. Preamble modules: `convergence`, `provenance`.
 
 1. **Setup**: Run `{SCRIPT}` from repo root and parse FEATURE_DIR and AVAILABLE_DOCS list. All paths must be absolute. For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
+   If the branch matches `NNN-work-*`, follow **Work Branch Coordination** above instead of steps 2-6.
 
 2. **Load design documents**: Read from FEATURE_DIR:
    - **Required**: plan.md (tech stack, libraries, structure), spec.md (user stories with priorities)

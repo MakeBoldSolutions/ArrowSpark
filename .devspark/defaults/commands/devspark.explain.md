@@ -8,12 +8,9 @@ handoffs:
   - label: Sweep Unrelated Stale Content
     agent: devspark-release
     prompt: Clean up unrelated stale work products or knowledge noticed during this trace
-  - label: Spec the Missing Behavior
+  - label: Start Work on a Gap or Defect
     agent: devspark-specify
-    prompt: This topic revealed genuinely unimplemented behavior, not just undocumented behavior
-  - label: Fix a Confirmed Code Defect
-    agent: devspark-quickfix
-    prompt: Explain confirmed a code defect while tracing this topic; fix it as a bounded quickfix
+    prompt: This topic revealed genuinely unimplemented behavior or a confirmed code defect; start work to address it
 scripts:
   sh: .devspark/scripts/bash/explain-context.sh $ARGUMENTS --json
   ps: .devspark/scripts/powershell/explain-context.ps1 $ARGUMENTS -Json
@@ -42,7 +39,7 @@ modules: `convergence`.
 ## Lifecycle Position
 
 Ad-hoc utility, alongside `/devspark-release` and `/devspark-site-audit` — not a step in the
-`specify → plan → tasks → analyze → critic → implement → pr-review` gate chain. Usable any time a
+Understand → Implement ↔ Verify → Deliver flow. Usable any time a
 developer or an agent needs a grounded answer instead of guessing, and doubles as a lightweight,
 on-demand knowledge-sync check for one topic.
 
@@ -155,8 +152,8 @@ finding_ids[], applied, trace_saved, trace_path}` where `resolution` is one of `
      - Yes → write the file(s), run `python3 scripts/build_knowledge_index.py --repo-root .`, and
        re-verify the specific finding now resolves before reporting success.
      - No → leave as a proposal only (`resolution: proposal-pending`); write nothing.
-   - **Code defect** — Explain reports confirmed code defects and offers the Quickfix handoff
-     (`/devspark-quickfix`). It does not modify application code itself.
+   - **Code defect** — Explain reports confirmed code defects and offers the Start Work handoff
+     (`/devspark-specify`). It does not modify application code itself.
    - **Follow-up work** — never started or scheduled by Explain; name it in the next-step footer.
 8. Under `--dry-run`, never write anything: report `trace_saved: false` unconditionally and skip
    step 9.

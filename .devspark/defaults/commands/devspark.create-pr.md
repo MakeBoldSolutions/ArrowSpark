@@ -38,15 +38,18 @@ and asks the user to confirm before creating or updating it.
 This command is advisory, with one exception: it is the **readiness boundary**. A successful run means
 DevSpark believes the committed, pushed HEAD is complete, internally consistent, and ready for other
 people to review. It never means "open the PR so `/devspark-pr-review` can find out whether the work is
-finished." A known deterministic committed-state Knowledge failure (`knowledge.readiness: blocked`,
-meaning the Knowledge cannot be built) stops the command; see *Knowledge Readiness Boundary* below.
+finished." Three known deterministic committed-state failures stop the command: Knowledge that cannot
+be built (`knowledge.readiness: blocked`; see *Knowledge Readiness Boundary* below), a mandatory
+obligation without satisfying evidence (`lifecycle` failure `required-obligation-unresolved`; see
+*Completed-Work Invariant*), and declared mandatory obligations that the lifecycle check could not
+evaluate (`lifecycle.status: unavailable` with `obligations_declared: true`).
 Dirty trees, failed verification,
 code/knowledge mismatches, and unresolved review findings are otherwise warnings the agent must
 explain. Missing planning records are normal.
 
 ## Definition of Done
 
-Done when: `knowledge.readiness` is not `blocked`, the user has explicitly confirmed (step 4), and the PR has been created or updated (step 5), with the step-6 result report printed. Do not call the create/update script before that confirmation, and do not keep re-drafting once the user has approved — act on their decision.
+Done when: `knowledge.readiness` is not `blocked`, `lifecycle` reports no `required-obligation-unresolved` failure and is not `unavailable` with `obligations_declared: true`, the user has explicitly confirmed (step 4), and the PR has been created or updated (step 5), with the step-6 result report printed. Do not call the create/update script before that confirmation, and do not keep re-drafting once the user has approved — act on their decision.
 
 ## Outline
 
@@ -68,6 +71,7 @@ Use the script output as the source of truth for:
   display evidence only). `unknown` means the engine or interpreter was unavailable: report it as a
   compatibility warning, never as clean
 - gate artifact scan results and severities
+- `lifecycle` — the lifecycle check for the branch's work directory or planning bundle (see below)
 - gate acknowledgements from tasks or quickfix records
 - `diff.lines_summary`, `diff.commit_log` (hash/subject/author/date), `diff.file_changes` (status/path)
 
@@ -100,9 +104,11 @@ Use recommendation language, not hard-block language.
 
 Everything the active spec requires is finished before this command runs: implementation, tests, Knowledge synchronization, required Verify obligations, finding dispositions, and Closeout. No required task is scheduled for after the PR or after merge, and the design never includes "merge, then branch again to finish the old spec". PR Review may still find new blockers; those are corrected on this branch and PR.
 
-When the planning bundle (`FEATURE_DIR`) still exists, run `scripts/judge.py lifecycle --feature-dir <FEATURE_DIR>` (installed repos: `.devspark/scripts/bash/judge.sh` or `.devspark/scripts/powershell/judge.ps1`). It reports unchecked required tasks, a required planning review that is missing, an unresolved verdict or pending human decision, a stale Judge (or a child gate that needs a recheck — a stale `PROCEED` is not evidence), routed obligations whose owner has not completed, preserved future work that was never materialized, and a `not-complete` closeout. Obligations routed to `pr-review` are pending for that later phase and are fine.
+A universal work branch (any `NNN-work-*` branch, whatever its directory holds) is held to the same invariant with less to prove: the requested change is implemented and verified in proportion to its risk, and any mandatory obligation has satisfying evidence. It needs no Verify or Closeout document.
 
-Treat a failure here as a **stop**, not a nudge: route back to `/devspark-implement` (or `/devspark-verify`). The developer may still proceed by saying so explicitly; record each unmet item under the PR's acknowledged gaps. Unlike other warnings in this command, this one is never silently skipped, `--auto` or not. Where a deferral must outlive the spec, it lives as a Future Work Plan, a new spec, an external work item, an explicit accepted limitation, or a release/deployment activity — never as an unchecked task in a spec that is about to be archived.
+Preflight already runs the lifecycle check and reports it as `lifecycle`: `status` (`pass`, `fail`, `unavailable`, `not-applicable`), `failures[]` (`code`, `message`, and `obligations[]` with each obligation's `authority`), and `pending_later_phase[]`. Read it; do not run the check again. `not-applicable` means the branch has no work directory or planning bundle — a bundle-free work branch with no resume note — and needs nothing further. `unavailable` means the check could not run, and is never a pass: `reason` says why (`judge-missing`, `python-unavailable`, or `invalid-output`) and `obligations_declared` says whether `work.md` has a `## Required Obligations` section. When obligations are declared, the script refuses create and update mode with `CREATE PR BLOCKED — LIFECYCLE CHECK UNAVAILABLE` and the recovery step for that reason, because an obligation that could not be evaluated has not been shown to pass; stop and relay it. DevSpark has no override for this; where organizational policy authorizes a different approval path, the developer follows it outside DevSpark. Otherwise, run `scripts/judge.py lifecycle --feature-dir <FEATURE_DIR>` yourself (installed repos: `.devspark/scripts/bash/judge.sh` or `.devspark/scripts/powershell/judge.ps1`); if that also cannot run, say readiness is unconfirmed rather than calling it clean. The check reads the committed local HEAD (`remote.local_head`); creation requires that HEAD to be the published branch tip (`remote.remote_head`), so when they differ say which one the evidence describes. It reports unchecked required tasks, an incomplete optional `work.md` resume note, a required planning review that is missing, an unresolved verdict or pending human decision, a stale Judge (or a child gate that needs a recheck — a stale `PROCEED` is not evidence), routed obligations whose owner has not completed, preserved future work that was never materialized, a `not-complete` closeout, and an unchecked `## Required Obligations` entry in `work.md`, or one checked without its authority or an evidence reference. Obligations routed to `pr-review` are pending for that later phase and are fine. A bundle-free work branch with no resume note uses the same normal PR preflight without a synthetic planning bundle.
+
+Treat a failure here as a **stop**, not a nudge: route back to `/devspark-implement` (or `/devspark-verify`). The developer may still proceed by saying so explicitly; record each unmet item under the PR's acknowledged gaps. The exception is `required-obligation-unresolved`: a mandatory obligation is not the developer's to waive, and the script itself refuses create and update mode with `CREATE PR BLOCKED — REQUIRED OBLIGATION UNRESOLVED`, naming each obligation and the authority it belongs to. Stop before drafting. It clears only when the satisfying evidence, or an explicit decision from the named authority, is recorded by checking the `## Required Obligations` entry in `work.md` with a reference to it; then commit, push and rerun this command. Proceeding past the check is never how that decision is recorded. No flag, `--auto` or Gate Acknowledgement bypasses it. Where a deferral must outlive the spec, it lives as a Future Work Plan, a new spec, an external work item, an explicit accepted limitation, or a release/deployment activity — never as an unchecked task in a spec that is about to be archived.
 
 #### Knowledge Readiness Boundary (blocking)
 
@@ -140,6 +146,7 @@ After the warnings, surface a short, one-time reminder that **offers** — but n
   - **Skip and continue** → proceed straight to drafting. This is the **default**, and it keeps the fast `quickfix → create-pr → pr-review` path at three steps.
 - Tailor the strength of the reminder to context, but keep it advisory in every case:
   - If `spec.md` declares one or more `verify:<mode>` gates and no passing `gates/verify.md` exists, phrase it as a clear recommendation ("this change declared verification; running it is recommended before review").
+  - On a universal work branch, offer verification proportional to the change's risk; it needs no spec, no declared mode and no gate document, and skipping it is never a failure.
   - Otherwise (e.g. a low-risk quickfix with no declared verify mode), phrase it as a light optional nudge ("optional: prove the fix works before review").
 - Never block on this, and never run verify without the developer choosing it. If `--auto` (or a standing autonomy instruction) is in effect, skip the offer and continue without running verify, noting in the step-6 result that verification was not run.
 
@@ -186,7 +193,7 @@ Build the body from the preflight JSON (keep total under 4,000 characters):
   `.knowledge/`, including any gap requiring reviewer attention
 - **Verification** — exact commands and outcomes for tests, lint, builds, or runtime checks
 - **Quality Gates** — gate artifact statuses, or "No gate artifacts found". **Test signal wording**: if you observed both a functional test result and a separate policy/coverage-gate result (e.g. a test run that passes but a coverage or lint threshold that fails, or vice versa), report them as two distinct statements — never collapse them into a single "tests failed"/"tests passed" line. Name the specific gate that failed when it isn't the tests themselves.
-- **Deployment status** — when the closeout gate lists deferred `stage: post-deploy` items, state "ready to deploy, not deployed" and list each carried item with its `captured_as` record and required evidence. Deferred post-deploy items do not block the PR and are never reported as passed. Omit this bullet when none exist.
+- **Deployment status** — when the closeout gate lists deferred `stage: post-deploy` items, state "ready to deploy, not deployed" and list each carried item with its `captured_as` record and required evidence. On a work branch, do the same for each requirement that `work.md` or the verification report names as provable only after deployment, with how it will be proven. Deferred post-deploy items do not block the PR and are never reported as passed. Omit this bullet when none exist.
 - **Knowledge Evidence** — for `.knowledge/` nodes changed in this diff, note whether each cites a
   test-verified (`verified_by: execution`) claim or a code-only one, and whether a code-only entry
   carries a `fallback_reason`. A code-only entry with no adjacent reason is a note for the reviewer,
@@ -233,6 +240,8 @@ Supported flags:
 
 Use create mode when no PR exists. Use update mode when a PR already exists for the branch or the user explicitly chooses update.
 
+Create and update mode exit `0` only when they return `status: ok`; every refusal or failure returns `error: true` and exits `1` in both the PowerShell and Bash scripts. Read the exit code, not the message text, to tell them apart. Preflight always exits `0` and reports problems in its JSON.
+
 If a quickfix record for this branch still lives under `.devspark.work/quickfixes/` with a blank
 `**PR**` field, fill in the new PR number now and commit that one-line update on the same branch —
 this is the only place that field gets populated, so a quickfix record left over from before this
@@ -266,5 +275,5 @@ After reporting the result above, offer — but never require — an immediate h
 
 - Branches with no spec are the expected post-implementation state.
 - Never include spec, task, quickfix, feature, or requirement identifiers in the PR title or body.
-- If gate artifacts are absent, recommend `/devspark-analyze` or `/devspark-critic` before merge.
+- If gate artifacts are absent, say so plainly. Their absence is the normal state for work that needed no extra assurance; recommend `/devspark-analyze` or `/devspark-critic` only for a specific, named concern in this change.
 - Surface gate acknowledgements plainly in the draft body rather than burying them in prose.

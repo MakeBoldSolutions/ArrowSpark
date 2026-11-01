@@ -2,9 +2,9 @@
 source: "BSW.DevSpark — © 2026 Baylor Scott & White Health. Source: https://bsw-devspark.bswhive.com"
 description: Create or update the project constitution from interactive or provided principle inputs, ensuring all dependent templates stay in sync.
 handoffs:
-  - label: Build Specification
+  - label: Start New Work
     agent: devspark-specify
-    prompt: Implement the feature specification based on the updated constitution. I want to build...
+    prompt: Start new work under the updated constitution. I want to build...
 ---
 
 ## User Input

@@ -1,19 +1,23 @@
 ---
 source: "BSW.DevSpark — © 2026 Baylor Scott & White Health. Source: https://bsw-devspark.bswhive.com"
-description: Challenge whether an internally sound plan is wrong about the real system it will run in — unimplementable conditions, absent operational controls, and unexamined assumptions about code, dependencies, and failure.
+description: On demand for one specific material concern — challenge whether the work is wrong about the real system it will run in, such as unimplementable conditions, absent operational controls, and unexamined assumptions about code, dependencies, and failure. Never a default gate.
 handoffs:
-  - label: Fix Spec Showstoppers
-    agent: devspark-specify
-    prompt: Revise spec to resolve vague requirements, missing edge cases, or undefined trust boundaries
-    send: true
-  - label: Fix Critical Issues
+  - label: Return to Implementation
+    agent: devspark-implement
+    prompt: Continue implementation, applying the critic disposition
+    send: false
+  - label: Resolve Spec Showstoppers (existing specification)
+    agent: devspark-clarify
+    prompt: Resolve vague requirements, missing edge cases, or undefined trust boundaries in the existing spec
+    send: false
+  - label: Revise Existing Plan
     agent: devspark-plan
-    prompt: Revise plan to address critical architectural risks
-    send: true
-  - label: Update Tasks
+    prompt: Revise the existing plan to address the critical architectural risk
+    send: false
+  - label: Update Existing Tasks
     agent: devspark-tasks
-    prompt: Regenerate tasks with missing operational items
-    send: true
+    prompt: Update the existing task list with the missing operational items
+    send: false
 scripts:
   sh: .devspark/scripts/bash/check-prerequisites.sh --json --include-tasks
   ps: .devspark/scripts/powershell/check-prerequisites.ps1 -Json -IncludeTasks
@@ -63,9 +67,9 @@ Critic is **planning-time** assurance. It is not post-implementation code review
 
 ## Operating Constraints
 
-Non-destructive. Do **not** edit `spec.md`, `plan.md`, `tasks.md`, or source files. The only allowed write is refreshing the gate artifact at `FEATURE_DIR/gates/critic.md`.
+Non-destructive. Do **not** edit `spec.md`, `plan.md`, `tasks.md`, or source files. The only allowed write is refreshing the gate artifact at `FEATURE_DIR/gates/critic.md` — and on a work branch, not even that (assurance-contract.md §13).
 
-Read YAML frontmatter from `spec.md` (or the quickfix record when `FEATURE_SPEC` resolves to `.devspark.work/quickfixes/<branch>.md`). Treat `classification`, `risk_level`, `risk_profile`, `change_type`, `archetype`, and `required_gates` as authoritative when present.
+Read YAML frontmatter from `spec.md` (or the quickfix record when `FEATURE_SPEC` resolves to `.devspark.work/quickfixes/<branch>.md`). Treat `classification`, `risk_level`, `risk_profile`, `change_type`, `archetype`, and `required_gates` as authoritative when present. On a work branch none of this applies: a `spec.md` in its directory is incidental, and the stated concern alone sets the scope (assurance-contract.md §13).
 
 **Mindset**: Default — assume **limited team experience** with the stack, **optimistic estimates**, and **incomplete edge-case understanding**. If `/.knowledge/governance/constitution.md` declares `**Team Experience**: expert` in its Governance section, calibrate instead to: assume deep stack familiarity — de-emphasize beginner-trap findings (basic setup mistakes, well-known footguns already covered by linting/tests) and weight findings toward the sophisticated, cross-cutting risks a seasoned team is more likely to miss (subtle race conditions, cross-service contract drift, adversarial edge cases). `mixed` blends both: neither suppress nor over-index on beginner traps. Absence of the field, or any other value, means the default pessimistic mindset applies unchanged.
 
@@ -94,8 +98,11 @@ Run `{SCRIPT}` once from repo root, parse JSON for FEATURE_DIR and AVAILABLE_DOC
 | spec only           | Spec-level: rationale, requirement completeness, scope hazards, trust boundaries | `SPEC-ONLY`       |
 | spec + plan         | Above + architecture, stack, data model, deployment risks                        | `SPEC+PLAN`       |
 | spec + plan + tasks | Full critique including task sequencing & operational gaps                       | `FULL`            |
+| work branch (`NNN-work-*`, whatever its directory holds) | One stated concern challenged against the current code, tests, declared contracts, `.knowledge/` and the constitution | `WORK`            |
 
-Abort only if `spec.md` is missing AND no quickfix record exists for this branch under `.devspark.work/quickfixes/` (FEATURE_SPEC resolves there automatically — see the shared preamble's script resolution). Print the degradation label in the Executive Summary so partial reviews aren't mistaken for full ones.
+Abort only if `spec.md` is missing AND no quickfix record exists for this branch under `.devspark.work/quickfixes/` AND the branch is not a `NNN-work-*` branch (FEATURE_SPEC resolves there automatically — see the shared preamble's script resolution). Print the degradation label in the Executive Summary so partial reviews aren't mistaken for full ones.
+
+**Work branch (`WORK`).** Follow assurance-contract.md §13. Ask for the concern if the developer did not state one; with no concern there is nothing to critique. Challenge only that concern, with inspected evidence (§3.1) from the real system — the change under way, its consumers, contracts and failure modes — and use the optional `work.md` and `plan.md` as stated intent. Report the §13 result block instead of the full report. Write no gate artifact (skip §11) and return to `/devspark-implement`. Never run `/devspark-analyze` or Planning Review as a follow-on; recommend one only when the outcome shows that concern needs it.
 
 For single quotes in args (e.g. "I'm Groot"), use `'I'\''m Groot'` or double-quote.
 
@@ -480,6 +487,8 @@ pre-implementation actions, is a self-contradiction — recompute before writing
 Every table row MUST correspond to a `finding_id` in the YAML `findings:` list — the YAML list is the single source of truth. Tables are projections, never additive. `routed_findings` and `verification_obligations` are never rendered as findings tables.
 
 ### 11. Persist Gate Artifact
+
+Skip this step on a work branch (`WORK` scope): the §13 result is reported, not persisted.
 
 Before writing the report, compute `reviewed_artifacts`: for each artifact actually read in this review (typically `spec.md`, and `plan.md`/`tasks.md` when scope is SPEC+PLAN or FULL), run `git hash-object <path>` and record the `path`/`hash` pair. This is a mechanical step (a hash, not a judgment) -- do not skip it even when findings are empty.
 
