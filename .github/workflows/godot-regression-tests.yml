@@ -10,6 +10,8 @@ on:
       - 'addons/maaacks_game_template/base/scripts/**'
       - 'tests/**'
       - 'project.godot'
+      - 'export_presets.cfg'
+      - 'levels/**'
       - '.github/workflows/godot-regression-tests.yml'
   pull_request:
     paths:
@@ -18,6 +20,8 @@ on:
       - 'addons/maaacks_game_template/base/scripts/**'
       - 'tests/**'
       - 'project.godot'
+      - 'export_presets.cfg'
+      - 'levels/**'
       - '.github/workflows/godot-regression-tests.yml'
 
 jobs:

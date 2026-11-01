@@ -380,11 +380,96 @@ knowledge_blocked_error() {
     details+=$'\n2. Confirm it builds: python '"$engine_rel"$' --repo-root . --check'
     details+=$'\n3. Commit the .knowledge/** changes.'
     details+=$'\n4. Push.'
-    details+=$'\n5. Rerun /devspark.create-pr.'
+    details+=$'\n5. Rerun /devspark-create-pr.'
 
     jq -n --arg message "$message" --arg details "$details" --arg head "$head" \
         --argjson blockers "$(jq -c '.blockers' <<< "$knowledge_json")" \
         '{error: true, message: $message, details: $details, checked_head: $head, blockers: $blockers}'
+}
+
+# Reports DevSpark's own lifecycle check (judge.py lifecycle) for the branch's work directory, the
+# same check /devspark-next and /devspark-implement use. It only reads; the rules live in judge.py.
+# When the check cannot run, the result says why and whether work.md declares mandatory obligations,
+# because an obligation that could not be evaluated must never read as one that passed.
+lifecycle_unavailable_json() {
+    local feature_dir="$1" reason="$2" declared=false
+    if [[ -f "$feature_dir/work.md" ]] && grep -Eiq $'^##[[:blank:]]+Required Obligations[[:blank:]]*\r?$' "$feature_dir/work.md"; then
+        declared=true
+    fi
+    jq -n --arg reason "$reason" --argjson declared "$declared" \
+        '{status: "unavailable", reason: $reason, obligations_declared: $declared, failures: [], pending_later_phase: []}'
+}
+
+collect_lifecycle_json() {
+    local feature_dir="$1" judge python output
+    if [[ -z "$feature_dir" || ! -d "$feature_dir" ]]; then
+        jq -n '{status: "not-applicable", failures: [], pending_later_phase: []}'
+        return 0
+    fi
+    judge="$SCRIPT_DIR/../judge.py"
+    if [[ ! -f "$judge" ]]; then
+        lifecycle_unavailable_json "$feature_dir" "judge-missing"
+        return 0
+    fi
+    if ! python=$(resolve_knowledge_python); then
+        lifecycle_unavailable_json "$feature_dir" "python-unavailable"
+        return 0
+    fi
+    output=$("$python" "$judge" lifecycle --feature-dir "$feature_dir" 2>/dev/null | tr -d '\r') || true
+    if jq -e '.status == "pass" or .status == "fail"' <<< "$output" >/dev/null 2>&1; then
+        jq -c '{status: .status, failures: (.failures // []), pending_later_phase: (.pending_later_phase // [])}' <<< "$output"
+    else
+        lifecycle_unavailable_json "$feature_dir" "invalid-output"
+    fi
+}
+
+lifecycle_unavailable_error() {
+    local preflight_json="$1"
+    local reason head feature_name cause fix details
+    reason=$(jq -r '.lifecycle.reason // ""' <<< "$preflight_json")
+    head=$(jq -r '.remote.local_head' <<< "$preflight_json")
+    feature_name=$(basename "$(jq -r '.feature.dir // ""' <<< "$preflight_json")")
+    case "$reason" in
+        judge-missing)
+            cause="DevSpark's judge.py is not installed beside its scripts"
+            fix="1. Restore judge.py by reinstalling or upgrading the DevSpark scripts." ;;
+        python-unavailable)
+            cause="no Python 3.11+ interpreter with PyYAML is available as python3 or python"
+            fix="1. Make Python 3.11+ with PyYAML available as python3 or python." ;;
+        *)
+            cause="judge.py ran but did not return a lifecycle result"
+            fix="1. Run judge.py lifecycle --feature-dir .devspark.work/specs/$feature_name to see the error, and fix it." ;;
+    esac
+    details="Committed HEAD: $head"
+    details+=$'\n'"work.md declares Required Obligations, but DevSpark could not run its lifecycle check: $cause."
+    details+=$'\nAn obligation that could not be evaluated is not an obligation that passed, so DevSpark will not publish this PR.'
+    details+=$'\nRequired action:'
+    details+=$'\n'"$fix"
+    details+=$'\n2. Rerun /devspark-create-pr.'
+    details+=$'\nDevSpark has no override for this. Where organizational policy authorizes a different approval path, follow that path outside DevSpark.'
+
+    jq -n --arg message "CREATE PR BLOCKED — LIFECYCLE CHECK UNAVAILABLE" --arg details "$details" --arg reason "$reason" \
+        '{error: true, message: $message, details: $details, reason: $reason}'
+}
+
+obligation_blocked_error() {
+    local preflight_json="$1"
+    local failure head details
+    failure=$(jq -c '[.lifecycle.failures[] | select(.code == "required-obligation-unresolved")][0]' <<< "$preflight_json")
+    head=$(jq -r '.remote.local_head' <<< "$preflight_json")
+    details="Committed HEAD: $head"
+    details+=$'\n'"Obligation: $(jq -r '.message' <<< "$failure")"
+    details+=$'\nA mandatory obligation is not the developer\'s to waive, and no flag or acknowledgement bypasses it.'
+    details+=$'\nRequired action:'
+    details+=$'\n1. Obtain the satisfying evidence, or an explicit decision from the authority the obligation names.'
+    details+=$'\n2. Check the entry under ## Required Obligations in work.md and add a reference to that evidence or decision (Evidence: followed by a repository path, commit, review or approval id, or link).'
+    details+=$'\n3. Commit.'
+    details+=$'\n4. Push.'
+    details+=$'\n5. Rerun /devspark-create-pr.'
+
+    jq -n --arg message "CREATE PR BLOCKED — REQUIRED OBLIGATION UNRESOLVED" --arg details "$details" \
+        --argjson obligations "$(jq -c '.obligations // []' <<< "$failure")" \
+        '{error: true, message: $message, details: $details, obligations: $obligations}'
 }
 
 collect_preflight() {
@@ -394,7 +479,7 @@ collect_preflight() {
     local spec_exists=false plan_exists=false tasks_exists=false
     local spec_title="" classification="" risk_level="" required_gates="" recommended_next_step=""
     local tasks_total=0 tasks_completed=0 tasks_incomplete=0
-    local diff_ref lines_summary changed_files_count file_changes_json commit_log_json existing_pr_json checklists_json gate_artifacts_json gate_acknowledgements_json quickfix_json knowledge_json
+    local diff_ref lines_summary changed_files_count file_changes_json commit_log_json existing_pr_json checklists_json gate_artifacts_json gate_acknowledgements_json quickfix_json knowledge_json lifecycle_json
     local existing_pr=false existing_pr_number="" existing_pr_url="" existing_pr_title="" existing_pr_state="" existing_pr_draft=false
 
     repo_root=$(get_repo_root)
@@ -510,6 +595,7 @@ collect_preflight() {
         jq -s '.' 2>/dev/null || printf '[]\n')
 
     knowledge_json=$(collect_knowledge_json "$repo_root" "$local_head")
+    lifecycle_json=$(collect_lifecycle_json "$feature_dir")
 
     if [[ "$cli_available" == true && "$auth_ok" == true ]]; then
         if [[ "$DEVSPARK_PLATFORM_NAME" == "azdo" ]]; then
@@ -583,6 +669,7 @@ collect_preflight() {
         --argjson gate_acknowledgements "$gate_acknowledgements_json" \
         --argjson quickfix_record "$quickfix_json" \
         --argjson knowledge "$knowledge_json" \
+        --argjson lifecycle "$lifecycle_json" \
         '{
             repo_root: $repo_root,
             current_branch: $current_branch,
@@ -633,6 +720,7 @@ collect_preflight() {
             },
             quickfix_record: $quickfix_record,
             knowledge: $knowledge,
+            lifecycle: $lifecycle,
             existing_pr: {
                 exists: $existing_pr,
                 number: (if $existing_pr then $existing_pr_number else null end),
@@ -659,6 +747,14 @@ run_create_or_update() {
     fi
     if [[ "$(echo "$preflight_json" | jq -r '.knowledge.readiness')" == "blocked" ]]; then
         knowledge_blocked_error "$preflight_json"
+        return 1
+    fi
+    if jq -e '[.lifecycle.failures[] | select(.code == "required-obligation-unresolved")] | length > 0' <<< "$preflight_json" >/dev/null; then
+        obligation_blocked_error "$preflight_json"
+        return 1
+    fi
+    if jq -e '.lifecycle.status == "unavailable" and .lifecycle.obligations_declared == true' <<< "$preflight_json" >/dev/null; then
+        lifecycle_unavailable_error "$preflight_json"
         return 1
     fi
 

@@ -638,6 +638,7 @@ func _check_level_select_group_descriptions() -> void:
 		PuzzleCatalog.GROUP_ARROWSPARK_LEVELS: "The intended ArrowSpark experience.",
 		PuzzleCatalog.GROUP_FOUNDATIONS: "Small boards that teach the rule.",
 		PuzzleCatalog.GROUP_PUZZLE_LAB: "Development experiments, some deliberately over-tangled.",
+		PuzzleCatalog.GROUP_GENERATED: "Boards built by the level generator; an untuned first sample.",
 	}
 	var ranking := RegEx.create_from_string("(?i)\b(best|better|easy|easier|hard|harder|hardest|beginner|advanced|expert|basic|top|premium|bonus|real)\b")
 	for i in range(labels.size()):

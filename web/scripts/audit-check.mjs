@@ -6,13 +6,7 @@
 // be installed; any advisory not listed here still fails the build.
 import { spawnSync } from 'node:child_process';
 
-const ALLOWED = {
-  // http-cache-semantics <= 4.2.0 (no patched release), pulled in only by astro. Astro uses it
-  // only to cache remote images at build time; this site has no remote images and ships static
-  // files with no server-side HTTP cache, so the max-stale disclosure cannot occur.
-  // Remove when a patched http-cache-semantics reaches astro.
-  'GHSA-ch52-4w7c-c8xp': 'build-time only; no remote images; static output',
-};
+const ALLOWED = {};
 
 const BLOCKING = new Set(['high', 'critical']);
 

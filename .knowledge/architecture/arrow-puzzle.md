@@ -11,6 +11,9 @@ appliesTo:
   - scripts/puzzle/puzzle_catalog.gd
   - scripts/puzzle/puzzle_analyzer.gd
   - scripts/puzzle/puzzle_content_version.gd
+  - scripts/puzzle/puzzle_pack_format.gd
+  - scripts/puzzle/puzzle_generator.gd
+  - levels/**
   - scripts/presentation/web_attempt_emitter.gd
   - scripts/puzzle_session.gd
   - scripts/puzzle_scoreboard.gd
@@ -46,6 +49,11 @@ appliesTo:
   - tests/puzzle_presentation_check.gd
   - tests/arrow_departure_visual_check.gd
   - tests/scene_loader_stub.gd
+  - tests/puzzle_pack_format_check.gd
+  - tests/puzzle_generator_check.gd
+  - tests/puzzle_report_format.gd
+  - tests/level_pack_build.gd
+  - tests/run_level_pack_build.py
 ---
 
 # Arrow Puzzle Rules, Presentation and Menu Integration
@@ -61,7 +69,8 @@ model, never the reverse. Shared definitions live with the rules model
 | Responsibility | Scripts |
 |---|---|
 | Rules and model | `scripts/puzzle/puzzle_definition.gd` (board shape, validation, direction step, head ordering), `puzzle_state.gd` (blocking, removal, mistakes, Open Move, score), `puzzle_solver.gd`, `puzzle_analyzer.gd`, `puzzle_content_version.gd` |
-| Puzzle content | `scripts/puzzle/puzzle_catalog.gd` (entries, groups, builders) |
+| Puzzle content | `levels/` (level packs: the committed data for every level), `scripts/puzzle/puzzle_catalog.gd` (registry and groups, read from the packs), `puzzle_pack_format.gd` (reading, auditing and writing packs) |
+| Level generation (developer tooling only) | `scripts/puzzle/puzzle_generator.gd` (seeded generator), `tests/level_pack_build.gd` and `tests/run_level_pack_build.py` (pack-build tool) |
 | Session state | `scripts/puzzle_session.gd` (selected puzzle, Next Puzzle), `scripts/puzzle_scoreboard.gd` (session bests) |
 | Presentation | `scenes/puzzle/arrow_view.gd`, `scenes/puzzle/puzzle_results.gd`, `scripts/presentation/game_visual_style.gd`, `arrow_departure_geometry.gd`, `puzzle_viewport_transform.gd`, `scripts/puzzle/puzzle_feedback.gd` (animation constants), `puzzle_results_format.gd` (display formatting) |
 | Input and board canvas | `scenes/puzzle/puzzle_board.gd` (mouse, keyboard, gamepad and touch input; hit testing; zoom and pan through `PuzzleViewportTransform`; arrow view placement) |
@@ -299,23 +308,27 @@ and `PUZZLE_FAILURES=0`.
 
 `PuzzleCatalog` (scripts/puzzle/puzzle_catalog.gd) is a static-registry
 `RefCounted` class, never instantiated, sitting between the domain
-(`PuzzleDefinition`) and presentation. It holds an ordered array of thirty entries (`{id, title, group, build}`) — the original eight baseline puzzles, six
+(`PuzzleDefinition`) and presentation. It reads its entries once per process
+from the level packs under `res://levels` (see Level packs below) and holds
+them in catalog order: thirty-four entries — the original eight baseline puzzles, six
 experimental puzzles (`nested_chain`, `cascade_key_arrow`,
 `dense_unravel`, `bent_network`, `long_range_blocker`, `composed_shaped`),
 each deliberately authored to combine structural features (dependency depth,
 cascade fan-out, density, bent-tail dependencies, long-range blocking,
 macro-scale composition) the baseline eight never did in combination, one large-canvas validation board (`canvas_validation`, titled "Large Canvas
-Validation"), six newer geometric experiments (`knot_long_geometry`, `knot_interwoven_paths`, `knot_dense_core`, `knot_regions`, `knot_single_release`, `knot_boundary`), eight progression levels (`first_knot`, `two_neighborhoods`, `the_bridge`, `false_simplicity`, `the_rescan`, `major_release`, `dense_weave`, `almost_a_knot`) and the hand-composed Reference Knot (`reference_knot`) — each `build` a zero-argument static function
-constructing a fresh `PuzzleDefinition` exactly like `create_fixed()`'s own
-literal-construction style. `count()`, `id_at(index)`, `title_at(index)`,
+Validation"), six newer geometric experiments (`knot_long_geometry`, `knot_interwoven_paths`, `knot_dense_core`, `knot_regions`, `knot_single_release`, `knot_boundary`), eight progression levels (`first_knot`, `two_neighborhoods`, `the_bridge`, `false_simplicity`, `the_rescan`, `major_release`, `dense_weave`, `almost_a_knot`), the hand-composed Reference Knot (`reference_knot`) and four generated sample levels (`gen_sample_01` to `gen_sample_04`). `count()`, `id_at(index)`, `title_at(index)`,
 `index_of(id)` (`-1` if unknown), `ids()` (an independent ordered copy) and
 `get_title(id)` (`""` if unknown) expose ordering and identity as two
 separate concepts — a stable string id is never derived from array position,
-title, or any filesystem path. `get_definition(id)` (`null` if unknown)
-rebuilds and returns a fresh `PuzzleDefinition` on every call — no caching,
-no shared instance — so two calls for the same id are structurally equal but
-never share mutable substructure, the same isolation guarantee
-`create_fixed()` already had. `PuzzleDefinition` itself gained no
+title, pack or any filesystem path; `index_of` looks ids up in a map built
+at load. `get_definition(id)` (`null` if unknown) builds and returns a fresh
+`PuzzleDefinition` from the stored level data on every call — no shared
+instance — so two calls for the same id are structurally equal but never share
+mutable substructure, the same isolation guarantee `create_fixed()` has.
+`load_errors()` lists every problem met while reading the packs, each naming
+its pack and level; a malformed level is reported (also through `push_error`)
+and left out, never silently dropped, and the catalog gate fails on any load
+error. `PuzzleDefinition` itself gained no
 catalog/progression fields; it remains anonymous structural data.
 
 `canvas_validation` is a plainly titled, player-visible entry (the seventh
@@ -325,11 +338,11 @@ the cells occupied): almost every arrow is long and bent (most 22-43 cells,
 only three shorter than eight), all four directions appear, long tails cross
 the rays of other arrows so most removals unlock several others, all four
 corner regions are occupied, and the initial open move (the first legal head
-in (y, x) order) is near the top-left. The layout is fixed literal data built
-by `PuzzleCatalog._from_shapes`, like every other vertex-path board, from
-orthogonal path vertices expanded deterministically by
-`PuzzleCatalog._tail_along`; it was found once by a seeded offline search that
-kept every step solvable and is not generated at runtime. It exists to
+in (y, x) order) is near the top-left. The layout is fixed data in
+`levels/packs/puzzle_lab.json`, stored like every level as orthogonal path
+vertices expanded deterministically by `PuzzlePackFormat.expand_vertices`; it
+was found once by a seeded offline search that kept every step solvable and is
+not generated at runtime. It exists to
 exercise large-board navigation, off-screen assistance and long departures;
 its difficulty is deliberately untuned. The original fourteen entries' ids, order, dimensions and exact arrow/tail
 content are pinned by fingerprints, as is the complete `canvas_validation`
@@ -349,11 +362,11 @@ Eight levels sit between the Foundations and the Reference Knot, in this order:
 `first_knot` (9x7, 9 arrows), `two_neighborhoods` (15x9, 15), `the_bridge`
 (17x9, 14), `false_simplicity` (14x11, 17), `the_rescan` (20x12, 23),
 `major_release` (22x14, 30), `dense_weave` (26x16, 68) and `almost_a_knot`
-(36x24, 93). Each is fixed literal data built by `PuzzleCatalog._from_shapes`
-from orthogonal path vertices, found by a seeded offline search against a
-structural profile and then confirmed by the solver; none is generated at
-runtime and none contains an isolated single-cell arrow. Each builder's doc
-comment states the experience the level is built to offer. Their ids, titles,
+(36x24, 93). Each is fixed data in `levels/packs/arrowspark_levels.json`,
+found by a seeded offline search against a structural profile (an earlier
+search, not the in-repo generator) and then confirmed by the solver; none is
+generated at runtime and none contains an isolated single-cell arrow. Each
+level's `notes` field states the experience the level is built to offer. Their ids, titles,
 order, dimensions, arrow counts and content versions are pinned in
 tests/puzzle_catalog_check.gd, and every one is confirmed valid and solvable
 by tests/puzzle_analyzer_check.gd. Measured structure of each level and the
@@ -365,12 +378,14 @@ designer's observations are in
 Every catalog entry carries a `group` metadata key: `arrowspark_levels`
 ("ArrowSpark Levels": designed against the current player-experience
 standard: the eight progression levels in order, then the Reference Knot), `foundations` ("Foundations": the
-eight baseline puzzles) or `puzzle_lab` ("Puzzle Lab": the structural
-experiments, the large-canvas validation board and the knot experiments).
+eight baseline puzzles), `puzzle_lab` ("Puzzle Lab": the structural
+experiments, the large-canvas validation board and the knot experiments) or
+`generated` ("Generated Levels": the four sample levels built by the level
+generator).
 Groups describe why content exists, not a quality ranking, and have no effect
 on rules, solver, analyzer, scoring, Open Move or the viewport. `PuzzleCatalog`
 exposes `group_ids()` (presentation order: ArrowSpark Levels, Foundations,
-Puzzle Lab), `group_title()`, `group_of()`, `ids_in_group()`, `group_position()`
+Puzzle Lab, Generated Levels), `group_title()`, `group_of()`, `ids_in_group()`, `group_position()`
 (1-based within the group) and `next_in_group()` (no wrap, no cross-group,
 empty for unknown ids). Level Select renders one non-focusable header per group
 as a collapsible accordion: a focusable toggle header button per group (marked
@@ -379,7 +394,8 @@ entry buttons, numbered by group position. Under each header is one
 non-focusable line saying what the group is for — ArrowSpark Levels: "The
 intended ArrowSpark experience."; Foundations: "Small boards that teach the
 rule."; Puzzle Lab: "Development experiments, some deliberately
-over-tangled." — which stays visible when the group is collapsed and never
+over-tangled."; Generated Levels: "Boards built by the level generator; an
+untuned first sample." — which stays visible when the group is collapsed and never
 ranks one group above another. Every group starts expanded;
 collapsing hides a group's entries so keyboard and gamepad focus skip them. The
 in-game label and results title use the same group-relative number. The play
@@ -414,7 +430,8 @@ running process, not to any node or scene.
 Source of truth: tests/puzzle_catalog_check.gd (unique/valid stable ids
 independent of position, deterministic `id_at`/`index_of`/`ids` ordering,
 fresh-and-isolated `get_definition` per call including cross-id
-independence, every one of the thirty entries structurally valid and
+independence, the pack gate (no load errors, and `PuzzlePackFormat.audit_levels`
+over every packed level finds nothing), every one of the thirty-four entries structurally valid and
 solver-confirmed solvable with a replayed zero-mistake witness, the original
 fourteen entries' ids, order, dimensions and content unchanged, the
 `canvas_validation` fixture's dimensions/arrow count/bent long arrows/four
@@ -430,8 +447,9 @@ instead — see the
 Rule Layer's Solvability Analysis section above), `PuzzleSession` default/set/advance/has-next behavior including the
 last-entry no-op and the invalid-id fallback), run via the same
 `run_puzzle_regressions.py` launcher in the same bare isolated temp project
-as tests/puzzle_regression.gd (PuzzleCatalog depends only on
-PuzzleDefinition); requires `PUZZLE_CATALOG_FAILURES=0`.
+as tests/puzzle_regression.gd, with `levels/` copied in at the same relative
+path (PuzzleCatalog depends only on the puzzle domain scripts and the packs);
+requires `PUZZLE_CATALOG_FAILURES=0`.
 
 ### Puzzle content version
 
@@ -450,6 +468,98 @@ Reference Knot's value is pinned: `g1-7ce0942d4a5e`. Evidence about play
 tests/puzzle_catalog_check.gd (the literal pin, stability across calls,
 independence from id/title/group, and changes for a moved tail cell, a
 turned arrow and a resized board).
+
+### Level packs
+
+Every level is committed data, not code. `levels/catalog.json`
+(`{"format": "arrowspark-catalog/1", "packs": [...]}`) names the packs in
+catalog order, and each `levels/packs/<name>.json`
+(`{"format": "arrowspark-pack/1", "pack": <name>, "levels": [...]}`) holds its
+levels in order; catalog order is manifest order, then pack order. A level
+records `id`, `title`, `group`, `width`, `height`, `content_version`,
+`provenance`, optional `notes` and `arrows`. Each arrow is
+`[direction name, vertices]`: the head, every cell where the path turns, then
+the tail end. Provenance is `{"kind": "hand-authored"}` or
+`{"kind": "generated", "generator", "profile_name", "profile", "seed"}`, with
+the full profile inline so a generated level can be regenerated without its
+recipe. Levels that were once code builders carry their design notes in
+`notes`.
+
+`PuzzlePackFormat` (scripts/puzzle/puzzle_pack_format.gd) is the one
+definition of the format. `load_catalog(root, skip_pack)` reads a manifest and
+its packs, returning the levels and every error (a missing listed pack is an
+error unless it is `skip_pack`). Parsing rejects malformed JSON, fractional or
+non-numeric coordinates, diagonal or zero-length vertex steps and any board
+that fails `PuzzleDefinition` validation, each with a message naming the pack
+and level. `audit_levels(levels, known_groups)` checks the invariants every
+shipped level holds: a valid and solvable board (through `PuzzleSolver`), a
+stored content version equal to `PuzzleContentVersion.of()` of its geometry,
+ids and boards unique across all packs, and a known group. `make_record` and
+`serialize_pack` write packs deterministically (fixed key order, one arrow per
+line, heads in `head_less_than` order), so the same levels always give the
+same bytes; `.gitattributes` keeps them LF on every checkout. The Web export
+includes `levels/catalog.json` and `levels/packs/*.json` explicitly and
+excludes `levels/recipes/`.
+
+Source of truth: tests/puzzle_pack_format_check.gd (one failing case for each
+malformed input above, a missing listed pack, a skipped missing pack,
+duplicate ids, duplicate boards, an unknown group and a stale content version,
+each naming its pack and level; serialize, parse and serialize again is
+byte-identical) and the pack gate in tests/puzzle_catalog_check.gd.
+
+### Level generator and pack-build tool
+
+`PuzzleGenerator.generate(profile, seed)` (scripts/puzzle/puzzle_generator.gd)
+proposes boards for developer tooling only; the shipped game never generates
+levels. It is not a second rules engine: validity, solvability and every
+measured value come from `PuzzleDefinition`, `PuzzleSolver` and
+`PuzzleAnalyzer`. Arrows are placed in reverse solve order: a new arrow is
+accepted only if its forward ray is clear of every placed cell, so the last
+arrow placed can always leave first and every candidate is solvable by
+construction; tails may cross earlier arrows' rays, which creates the
+dependencies. Head cells are visited centre-outward with seeded jitter
+(`center_out`) or in a seeded shuffle (`uniform`).
+
+A profile sets the board size (a whole number or `[min, max]`), inclusive
+target ranges over analyzer metrics (`arrows`, `density`, `initial_playable`,
+`depth`, `components`, `bends`, `max_length`, `average_length`), placement
+options (`layering`, `initial_playable_cap`, `arrow_length`) and `attempts`.
+A profile is rejected before any search only for a detectable contradiction:
+an inverted range, a value outside its allowed range, an unknown key, or no
+permitted board size able to hold the minimum arrow count at the minimum arrow
+length. Otherwise only feasible sizes are drawn, and unreachable targets end
+as a reported miss rather than being proven impossible. The playable cap is an
+acceptance rule: tail walks are steered onto playable arrows' rays while too
+many are playable, and a result whose measured initial playable count exceeds
+the cap is never reported `ok`. Each candidate is scored by how far its
+metrics (and the cap) fall outside their ranges; the first perfect one, or the
+best within the budget, is returned with every metric and miss. Work is
+bounded: each head cell is tried at most once per candidate, each arrow gets at
+most `MAX_HEAD_TRIES` heads, and a tail stops at its length or a dead end. The
+same profile and seed always give the same board on Godot 4.4.x;
+`GENERATOR_SCHEME` (`gen1`) is recorded in provenance and must change whenever
+that would stop holding.
+
+`python tests/run_level_pack_build.py --godot <exe> --recipe
+levels/recipes/<pack>.json` builds one pack from a recipe (pack name, group,
+named profiles, and levels with id, title, profile and seed) in an isolated
+temp project through tests/level_pack_build.gd. The pack must already be
+listed in `levels/catalog.json`; its current file is skipped while the other
+packs load, so a first build and a rebuild work the same way. Every level must
+meet its profile, and the audit runs over the other packs plus the new levels.
+It prints a structural report per level (through the shared
+tests/puzzle_report_format.gd printer) and a `level: <id> <content_version>`
+line. Only when nothing failed does it write: to a temp file beside the
+destination, flushed to disk, then replaced in one step, so a failed or
+interrupted build leaves an existing pack byte-identical. `--check` never
+writes and passes only when a fresh build is byte-identical to the committed
+pack. Titles and acceptance of generated levels stay a human step.
+
+Source of truth: tests/puzzle_generator_check.gd (determinism, in-range
+success, the cap on results with and without an `initial_playable` range,
+unreachable profiles, bounded work, every rejection rule, feasible sizes
+only), run by `run_puzzle_regressions.py`. The build tool has no automated
+gate; it is exercised by running it, including `--check`.
 
 ### Attempt timing and the Web completion hand-off
 
@@ -831,7 +941,7 @@ in-flight departure so no stale completion reaches a replaced attempt; a
 post-completion selection being ignored; a freshly instantiated scene
 starting clean; 20 rapid repeated selections on a blocked tail cell counting
 exactly once each without disturbing the attempt; the blocked-cue duration
-cap; and, for every one of the thirty `PuzzleCatalog` entries in turn: the
+cap; and, for every `PuzzleCatalog` entry in turn: the
 board's active view count matches the definition's arrow count, the HUD
 puzzle label matches the catalog title, and the same solver-derived
 zero-mistake witness clears through the real scene with unchanged

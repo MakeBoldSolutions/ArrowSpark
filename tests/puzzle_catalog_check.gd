@@ -1,9 +1,10 @@
 extends SceneTree
 ## Headless isolated-project check for PuzzleCatalog and PuzzleSession: no
 ## scene, font or GameVisualStyle dependency, since PuzzleCatalog depends
-## only on PuzzleDefinition (and, here, PuzzleSolver/PuzzleState to replay
-## each entry's witness). Run via tests/run_puzzle_regressions.py in the
-## same bare temp project as tests/puzzle_regression.gd.
+## only on the puzzle domain scripts and the level packs under res://levels
+## (and, here, PuzzleSolver/PuzzleState to replay each entry's witness). Run
+## via tests/run_puzzle_regressions.py in the same bare temp project as
+## tests/puzzle_regression.gd.
 
 var failures: int = 0
 
@@ -20,7 +21,7 @@ func check(condition: bool, description: String) -> void:
 ## fails loudly rather than skipping the malformed one.
 func _check_full_catalog_solvable() -> void:
 	var count := PuzzleCatalog.count()
-	check(count == 30, "the catalog contains 21 existing puzzles, eight progression levels and the Reference Knot")
+	check(count == 34, "the catalog contains 21 existing puzzles, eight progression levels, the Reference Knot and four generated samples")
 
 	var seen_ids: Dictionary = {}
 	for i in range(count):
@@ -44,6 +45,21 @@ func _check_full_catalog_solvable() -> void:
 				"catalog entry '%s' witness head %s replays clear against a fresh PuzzleState" % [id, head])
 		check(replay.completed, "catalog entry '%s' witness clears the board" % id)
 		check(replay.mistakes == 0, "catalog entry '%s' witness completes with zero mistakes" % id)
+
+## Every level in every pack: the catalog loaded without errors, and the
+## shared pack audit (valid and solvable board, stored content version equal
+## to its geometry, ids and boards unique across all packs, known group) finds
+## nothing.
+func _check_pack_gate() -> void:
+	var load_errors := PuzzleCatalog.load_errors()
+	check(load_errors.is_empty(), "the catalog loads every pack without errors%s" % ("" if load_errors.is_empty() else ": " + "; ".join(load_errors)))
+	var loaded := PuzzlePackFormat.load_catalog(PuzzleCatalog.LEVELS_ROOT)
+	var levels: Array = loaded["levels"]
+	check(levels.size() == PuzzleCatalog.count(), "every packed level is in the catalog (%d levels)" % levels.size())
+	var audit := PuzzlePackFormat.audit_levels(levels, PuzzleCatalog.GROUP_TITLES.keys())
+	for problem in audit:
+		check(false, problem)
+	check(audit.is_empty(), "every packed level passes the pack audit")
 
 ## The original fourteen entries keep their ids, order, dimensions, arrow
 ## counts and exact arrow/tail content: a change to any of them fails here
@@ -87,15 +103,16 @@ func _check_knot_entries() -> void:
 	var lab_ids := PuzzleCatalog.ids_in_group(PuzzleCatalog.GROUP_PUZZLE_LAB)
 	check(lab_ids[lab_ids.size() - 1] == "knot_boundary",
 		"the boundary experiment is the last Puzzle Lab entry")
-	check(PuzzleCatalog.id_at(PuzzleCatalog.count() - 1) == "reference_knot",
-		"the Reference Knot is the last catalog entry")
+	var levels_ids := PuzzleCatalog.ids_in_group(PuzzleCatalog.GROUP_ARROWSPARK_LEVELS)
+	check(levels_ids[levels_ids.size() - 1] == "reference_knot" and PuzzleCatalog.index_of("reference_knot") == 29,
+		"the Reference Knot ends ArrowSpark Levels at its unchanged catalog position")
 
 ## Every entry belongs to exactly one valid group, groups keep their planned
 ## sizes, and the group queries never wrap, cross groups or fail on unknown ids.
 func _check_groups() -> void:
 	var group_ids := PuzzleCatalog.group_ids()
-	check(group_ids == (["arrowspark_levels", "foundations", "puzzle_lab"] as Array[String]),
-		"groups are presented in the planned order")
+	check(group_ids == (["arrowspark_levels", "foundations", "puzzle_lab", "generated"] as Array[String]),
+		"groups are presented in the planned order, the generated samples last")
 	var total := 0
 	for group_id in group_ids:
 		check(not PuzzleCatalog.group_title(group_id).is_empty(), "group '%s' has a display title" % group_id)
@@ -104,6 +121,8 @@ func _check_groups() -> void:
 	check(PuzzleCatalog.ids_in_group("foundations").size() == 8, "Foundations has 8 entries")
 	check(PuzzleCatalog.ids_in_group("puzzle_lab").size() == 13, "Puzzle Lab has 13 entries")
 	check(PuzzleCatalog.ids_in_group("arrowspark_levels").size() == 9, "ArrowSpark Levels has the eight progression levels and the Reference Knot")
+	check(PuzzleCatalog.ids_in_group("generated").size() == 4, "Generated Levels has the four sample levels")
+	check(PuzzleCatalog.group_title("generated") == "Generated Levels", "the generated group is titled Generated Levels")
 	for i in range(PuzzleCatalog.count()):
 		var id := PuzzleCatalog.id_at(i)
 		check(group_ids.has(PuzzleCatalog.group_of(id)), "entry '%s' has a valid group" % id)
@@ -122,6 +141,11 @@ func _check_groups() -> void:
 	check(PuzzleCatalog.next_in_group("subtle_blockers") == "", "next_in_group ends at the last Foundations entry")
 	check(PuzzleCatalog.next_in_group("knot_boundary") == "", "next_in_group ends at the last Puzzle Lab entry")
 	check(PuzzleCatalog.next_in_group("reference_knot") == "", "next_in_group ends at the last ArrowSpark Levels entry")
+	check(PuzzleCatalog.group_position("gen_sample_01") == 1, "the generated group numbers from 1")
+	check(PuzzleCatalog.group_position("gen_sample_04") == 4, "the last sample is fourth in its group")
+	check(PuzzleCatalog.next_in_group("gen_sample_03") == "gen_sample_04", "next_in_group advances within the generated group")
+	check(PuzzleCatalog.next_in_group("gen_sample_04") == "", "next_in_group ends at the last generated sample")
+	check(PuzzleCatalog.index_of("gen_sample_01") == 30, "the generated samples follow every existing entry, leaving their positions unchanged")
 	check(PuzzleCatalog.group_of("no_such_id") == "", "group_of an unknown id is empty")
 	check(PuzzleCatalog.group_position("no_such_id") == 0, "group_position of an unknown id is 0")
 	check(PuzzleCatalog.next_in_group("no_such_id") == "", "next_in_group of an unknown id is empty")
@@ -579,6 +603,10 @@ const CATALOG_PINS: Array[Dictionary] = [
 	{"id": "dense_weave", "title": "Dense Weave", "group": "arrowspark_levels", "version": "g1-030c1402781a"},
 	{"id": "almost_a_knot", "title": "Almost a Knot", "group": "arrowspark_levels", "version": "g1-76fa1582e5a2"},
 	{"id": "reference_knot", "title": "Reference Knot", "group": "arrowspark_levels", "version": "g1-7ce0942d4a5e"},
+	{"id": "gen_sample_01", "title": "Warm-Up", "group": "generated", "version": "g1-23d44324684b"},
+	{"id": "gen_sample_02", "title": "Tangle", "group": "generated", "version": "g1-19d50822c894"},
+	{"id": "gen_sample_03", "title": "Growing Web", "group": "generated", "version": "g1-aa8be01658d5"},
+	{"id": "gen_sample_04", "title": "Wide Field", "group": "generated", "version": "g1-3980bb152beb"},
 ]
 
 func _check_catalog_pins() -> void:
@@ -598,6 +626,7 @@ func _check_catalog_pins() -> void:
 			"entry `%s` keeps its geometry %s (got %s)" % [id, pin["version"], version])
 
 func _initialize() -> void:
+	_check_pack_gate()
 	_check_catalog_pins()
 	_check_full_catalog_solvable()
 	_check_reference_knot_content_version()

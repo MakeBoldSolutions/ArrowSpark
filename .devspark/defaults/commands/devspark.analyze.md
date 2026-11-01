@@ -1,6 +1,6 @@
 ---
 source: "BSW.DevSpark — © 2026 Baylor Scott & White Health. Source: https://bsw-devspark.bswhive.com"
-description: Non-destructive cross-artifact consistency, coverage, and traceability analysis across spec.md, plan.md, and tasks.md. The closed-world half of planning assurance — proves the planning artifacts are internally sound; /devspark-critic challenges whether that sound plan is wrong about the real system.
+description: On demand for one specific concern — non-destructive check that recorded intent, plan decisions, contracts and tests agree (spec.md, plan.md and tasks.md for an existing specification bundle). Never a default gate; /devspark-critic challenges whether the work is wrong about the real system.
 handoffs:
   - label: Implement Project
     agent: devspark-implement
@@ -9,8 +9,8 @@ handoffs:
     agent: devspark-plan
     prompt: Revise plan to address analysis findings
 scripts:
-  sh: .devspark/scripts/bash/check-prerequisites.sh --json --require-tasks --include-tasks
-  ps: .devspark/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks
+  sh: .devspark/scripts/bash/check-prerequisites.sh --json --include-tasks
+  ps: .devspark/scripts/powershell/check-prerequisites.ps1 -Json -IncludeTasks
 ---
 
 ## User Input
@@ -49,7 +49,7 @@ Noticing one of these anyway is normal. Route it under `routed_findings:` per as
 
 ## Operating Constraints
 
-The analysis itself is non-destructive. Do **not** edit `spec.md`, `plan.md`, `tasks.md`, or source files. The only file write allowed is refreshing the persisted gate artifact at `FEATURE_DIR/gates/analyze.md` with the final report from this command.
+The analysis itself is non-destructive. Do **not** edit `spec.md`, `plan.md`, `tasks.md`, or source files. The only file write allowed is refreshing the persisted gate artifact at `FEATURE_DIR/gates/analyze.md` with the final report from this command — and on a work branch, not even that (assurance-contract.md §13).
 
 Read the YAML frontmatter in `spec.md` (or the quickfix record when `FEATURE_SPEC` resolves to `.devspark.work/quickfixes/<branch>.md`) before analyzing. Treat `classification`, `risk_level`, `required_gates`, `depends_on`, and `supersedes` as authoritative metadata.
 
@@ -100,8 +100,11 @@ Run `{SCRIPT}` once from repo root and parse JSON for FEATURE_DIR and AVAILABLE_
 | spec only           | Spec-level: internal consistency, requirement wording, duplication, terminology drift | `SPEC-ONLY`       |
 | spec + plan         | Above + spec↔plan Core-Problem drift, Rationale Summary completeness             | `SPEC+PLAN`       |
 | spec + plan + tasks | Full analysis including requirement↔task coverage                                | `FULL`            |
+| work branch (`NNN-work-*`, whatever its directory holds) | One stated concern: do the recorded intent (`work.md`), plan decisions (`plan.md`), declared contracts and existing tests contradict one another on it? | `WORK`            |
 
-Abort only if `spec.md` is missing AND no quickfix record exists for this branch under `.devspark.work/quickfixes/` (FEATURE_SPEC resolves there automatically — see the shared preamble's script resolution). Print the degradation label in the Executive Summary so partial reviews aren't mistaken for full ones.
+Abort only if `spec.md` is missing AND no quickfix record exists for this branch under `.devspark.work/quickfixes/` AND the branch is not a `NNN-work-*` branch (FEATURE_SPEC resolves there automatically — see the shared preamble's script resolution). Print the degradation label in the Executive Summary so partial reviews aren't mistaken for full ones.
+
+**Work branch (`WORK`).** Follow assurance-contract.md §13. Ask for the concern if the developer did not state one; with no concern there is nothing to analyze. Apply the detection passes below only to that concern and to the artifacts that exist, skip the requirement inventory, coverage metrics and task mapping, and report the §13 result block instead of the full report. Write no gate artifact (skip §10) and return to `/devspark-implement`. Never run `/devspark-critic` or Planning Review as a follow-on; recommend one only when the outcome shows that concern needs it.
 For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
 
 ### 2. Load Artifacts (Progressive Disclosure)
@@ -320,6 +323,8 @@ Ask the user: "Would you like me to suggest concrete remediation edits for the t
 **Autonomy override**: if `--auto` (or a standing autonomy instruction) is in effect, skip the ask. Instead, recommend re-running `/devspark-tasks` — its Gate Remediation Merge step (§2a) reads this report's `findings:` block directly, merges it with `/devspark-critic`'s, and appends concrete fix tasks without an extra round-trip through this command.
 
 ### 10. Persist Gate Artifact
+
+Skip this step on a work branch (`WORK` scope): the §13 result is reported, not persisted.
 
 Before producing the report, compute `reviewed_artifacts`: for each artifact actually read (typically `spec.md`, `plan.md`, `tasks.md`), run `git hash-object <path>` and record the `path`/`hash` pair. This is mechanical -- do not skip it even when findings are empty.
 

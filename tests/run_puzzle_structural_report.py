@@ -36,12 +36,15 @@ def run_structural_report(godot: str, repo: Path) -> str:
         (root / "project.godot").write_text(
             f'config_version=5\n[application]\nconfig/name="{name}"\n', encoding="utf-8"
         )
-        for script in ("puzzle_definition", "puzzle_state", "puzzle_solver", "puzzle_analyzer", "puzzle_catalog"):
+        for script in ("puzzle_definition", "puzzle_state", "puzzle_solver", "puzzle_analyzer", "puzzle_catalog",
+                       "puzzle_content_version", "puzzle_pack_format"):
             shutil.copyfile(
                 repo / "scripts/puzzle" / f"{script}.gd",
                 root / f"{script}.gd",
             )
+        shutil.copytree(repo / "levels", root / "levels", ignore=shutil.ignore_patterns("recipes"))
         shutil.copyfile(repo / "tests/puzzle_structural_report.gd", root / "puzzle_structural_report.gd")
+        shutil.copyfile(repo / "tests/puzzle_report_format.gd", root / "puzzle_report_format.gd")
 
         # Build the global class_name cache first, same as run_puzzle_regressions.py.
         subprocess.run([godot, "--headless", "--path", str(root), "--editor", "--quit"],

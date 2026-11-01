@@ -17,8 +17,10 @@ Play/New Game, or selecting a puzzle from Level Select, does not call
 `GlobalState.reset()` or `GameState.start_game()` (the no-reset guarantee for
 existing saved progress), and that New Game always sets `PuzzleSession` to
 the first ArrowSpark level (`first_knot`) regardless of a prior Level Select choice
-earlier in the same session. The isolated project also carries `scripts/puzzle/puzzle_definition.gd`,
-`scripts/puzzle/puzzle_catalog.gd` and `scripts/puzzle_session.gd`, since
+earlier in the same session. The isolated project also carries the puzzle scripts
+`PuzzleCatalog` needs to read the level packs (`puzzle_definition.gd`, `puzzle_state.gd`,
+`puzzle_solver.gd`, `puzzle_content_version.gd`, `puzzle_pack_format.gd`,
+`puzzle_catalog.gd`), the `levels/` data itself and `scripts/puzzle_session.gd`, since
 `main_menu_with_animations.gd`'s `new_game()`/Level Select handler now
 reference `PuzzleCatalog`/`PuzzleSession` directly. The launcher also copies the
 project's real `[input]` section into the isolated project so custom actions
@@ -39,7 +41,7 @@ replace those interactive checks.
 Run `python tests/run_puzzle_regressions.py` (Python 3 and Godot on PATH), or
 use `python tests/run_puzzle_regressions.py --godot C:/path/to/godot.exe`.
 
-This runs ten independent headless checks, in execution order:
+This runs twelve independent headless checks, in execution order:
 
 1. Pure rule regressions (`tests/puzzle_regression.gd`) against an isolated,
    unique temporary project containing only the puzzle's core scripts
@@ -71,18 +73,47 @@ This runs ten independent headless checks, in execution order:
    `canvas_validation` catalog fixture (solvable, fifty-two-arrow witness, bent
    arrows counted). Success requires
    exit code zero and `PUZZLE_ANALYZER_FAILURES=0`.
-3. Pure catalog/session regressions (`tests/puzzle_catalog_check.gd`) against
+3. Pack-format negative checks (`tests/puzzle_pack_format_check.gd`) against
+   the same bare temporary project as (1), which also holds a copy of
+   `levels/`: one failing case each for malformed JSON, a fractional or
+   non-numeric coordinate or board size, a diagonal or zero-length vertex step,
+   an unknown direction, an arrow that fails board validation, a missing listed
+   pack (manifest fixtures written under the isolated `user://`), duplicate
+   ids, duplicate boards, an unknown group and a stale content version. Each
+   must produce an error naming the pack and level. It also checks that a
+   well-formed pack parses and audits cleanly, that a missing pack named as
+   `skip_pack` is not an error, and that serialize, parse and serialize again
+   is byte-identical. Success requires exit code zero and
+   `PUZZLE_PACK_FORMAT_FAILURES=0`.
+4. Generator checks (`tests/puzzle_generator_check.gd`) against the same bare
+   project: the same profile and seed give the same content version three
+   times (for both layerings) and a different seed differs; a reachable profile
+   returns a valid, solvable, in-range board with analyzer-derived metrics;
+   the initial-playable cap is never exceeded by an `ok` result, with or
+   without an `initial_playable` range, and an unreachable cap is a reported
+   miss; an unreachable structural profile is a miss, not a rejection; a
+   profile whose arrows rarely fit stops within its budget; every rejection
+   rule (inverted range, out-of-range value, unknown key, no feasible board
+   size) rejects before searching; and ranged board sizes draw only feasible
+   sizes. Profiles are small so the check stays fast. Success requires exit
+   code zero and `PUZZLE_GENERATOR_FAILURES=0`.
+5. Pure catalog/session regressions (`tests/puzzle_catalog_check.gd`) against
    the same bare temporary project as (1), extended with
    `scripts/puzzle/puzzle_catalog.gd`, `scripts/puzzle/puzzle_analyzer.gd` and
    `scripts/puzzle_session.gd` (no scenes, fonts or `GameVisualStyle`
-   dependency — `PuzzleCatalog` depends only on `PuzzleDefinition`). Pins the
+   dependency — `PuzzleCatalog` depends only on the puzzle domain scripts and
+   the level packs). First the pack gate: the catalog loads with no
+   `load_errors()`, and `PuzzlePackFormat.audit_levels` over every packed level
+   (valid, solvable, stored content version equal to its geometry, unique ids
+   and boards, known group) finds nothing. Pins the
    original 14 entries' ids, order, dimensions and exact arrow/tail content by
    fingerprint, checks the appended `canvas_validation` fixture (40x30, fifty-two
    arrows, long bent arrows, all four directions, a tail-caused dependency, a
    top-left open move, occupied corners) and the Next flow from puzzle 14, and
-   enumerates all 30 authored catalog entries (eight baseline puzzles, six
+   enumerates all 34 catalog entries (eight baseline puzzles, six
    structural experiments, one large-canvas fixture, six Gordian Knot
-   experiments, eight progression levels and the Reference Knot) in three purpose groups asserting, for each: a unique, non-empty stable id
+   experiments, eight progression levels, the Reference Knot and four generated
+   sample levels) in four purpose groups asserting, for each: a unique, non-empty stable id
    independent of array position; structural validity via
    `PuzzleDefinition.is_valid()`; solver-confirmed solvability via
    `PuzzleSolver.analyze()`; the returned witness replays against a fresh
@@ -103,13 +134,13 @@ This runs ten independent headless checks, in execution order:
    last-entry no-op and the invalid-id fallback. Fails loudly (never partially
    skips a malformed entry) if any authored puzzle is malformed or unsolvable.
    Success requires exit code zero and `PUZZLE_CATALOG_FAILURES=0`.
-4. Pure scoreboard checks (`tests/puzzle_scoreboard_check.gd`) against the
+6. Pure scoreboard checks (`tests/puzzle_scoreboard_check.gd`) against the
    same bare temporary project: first completions establish session bests,
    higher scores replace them, and tied or lower scores preserve them. Checks
    also cover stored result fields, overall session score and independent
    result copies. No scene, font or puzzle-rule dependency is required.
    Success requires exit code zero and `PUZZLE_SCOREBOARD_FAILURES=0`.
-5. Pure route-geometry regressions (`tests/arrow_departure_geometry_check.gd`)
+7. Pure route-geometry regressions (`tests/arrow_departure_geometry_check.gd`)
    against a second isolated, unique temporary project containing only
    `scripts/presentation/arrow_departure_geometry.gd` — no scenes, addons,
    fonts or GameVisualStyle dependency, since the helper takes its style-ratio
@@ -124,7 +155,7 @@ This runs ten independent headless checks, in execution order:
    clearance in all four directions, and the tail-cap-dominance style-ratio
    guard. Success requires exit code zero and
    `ARROW_DEPARTURE_GEOMETRY_FAILURES=0`.
-6. Pure viewport-transform regressions (`tests/puzzle_viewport_transform_check.gd`)
+8. Pure viewport-transform regressions (`tests/puzzle_viewport_transform_check.gd`)
    against another isolated, unique temporary project containing only
    `scripts/presentation/puzzle_viewport_transform.gd`: fit margins and
    containment, logical/local inverse round trips, cell hit resolution, focal
@@ -132,7 +163,7 @@ This runs ten independent headless checks, in execution order:
    no-op bounds never leaving fit mode, per-axis pan clamps, fit/manual resize
    policy, invalid/non-finite areas, padded head reveal and the World
    projection. Success requires exit code zero and `PUZZLE_VIEWPORT_FAILURES=0`.
-7. A scene-based HUD/board layout and feedback-duration check
+9. A scene-based HUD/board layout and feedback-duration check
    (`tests/puzzle_layout_check.gd`) against the real project — so the full
    scene/addon dependency graph is available — with `APPDATA`/`XDG_DATA_HOME`
    redirected to an isolated temporary directory so no player save/settings
@@ -142,8 +173,8 @@ This runs ten independent headless checks, in execution order:
    resize and zero-extent recovery while paused, a combined concurrent-
    departure/pause/resize/resume scenario, setup-replacement disposal of
    in-flight departures, and that the blocked-cue duration constant does not
-   exceed its coded cap. Also covers every one of the 22 `PuzzleCatalog`
-   entries played start-to-finish through the real scene (active view count,
+   exceed its coded cap. Also covers every `PuzzleCatalog`
+   entry played start-to-finish through the real scene (active view count,
    HUD puzzle label, unchanged scoring for a zero-mistake witness); Level
    Select's listing/ordering/titles, its initial keyboard/gamepad focus
    placement on the first entry, and selecting a non-first entry
@@ -159,7 +190,7 @@ This runs ten independent headless checks, in execution order:
    order, and every Level Select entry is a grid card in its group's accent
    variation under a heading-style header.
    Success requires exit code zero and `PUZZLE_LAYOUT_FAILURES=0`.
-8. Integrated canvas checks (`tests/puzzle_canvas_check.gd`) against the real
+10. Integrated canvas checks (`tests/puzzle_canvas_check.gd`) against the real
    project and the same isolated user-data root: fit and layout of the large
    fixture and all original puzzles at 1280x720, 960x540, 800x800 and 1920x1080
    (no overlap, readable without navigation), wheel/middle-drag/button
@@ -175,7 +206,7 @@ This runs ten independent headless checks, in execution order:
    unchanged saved bytes, and a touch slop that stays in physical pixels at a
    stretch scale of 2 (a drift under it still taps, a drag past it pans). Success requires exit code zero and
    `PUZZLE_CANVAS_FAILURES=0`.
-9. Real-scene presentation checks (`tests/puzzle_presentation_check.gd`):
+11. Real-scene presentation checks (`tests/puzzle_presentation_check.gd`):
    ordered continuous geometry, cardinal heads, defensive copying, whole-cell
    GUI events, owner hover, interrupted red pulses, immediate normalized
    departures (including duplicate-start guards and exactly-once completion),
@@ -190,7 +221,7 @@ This runs ten independent headless checks, in execution order:
    independent of the authored catalog content — the layout check above is the
    catalog-generality coverage instead. Requires exit zero and
    `PUZZLE_PRESENTATION_FAILURES=0`.
-10. Real-project app theme checks (`tests/app_theme_check.gd`): the startup
+12. Real-project app theme checks (`tests/app_theme_check.gd`): the startup
    `AppTheme` autoload installs the brand theme in the engine default theme
    (including for a Label under a CanvasLayer) and points the scene loader at
    the branded loading screen; every standard control type has brand styles
@@ -223,6 +254,28 @@ marker, and always exits 0 on successful completion. It exists for
 developers comparing puzzles during authoring/review, never as an in-game
 screen, and its output contains no difficulty label, tier, or composite
 score.
+
+## Level Pack Build Tool (developer tooling, non-gating)
+
+```
+python tests/run_level_pack_build.py --godot C:/path/to/godot.exe --recipe levels/recipes/<pack>.json
+python tests/run_level_pack_build.py --godot C:/path/to/godot.exe --recipe levels/recipes/<pack>.json --check
+```
+
+Builds one level pack from a recipe with `PuzzleGenerator`, running
+`tests/level_pack_build.gd` in a bare isolated temp project with the puzzle
+scripts, the shared report printer (`tests/puzzle_report_format.gd`, also used
+by the structural report), the current `levels/` and the recipe. The pack must
+already be listed in `levels/catalog.json`. Its current file is skipped while
+the other packs load, so a first build works. Every level must meet its
+profile, and the pack audit runs over the other packs plus the new levels. It
+prints a structural report per level, a profile line with score, attempts and
+misses, and a `level: <id> <content_version>` line. Only when nothing failed
+does it write `levels/packs/<pack>.json`: to a temp file beside it, flushed to
+disk, then replaced in one step, so a failed or interrupted build leaves an
+existing pack byte-identical. `--check` never writes and exits 0 only when a
+fresh build is byte-identical to the committed pack. Generation runs in
+developer tooling only; the game reads the committed packs.
 
 Geometry assertions do not establish rendered seam/antialias quality. Inspect
 straight, bent and single-cell silhouettes, negative space, typography, hover,

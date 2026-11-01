@@ -4,6 +4,7 @@ type: authoritative-reference
 title: Reference Puzzle Design Report
 appliesTo:
   - scripts/puzzle/puzzle_catalog.gd
+  - levels/packs/arrowspark_levels.json
   - tests/puzzle_catalog_check.gd
   - tests/puzzle_analyzer_check.gd
   - tests/puzzle_structural_report.gd

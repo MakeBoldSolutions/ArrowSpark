@@ -4,6 +4,7 @@ type: authoritative-reference
 title: Gordian Knot Experiments
 appliesTo:
   - scripts/puzzle/puzzle_catalog.gd
+  - levels/packs/puzzle_lab.json
   - tests/puzzle_catalog_check.gd
   - tests/puzzle_structural_report.gd
   - tests/run_puzzle_structural_report.py
@@ -15,7 +16,7 @@ Six hand-authored puzzles follow the original fifteen catalog entries. `canvas_v
 
 Measured against the authored catalog Git object `cc30ad4a41e2c6a4919603c0bcf41e63e900ef7b` with Godot 4.7.2. The project targets Godot 4.4, and the same catalog was re-run under Godot 4.4.1: both regression launchers passed and the reported witnesses were identical.
 
-Source of truth: `scripts/puzzle/puzzle_catalog.gd`, `tests/puzzle_catalog_check.gd`, and `tests/puzzle_structural_report.gd`. Human evidence is one aggregate author play session across all six puzzles; per-puzzle detail was not recorded and is marked unknown.
+Source of truth: `levels/packs/puzzle_lab.json` (the boards), `tests/puzzle_catalog_check.gd`, and `tests/puzzle_structural_report.gd`. The boards were moved from code into this pack with every content version unchanged. Human evidence is one aggregate author play session across all six puzzles; per-puzzle detail was not recorded and is marked unknown.
 
 Each session record must identify the final puzzle geometry/build, date and author/reviewer role, completion, perceived challenge, tracing demand, removal satisfaction, a particular removal's visible simplification, assistance count, mistakes and final score/accuracy, actual zoom/pan/fit use and usefulness, arrow readability, overall qualitative verdict, and author familiarity/play order. Write zero when the count is zero and unknown when evidence is unavailable. Do not turn an unplayed puzzle into an inconclusive verdict.
 

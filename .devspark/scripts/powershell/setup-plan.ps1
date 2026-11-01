@@ -39,11 +39,20 @@ if (-not (Test-FeatureBranch -Branch $paths.CURRENT_BRANCH -HasGit $paths.HAS_GI
 # Ensure the feature directory exists
 New-Item -ItemType Directory -Path $paths.FEATURE_DIR -Force | Out-Null
 
+# A work branch has no specification: its optional work.md is a resume note, not a spec, and an
+# optional plan is written by /devspark-plan only when planning is justified, never from the
+# full-spec template.
+$workBranch = $paths.CURRENT_BRANCH -match '^\d{3}-work-'
+$featureSpec = if ($workBranch) { '' } else { $paths.FEATURE_SPEC }
+$workNote = if ($workBranch -and (Test-Path $paths.FEATURE_SPEC -PathType Leaf)) { $paths.FEATURE_SPEC } else { '' }
+
 # Copy plan template from override/stock fallback chain if it exists
 $template = Resolve-TemplatePath -RepoRoot $paths.REPO_ROOT -TemplateName 'plan-template.md'
 $planExists = Test-Path $paths.IMPL_PLAN
 $planMode = if ($Reset) { 'reset' } elseif ($planExists) { 'revise' } else { 'create' }
-if ($planExists -and -not $Reset) {
+if ($workBranch) {
+    if (-not $Json) { Write-Output "Work branch: no specification; an optional plan may be written at $($paths.IMPL_PLAN)" }
+} elseif ($planExists -and -not $Reset) {
     if (-not $Json) { Write-Output "Preserved existing plan at $($paths.IMPL_PLAN)" }
 } elseif ($template -and (Test-Path $template)) {
     Copy-Item $template $paths.IMPL_PLAN -Force
@@ -60,7 +69,7 @@ if ($planExists -and -not $Reset) {
 # never part of the OKF frontmatter contract. Best-effort: any failure here must not affect
 # this script's JSON output or exit code.
 try {
-    if (Test-Path $paths.FEATURE_SPEC) {
+    if ($featureSpec -and (Test-Path $featureSpec)) {
         $specHash = $null
         try { $specHash = (git hash-object $paths.FEATURE_SPEC 2>$null) } catch {}
         $featureDocPath = Join-Path $paths.FEATURE_DIR 'knowledge/feature.md'
@@ -106,21 +115,25 @@ try {
 # Output results
 if ($Json) {
     $result = [PSCustomObject]@{
-        FEATURE_SPEC = $paths.FEATURE_SPEC
+        FEATURE_SPEC = $featureSpec
         IMPL_PLAN = $paths.IMPL_PLAN
         SPECS_DIR = $paths.FEATURE_DIR
         BRANCH = $paths.CURRENT_BRANCH
         HAS_GIT = $paths.HAS_GIT
         PLAN_EXISTS = $planExists
         PLAN_MODE = $planMode
+        WORK_BRANCH = [bool]$workBranch
+        WORK_NOTE = $workNote
     }
     $result | ConvertTo-Json
 } else {
-    Write-Output "FEATURE_SPEC: $($paths.FEATURE_SPEC)"
+    Write-Output "FEATURE_SPEC: $featureSpec"
     Write-Output "IMPL_PLAN: $($paths.IMPL_PLAN)"
     Write-Output "SPECS_DIR: $($paths.FEATURE_DIR)"
     Write-Output "BRANCH: $($paths.CURRENT_BRANCH)"
     Write-Output "HAS_GIT: $($paths.HAS_GIT)"
     Write-Output "PLAN_EXISTS: $planExists"
     Write-Output "PLAN_MODE: $planMode"
+    Write-Output "WORK_BRANCH: $([bool]$workBranch)"
+    Write-Output "WORK_NOTE: $workNote"
 }

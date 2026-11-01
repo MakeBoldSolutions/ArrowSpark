@@ -1,0 +1,4 @@
+{
+  "format": "arrowspark-catalog/1",
+  "packs": ["foundations", "puzzle_lab", "arrowspark_levels", "generated_sample"]
+}

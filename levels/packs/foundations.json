@@ -1,0 +1,142 @@
+{
+  "format": "arrowspark-pack/1",
+  "pack": "foundations",
+  "levels": [
+    {
+      "id": "intro",
+      "title": "Simple Introduction",
+      "group": "foundations",
+      "width": 4,
+      "height": 4,
+      "content_version": "g1-95a75f0e6ec0",
+      "provenance": {"kind":"hand-authored"},
+      "notes": "Six single-cell arrows, each facing straight off a board edge with an empty forward ray, so every one is legal from the very first state.",
+      "arrows": [
+        ["left", [[0, 0]]],
+        ["up", [[1, 0]]],
+        ["up", [[3, 0]]],
+        ["down", [[0, 3]]],
+        ["down", [[2, 3]]],
+        ["right", [[3, 3]]]
+      ]
+    },
+    {
+      "id": "first_bend",
+      "title": "First Bend",
+      "group": "foundations",
+      "width": 4,
+      "height": 3,
+      "content_version": "g1-9d0fcfd77be0",
+      "provenance": {"kind":"hand-authored"},
+      "notes": "Mostly straight, edge-facing single-cell arrows plus exactly one tail with a single right-angle bend.",
+      "arrows": [
+        ["up", [[3, 0]]],
+        ["right", [[1, 1], [0, 1], [0, 0]]],
+        ["left", [[0, 2]]],
+        ["right", [[3, 2]]]
+      ]
+    },
+    {
+      "id": "multi_bend",
+      "title": "Multiple Bends",
+      "group": "foundations",
+      "width": 5,
+      "height": 5,
+      "content_version": "g1-0359fa394f4b",
+      "provenance": {"kind":"hand-authored"},
+      "notes": "A long, three-bend tail exercising the existing multi-bend geometry path, plus three edge-facing singles; one of them sits on the bent arrow's forward ray, adding a single dependency.",
+      "arrows": [
+        ["up", [[0, 0]]],
+        ["right", [[4, 0]]],
+        ["down", [[0, 4]]],
+        ["left", [[3, 4], [4, 4], [4, 3], [3, 3], [3, 2]]]
+      ]
+    },
+    {
+      "id": "dependency_chain",
+      "title": "Dependency Chain",
+      "group": "foundations",
+      "width": 5,
+      "height": 3,
+      "content_version": "g1-9dbed2fe5668",
+      "provenance": {"kind":"hand-authored"},
+      "notes": "A clear A-blocks-B-blocks-C chain: removing one arrow visibly unlocks the next, one at a time.",
+      "arrows": [
+        ["left", [[2, 0]]],
+        ["right", [[0, 1]]],
+        ["up", [[2, 1]]]
+      ]
+    },
+    {
+      "id": "forced_sequence",
+      "title": "Forced Sequence",
+      "group": "foundations",
+      "width": 5,
+      "height": 2,
+      "content_version": "g1-8a11ad329013",
+      "provenance": {"kind":"hand-authored"},
+      "notes": "Five arrows in a row, each blocked by every arrow still active to its own side, so exactly one legal move exists at every step of the solve.",
+      "arrows": [
+        ["left", [[0, 1]]],
+        ["left", [[1, 1]]],
+        ["left", [[2, 1]]],
+        ["left", [[3, 1]]],
+        ["left", [[4, 1]]]
+      ]
+    },
+    {
+      "id": "multiple_choices",
+      "title": "Multiple Choices",
+      "group": "foundations",
+      "width": 4,
+      "height": 4,
+      "content_version": "g1-bfc14580ef5f",
+      "provenance": {"kind":"hand-authored"},
+      "notes": "Three fully independent, simultaneously legal arrows (a genuine branching state) plus one dependent arrow that only opens up once one of them departs.",
+      "arrows": [
+        ["left", [[0, 0]]],
+        ["right", [[3, 0]]],
+        ["down", [[0, 3]]],
+        ["up", [[3, 3]]]
+      ]
+    },
+    {
+      "id": "dense_board",
+      "title": "Dense Board",
+      "group": "foundations",
+      "width": 6,
+      "height": 6,
+      "content_version": "g1-53bf4b1d0f55",
+      "provenance": {"kind":"hand-authored"},
+      "notes": "A larger 6x6 grid with ten arrows (more than the shipped fixed board's eight), exercising ownership/readability at higher density.",
+      "arrows": [
+        ["left", [[0, 0]]],
+        ["up", [[2, 0]]],
+        ["up", [[5, 0]]],
+        ["left", [[0, 2]]],
+        ["right", [[2, 3]]],
+        ["up", [[3, 3]]],
+        ["right", [[5, 3]]],
+        ["down", [[0, 5]]],
+        ["down", [[3, 5]]],
+        ["right", [[5, 5]]]
+      ]
+    },
+    {
+      "id": "subtle_blockers",
+      "title": "Subtle Blockers",
+      "group": "foundations",
+      "width": 5,
+      "height": 5,
+      "content_version": "g1-f46614de1bae",
+      "provenance": {"kind":"hand-authored"},
+      "notes": "Blockers positioned so the blocking relationship is not visually obvious: a short tail segment, two bends deep and far from its own head, sits just inside another arrow's long forward escape ray.",
+      "arrows": [
+        ["left", [[0, 0]]],
+        ["up", [[4, 0]]],
+        ["right", [[0, 2]]],
+        ["left", [[1, 4], [2, 4], [2, 2]]]
+      ]
+    }
+  ]
+}
