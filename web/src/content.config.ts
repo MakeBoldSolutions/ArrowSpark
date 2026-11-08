@@ -26,7 +26,7 @@ const chapters = defineCollection({
   schema: z
     .object({
       title: z.string().min(1),
-      part: z.number().int().min(1).max(11),
+      part: z.number().int().min(1).max(12),
       slug: z.string().regex(/^[a-z0-9-]+$/),
       description: z.string().min(1),
       spoiler: z.boolean(),

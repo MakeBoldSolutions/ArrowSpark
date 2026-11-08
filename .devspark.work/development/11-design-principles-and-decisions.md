@@ -110,6 +110,10 @@ Durable truth belongs in code, tests, and current knowledge.
 
 ### DP-025 --- Do not build the generator before understanding good puzzles
 
+*Status 2026-11-08: departed from. Spec 018 built a generator as developer tooling
+before this condition was met. The principle now governs tuning it and treating its
+output as more than a labelled sample.*
+
 Generation is downstream of design evidence.
 
 ## Explicit Non-Decisions

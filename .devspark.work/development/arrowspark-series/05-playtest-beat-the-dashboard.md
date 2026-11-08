@@ -31,6 +31,9 @@ open_items_for_author:
 next_article: "06-contract-before-difficulty.md"
 ---
 
+> **Superseded early draft (noted 2026-11-08).** The current text of this article is in `web/src/content/chapters/`. Kept for history.
+
+
 # The Playtest That Beat the Dashboard
 
 By the time I had a solver, arrows that unwound, and a proven guarantee, I had a different problem. I had one puzzle.

@@ -50,4 +50,34 @@
   title: This showcase
   changed: The game in a browser, the story beside it, and a way to tell us what you think.
   learned: What independent players make of it is the next thing to find out.
-  chapter: now-its-your-turn
+  chapter: the-game-goes-online
+- n: 11
+  title: Phones, in beta
+  changed: The Play page let touch screens in, and tap, drag and pinch became one set of gestures with no mode to switch.
+  learned: A simulated pinch worked and a real one did not. Only the phone could say.
+  chapter: a-phone-in-landscape
+- n: 12
+  title: A way up to the big board
+  changed: Eight new levels climb from 9 arrows to 93, Play starts at the first, and any point on a board can be brought to the center.
+  learned: A hard level needs a way up to it.
+  chapter: from-one-level-to-a-game
+- n: 13
+  title: Same game, less code
+  changed: A cleanup removed unused template code and duplicated rules, and every level was compared before and after.
+  learned: “No behavior change” is a claim you can test.
+  chapter: from-one-level-to-a-game
+- n: 14
+  title: Looking like a game
+  changed: Launch, menus, pause and credits took on one look and began scaling with the screen, while gameplay stayed fixed.
+  learned: Polish can be held to a requirement too, including what it must not change.
+  chapter: from-one-level-to-a-game
+- n: 15
+  title: Upright on a phone
+  changed: Portrait play, with status at the top, three buttons within thumb reach and most of the screen given to the board.
+  learned: Once gestures did the work, on-screen zoom and pan buttons were only taking up room.
+  chapter: from-one-level-to-a-game
+- n: 16
+  title: Levels as data, and a generator
+  changed: Every level moved into data files, and a seeded generator built a four-level sample.
+  learned: A generated board can be proven solvable. Whether it is any good is still a question for people.
+  chapter: from-one-level-to-a-game

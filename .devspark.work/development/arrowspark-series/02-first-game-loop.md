@@ -28,6 +28,9 @@ open_items_for_author:
 next_article: "03-provably-solvable.md"
 ---
 
+> **Superseded early draft (noted 2026-11-08).** The current text of this article is in `web/src/content/chapters/`. Kept for history.
+
+
 # My First Game Loop: Spec 001 Through a Business Developer's Eyes
 
 If you ask a room of developers what a game needs, most will say "a game loop" and start thinking about frames and physics. Mine turned out to be much smaller. It was a table, some arrows, and a question the code answers each time you click: *is anything in the way?*

@@ -1,6 +1,6 @@
 # ArrowSpark Development Documentation
 
-**Snapshot date:** 2026-10-11 (updated: Specs 001--012 complete, next spec not yet specified)\
+**Snapshot date:** 2026-11-08 (updated: Specs 001--018 complete, next spec not yet specified)\
 **Project:** ArrowSpark\
 **Family:** A Make Bold Spark Game\
 **Creator:** Make Bold Solutions\
@@ -50,7 +50,7 @@ The next architectural direction is:
 ## Document Map
 
 1.  [01-project-history.md](01-project-history.md) --- chronological
-    development history from first playable through the current state.
+    development history from first playable through the current state (sections 1--23).
 2.  [02-product-philosophy.md](02-product-philosophy.md) --- the product
     contract and why ArrowSpark rejects punitive puzzle mechanics.
 3.  [03-architecture.md](03-architecture.md) --- current technical
@@ -131,8 +131,14 @@ the Reference Knot.
 Spec 011 then put the game on the web (playable build, story site, anonymous
 reactions) and Spec 012 made it a mobile web beta with modeless touch.
 
-This documentation snapshot represents the state of `main` at `dece281`
-on 2026-10-11, after Spec 012 merged. Specs 001--012 are complete and
-there is no active feature branch. Modeless touch and iPhone are unverified on
-real devices, and no independent player has been recorded yet. See [08-current-state.md](08-current-state.md)
-for the 22-puzzle catalog, evidence quality and open limitations.
+Specs 013 to 018 then turned one level into a game: eight progression levels and
+a world canvas (013), a proven no-behavior-change consolidation (014), an
+app-wide Make Bold UI (016), portrait mobile play (017), and committed JSON level
+packs with a seeded developer-tooling generator (018).
+
+This documentation snapshot represents the state of `main` at `1a1ee67`
+on 2026-11-08. Specs 001--018 are complete (015 was a quickfix) and there is no
+active feature branch. Modeless touch is verified on one Pixel 7 Pro in Chrome.
+The owner has played portrait and landscape on the Pixel, iPhone has never been
+run, and no independent player has been recorded yet. See [08-current-state.md](08-current-state.md)
+for the 34-puzzle catalog, evidence quality and open limitations.

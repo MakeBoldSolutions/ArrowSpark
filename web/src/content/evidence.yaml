@@ -32,7 +32,9 @@ human:
 notClaimed:
   - No claim that the analyzer's measurements say whether a puzzle is fun.
   - No claim that the Reference Knot is hard for everyone, or good for everyone.
-  - No claim of support on phones, tablets or touch screens.
+  - No claim of support on phones or tablets beyond the mobile web beta, whose evidence is one Pixel phone, played by the designer in both orientations.
+  - No claim of support for iPhone Safari. It can open the game, but it has never been run.
+  - No claim that the generated sample levels are good. They are shown to be valid and solvable, and nothing more.
   - No claim of tested gamepad play in the browser.
   - No speed-up multiple. Elapsed time is not effort, and there is no stated baseline to compare against.
   - No claim that DevSpark is finished or right in every case.
@@ -53,3 +55,6 @@ limitations:
   - item: The six earlier experiments were judged in one aggregate session; per-puzzle results are unknown, not zero.
     class: accepted-limitation
     source: https://github.com/MakeBoldSolutions/ArrowSpark/blob/6e60e117acc175a47feb55f52a3a8da1c6cedaab/.knowledge/reference/gordian-knot-experiments.md
+  - item: The eight progression levels were judged by the designer in one aggregate note, not level by level.
+    class: accepted-limitation
+    source: https://github.com/MakeBoldSolutions/ArrowSpark/blob/1a1ee67a317c5cc1902ba30f8e0af189ccdc5f05/.knowledge/reference/progression-design-learning.md

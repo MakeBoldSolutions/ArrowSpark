@@ -24,8 +24,10 @@ packaged build if one has been provided to you. Controls:
 
 - **Mouse**: click an arrow to select it; wheel to zoom; middle-drag, or the
   Pan toggle plus left-drag, to move around a large board.
-- **Keyboard**: Tab between the Open Move button, the zoom/fit toolbar, and the
-  board; WASD to pan a focused board; `=`/`-` to zoom; `F` to fit.
+- **Touch** (mobile web beta): tap an arrow; drag with one finger to pan; pinch
+  to zoom.
+- **Keyboard**: Tab between the Menu, Open Move and Fit buttons and the board;
+  WASD to pan a focused board; `=`/`-` to zoom; `F` to fit.
 - **Gamepad**: D-pad/left stick to navigate and pan; shoulder buttons to zoom;
   `Y` to fit.
 
@@ -34,12 +36,14 @@ All bindings are remappable from the Options menu.
 ## Project Layout
 
 ```text
-scripts/puzzle/      # domain: PuzzleDefinition, PuzzleState, PuzzleSolver, PuzzleAnalyzer, PuzzleCatalog
+scripts/puzzle/      # domain: PuzzleDefinition, PuzzleState, PuzzleSolver, PuzzleAnalyzer, PuzzleCatalog, PuzzlePackFormat, PuzzleGenerator
+levels/              # level data: catalog.json, packs/*.json (shipped), recipes/*.json (generator input)
 scripts/              # PuzzleSession, PuzzleScoreboard, and other project-level scripts
 scripts/presentation/ # presentation-only helpers (viewport transform, departure geometry, visual style)
 scenes/               # menus and gameplay scenes (Godot .tscn/.gd)
 tests/                # GDScript headless checks plus Python launchers (run_*.py)
 addons/               # Maaack's Game Template (menus, settings, input remapping)
+web/                  # static showcase site (Astro + TypeScript) that hosts the Web build
 .knowledge/           # durable architecture, product, and governance documentation
 .devspark.work/       # temporary specs/plans/tasks used during development (not durable)
 ```

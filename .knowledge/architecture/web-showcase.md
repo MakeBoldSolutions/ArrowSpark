@@ -97,7 +97,7 @@ narrow screens.
   only on supported screens, so phones never download the engine. Clicking
   the frame focuses the game; the Play page says to click once for the
   keyboard. Audio starts on the first click, as browsers require.
-- **Game UI scaling and launch.** Wide desktop retains the 1280x720 canvas_items/expand design. Touch uses iframe CSS dimensions as logical content size through AppTheme, independent of rendering density. Menus reflow instead of shrinking the desktop layout. Portrait keeps status at top and Menu/Open Move/Fit in a bottom strip, with an expanding board. The engine boot splash remains ink and the branded launch is unchanged. The new portrait layout and effective phone targets await real-device acceptance; emulation is not device evidence.
+- **Game UI scaling and launch.** Wide desktop retains the 1280x720 canvas_items/expand design. Touch uses iframe CSS dimensions as logical content size through AppTheme, independent of rendering density. Menus reflow instead of shrinking the desktop layout. Portrait keeps status at top and Menu/Open Move/Fit in a bottom strip, with an expanding board. The engine boot splash remains ink and the branded launch is unchanged. The owner has played the portrait layout on a real Pixel phone (2026-11-08); emulation is not device evidence.
 - **Page zoom outside the game.** `web/src/scripts/page-zoom-guard.ts`
   suppresses ctrl+wheel and gesture zoom only while the pointer is over the
   game frame's own border and title bar; everywhere else on the page,
@@ -129,8 +129,8 @@ narrow screens.
   works in the page's full-screen mode, and gestures inside the game do not
   scroll or zoom the page (`touch-action: none` on the game shell). **iPhone
   Safari has not been verified on a real device** and is admitted by the same
-  capability rule, not claimed as supported. Known limitations: current portrait controls await real-device sizing verification, and fullscreen may be unavailable (the button is hidden
-  when the browser refuses it). Modeless touch (tap on release, one-finger drag pans, pinch zooms; see `.knowledge/reference/touch-gestures.md`) has since been verified on the same Pixel 7 Pro in Chrome: pinch zoom and one-finger drag worked without issue, and every level, including the larger ones, was played through by tapping (before the change, pinch did not work). The build was reached over HTTPS on a local network, because Godot's loader refuses a non-secure origin; that limit affects local testing only. Current phone limitations: portrait sizing, target dimensions and gesture feel after the latest layout changes remain outstanding real-device checks. Capability admission may admit iPhone Safari, but support outside Pixel/Chrome is unverified. The Play-page copy states that limitation. Touch frames use the dynamic visible height in both orientations, with a scroll-away page header, safe-area padding, and touch-action/overscroll suppression on the stage and shell. Optional fullscreen targets the host so its padding remains effective. These layout changes do not reload the iframe or create a new game session.
+  capability rule, not claimed as supported. Known limitation: fullscreen may be unavailable (the button is hidden
+  when the browser refuses it). Modeless touch (tap on release, one-finger drag pans, pinch zooms; see `.knowledge/reference/touch-gestures.md`) has since been verified on the same Pixel 7 Pro in Chrome: pinch zoom and one-finger drag worked without issue, and every level, including the larger ones, was played through by tapping (before the change, pinch did not work). The build was reached over HTTPS on a local network, because Godot's loader refuses a non-secure origin; that limit affects local testing only. The owner then played the current build on the same Pixel, upright and sideways, and accepted it (reported 2026-11-08; the browser and per-control measurements were not recorded). Capability admission may admit iPhone Safari, but support outside Pixel/Chrome is unverified. The Play-page copy states that limitation. Touch frames use the dynamic visible height in both orientations, with a scroll-away page header, safe-area padding, and touch-action/overscroll suppression on the stage and shell. Optional fullscreen targets the host so its padding remains effective. These layout changes do not reload the iframe or create a new game session.
 
 
 ## Completion bridge
@@ -213,7 +213,7 @@ Published story and method content lives in Astro content collections
 them and never restate a figure a collection holds. Any schema violation
 fails the build.
 
-- `chapters` (`web/src/content/chapters/NN-slug.md`): `title`, `part` (1–9),
+- `chapters` (`web/src/content/chapters/NN-slug.md`): `title`, `part` (1–12),
   `slug`, `description`, `spoiler`, `status` (`draft` | `published`),
   `sources`, `updated`. Only `published` chapters are built; `/story/` lists
   them in order and `/story/<slug>/` renders each with `ArticleLayout.astro`.

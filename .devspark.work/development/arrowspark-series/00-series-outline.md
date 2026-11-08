@@ -6,12 +6,19 @@ status: first-draft
 author: Mark Hazleton
 date_drafted: 2026-09-30
 date_facts_refreshed: 2026-10-01
+date_status_refreshed: 2026-11-08
 theme: "A business-software developer with no game experience uses spec-driven development to fill a gap in arcade puzzle apps, and learns what the game actually is by testing his own assumptions."
-description: "Index, story arc, and editorial notes for an eight-chapter series (plus a closing chapter) on the development of ArrowSpark, a Godot puzzle game built with DevSpark between 2026-09-26 and 2026-10-01."
+description: "Index, story arc, and editorial notes for the series on the development of ArrowSpark, a Godot puzzle game built with DevSpark. The clock and facts below cover 2026-09-26 to 2026-10-01; the published series now has twelve chapters."
 purpose: "Give the author one page to steer the series: what each article is for, how the story escalates, which evidence backs each claim, and what the author still has to supply."
 ---
 
 # Building ArrowSpark with DevSpark: Series Outline
+
+> **Status 2026-11-08.** The working copy of the series is now `web/src/content/chapters/`.
+> It has twelve chapters, all published. The article files in this folder are the
+> early drafts of parts 1--8 and are kept for history; do not edit them to update the series.
+> The clock, facts and "must supply" list below are a snapshot as of 2026-10-01, the end of
+> the clock the series measures. For current figures see `../08-current-state.md`.
 
 ## The one-sentence story
 
@@ -90,7 +97,10 @@ Receipts already in the repo besides commits: `.devspark.work/specs/*/gates/` (a
 | 6 | The Contract Before the Difficulty, the Canvas Before the Content | Sequencing and player trust | Specs 007, 008 | [06](06-contract-before-difficulty.md) |
 | 7 | Pulling the Thread: Knots, Audits, and What DevSpark Learned | Ingredients and honest evidence | Spec 009, audit | [07](07-pulling-the-thread.md) (to be split: Spec 010 and closing sections move out) |
 | 8 | The Reference Knot: A Level Judged by a Human | Composition, a human definition of done, recorded failure | Spec 010, PR #4 | [08](08-the-reference-knot.md) |
-| Close | Now It's Your Turn | The whole clock, lessons, the request to play | All; `12-devspark-lessons.md` | not yet written |
+| 9 | The Game Goes Online | Web target, gates first | Spec 011, PR #5 | `web/src/content/chapters/09-*` |
+| 10 | A Phone in Landscape | A beta instead of a matrix | Spec 012, PRs #6 and #8 | `web/src/content/chapters/10-*` |
+| 11 | From One Level to a Game | Progression, sameness proof, polish, portrait, levels as data | Specs 013--018 | `web/src/content/chapters/11-*` |
+| 12 | Now It's Your Turn | The whole clock, lessons, the request to play | All; `12-devspark-lessons.md` | `web/src/content/chapters/12-*` |
 
 ## Recurring motifs (use consistently)
 

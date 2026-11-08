@@ -16,6 +16,7 @@ const openBeats = beats.filter((beat) => !beat.spoiler);
 const spoilerBeats = beats.filter((beat) => beat.spoiler);
 const lessons = (await getEntry('lessons', 'main'))!.data;
 const facts = (await getEntry('facts', 'main'))!.data;
+const closingChapter = await getCollection('chapters', (entry) => entry.data.slug === 'now-its-your-turn' && entry.data.status === 'published');
 ---
 <BaseLayout
   title="Built with DevSpark"
@@ -41,8 +42,8 @@ const facts = (await getEntry('facts', 'main'))!.data;
       <Eyebrow>Research</Eyebrow>
       <h2 id="research" class="research-card__title">Is this just waterfall with an AI?</h2>
       <p class="research-card__lead">
-        Kent Beck argues that spec-driven AI development slides into waterfall. We tested that against all thirteen
-        ArrowSpark specs, the agent transcripts and this site’s own story, looking for counterexamples as hard as for
+        Kent Beck argues that spec-driven AI development slides into waterfall. In October 2026 we tested that against
+        the thirteen ArrowSpark specs that existed then, the agent transcripts and this site’s own story, looking for counterexamples as hard as for
         support. The verdict is <strong>partially supported</strong>: the specs were genuinely small, incremental
         changes, but the iteration came mostly from a human playing the game, sometimes in spite of the process.
       </p>
@@ -74,7 +75,7 @@ const facts = (await getEntry('facts', 'main'))!.data;
         <p>
           Only a finding that blocks the objective becomes more work. Everything else is classified (an accepted
           limitation, deferred work, or something learned) and carried forward with its reason.
-          <a href="/story/now-its-your-turn/">How the project learned this</a>
+          {closingChapter.length > 0 && <a href="/story/now-its-your-turn/">How the project learned this</a>}
         </p>
       </Fragment>
     </EvidenceCallout>

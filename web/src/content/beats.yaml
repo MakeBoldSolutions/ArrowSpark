@@ -129,6 +129,54 @@
   spoiler: false
 
 - n: 12
+  title: The plan can be bigger than the problem
+  belief: Phone play needs a device spike, a support matrix and a new touch layer. The task list had sixty-one entries.
+  evidence: The spike showed the unmodified game already worked on a real phone for taps and on-screen controls. The only thing stopping a phone was the page refusing to start the game.
+  decision: Ship a beta with its limits written into the page, the pull request and the constitution, and record the unfinished tasks on purpose.
+  sources:
+    - label: Mobile web beta admission (commit)
+      url: https://github.com/MakeBoldSolutions/ArrowSpark/commit/8b3c260c745503935add2b5e57ac614e940d5ce0
+    - label: Mobile web beta (PR #6)
+      url: https://github.com/MakeBoldSolutions/ArrowSpark/pull/6
+  spoiler: false
+
+- n: 13
+  title: An emulator is not a phone
+  belief: If simulated touches zoom the board, pinch works.
+  evidence: Emulation said yes and the real Pixel said no. After the gestures were rebuilt, the same real phone in Chrome confirmed pinch zoom and one-finger drag.
+  decision: Only a real device counts as evidence for a device. Say which device, and say which ones were never tried.
+  sources:
+    - label: Modeless touch (PR #8)
+      url: https://github.com/MakeBoldSolutions/ArrowSpark/pull/8
+    - label: Real-phone result recorded (commit)
+      url: https://github.com/MakeBoldSolutions/ArrowSpark/commit/776ae49719f8af1b8ee4f387c4f57b24009cc50d
+  spoiler: false
+
+- n: 14
+  title: Prove a cleanup changed nothing
+  belief: A refactor that passes the tests has not changed the game.
+  evidence: Six of the thirty catalog entries had no exact geometry pin, so a change to them could have passed unnoticed. They were pinned before the cleanup, and a full before-and-after comparison came back identical. A deliberate one-coordinate change confirmed the gate would fail.
+  decision: For a change that promises no difference, make the sameness the thing that is measured.
+  sources:
+    - label: Every catalog entry pinned (commit)
+      url: https://github.com/MakeBoldSolutions/ArrowSpark/commit/a25849f8ef18b5bdc296b477f04eb441aba3e4f9
+    - label: Codebase consolidation (PR #10)
+      url: https://github.com/MakeBoldSolutions/ArrowSpark/pull/10
+  spoiler: false
+
+- n: 15
+  title: The generator came early
+  belief: Generation comes last, after human evidence says what is worth generating.
+  evidence: A seeded generator shipped as developer tooling while the human evidence was still one designer. It proves boards solvable and hits structural ranges, the same measurements that failed to predict challenge in the 2/5 playtest.
+  decision: Name the departure, keep the generator out of the running game, and call its output what it is, an untuned first sample.
+  sources:
+    - label: Levels as data and a seeded generator (commit)
+      url: https://github.com/MakeBoldSolutions/ArrowSpark/commit/b36c041b032afbc3fc80651684a51996a0de540f
+    - label: Level pack engine (PR #16)
+      url: https://github.com/MakeBoldSolutions/ArrowSpark/pull/16
+  spoiler: false
+
+- n: 16
   title: The designer's opinion is not enough
   belief: If the person who built the level likes it, it's good.
   evidence: One tester, who designed the level. No independent player had tried it before this showcase.

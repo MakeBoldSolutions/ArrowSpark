@@ -34,6 +34,9 @@ open_items_for_author:
 next_article: "Closing chapter: Now It's Your Turn (not yet written)"
 ---
 
+> **Superseded early draft (noted 2026-11-08).** The current text of this article is in `web/src/content/chapters/`. Kept for history.
+
+
 # The Reference Knot: A Level Judged by a Human
 
 *If you haven't played the Reference Knot yet, play it first. This chapter discusses how it was designed, and knowing what to look for changes the experience.*

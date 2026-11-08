@@ -1,7 +1,8 @@
 # Future Work Plan: Verify the scaled game UI on a real phone
 
 **Type**: operational
-**Status**: open
+**Status**: complete (2026-11-08)
+**Resolution**: Owner reported on 2026-11-08: played on the Pixel in portrait and landscape; marked complete at the owner's direction. Browser and per-scenario observations were not supplied.
 **Owner**: project owner
 **Required evidence**: `deployed`, meaning a real Pixel 7 Pro (Chrome) against the published showcase
 **Carries**: FR-003 phone-surface clause and SC-005 touch-on-phone clause of 016-spec-game-ui-improvements (both `stage: post-deploy`)

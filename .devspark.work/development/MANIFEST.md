@@ -1,6 +1,6 @@
 # Document Manifest
 
-Generated: 2026-09-28 (updated 2026-10-11: Specs 001--012 complete). Byte counts below were recorded 2026-09-28 and are stale for files edited since; 01, 08, 09, 10, 13, 03, 04, 14 and README have changed; the arrowspark-series folder and 14-showcase-story-plan.md are not listed.
+Generated: 2026-09-28 (updated 2026-11-08: Specs 001--018 complete; 04, 11, 12 and 13 also changed since the byte counts). Byte counts below were recorded 2026-09-28 and are stale for files edited since; 01, 08, 09, 10, 13, 03, 04, 14 and README have changed; the arrowspark-series folder and 14-showcase-story-plan.md are not listed.
 
 Files:
 
