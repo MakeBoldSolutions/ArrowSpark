@@ -22,6 +22,15 @@ const publishedSlugs = (await getCollection('chapters', (entry) => entry.data.st
       Where the game and the method meet. Each milestone says what changed and what we learned from it.
     </p>
     <JourneyList steps={steps} publishedSlugs={publishedSlugs} />
+    <section class="whats-next" aria-labelledby="whats-next">
+      <h2 id="whats-next" class="whats-next__title">What’s next</h2>
+      <ul class="whats-next__list">
+        <li><strong>A profile that stays on your device.</strong> No sign-in. Your finished levels and best scores will still be there when you come back.</li>
+        <li><strong>Many more levels,</strong> with a steady climb in difficulty.</li>
+        <li><strong>Later, optional online accounts,</strong> so your progress can follow you and you can compare scores.</li>
+      </ul>
+      <p class="muted">These are plans, not promises. Each one joins the list above once it has shipped.</p>
+    </section>
     <div class="rejoin">
       <a class="rejoin__card rejoin__card--rust" href="/play/">Try the Game <Icon name="arrow-right" /></a>
       <a class="rejoin__card rejoin__card--ink" href="/devspark/">Built with DevSpark <Icon name="arrow-right" /></a>
@@ -31,6 +40,10 @@ const publishedSlugs = (await getCollection('chapters', (entry) => entry.data.st
 
 <style>
   .journey-intro { margin: var(--space-5) 0 var(--space-12); }
+  .whats-next { margin-block: var(--space-12); max-width: var(--container-prose); }
+  .whats-next__title { font-size: var(--fs-h2); margin-bottom: var(--space-4); }
+  .whats-next__list { margin: 0 0 var(--space-4); padding-left: var(--space-5); }
+  .whats-next__list li { margin-bottom: var(--space-2); }
   .rejoin {
     border-top: var(--border-hairline) solid var(--border-default);
     padding-top: var(--space-8);
