@@ -6,7 +6,8 @@ extends Control
 ## grid, numbered within their group and edged in the group's accent,
 ## emitting puzzle_selected(id) on selection. Collapsed entries are
 ## hidden, so focus skips them. Every group starts expanded. No locked/unlocked states —
-## every catalog entry is always selectable. Built directly against
+## every catalog entry is always selectable. A level the player has finished shows
+## their best result on a second line (from PlayerProfile). Built directly against
 ## PuzzleCatalog, not the addon example's GameState-backed script.
 
 signal puzzle_selected(id: String)
@@ -34,6 +35,7 @@ const GROUP_DESCRIPTIONS := {
 var _first_button: Button
 var _header_buttons: Array[Button] = []
 var _entry_buttons: Array[Button] = []
+var _entry_ids: Array[String] = []
 var _description_labels: Array[Label] = []
 
 func _ready() -> void:
@@ -74,10 +76,29 @@ func _ready() -> void:
 			button.pressed.connect(_on_entry_pressed.bind(id))
 			section.add_child(button)
 			_entry_buttons.append(button)
+			_entry_ids.append(id)
 			if _first_button == null:
 				_first_button = button
 		header.toggled.connect(_on_header_toggled.bind(header, section, group_id, members.size()))
 		_refresh_header(header, true, group_id, members.size())
+	_refresh_progress()
+
+## Shows each finished level's saved best under its title. Runs whenever the menu
+## opens, so a deleted profile is reflected without rebuilding the list.
+func _refresh_progress() -> void:
+	PlayerProfile.ensure_loaded()
+	for i in _entry_buttons.size():
+		var id := _entry_ids[i]
+		var title := "%d. %s" % [PuzzleCatalog.group_position(id), PuzzleCatalog.get_title(id)]
+		var best: Variant = PlayerProfile.best_result(id)
+		if best == null:
+			_entry_buttons[i].text = title
+			_entry_buttons[i].tooltip_text = title
+		else:
+			var summary := "Best %d of %d" % [best["score"], best["total_arrows"]]
+			_entry_buttons[i].text = "%s
+%s" % [title, summary]
+			_entry_buttons[i].tooltip_text = "%s: %s" % [title, summary]
 
 func _on_header_toggled(expanded: bool, header: Button, section: Control, group_id: String, count: int) -> void:
 	section.visible = expanded
@@ -106,6 +127,8 @@ func _on_entry_pressed(id: String) -> void:
 ## puzzle_results.gd's existing _replay_button.grab_focus() convention.
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_VISIBILITY_CHANGED and is_visible_in_tree():
+		if not _entry_ids.is_empty():
+			_refresh_progress()
 		call_deferred("_grab_first_entry_focus")
 
 func _grab_first_entry_focus() -> void:

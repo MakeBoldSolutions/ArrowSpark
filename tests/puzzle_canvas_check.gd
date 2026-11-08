@@ -1315,6 +1315,7 @@ func _check_cancelled_touch_and_resize() -> void:
 # --- Runner -------------------------------------------------------------------
 
 func _initialize() -> void:
+	PlayerProfile.reset() # suites share one user-data folder; start from an empty profile
 	for head in PuzzleSolver.analyze(PuzzleCatalog.get_definition(LARGE_ID)).witness.slice(0, 5):
 		_long_heads.append(head)
 	await _check_cancelled_touch_and_resize()

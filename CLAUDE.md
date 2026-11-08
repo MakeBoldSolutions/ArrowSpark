@@ -39,6 +39,14 @@ prefer explicit types where they aid clarity; keep changes small and justify new
 
 ## Recent Changes
 
+- Local player profile (no sign-in): `PlayerProfile` (`scripts/player_profile.gd`) saves a name,
+  finished levels, best result per level and simple play counts to `user://player_profile.json`
+  (browser storage on web, never sent anywhere), separate from settings and the template save.
+  `PuzzleScoreboard` stays the comparator and is seeded from it; Continue, a Profile menu and
+  "Best N of M" in Level Select use it. An unreadable file is copied to `.recovery`, not discarded.
+  Only finished attempts are saved, never an unfinished board. Verified on desktop; the web build
+  and real phones are covered in the work record, not assumed.
+
 - Levels are data: every catalog level lives in committed JSON level packs under `levels/`
   (`catalog.json` lists the packs in order), read and audited by `PuzzlePackFormat`;
   `PuzzleCatalog` keeps its API and loads the packs. A seeded `PuzzleGenerator` (developer

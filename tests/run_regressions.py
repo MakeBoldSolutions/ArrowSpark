@@ -47,7 +47,7 @@ def main():
         # GlobalState.get_state()'s dynamic load(), so it must keep that
         # relative path in the isolated project, not sit flat at the root.
         (root / "scripts").mkdir(exist_ok=True)
-        for script in ("game_state", "level_state", "puzzle_session", "puzzle_scoreboard"):
+        for script in ("game_state", "level_state", "puzzle_session", "puzzle_scoreboard", "player_profile"):
             shutil.copyfile(repo / "scripts" / f"{script}.gd", root / "scripts" / f"{script}.gd")
         # PuzzleCatalog reads the level packs through PuzzlePackFormat, whose
         # pack audit needs the solver and content-version scripts, so the

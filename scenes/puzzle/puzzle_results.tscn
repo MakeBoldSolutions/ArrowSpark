@@ -91,7 +91,7 @@ unique_name_in_owner = true
 layout_mode = 2
 horizontal_alignment = 1
 autowrap_mode = 3
-text = "Overall Session Score: 0"
+text = "Overall Score: 0"
 
 [node name="ButtonRow" type="BoxContainer" parent="CenterContainer/VBoxContainer"]
 layout_mode = 2

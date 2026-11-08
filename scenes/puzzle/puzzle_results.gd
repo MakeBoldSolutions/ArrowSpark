@@ -46,11 +46,12 @@ func _ready() -> void:
 ## was actually completed, independent of the metrics above.
 ##
 ## session_comparison is one of PuzzleScoreboard.record_attempt()'s four
-## outcome strings ("established"/"improved"/"tied"/"not_improved");
-## overall_session_score is PuzzleScoreboard.get_overall_score() taken right
+## outcome strings ("established"/"improved"/"tied"/"not_improved"), measured
+## against the player's saved best; overall_session_score is
+## PuzzleScoreboard.get_overall_score() (the sum of every level's best) taken right
 ## after that same record_attempt call. This panel only displays what it is
 ## given -- it never calls PuzzleScoreboard itself -- kept to two short lines
-## per the spec's "no progression dashboard" constraint.
+## per the original "no progression dashboard" constraint.
 func show_results(results: Dictionary, puzzle_id: String, has_next: bool,
 		session_comparison: String, overall_session_score: int) -> void:
 	_puzzle_label.text = "%d. %s" % [PuzzleCatalog.group_position(puzzle_id), PuzzleCatalog.get_title(puzzle_id)]
@@ -60,7 +61,7 @@ func show_results(results: Dictionary, puzzle_id: String, has_next: bool,
 	_score_label.text = "Score: %d" % results["score"]
 	_accuracy_label.text = "Accuracy: %s" % PuzzleResultsFormat.format_accuracy_percent(results["accuracy"])
 	_session_comparison_label.text = _format_session_comparison(session_comparison, results["score"])
-	_overall_session_score_label.text = "Overall Session Score: %d" % overall_session_score
+	_overall_session_score_label.text = "Overall Score: %d" % overall_session_score
 	_next_puzzle_button.visible = has_next
 	_level_select_button.visible = not has_next
 	# The panel is hidden while its parent is sized, and a hidden Control can miss
@@ -73,13 +74,13 @@ func show_results(results: Dictionary, puzzle_id: String, has_next: bool,
 static func _format_session_comparison(outcome: String, score: int) -> String:
 	match outcome:
 		"established":
-			return "New session best: %d" % score
+			return "New best: %d" % score
 		"improved":
-			return "Session best improved to %d" % score
+			return "Best improved to %d" % score
 		"tied":
-			return "Matched session best: %d" % score
+			return "Matched your best: %d" % score
 		_: # "not_improved"
-			return "Session best unchanged"
+			return "Best unchanged"
 
 func _on_replay_button_pressed() -> void:
 	replay_requested.emit()

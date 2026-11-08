@@ -107,13 +107,14 @@ func _initialize() -> void:
 	check(Config.get_config("Session", "value") == 99, "settings persist after reset and reload")
 	_test_no_reset_on_puzzle_entry()
 	_test_puzzle_scoreboard_session_only()
+	_test_profile_is_separate_and_continue_resumes()
 	_test_canvas_actions_additive_and_remappable()
 	print("REGRESSION_FAILURES=", failures)
 	quit(1 if failures else 0)
 
-## PuzzleScoreboard's session-best/overall-score bookkeeping
-## must never reach the save file, and a freshly started process must begin
-## with no remembered scores at all.
+## PuzzleScoreboard's best/overall-score bookkeeping must never reach the save
+## file (PlayerProfile keeps the player's results in its own file), and a freshly
+## started process that has not loaded a profile begins with no remembered scores.
 func _test_puzzle_scoreboard_session_only() -> void:
 	check(PuzzleScoreboard.get_overall_score() == 0,
 		"a freshly started process begins with a zero overall session score")
@@ -133,6 +134,50 @@ func _test_puzzle_scoreboard_session_only() -> void:
 	var save_bytes_after: PackedByteArray = FileAccess.get_file_as_bytes(save_path) if FileAccess.file_exists(save_path) else PackedByteArray()
 	check(save_bytes_after == save_bytes_before,
 		"recording PuzzleScoreboard attempts never writes to the save file (user://global_state.tres)")
+
+## The player profile lives in its own file: finishing a level and deleting the
+## profile leave the settings file and the template's save byte-for-byte alone, and
+## Continue opens the level the profile points at without touching either.
+func _test_profile_is_separate_and_continue_resumes() -> void:
+	PlayerProfile.reset()
+	GlobalState.current = null
+	GlobalState.open()
+	GlobalState.save()
+	Config.set_config("ProfileCheck", "marker", 1)
+	var save_bytes_before := FileAccess.get_file_as_bytes(GlobalState.SAVE_STATE_PATH)
+	var config_bytes_before := FileAccess.get_file_as_bytes(Config.CONFIG_FILE_LOCATION)
+
+	var id := PuzzleCatalog.id_at(0)
+	var results := {"total_arrows": 8, "mistakes": 1, "open_move_assists": 0, "score": 7, "accuracy": 0.9}
+	var comparison := PuzzleScoreboard.record_attempt(id, results)
+	PlayerProfile.record_completion(id, results, comparison, PuzzleContentVersion.of(PuzzleCatalog.get_definition(id)))
+	check(FileAccess.file_exists(PlayerProfile.PROFILE_PATH), "finishing a level writes the profile file")
+	check(FileAccess.get_file_as_bytes(GlobalState.SAVE_STATE_PATH) == save_bytes_before,
+		"finishing a level never writes the template save (user://global_state.tres)")
+	check(FileAccess.get_file_as_bytes(Config.CONFIG_FILE_LOCATION) == config_bytes_before,
+		"finishing a level never writes the settings file")
+
+	var menu = load("res://main_menu_with_animations.gd").new()
+	menu.game_scene_path = "res://dummy_puzzle.tscn"
+	var scene_loader := get_root().get_node("SceneLoader")
+	var calls_before: int = scene_loader.load_scene_calls
+	var times_played_before: int = GameState.get_game_state().times_played
+	PuzzleSession.set_current_id(PuzzleCatalog.id_at(0))
+	menu._on_continue_game_button_pressed()
+	check(PlayerProfile.resume_id() != "" and PuzzleSession.get_current_id() == PlayerProfile.resume_id(),
+		"Continue selects the level the profile points at")
+	check(scene_loader.load_scene_calls > calls_before, "Continue opens the puzzle via SceneLoader.load_scene")
+	check(GameState.get_game_state().times_played == times_played_before,
+		"Continue does not call GameState.start_game()")
+
+	PlayerProfile.reset()
+	check(FileAccess.get_file_as_bytes(GlobalState.SAVE_STATE_PATH) == save_bytes_before,
+		"deleting the profile never writes the template save")
+	check(FileAccess.get_file_as_bytes(Config.CONFIG_FILE_LOCATION) == config_bytes_before,
+		"deleting the profile never writes the settings file")
+	Config.erase_section("ProfileCheck")
+	PuzzleScoreboard.clear()
+	menu.free()
 
 ## Opening the puzzle from Play/New Game MUST NOT reset or save existing
 ## progress, or disturb keyboard/gamepad remaps. Guards against a future

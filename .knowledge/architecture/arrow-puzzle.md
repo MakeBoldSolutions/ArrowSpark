@@ -17,6 +17,7 @@ appliesTo:
   - scripts/presentation/web_attempt_emitter.gd
   - scripts/puzzle_session.gd
   - scripts/puzzle_scoreboard.gd
+  - scripts/player_profile.gd
   - scripts/presentation/arrow_departure_geometry.gd
   - scripts/presentation/puzzle_viewport_transform.gd
   - scenes/puzzle/arrow_puzzle.tscn
@@ -32,6 +33,7 @@ appliesTo:
   - scenes/menus/main_menu/main_menu_with_animations.tscn
   - scenes/menus/main_menu/main_menu_with_animations.gd
   - scenes/menus/main_menu/puzzle_select_menu.gd
+  - scenes/menus/main_menu/profile_menu.gd
   - tests/puzzle_regression.gd
   - tests/puzzle_catalog_check.gd
   - tests/puzzle_analyzer_check.gd
@@ -590,35 +592,38 @@ is described in `.knowledge/architecture/web-showcase.md`.
 ## Open Move Assistance and Session Scoring
 
 See `.knowledge/product/gameplay-contract.md` for the behavioral contract
-this section implements: mistakes cost score not play, the session is the
-sole gameplay-memory boundary, and replay exists to improve a puzzle's
-session-best, never to recover from failure.
+this section implements: mistakes cost score not play, the player profile is
+the sole gameplay-memory boundary, and replay exists to improve a puzzle's
+best score, never to recover from failure.
 
-`PuzzleScoreboard` (scripts/puzzle_scoreboard.gd) is a session-lifetime,
-in-memory-only `RefCounted` class holding one private `static var
+`PuzzleScoreboard` (scripts/puzzle_scoreboard.gd) is an in-memory-only
+`RefCounted` class holding one private `static var
 _best_results` (`puzzle_id -> Completed Attempt Result Dictionary`, the
 exact shape `PuzzleState.get_results()` returns) — the same static-var,
 process-lifetime precedent `PuzzleSession`/`GameVisualStyle` already
 establish. It is a deliberate sibling to `PuzzleSession`, never a merge with
 it: `PuzzleSession` owns *which puzzle is currently selected*; `PuzzleScoreboard`
-owns *how well each puzzle has been played this session*. Neither reads the
-other's state, and neither reads or writes `GlobalState`, `GameState`,
-`LevelState`, or `user://global_state.tres`; both are reset only by a fresh
-engine process.
+owns *the best result held for each puzzle*. Neither reads the other's state,
+and neither reads or writes `GlobalState`, `GameState`, `LevelState`, or
+`user://global_state.tres`. The scoreboard itself never touches storage:
+`PlayerProfile` (see `.knowledge/architecture/save-progression.md`'s Player
+Profile section) saves the bests, seeds them back in with `seed_best()` at
+startup and empties the scoreboard with `clear()` when the player deletes their
+profile. Without a loaded profile the scoreboard starts empty.
 
 `record_attempt(puzzle_id, result)` records one completed attempt against
-that puzzle's session-best and returns exactly one of `"established"` (no
+that puzzle's best and returns exactly one of `"established"` (no
 prior best existed), `"improved"` (strictly greater score), `"tied"` (equal
 score), or `"not_improved"` (lower score); only `"established"`/`"improved"`
 replace the stored dictionary, so a worse or tied replay can never lower a
-puzzle's session-best. It asserts `result` carries the five expected keys and
+puzzle's best. It asserts `result` carries the five expected keys and
 that `score` is a nonnegative int no greater than `total_arrows` — a
 contract shape/range sanity check only, never a re-derivation of whether the
 attempt is actually completed or a recomputation of the score formula;
 `PuzzleState` remains the sole scoring/completion authority.
 `get_best(puzzle_id)` returns the stored dictionary or `null` if that puzzle
-has not been completed this session. `get_overall_score()` sums `["score"]`
-across every stored session-best, so a puzzle never completed contributes
+has no stored best. `get_overall_score()` sums `["score"]`
+across every stored best, so a puzzle never completed contributes
 nothing, and improving one puzzle's best raises the sum by exactly the
 improvement.
 
@@ -636,15 +641,17 @@ affect accuracy. `get_results()` now computes `score = max(total_arrows -
 (mistakes + open_move_assists * 5), 0)` and includes `open_move_assists`
 alongside the existing fields.
 
-In the scene, `arrow_puzzle.gd`'s `_show_results()` calls
+In the scene, `arrow_puzzle.gd`'s `_show_results()` first makes sure
+`PlayerProfile` is loaded (seeding the scoreboard), calls
 `PuzzleScoreboard.record_attempt(PuzzleSession.get_current_id(),
-_state.get_results())` exactly once per completed attempt, then passes its
-outcome string and `PuzzleScoreboard.get_overall_score()` into
+_state.get_results())` exactly once per completed attempt, hands the outcome to
+`PlayerProfile.record_completion()` so it is saved, then passes the outcome
+string and `PuzzleScoreboard.get_overall_score()` into
 `puzzle_results.gd`'s `show_results()`. `puzzle_results.gd` renders two
-additional short lines — a session-best comparison (`%SessionComparisonLabel`:
-"New session best: N" / "Session best improved to N" / "Matched session
-best: N" / "Session best unchanged") and `%OverallSessionScoreLabel`
-("Overall Session Score: N") — alongside the existing four metric labels,
+additional short lines — a best-result comparison (`%SessionComparisonLabel`:
+"New best: N" / "Best improved to N" / "Matched your best: N" / "Best
+unchanged") and `%OverallSessionScoreLabel` ("Overall Score: N"; the node
+names predate the profile) — alongside the existing four metric labels,
 kept to one line each rather than a progression dashboard. The panel only
 displays what it is given; it never calls `PuzzleScoreboard` itself, keeping
 the "display component never mutates state" boundary intact.
@@ -677,9 +684,11 @@ across established/improved/tied/not_improved outcomes and the overall
 score; a real replay resetting `mistakes`/`open_move_assists`/`score` to
 zero), and tests/save_input_regression.gd (`PuzzleScoreboard` never reads or
 writes `GlobalState`/`GameState`/the save file, and a freshly started
-process begins with zero session-best entries and a zero overall score), run
+process that has not loaded a profile begins with zero best entries and a zero
+overall score), tests/player_profile_check.gd (saving, seeding and deleting the
+bests through `PlayerProfile`), run
 via the same `run_puzzle_regressions.py`/`run_regressions.py` launchers;
-requires `PUZZLE_SCOREBOARD_FAILURES=0` and `REGRESSION_FAILURES=0`
+requires `PUZZLE_SCOREBOARD_FAILURES=0`, `PLAYER_PROFILE_FAILURES=0` and `REGRESSION_FAILURES=0`
 respectively alongside the existing markers.
 
 ## Structural Analysis (PuzzleAnalyzer)
@@ -1081,14 +1090,14 @@ both point `game_scene_path` at `res://scenes/puzzle/arrow_puzzle.tscn`.
 `main_menu_with_animations.gd` overrides `new_game()` only to select `first_knot` before delegating to the base `MainMenu`; `load_game_scene()`
 uses the base default implementation (`SceneLoader.load_scene(game_scene_path)` only), so
 opening the puzzle from Play/New Game never calls `GlobalState.reset()` or
-`GameState.start_game()`. Continue stays hidden (the scene's default
-`visible = false`, no longer overridden to conditionally show it); its
-scene/script remain in source, unreachable from this menu, so it can be restored
-later. Level Select is visible and opens the grouped puzzle list; the Results
-Level Select button and the play HUD's Back button both return to it. The
-`NewGameButton` carries a tooltip
-("Existing level progress is preserved even though it's hidden here.")
-stating this. Intro, options and credits are unaffected.
+`GameState.start_game()`. Continue is hidden until the player profile has a
+level to resume at, then shown; it selects that level through `PuzzleSession`
+and loads the same scene. A Profile button opens the profile sub-menu
+(`profile_menu.gd`), which is added to the same container as Level Select. Level
+Select is visible and opens the grouped puzzle list, with each finished level's
+best shown under its title; the Results Level Select button and the play HUD's
+Back button both return to it. The `NewGameButton` tooltip says saved results are
+kept and Continue resumes. Intro, options and credits are unaffected.
 
 Source of truth: tests/save_input_regression.gd's
 `_test_no_reset_on_puzzle_entry()` (run via `tests/run_regressions.py`),

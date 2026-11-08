@@ -95,6 +95,7 @@ func _check_web_attempt_payload() -> void:
 	check(not WebAttemptEmitter.emit(payload), "emit() does nothing outside a Web build")
 
 func _run() -> void:
+	PlayerProfile.reset() # suites share one user-data folder; start from an empty profile
 	_check_geometry()
 	_check_web_attempt_payload()
 	_check_effects()
@@ -323,8 +324,8 @@ func _check_theme(puzzle: Control) -> void:
 	results.show_results({"total_arrows": 8, "mistakes": 3, "open_move_assists": 1, "score": 5, "accuracy": 8.0 / 11.0}, PuzzleCatalog.id_at(0), false, "established", 5)
 	check(results.get_node("%AccuracyLabel").text == "Accuracy: 72.7%" and results.get_node("%ScoreLabel").text == "Score: 5", "results retain numeric behavior")
 	check(results.get_node("%OpenMoveAssistsLabel").text == "Open Move Assists: 1", "results display the open-move-assist count as its own value")
-	check(results.get_node("%SessionComparisonLabel").text == "New session best: 5", "results display the session-best comparison outcome")
-	check(results.get_node("%OverallSessionScoreLabel").text == "Overall Session Score: 5", "results display the overall session score")
+	check(results.get_node("%SessionComparisonLabel").text == "New best: 5", "results display the best-result comparison outcome")
+	check(results.get_node("%OverallSessionScoreLabel").text == "Overall Score: 5", "results display the overall score")
 	check(results.get_node("%ScoreLabel").get_theme_color("font_color") == GameVisualStyle.GAME_SUCCESS, "existing score supplies success cue")
 	var replay: Button = results.get_node("%ReplayButton")
 	check(replay.has_focus(), "results preserve Replay focus")

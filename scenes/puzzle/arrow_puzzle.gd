@@ -1,7 +1,8 @@
 extends Control
 ## Session controller: owns PuzzleState, the live HUD, and the
 ## playing -> draining -> results lifecycle. Reuses the starter's pause menu
-## and background music; does not touch saved progress or settings.
+## and background music. A finished attempt is handed to PlayerProfile, which
+## keeps the player's best results; settings and the template's save are untouched.
 
 @export_file("*.tscn") var main_menu_scene_path: String = "res://scenes/menus/main_menu/main_menu_with_animations.tscn"
 
@@ -192,7 +193,11 @@ func _show_results() -> void:
 	_pause_menu_controller.set_process_unhandled_input(false)
 	var results: Dictionary = _state.get_results()
 	var puzzle_id: String = PuzzleSession.get_current_id()
+	# The saved best results seed the scoreboard before the comparison, so a
+	# replay is measured against the player's saved best, not just this visit's.
+	PlayerProfile.ensure_loaded()
 	var comparison: String = PuzzleScoreboard.record_attempt(puzzle_id, results)
+	PlayerProfile.record_completion(puzzle_id, results, comparison, PuzzleContentVersion.of(_definition))
 	# Web builds hand the completed attempt to the hosting page; elsewhere a no-op.
 	WebAttemptEmitter.emit(WebAttemptEmitter.build_payload(puzzle_id, _definition, results,
 		_attempt_completed_msec - _attempt_started_msec))
@@ -211,7 +216,7 @@ func _on_results_main_menu_requested() -> void:
 	SceneLoader.load_scene(main_menu_scene_path)
 
 ## Leaves the puzzle mid-play for Level Select without finishing it. Abandoning
-## an attempt records nothing: no score, session best or progress is touched.
+## an attempt records nothing: no score, best result, statistic or progress is touched.
 func _on_back_button_pressed() -> void:
 	PuzzleSession.request_level_select()
 	SceneLoader.load_scene(main_menu_scene_path)
