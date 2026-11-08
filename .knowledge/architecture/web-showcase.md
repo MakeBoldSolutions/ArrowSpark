@@ -337,7 +337,9 @@ and `npm run build` in `web/`. `web/scripts/audit-check.mjs` runs
 `npm audit --json` and fails on any high or critical advisory that is not in
 its allowlist. Each allowed advisory carries its reason in the script and is
 removed once a fixed version can be installed. The allowlist is currently
-empty: `npm audit` reports no advisories for the locked dependencies.
+empty: `npm audit` reports no advisories for the locked dependencies. The
+update procedure and any held-back packages are recorded in
+`.knowledge/reference/web-dependency-updates.md`.
 
 `web/scripts/synthetic-check.mjs` is one headless-browser visit with no
 visitor data: it loads `/` and the story pages, then `/play/`, and waits for
