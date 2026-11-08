@@ -14,16 +14,16 @@ sources:
     url: https://github.com/MakeBoldSolutions/ArrowSpark/commit/0ec2dda8a4748c40b8bf42d8ed769a7a7d855236
   - label: "Constitution as of Spec 010"
     url: https://github.com/MakeBoldSolutions/ArrowSpark/blob/6e60e117acc175a47feb55f52a3a8da1c6cedaab/.knowledge/governance/constitution.md
-updated: 2026-10-02
+updated: 2026-11-08
 ---
 
 I build business software. Most of my career has been C#, .NET, APIs, and the unglamorous machinery that keeps organizations running. I have never shipped a game.
 
-In late September 2026 I started one anyway. The first commit landed at 10:41 on a Saturday morning. About 121 hours of wall-clock time later, ten specifications had been designed, reviewed, implemented, verified and merged. The game has a catalog of twenty-two puzzles, a solver that proves each one can be finished, a zoomable canvas, a scoring system, and one level built to be played rather than to answer a research question. It also has a design philosophy I didn't have when I started, and that philosophy is the real product.
+In late September 2026 I started one anyway. The first commit landed at 10:41 on a Saturday morning. About 121 hours of wall-clock time later, ten specifications had been designed, reviewed, implemented, verified and merged. At that point the game had a catalog of twenty-two puzzles (it has more now), a solver that proves each one can be finished, a zoomable canvas, a scoring system, and one level built to be played rather than to answer a research question. It also has a design philosophy I didn't have when I started, and that philosophy is the real product.
 
 I want to be precise about that number, because it's the heart of this series. It is elapsed time, overnight gaps included. It is not a claim that I sat typing for 121 hours, and it is not a claim that the game is finished. It *is* a claim about what happens when an experienced developer applies disciplined process, and a tool built around that process, to a domain he's never worked in.
 
-This is the first of nine chapters about how that happened. It starts with the gap, and then it starts the clock.
+This is the first of twelve chapters about how that happened, and what came after it. It starts with the gap, and then it starts the clock.
 
 ## This is not a vibe-coding story
 
@@ -119,7 +119,10 @@ Here's the road ahead:
 6. **[The contract before the difficulty](/story/contract-before-difficulty/)**: Open Move assistance, session scoring, and a canvas as big as the knot.
 7. **[Pulling the thread](/story/pulling-the-thread/)**: knot experiments, and an audit that caught the project breaking its own rule.
 8. **[The Reference Knot](/story/the-reference-knot/)**: one level, judged by a human.
-9. **[Now it's your turn](/story/now-its-your-turn/)**: the whole clock, what DevSpark learned, and a request.
+9. **[The game goes online](/story/the-game-goes-online/)**: a browser build, this site, and what the pull request admitted it hadn't run.
+10. **[A phone in landscape](/story/a-phone-in-landscape/)**: a beta instead of a sixty-one-task plan.
+11. **[From one level to a game](/story/from-one-level-to-a-game/)**: a way up to the big board, levels as data, and a generator that came early.
+12. **[Now it's your turn](/story/now-its-your-turn/)**: the whole clock, what DevSpark learned, and a request.
 
 Each chapter carries a "clock" beat: how long its specs took on the wall clock, and what the discipline bought in that time. The whole run is about 121 hours from the first commit to the tenth spec's merge, with nine specs merged in the first 70. That's not a boast; it's the evidence. It says the interesting part wasn't typing speed. It was the quality of the questions asked between the steps, and a process that made asking them cheap.
 

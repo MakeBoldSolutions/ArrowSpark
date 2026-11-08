@@ -34,6 +34,9 @@ open_items_for_author:
 next_article: "07-pulling-the-thread.md"
 ---
 
+> **Superseded early draft (noted 2026-11-08).** The current text of this article is in `web/src/content/chapters/`. Kept for history.
+
+
 # The Contract Before the Difficulty, the Canvas Before the Content
 
 After Spec 006 I knew where the difficulty was: long, bent, interwoven arrows. The obvious next step was to author some.

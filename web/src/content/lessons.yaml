@@ -17,6 +17,10 @@ worked:
     source: https://github.com/MakeBoldSolutions/ArrowSpark/commit/313d5e636b2dd0083a20ef4b7956fbcb45a44cc1
   - text: Pull-request review after every gate was green, which still found a real bug (focus landing on a hidden entry).
     source: https://github.com/MakeBoldSolutions/ArrowSpark/commit/4998d18c4f692cc31c13e7bafc04f46c5bacc48c
+  - text: Proving a no-behavior-change refactor by comparing every level before and after, then breaking one on purpose to confirm the check can fail.
+    source: https://github.com/MakeBoldSolutions/ArrowSpark/pull/10
+  - text: Reproducible level packs. The same recipe and seed rebuild the same file byte for byte, and the tool checks that it does.
+    source: https://github.com/MakeBoldSolutions/ArrowSpark/pull/16
 
 didnt:
   - text: Structural metrics did not predict fun. Six experiments hit every target and rated about 2 out of 5 for challenge.
@@ -35,3 +39,7 @@ didnt:
     source: https://github.com/MakeBoldSolutions/ArrowSpark/commit/4998d18c4f692cc31c13e7bafc04f46c5bacc48c
   - text: Early content was too simple. Most early puzzles were built from single-cell arrows a player can read at a glance.
     source: https://github.com/MakeBoldSolutions/ArrowSpark/commit/7edd8e11a1c5fe75ace7b2e5976ea7544e20603e
+  - text: Absence was recorded as agreement. The owner's silence was logged as accepting an exit margin, and review later found an accepted limitation with no real acceptor.
+    source: https://github.com/MakeBoldSolutions/ArrowSpark/pull/9
+  - text: The real-phone check kept moving. It was deferred out of the UI work and again out of the portrait work, and was recorded three weeks after the portrait work merged.
+    source: https://github.com/MakeBoldSolutions/ArrowSpark/pull/14

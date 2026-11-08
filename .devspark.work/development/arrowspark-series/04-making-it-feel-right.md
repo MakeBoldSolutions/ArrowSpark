@@ -32,6 +32,9 @@ open_items_for_author:
 next_article: "05-playtest-beat-the-dashboard.md"
 ---
 
+> **Superseded early draft (noted 2026-11-08).** The current text of this article is in `web/src/content/chapters/`. Kept for history.
+
+
 # Making It Feel Right: Unwinding Arrows and What Tests Can't See
 
 By the end of Spec 002 the game was correct and ugly. Arrows were cells. A bent arrow looked like a scatter of adjacent squares.

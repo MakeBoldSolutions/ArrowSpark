@@ -8,8 +8,9 @@ Do not add systems merely because successful games often contain them.
 
 Each major step should remove one constraint or answer one uncertainty.
 
-> **Status note (2026-10-11):** Specs 001--012 are complete. The Web Showcase (011)
-> and the mobile web beta (012) have shipped; the next spec is not yet specified.
+> **Status note (2026-11-08):** Specs 001--018 are complete and the next spec is not yet
+> specified. Note that generation arrived earlier than this file planned (see below).
+> (2026-10-11 note: Specs 001--012 were complete.)
 > (2026-10-01 note: Specs 001--010 were complete and the next spec was
 > expected to be a Web Showcase & Playtest.) (2026-09-28 note: Specs 001--007
 > were complete and Spec 008 was in progress.) The detailed, living plan for Specs 008--010 is
@@ -53,14 +54,21 @@ PR #4 on 2026-10-01. See [08-current-state.md](08-current-state.md).
 Spec 011 shipped the playable Web build, story site and anonymous reactions
 client (PR #5, 2026-10-03). Spec 012 made it a mobile web beta: PR #6
 (2026-10-03) admitted touch landscape screens, and PR #8 (2026-10-11) made touch
-modeless (tap, one-finger pan, pinch). Modeless touch and iPhone are unverified
-on real devices. See [08-current-state.md](08-current-state.md).
+modeless (tap, one-finger pan, pinch). Modeless touch was later verified on one
+Pixel 7 Pro in Chrome; iPhone remains unrun. See [08-current-state.md](08-current-state.md).
+
+## Done --- Specs 013--018
+
+Progression levels and world canvas (013, PR #9), codebase consolidation (014,
+PR #10), deferred follow-ups (015 quickfix, PR #11), game UI (016, PR #13),
+portrait play (017, PR #14), level packs and a seeded generator (018, PR #16).
+History is in [01-project-history.md](01-project-history.md), sections 18--22.
 
 ## Now --- Get outside players (not yet specified)
 
 The site exists to bring in outside players and with them the deferred
-fresh-player validation (the SC-009 protocol). Touch ergonomics (44 px targets,
-in-game touch help) are the known deferred product work.
+fresh-player validation (the SC-009 protocol). It remains open; the owner is still
+the only tester. The real-phone portrait check was closed on 2026-11-08.
 
 ### Original Spec 009 plan (historical)
 
@@ -172,7 +180,12 @@ boundary; - determine useful puzzle families.
 
 Avoid collapsing everything into one "difficulty score" prematurely.
 
-## Later --- Procedural Generation
+## Later --- Tuning Procedural Generation
+
+Status (2026-11-08): the generator itself shipped in Spec 018 as developer
+tooling, ahead of the evidence this section asked for. It targets analyzer metric
+ranges and has not been tuned. The condition below now applies to *tuning* it and
+to shipping generated content as more than a labelled sample.
 
 Generation becomes appropriate only when the project can state useful
 constraints such as: - desired long-arrow ratio; - bend distribution; -

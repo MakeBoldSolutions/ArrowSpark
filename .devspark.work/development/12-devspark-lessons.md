@@ -138,3 +138,26 @@ ArrowSpark demonstrates the DevSpark principle well:
 
 **creative exploration can be loose; implementation contracts should be
 precise.**
+
+## 12. A No-Change Spec Needs a Sameness Measurement (added 2026-11-08)
+
+Spec 014 pinned every catalog entry first, compared a full probe before and
+after, then mutated one coordinate to prove the gate could fail. Spec 018 reused
+the snapshot-neutral approach. "Tests still pass" would not have shown either.
+
+## 13. Silence Is Not Acceptance (added 2026-11-08)
+
+Spec 013 recorded the owner's silence as acceptance of an exit margin and closed
+eight per-level tasks on one aggregate comment. Review caught an accepted
+limitation that had no real acceptor. Acceptance should name who accepted it.
+
+## 14. Post-Deploy Obligations Drift (added 2026-11-08)
+
+The real-phone check moved out of Spec 016, then Spec 017 added to the same open
+item, and it stayed unrecorded for three weeks. Deferring with a home is right, but the home
+also needs a date or trigger someone will notice.
+
+## 15. Name the Principle You Depart From (added 2026-11-08)
+
+DP-025 said no generator before understanding good puzzles. Spec 018 built one.
+That can be a reasonable call, but the record should say it was a departure.

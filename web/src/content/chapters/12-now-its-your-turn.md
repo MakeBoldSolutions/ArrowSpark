@@ -1,10 +1,10 @@
 ---
 title: "Now It's Your Turn"
-part: 11
+part: 12
 slug: now-its-your-turn
 description: "The whole clock from first commit to the Reference Knot, what DevSpark learned from a game, the day verification kept creating work after the objective was met, what is still open, and one request: play it, then tell us what you think."
 spoiler: false
-status: draft
+status: published
 sources:
   - label: "Spec 010 merged (the clock's end)"
     url: https://github.com/MakeBoldSolutions/ArrowSpark/commit/6e60e117acc175a47feb55f52a3a8da1c6cedaab
@@ -18,14 +18,14 @@ sources:
     url: https://github.com/MakeBoldSolutions/ArrowSpark/commit/72e52ead6ecea34f3bec402d16466d9189f084e7
   - label: "Spec 010 pull request"
     url: https://github.com/MakeBoldSolutions/ArrowSpark/pull/4
-updated: 2026-10-11
+updated: 2026-11-08
 ---
 
 In [the first chapter](/story/finding-the-gap/) I said ArrowSpark had two jobs: be a good puzzle, and be an honest test of a method. This last chapter grades both, and the honest grade is *partial, and here's precisely how.*
 
 ## The whole clock
 
-Here's the entire project on one page, from the first commit to the merge of the Reference Knot. Times are local, from the commit log. The clock stops there, at Spec 010; the two specs after it, the web showcase and the mobile beta, are told in [Part 9](/story/the-game-goes-online/) and [Part 10](/story/a-phone-in-landscape/) and are not counted in these figures.
+Here's the entire project on one page, from the first commit to the merge of the Reference Knot. Times are local, from the commit log. The clock stops there, at Spec 010. The work after it is told in [Part 9](/story/the-game-goes-online/), [Part 10](/story/a-phone-in-landscape/) and [Part 11](/story/from-one-level-to-a-game/) and is not counted in these figures.
 
 | Milestone | When | Elapsed since first commit |
 |---|---|---|
@@ -91,10 +91,10 @@ From the notes I kept along the way, here's what the method took from a game:
 
 ## What's still open
 
-- **One person has played the Reference Knot to the end, and it's the person who designed it.** No independent player has validated it. That's the most important open fact in this whole series.
+- **One person has played the Reference Knot to the end, and it's the person who designed it.** No independent player has validated it, and as of November 2026 I am still the only person who has tested the game. That's the most important open fact in this whole series.
 - **Nobody new has tried to find it.** Whether a first-time player opens Level Select and finds the ArrowSpark Levels group without help was deferred to this showcase.
-- **Mobile web is a beta.** The game now plays on phones and tablets in landscape, with taps and the on-screen zoom, Fit and Pan controls. Pinch to zoom failed on the one real phone I tried; a later change made touch modeless (tap, one-finger drag, pinch) but I have not yet tested it on a phone. Touch targets are small, and it has been tried on very few real devices, none of them an iPhone. Desktop is still the best way to play.
-- **Generation is deliberately last.** The order is: rules, contract, viewport, hand-authored knots, human evidence, *then* maybe a generator that encodes what people actually enjoyed. Otherwise I'd teach a machine to optimize numbers no human cares about.
+- **Mobile web is a beta.** The game plays on phones and tablets in both orientations, with tap, one-finger drag and pinch. Those gestures work on the one real phone I have tested, a Pixel 7 Pro in Chrome. I have played it on that phone both upright and sideways. No iPhone has been tried at all.
+- **The generator came before the evidence it was supposed to wait for.** I said the order was rules, contract, viewport, hand-authored knots, human evidence, and *then* maybe a generator that encodes what people actually enjoyed. A generator now exists, as developer tooling, and the human evidence is still thin. It can prove a board is solvable and hit a range of measurements. It can't tell whether anyone would enjoy the result, so what it should optimize is still an open question.
 - **"Hard but never unsolvable" is a claim I can prove. "Satisfying" is one I can only test on people.**
 
 ## Back to the gap
@@ -107,6 +107,6 @@ The most valuable thing I did wasn't write code. It was ask, after every step, *
 
 ## Now it's your turn
 
-So here is the request. [Play the Reference Knot](/play/). You don't need to read anything first, and if you have already read this far, that's fine too; the reaction form asks which.
+So here is the request. [Play it](/play/). New Game starts at First Knot, the first of nine levels that climb to the Reference Knot, and Level Select will take you straight there if you'd rather. You don't need to read anything first, and if you have already read this far, that's fine too; the reaction form asks which.
 
 Then tell us two things, honestly: what you thought of the game, and what you thought of the way it was built. A "no" is as useful as a "yes". The reactions are optional and anonymous: no account, no tracking, nothing that identifies you.

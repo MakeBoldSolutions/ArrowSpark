@@ -421,27 +421,76 @@ the modeless touch change on any real device, and any iPhone. Closed out as a
 public beta with documented limitations; 44 px touch targets, touch scaling
 and touch-appropriate in-game help are deferred.
 
-## 18. Current Moment
+## 18. Spec 013 --- Progression Pack (2026-10-11 to 2026-10-14)
 
-At this documentation snapshot (2026-10-11, `main` at `dece281`, clean tree,
-140 commits):
+Merged as PR #9. Two stories, both from play. **World canvas:** any board point,
+corners included, can be centered; departing arrows are no longer clipped at the
+board edge and travel a fixed margin past it. **Progression:** eight levels
+(9, 15, 14, 17, 23, 30, 68 and 93 arrows) lead to the Reference Knot, and New Game
+now starts `first_knot`. The boards came from a seeded offline search in reverse
+solve order and were confirmed by the solver; first-draft intent claims that
+overstated the measured structure were rewritten. The owner played every level on
+desktop and on the Pixel 7 Pro in Chrome. The same closeout recorded that modeless
+touch (pinch and one-finger drag) worked on that phone. Playtest notes are aggregate.
+The Beck retrospective, published 2026-10-14 under `/devspark/`, records where
+this spec's process was loose.
 
-- **Specs 001--012 are complete and merged.** There is no active feature
-  branch.
-- The catalog has **22 puzzles in three groups**.
+## 19. Spec 014 --- Codebase Consolidation (2026-10-15)
+
+Merged as PR #10. No behavior change was the requirement. All 30 catalog entries
+were pinned first (`a25849f`); a probe of validity, witness orders, Open Move
+trails and analyzer reports was byte-identical before and after (195,273 bytes);
+a deliberate one-coordinate mutation made the gate fail. Head ordering and
+direction steps gained single definitions, and unreachable template examples
+were removed. Branch diff: 44 files, +95/-861. Level data files and a generator
+were written down as separate future work. Quickfix 015 (PR #11) cleaned up
+three leftovers.
+
+## 20. Spec 016 --- Game UI Improvements (2026-10-16 to 2026-10-17)
+
+Merged as PR #13. Every non-gameplay surface took on one Make Bold look and
+scales with the screen; branded launch, hero Main Menu, Level Select cards,
+restrained motion and sounds. Gameplay was held fixed, and regression
+expectations did not change. Owner sign-off covered Chrome, Firefox and two
+other Chromium-based browsers. Real-phone verification was removed from the spec
+by owner decision and is an open intake item.
+
+## 21. Spec 017 --- Mobile Portrait Play (2026-10-18)
+
+Merged as PR #14. Portrait is admitted (at least 360 x 640). Status sits at the
+top and Menu, Open Move and Fit form a bottom strip in portrait touch layouts; the
+board has at least 75 percent of the usable area. Persistent Zoom In, Zoom Out and
+Pan buttons were removed because gestures made them duplicates. Real-phone
+acceptance was deferred post-deploy and closed on 2026-11-08, when the owner reported
+playing on the Pixel in both orientations.
+
+## 22. Spec 018 --- Level Pack Engine (2026-10-23, merged 2026-10-31)
+
+Merged as PR #16. All 30 levels moved from catalog builder functions to committed
+JSON packs with unchanged ids, order, versions and structure (snapshot-neutral
+diff empty). A seeded `PuzzleGenerator` (reverse solve order, center-outward
+layering, an initial-playable cap, profiles of analyzer ranges) and a one-command
+pack build added a four-level Generated Levels sample. Same recipe and seed give
+a byte-identical pack. This reverses the earlier stated order that generation
+would wait for human evidence: the generator exists, as developer tooling, and
+makes no claim about quality.
+
+## 23. Current Moment
+
+At this documentation snapshot (2026-11-08, `main` at `1a1ee67`, 214 commits):
+
+- **Specs 001--014 and 016--018 and quickfix 015 are complete and merged.** There is
+  no active feature branch.
+- The catalog has **34 puzzles in four groups**.
 - The game is playable in a browser on desktop and, as a beta, on touch screens
-  in landscape. Both regression gates and Godot validation were green on
-  2026-10-11.
-- The deferred fresh-player validation protocol
-  (`.devspark.work/specs/010-spec-reference-puzzle/deferred-to-next-spec.md`)
-  is still not performed: no independent player has been recorded.
-- The article series lives on the site as eleven chapters
-  (`web/src/content/chapters/`): parts 1--8 are published; parts 9 (Spec 011),
-  10 (Spec 012) and 11 (the closing chapter) are drafts awaiting owner review.
-  The copies in `.devspark.work/development/arrowspark-series/` are the earlier
-  drafts of parts 1--8 and were not updated.
+  in both orientations. CI on `1a1ee67` passed with every failure marker at zero.
+- The fresh-player validation protocol is still not performed; the owner is the only
+  tester so far.
+- The article series lives on the site as twelve chapters
+  (`web/src/content/chapters/`), all published. The copies in `arrowspark-series/` are superseded early
+  drafts of parts 1--8.
 
-The project has moved through four phases:
+The project has moved through six phases:
 
 **Phase 1 --- Prove the game works.** Specs 001--005.
 
@@ -456,7 +505,9 @@ Specs 007 and 008.
 **Phase 5 --- Put it in front of people.** Specs 011 and 012: the web
 showcase and the mobile web beta.
 
-The eventual goal is still not simply "more levels." It is to understand what
-makes a knot satisfying enough that, only then, procedural generation might be
-worth attempting. The evidence base is still one tester; the site now exists to
-bring in other people, and that is the next thing to learn.
+**Phase 6 --- Turn one level into a game.** Specs 013--018: a progression, a
+tidier codebase, a finished look, portrait play, and levels as data.
+
+The eventual goal is still not simply "more levels." Levels are now cheap to
+produce; knowing which ones are worth playing is not. The evidence base is still
+one recorded tester, and that is the next thing to change.

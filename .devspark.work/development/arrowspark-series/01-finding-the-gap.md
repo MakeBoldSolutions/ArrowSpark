@@ -30,6 +30,9 @@ open_items_for_author:
 next_article: "02-first-game-loop.md"
 ---
 
+> **Superseded early draft (noted 2026-11-08).** The current text of this article is in `web/src/content/chapters/`. Kept for history.
+
+
 # Finding the Gap: A Puzzle That Never Punishes You
 
 I build business software. Most of my career has been C#, .NET, APIs, and the unglamorous machinery that keeps organizations running. I have never shipped a game.

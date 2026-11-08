@@ -49,8 +49,8 @@ prefer explicit types where they aid clarity; keep changes small and justify new
 - Mobile web beta on the showcase Play page: `web/src/scripts/play-admission.ts` decides from viewport
   and input capabilities (not the user agent) whether the game shows (desktop: fine pointer and
   at least 960 × 540; touch: portrait at least 360 × 640 or landscape at least 640 × 320), and
-  the beta is verified on one real Android phone only (iPhone not yet verified; the portrait
-  layout still awaits real-device verification).
+  the beta is verified on one real Android phone only, in both orientations (iPhone not yet
+  verified).
 
 - Modeless touch gestures in `PuzzleBoard` (tap acts on release, one-finger drag pans, two-finger
   pinch zooms, no Pan mode needed) plus `touch-action: none` on the Play page's game stage;

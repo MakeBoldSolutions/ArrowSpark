@@ -4,7 +4,7 @@ part: 9
 slug: the-game-goes-online
 description: "Spec 011 put ArrowSpark in a browser: a playable Web build, this story site and an anonymous reactions form, specified, gated and merged in thirteen hours, with the list of what had not yet been run written into the pull request."
 spoiler: false
-status: draft
+status: published
 sources:
   - label: "Spec 011 specified and planned"
     url: https://github.com/MakeBoldSolutions/ArrowSpark/commit/546e6285db9d9e1e044544e864ad3b47ec4138ef

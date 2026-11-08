@@ -28,6 +28,9 @@ open_items_for_author:
 next_article: "04-making-it-feel-right.md"
 ---
 
+> **Superseded early draft (noted 2026-11-08).** The current text of this article is in `web/src/content/chapters/`. Kept for history.
+
+
 # Provably Solvable: A Solver and a One-Paragraph Proof
 
 Eight arrows pointing at walls is a demo. To become a puzzle, arrows had to interact, and that meant giving them bodies.

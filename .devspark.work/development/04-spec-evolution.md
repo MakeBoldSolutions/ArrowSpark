@@ -357,3 +357,9 @@ The intended order is:
 
 This avoids teaching a generator to optimize metrics that humans do not
 actually enjoy.
+
+**Status (2026-11-08):** this order was not followed. Spec 018 shipped a seeded
+generator as developer tooling before steps 5 and 6 had real evidence. The risk
+named above still stands, so its four samples are labelled untuned and no claim
+is made about their quality. Specs 009--018 are summarized in
+[01-project-history.md](01-project-history.md).

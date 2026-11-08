@@ -2,9 +2,9 @@
 title: "A Phone in Landscape"
 part: 10
 slug: a-phone-in-landscape
-description: "Spec 012 set out to certify mobile web play with a real-device spike and ended as a public beta in under three hours, because the engine already did the hard part; a week later pinch and drag were rebuilt, and are still untested on a phone."
+description: "Spec 012 set out to certify mobile web play with a real-device spike and ended as a public beta in under three hours, because the engine already did the hard part; a week later pinch and drag were rebuilt, and a real phone confirmed them days after that."
 spoiler: false
-status: draft
+status: published
 sources:
   - label: "Spec 012 planned"
     url: https://github.com/MakeBoldSolutions/ArrowSpark/commit/689e0889d9260258dd1b4652b0d74e496ed1d439
@@ -22,7 +22,9 @@ sources:
     url: https://github.com/MakeBoldSolutions/ArrowSpark/blob/c140776f345afef2e9df27e69ae2cc7b667405c0/.knowledge/reference/touch-gestures.md
   - label: "Modeless touch pull request"
     url: https://github.com/MakeBoldSolutions/ArrowSpark/pull/8
-updated: 2026-10-11
+  - label: "Real-phone result for modeless touch"
+    url: https://github.com/MakeBoldSolutions/ArrowSpark/commit/776ae49719f8af1b8ee4f387c4f57b24009cc50d
+updated: 2026-11-08
 ---
 
 Spec 012 was simple to state: a phone should be able to play ArrowSpark. Until it, the Play page showed phones a notice that the game needed a desktop browser. This part is about replacing that notice, and about the gap between a plan and what the evidence allowed.
@@ -68,12 +70,12 @@ The design is written up with its research in the project's knowledge base. The 
 - **The board drops the mouse events the engine synthesizes from touch**, so a touch never selects twice.
 - **The page also has to let go.** Chrome combines the `touch-action` setting across an iframe boundary, so the game frame on the page needed `touch-action: none` as well as the game's own shell. The leading explanation for why pinch failed on the Pixel is that the page claimed the two-finger gesture as a page zoom. That is a hypothesis.
 
-## What this part does not claim
+## What this part did not claim when it closed
 
-- **The modeless touch change has not been tried on a real phone.** The headless checks synthesize touches, and the research itself notes that browser emulation zoomed under simulated multi-touch while the real phone did not.
-- **It does not claim iPhone support.** Safari on an iPhone is let in by the same capability rule and has never been run.
-- **It does not claim touch is comfortable.** Controls are still small, and in-game help still describes the mouse. Both are deferred.
-- **It evidences one phone**, a Pixel 7 Pro, and one tester.
+- **The modeless touch change had not been tried on a real phone.** The headless checks synthesized touches, and the research itself noted that browser emulation zoomed under simulated multi-touch while the real phone did not. The result was recorded three days after the merge, on the same Pixel 7 Pro in Chrome: pinch zoom and one-finger drag worked, and every level could be played by tapping.
+- **It does not claim iPhone support.** Safari on an iPhone is let in by the same capability rule and has never been run. That is still true.
+- **It did not claim touch was comfortable.** Controls were small, and in-game help described the mouse. Help now covers touch, and [Part 11](/story/from-one-level-to-a-game/) covers the portrait layout that replaced those controls, which has since been played on the same phone.
+- **It evidences one phone**, a Pixel 7 Pro, and one tester. That is still true as well.
 
 ## What it taught us
 

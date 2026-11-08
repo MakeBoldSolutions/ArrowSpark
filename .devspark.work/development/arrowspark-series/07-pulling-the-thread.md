@@ -33,6 +33,9 @@ open_items_for_author:
 next_article: "none (series end)"
 ---
 
+> **Superseded early draft (noted 2026-11-08).** The current text of this article is in `web/src/content/chapters/`. Kept for history.
+
+
 # Pulling the Thread: Knots, Audits, and What DevSpark Learned from a Game
 
 In the first article I said ArrowSpark had two jobs: be a good puzzle, and be an honest test of a method. This last article grades both, and the honest grade is *partial, and here's precisely how.*
