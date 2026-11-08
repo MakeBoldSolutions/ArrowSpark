@@ -1,6 +1,6 @@
 product: BSW.DevSpark
 edition: BSW-internal
-version: 9.4.0
-installed: 2026-10-31
+version: 9.5.1
+installed: 2026-11-08
 method: claude-code-quickstart
 migrated-from: fresh

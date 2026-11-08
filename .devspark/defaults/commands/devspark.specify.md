@@ -45,8 +45,14 @@ and nothing the change does not need.
 
 ## Understand
 
-1. Treat the user's request as the source of intent. Identify the desired outcome and what observable
-   behavior would demonstrate the first useful increment. Do not write a requirements catalog.
+1. Treat the user's request as the source of intent. Identify the desired outcome, the observable
+   acceptance evidence, and material exclusions for the first useful increment. A smaller increment
+   must still satisfy the requested outcome unless the developer authorizes splitting it. Derive
+   obligations from that request and applicable contracts; adjacent improvements and future
+   possibilities are not acceptance criteria. Carry explicit operating assumptions (target
+   environment, supported users, configuration and decision owner) under preamble §13; do not
+   turn missing details into a questionnaire or invent additional supported environments or users.
+   Do not write a requirements catalog.
 2. Inspect only relevant existing code, tests, contracts, and `.knowledge/`. Reuse repository
    patterns. If the user names an issue or work item, use it as source context through
    `## Work-Item Grounding`; do not guess or search for a matching item.
@@ -98,6 +104,30 @@ When both hold, offer the review and act on the answer:
   unreachable, unauthenticated, or slow must never block starting work.
 
 Make the offer before `## Start Safely`, so the item can still inform the branch name.
+
+## Prospective Spec Context
+
+This applies **only when the developer explicitly names a Prospective Spec** from an optional roadmap
+(an id such as `ps-004`, or a PS path). Otherwise skip it silently: never search for a roadmap or a
+matching PS, and never mention roadmaps.
+
+Run `.devspark/scripts/bash/roadmap-check.sh locate <id> --json` (or
+`.devspark/scripts/powershell/roadmap-check.ps1 locate <id> -Json`), adding `--root <path>` when the
+developer gave a roadmap location. Read the PS at `ITEM.path` (relative to `ROADMAP_ROOT`) as intake
+context: its outcome, current reality, scope and standalone boundary, future-health expectations,
+dependencies, decisions, and completion expectations. Verify its current-reality claims against the
+repository; code and Git evidence outrank a stale planning claim. Then continue with the normal
+workflow below.
+
+- When `ITEM` is missing or ambiguous, or `DEPENDENCIES` include an item that is not `complete`, report
+  it in one line and let the developer decide. It is context, not a gate.
+- When the outcome looks larger than one independently shippable increment, say so and suggest
+  `/devspark-roadmap` to right-size it. Do not split it here.
+- Do not edit the roadmap or the PS. Recording delivery progress is `/devspark-roadmap`'s job.
+- The PS id is planning traceability. It may appear in the branch description, `work.md`, a commit
+  message, or the pull request description, but never in shipped code, tests, or `.knowledge/`. Pass
+  the PS id and title (for example `ps-004 storage format v2`), not its path or `--root`, as the
+  branch description in `## Start Safely`.
 
 ## Governance and Verification
 
@@ -154,7 +184,7 @@ When a material decision, unresolved blocker, intended outcome, or next action w
 lost between sessions, create or update only
 `.devspark.work/specs/<branch>/work.md`. Keep it short and limited to:
 
-- Intended outcome
+- Intended outcome, acceptance evidence, material exclusions and explicit operating assumptions
 - Material decisions, each with the basis it rests on (evidence paths or contracts and a commit)
   when it came from on-demand assurance
 - Unresolved blockers
@@ -175,8 +205,9 @@ information instead of fabricating it or silently creating a full-spec.
 
 ## Handoff
 
-Hand off to `/devspark-implement` with the original request, observed repository facts, acceptance
-evidence for the first increment, any material decision already authorized, any invariant, the
+Hand off to `/devspark-implement` with the original request, observed repository facts, the intended
+outcome, acceptance evidence, material exclusions and explicit operating assumptions for the first
+increment, any material decision already authorized, any invariant, the
 verification expectations above, and any mandatory or recommended assurance concern. Do not generate Analyze, Critic, or Judge artifacts here.
 
 Report the branch and next action. No Plan, Tasks, checklist, specification, or review artifact is
