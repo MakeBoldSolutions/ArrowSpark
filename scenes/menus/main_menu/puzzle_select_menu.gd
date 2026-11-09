@@ -1,7 +1,7 @@
 extends Control
-## Minimal, catalog-driven Level Select content: accordion group sections. Each
-## purpose group has a header button that collapses or expands its entries,
-## followed by one line saying what the group is for (never a ranking);
+## Minimal, catalog-driven Level Select content: accordion tier sections. Each
+## difficulty tier has a header button that collapses or expands its entries,
+## followed by one line saying what the tier is like;
 ## entries are keyboard/gamepad focus-navigable card buttons in a two-column
 ## grid, numbered within their group and edged in the group's accent,
 ## emitting puzzle_selected(id) on selection. Collapsed entries are
@@ -12,22 +12,24 @@ extends Control
 
 signal puzzle_selected(id: String)
 
-## Card accent per purpose group (a GameVisualStyle LevelCard variation).
+## Card accent per tier (a GameVisualStyle LevelCard variation).
 const GROUP_CARD_VARIATIONS := {
-	PuzzleCatalog.GROUP_ARROWSPARK_LEVELS: &"LevelCardRust",
-	PuzzleCatalog.GROUP_FOUNDATIONS: &"LevelCardInk",
-	PuzzleCatalog.GROUP_PUZZLE_LAB: &"LevelCardEmber",
-	PuzzleCatalog.GROUP_GENERATED: &"LevelCardEmber",
+	PuzzleCatalog.GROUP_GETTING_STARTED: &"LevelCardInk",
+	PuzzleCatalog.GROUP_INTERMEDIATE: &"LevelCardEmber",
+	PuzzleCatalog.GROUP_ADVANCED: &"LevelCardEmber",
+	PuzzleCatalog.GROUP_EXPERT: &"LevelCardRust",
+	PuzzleCatalog.GROUP_MASTER: &"LevelCardRust",
 }
 const CARD_COLUMNS := 2
 const CARD_WIDTH := 300
 
-## One honest line per purpose group. Shown even when the group is collapsed.
+## One line per tier. Shown even when the tier is collapsed.
 const GROUP_DESCRIPTIONS := {
-	PuzzleCatalog.GROUP_ARROWSPARK_LEVELS: "The intended ArrowSpark experience.",
-	PuzzleCatalog.GROUP_FOUNDATIONS: "Small boards that teach the rule.",
-	PuzzleCatalog.GROUP_PUZZLE_LAB: "Development experiments, some deliberately over-tangled.",
-	PuzzleCatalog.GROUP_GENERATED: "Boards built by the level generator; an untuned first sample.",
+	PuzzleCatalog.GROUP_GETTING_STARTED: "Small boards that teach the rule.",
+	PuzzleCatalog.GROUP_INTERMEDIATE: "Bigger boards and longer chains.",
+	PuzzleCatalog.GROUP_ADVANCED: "Dense boards where order matters.",
+	PuzzleCatalog.GROUP_EXPERT: "Large, tightly packed boards.",
+	PuzzleCatalog.GROUP_MASTER: "The hardest boards in the game.",
 }
 
 @onready var _list_container: VBoxContainer = %PuzzleListContainer

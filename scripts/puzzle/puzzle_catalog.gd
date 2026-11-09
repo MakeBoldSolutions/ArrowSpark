@@ -4,9 +4,11 @@ extends RefCounted
 ## packs under res://levels (see PuzzlePackFormat): catalog.json names the
 ## packs in catalog order, and each pack holds its levels in order. Every entry
 ## carries a stable id (independent of position, title, pack or file path), a
-## display title and a purpose group (Foundations, Puzzle Lab, ArrowSpark
-## Levels, Generated Levels) that is pure metadata: it drives Level Select sections,
-## group-relative numbering and Next Puzzle scope, and never affects rules.
+## display title and a difficulty tier (Getting Started, Intermediate,
+## Advanced, Expert, Master), carried as the level's group, that is pure
+## metadata: it drives Level Select sections, tier-relative numbering and Next
+## Puzzle scope, and never affects rules. Within a tier, levels keep catalog
+## order, which is easiest first.
 ## Never instantiated; every member is static. The packs are read once per
 ## process; get_definition() still builds a fresh PuzzleDefinition from the
 ## stored level data on every call, so no two calls share mutable
@@ -16,15 +18,17 @@ extends RefCounted
 
 const LEVELS_ROOT := "res://levels"
 
-const GROUP_ARROWSPARK_LEVELS := "arrowspark_levels"
-const GROUP_FOUNDATIONS := "foundations"
-const GROUP_GENERATED := "generated"
-const GROUP_PUZZLE_LAB := "puzzle_lab"
+const GROUP_GETTING_STARTED := "getting_started"
+const GROUP_INTERMEDIATE := "intermediate"
+const GROUP_ADVANCED := "advanced"
+const GROUP_EXPERT := "expert"
+const GROUP_MASTER := "master"
 const GROUP_TITLES := {
-	GROUP_ARROWSPARK_LEVELS: "ArrowSpark Levels",
-	GROUP_FOUNDATIONS: "Foundations",
-	GROUP_GENERATED: "Generated Levels",
-	GROUP_PUZZLE_LAB: "Puzzle Lab",
+	GROUP_GETTING_STARTED: "Getting Started",
+	GROUP_INTERMEDIATE: "Intermediate",
+	GROUP_ADVANCED: "Advanced",
+	GROUP_EXPERT: "Expert",
+	GROUP_MASTER: "Master",
 }
 
 static var _loaded := false
@@ -90,10 +94,9 @@ static func get_title(id: String) -> String:
 		return ""
 	return title_at(index)
 
-## Group ids in Level Select presentation order. Presentation order only; it
-## makes no quality claim.
+## Tier ids in Level Select presentation order, easiest first.
 static func group_ids() -> Array[String]:
-	return [GROUP_ARROWSPARK_LEVELS, GROUP_FOUNDATIONS, GROUP_PUZZLE_LAB, GROUP_GENERATED]
+	return [GROUP_GETTING_STARTED, GROUP_INTERMEDIATE, GROUP_ADVANCED, GROUP_EXPERT, GROUP_MASTER]
 
 static func group_title(group_id: String) -> String:
 	return String(GROUP_TITLES.get(group_id, ""))
