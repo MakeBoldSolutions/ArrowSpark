@@ -383,7 +383,8 @@ Every catalog entry carries a `group` metadata key naming its difficulty tier:
 generated level and the four smallest rule experiments), `intermediate`
 ("Intermediate": fifteen levels from nine to twenty-five arrows, including the
 generated levels and the large sparse boards), `advanced` ("Advanced": three
-dense mid-size boards), `expert` ("Expert": the large-canvas validation board
+dense mid-size boards, then 45 generated levels of 30 to 69 arrows in
+`advanced_generated.json`, built from `levels/recipes/advanced_generated.json`), `expert` ("Expert": the large-canvas validation board
 and `almost_a_knot`) and `master` ("Master": the Reference Knot). Tiers are
 assigned from `PuzzleAnalyzer` measurements (arrows, density, dependency
 depth, arrows playable at the start), not from where a level came from, and
@@ -529,7 +530,10 @@ dependencies. Head cells are visited centre-outward with seeded jitter
 A profile sets the board size (a whole number or `[min, max]`), inclusive
 target ranges over analyzer metrics (`arrows`, `density`, `initial_playable`,
 `depth`, `components`, `bends`, `max_length`, `average_length`), placement
-options (`layering`, `initial_playable_cap`, `arrow_length`) and `attempts`.
+options (`layering`, `initial_playable_cap`, `arrow_length`, `depth_bias`) and `attempts`.
+`depth_bias` (0 to 1, gen2) is the chance that an arrow is placed with its head on the
+forward ray of the current chain tip, the arrow with the longest run of arrows waiting on it,
+so dependency chains grow deeper; without it a profile is proposed exactly as gen1 did.
 A profile is rejected before any search only for a detectable contradiction:
 an inverted range, a value outside its allowed range, an unknown key, or no
 permitted board size able to hold the minimum arrow count at the minimum arrow
@@ -543,8 +547,10 @@ best within the budget, is returned with every metric and miss. Work is
 bounded: each head cell is tried at most once per candidate, each arrow gets at
 most `MAX_HEAD_TRIES` heads, and a tail stops at its length or a dead end. The
 same profile and seed always give the same board on Godot 4.4.x;
-`GENERATOR_SCHEME` (`gen1`) is recorded in provenance and must change whenever
-that would stop holding.
+`GENERATOR_SCHEME` (`gen2`) names the algorithm; provenance records `scheme_for(profile)`,
+which is `gen1` for a profile without `depth_bias`, so existing pinned boards stay
+reproducible, and the scheme must change whenever same-profile-same-seed would stop
+giving the same board.
 
 `python tests/run_level_pack_build.py --godot <exe> --recipe
 levels/recipes/<pack>.json` builds one pack from a recipe (pack name, group,
