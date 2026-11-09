@@ -293,6 +293,13 @@ deployed `web/dist/staticwebapp.config.json`:
 - **MIME types.** `.wasm` is served as `application/wasm`, `.pck` as
   `application/octet-stream`. Other headers: `X-Content-Type-Options:
   nosniff`, `Referrer-Policy: no-referrer`. No cookies are set.
+- **What the game stores in the browser.** Settings, input remaps and the player
+  profile (name, finished levels, best scores, play counts) live in the Godot Web
+  build's own browser storage for the site (`user://`). Nothing there is sent
+  anywhere, and no cookie is involved. The Play page's "What this page keeps"
+  note and the footer say so, including that the profile stays in that browser
+  and that clearing site data removes it. See
+  `.knowledge/architecture/save-progression.md` for the profile and its limits.
 - **Content-Security-Policy**, every directive explicit: `default-src
   'self'`; `script-src 'self' 'wasm-unsafe-eval'` plus the SHA-256 of the
   game shell's single inline bootstrap script, computed from the exported

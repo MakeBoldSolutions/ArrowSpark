@@ -50,13 +50,13 @@ func _check_session_best_and_overall_score_progression() -> void:
 	var puzzle_a: Control = await _complete_via_real_scene_with_assists(id, 1)
 	var established_score: int = puzzle_a._state.get_results()["score"]
 	check(puzzle_a.get_node("%PuzzleResults").get_node("%SessionComparisonLabel").text ==
-		"New session best: %d" % established_score,
-		"the first completion this session establishes the session best")
+		"New best: %d" % established_score,
+		"the first completion establishes the saved best")
 	check(PuzzleScoreboard.get_overall_score() == baseline_overall + established_score,
 		"the overall session score increases by the newly-established best")
 	check(puzzle_a.get_node("%PuzzleResults").get_node("%OverallSessionScoreLabel").text ==
-		"Overall Session Score: %d" % PuzzleScoreboard.get_overall_score(),
-		"the Results screen displays the correct overall session score after establishing")
+		"Overall Score: %d" % PuzzleScoreboard.get_overall_score(),
+		"the Results screen displays the correct overall score after establishing")
 	puzzle_a.queue_free()
 	await process_frame
 
@@ -64,8 +64,8 @@ func _check_session_best_and_overall_score_progression() -> void:
 	var puzzle_b: Control = await _complete_via_real_scene_with_assists(id, 2)
 	var worse_score: int = puzzle_b._state.get_results()["score"]
 	check(worse_score < established_score, "the two-assist replay genuinely scores lower than the one-assist baseline")
-	check(puzzle_b.get_node("%PuzzleResults").get_node("%SessionComparisonLabel").text == "Session best unchanged",
-		"a worse replay is reported as not improving the session best")
+	check(puzzle_b.get_node("%PuzzleResults").get_node("%SessionComparisonLabel").text == "Best unchanged",
+		"a worse replay is reported as not improving the best")
 	check(PuzzleScoreboard.get_overall_score() == baseline_overall + established_score,
 		"a worse replay never lowers the overall session score")
 	puzzle_b.queue_free()
@@ -76,8 +76,8 @@ func _check_session_best_and_overall_score_progression() -> void:
 	var tied_score: int = puzzle_c._state.get_results()["score"]
 	check(tied_score == established_score, "repeating the same assist count reproduces the same score")
 	check(puzzle_c.get_node("%PuzzleResults").get_node("%SessionComparisonLabel").text ==
-		"Matched session best: %d" % tied_score,
-		"a tied replay is reported as matching, not improving, the session best")
+		"Matched your best: %d" % tied_score,
+		"a tied replay is reported as matching, not improving, the best")
 	check(PuzzleScoreboard.get_overall_score() == baseline_overall + established_score,
 		"a tied replay never changes the overall session score")
 	puzzle_c.queue_free()
@@ -89,8 +89,8 @@ func _check_session_best_and_overall_score_progression() -> void:
 	var perfect_score: int = puzzle_d._state.get_results()["score"]
 	check(perfect_score > established_score, "the perfect replay genuinely scores higher than the one-assist baseline")
 	check(puzzle_d.get_node("%PuzzleResults").get_node("%SessionComparisonLabel").text ==
-		"Session best improved to %d" % perfect_score,
-		"a better replay is reported as improving the session best")
+		"Best improved to %d" % perfect_score,
+		"a better replay is reported as improving the best")
 	check(PuzzleScoreboard.get_overall_score() == baseline_overall + perfect_score,
 		"the overall session score increases by exactly the improvement (%d -> %d)" % [established_score, perfect_score])
 	puzzle_d.queue_free()
@@ -575,6 +575,7 @@ func _check_level_select_accordion() -> void:
 ## The Main Menu hero carries the product title and stays decorative; actions keep their
 ## order with Play as the one primary; Level Select shows each group as accented cards.
 func _check_menu_brand_layout() -> void:
+	PlayerProfile.reset() # a fresh profile: Continue is hidden until a level is finished
 	var menu = load("res://scenes/menus/main_menu/main_menu_with_animations.tscn").instantiate()
 	get_root().add_child(menu)
 	await process_frame
@@ -596,7 +597,7 @@ func _check_menu_brand_layout() -> void:
 	for child in menu.get_node("%MenuButtonsBoxContainer").get_children():
 		if child is Button and child.visible:
 			order.append(child.name)
-	var expected: Array[String] = ["NewGameButton", "LevelSelectButton", "OptionsButton", "CreditsButton"]
+	var expected: Array[String] = ["NewGameButton", "LevelSelectButton", "ProfileButton", "OptionsButton", "CreditsButton"]
 	if not OS.has_feature("web"):
 		expected.append("ExitButton")
 	check(order == expected, "Main Menu actions keep their order (%s)" % [order])
@@ -621,6 +622,74 @@ func _check_menu_brand_layout() -> void:
 	check(all_grids, "each Level Select group lays its cards out in a grid")
 	check(level_select.header_buttons().all(func(h: Button) -> bool: return h.theme_type_variation == &"LevelGroupHeader"),
 		"group headers use the section heading style")
+	menu.queue_free()
+	await process_frame
+
+## Finishing a level is remembered: Level Select shows its best, Continue appears,
+## the Profile menu shows and edits the profile, and deleting it undoes all of that.
+func _check_profile_continue_and_progress() -> void:
+	PlayerProfile.reset()
+	var ids := PuzzleCatalog.ids_in_group(PuzzleCatalog.GROUP_ARROWSPARK_LEVELS)
+	var scene_path := "res://scenes/menus/main_menu/main_menu_with_animations.tscn"
+	var menu = load(scene_path).instantiate()
+	get_root().add_child(menu)
+	await process_frame
+	await process_frame
+	check(not menu.get_node("%ContinueGameButton").visible, "Continue stays hidden while nothing is finished")
+	check(menu.get_node("%ProfileButton").visible, "the main menu offers a Profile button")
+	menu.queue_free()
+	await process_frame
+
+	var puzzle: Control = await _complete_via_real_scene_with_assists(ids[0], 1)
+	var finished_score: int = puzzle._state.get_results()["score"]
+	var finished_total: int = puzzle._state.get_results()["total_arrows"]
+	puzzle.queue_free()
+	await process_frame
+	check(PlayerProfile.is_finished(ids[0]) and PlayerProfile.resume_id() == ids[1],
+		"finishing a level saves it and points Continue at the next level in its group")
+
+	menu = load(scene_path).instantiate()
+	get_root().add_child(menu)
+	await process_frame
+	await process_frame
+	var continue_button: Button = menu.get_node("%ContinueGameButton")
+	check(continue_button.visible, "Continue appears once a level is finished")
+	var level_select = menu.level_select_scene
+	var presentation_order: Array[String] = []
+	for group_id in PuzzleCatalog.group_ids():
+		presentation_order.append_array(PuzzleCatalog.ids_in_group(group_id))
+	var entry_index := presentation_order.find(ids[0])
+	var summary := "Best %d of %d" % [finished_score, finished_total]
+	check(level_select.entry_buttons()[entry_index].text.ends_with(summary),
+		"Level Select shows the finished level's best (%s)" % summary)
+	check(not level_select.entry_buttons()[entry_index + 1].text.contains("Best"),
+		"Level Select shows no best for a level that is not finished")
+
+	menu._on_profile_button_pressed()
+	await process_frame
+	await process_frame
+	var profile = menu.profile_scene
+	check(profile != null and profile.visible and menu.sub_menu == profile, "the Profile button opens the profile menu")
+	var focus_owner := get_root().gui_get_focus_owner()
+	check(focus_owner == profile._name_edit, "opening the profile menu focuses the name field")
+	check(profile._summary.text.begins_with("Levels finished: 1 of %d" % PuzzleCatalog.count()),
+		"the profile menu counts finished levels")
+	check(profile._summary.text.contains("Overall score: %d" % finished_score), "the profile menu shows the overall score")
+	profile._name_edit.text_submitted.emit("  Ada  ")
+	check(PlayerProfile.display_name() == "Ada" and profile._name_edit.text == "Ada", "submitting a name saves it trimmed")
+
+	profile._on_delete_confirmed()
+	await process_frame
+	check(not PlayerProfile.has_progress() and PlayerProfile.display_name() == PlayerProfile.DEFAULT_NAME,
+		"deleting the profile removes progress and the name")
+	check(not continue_button.visible, "deleting the profile hides Continue")
+	menu._close_sub_menu()
+	menu._on_level_select_button_pressed()
+	await process_frame
+	await process_frame
+	check(not level_select.entry_buttons()[entry_index].text.contains("Best"),
+		"reopening Level Select after deleting the profile shows no bests")
+	check(PuzzleScoreboard.get_overall_score() == 0, "deleting the profile resets the overall score")
 	menu.queue_free()
 	await process_frame
 
@@ -797,7 +866,7 @@ func _check_level_select_menu() -> void:
 			button_index += 1
 			check(entry_button.visible and not entry_button.disabled,
 				"Level Select entry '%s' is neither locked nor hidden" % id)
-			check(entry_button.text == "%d. %s" % [PuzzleCatalog.group_position(id), PuzzleCatalog.get_title(id)],
+			check(entry_button.text.begins_with("%d. %s" % [PuzzleCatalog.group_position(id), PuzzleCatalog.get_title(id)]),
 				"Level Select entry '%s' shows its group-relative number and title in group order" % id)
 
 	menu._on_level_select_button_pressed()
@@ -991,6 +1060,9 @@ func _check_portrait_action_strip() -> void:
 	await process_frame
 
 func _initialize() -> void:
+	# Each check suite starts from an empty profile: they share one user-data
+	# folder, and a saved best would change what "first completion" means.
+	PlayerProfile.reset()
 	await _check_nested_pause_portrait()
 	await _check_portrait_action_strip()
 	check(PuzzleFeedback.BLOCKED_CUE_DURATION_SECONDS <= PuzzleFeedback.BLOCKED_CUE_DURATION_CAP_SECONDS,
@@ -1020,6 +1092,7 @@ func _initialize() -> void:
 	await _check_level_select_accordion()
 	await _check_level_select_group_descriptions()
 	await _check_menu_brand_layout()
+	await _check_profile_continue_and_progress()
 	await _check_results_overlay_fills_scene_without_resize()
 	await _check_level_select_focus_after_collapse()
 	await _check_back_button()

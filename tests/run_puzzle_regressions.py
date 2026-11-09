@@ -1,6 +1,6 @@
 """Run headless Godot checks for the arrow puzzle without touching player data.
 
-Eleven independent checks run, in execution order:
+Twelve independent checks run, in execution order:
 1. Pure rule regressions (tests/puzzle_regression.gd) against an isolated,
    unique temporary project containing the puzzle core scripts. No scenes,
    addons or autoloads are needed by the RefCounted rule classes.
@@ -20,27 +20,30 @@ Eleven independent checks run, in execution order:
 4. Pure scoreboard checks (tests/puzzle_scoreboard_check.gd) against the
    same bare project. PuzzleScoreboard operates on result Dictionaries
    independently of PuzzleState, PuzzleDefinition, scenes and fonts.
-5. Pure route-geometry regressions (tests/arrow_departure_geometry_check.gd)
+5. Player profile persistence checks (tests/player_profile_check.gd) against the
+   same bare project and redirected user-data root: restart persistence, best-score
+   rules, resume position, unreadable-file recovery, changed boards and deletion.
+6. Pure route-geometry regressions (tests/arrow_departure_geometry_check.gd)
    against a second isolated project containing only
    scripts/presentation/arrow_departure_geometry.gd. Style ratios are passed
    as constructor arguments, so no GameVisualStyle or font assets are needed.
-6. Pure viewport-transform regressions (tests/puzzle_viewport_transform_check.gd)
+7. Pure viewport-transform regressions (tests/puzzle_viewport_transform_check.gd)
    against a third isolated project containing only
    scripts/presentation/puzzle_viewport_transform.gd, with no rule, scene or
    asset dependency.
-7. Scene-based HUD/board layout and feedback-duration checks
+8. Scene-based HUD/board layout and feedback-duration checks
    (tests/puzzle_layout_check.gd) against the imported real project, with the
    application-data root redirected to an isolated temporary directory.
-8. Integrated canvas navigation, transformed input and lifecycle checks
+9. Integrated canvas navigation, transformed input and lifecycle checks
    (tests/puzzle_canvas_check.gd) against the real project and the same
    isolated user-data root.
-9. Interaction, fonts and animation presentation checks
+10. Interaction, fonts and animation presentation checks
    (tests/puzzle_presentation_check.gd) against the real project, sharing
    the layout and canvas suites' isolated user-data root.
-10. App-wide theme checks (tests/app_theme_check.gd) against the real project:
+11. App-wide theme checks (tests/app_theme_check.gd) against the real project:
     the startup theme reaches every control type, including under a CanvasLayer,
     with brand styles, visible focus, minimum target and text sizes, and AA contrast.
-11. Portrait menu geometry and scroll reachability (tests/portrait_menu_check.gd)
+12. Portrait menu geometry and scroll reachability (tests/portrait_menu_check.gd)
     across actual narrow iframe widths and every Options tab.
 """
 
@@ -80,10 +83,12 @@ def run_rule_regressions(godot: str, repo: Path) -> None:
         shutil.copytree(repo / "levels", root / "levels", ignore=shutil.ignore_patterns("recipes"))
         shutil.copyfile(repo / "scripts/puzzle_session.gd", root / "puzzle_session.gd")
         shutil.copyfile(repo / "scripts/puzzle_scoreboard.gd", root / "puzzle_scoreboard.gd")
+        shutil.copyfile(repo / "scripts/player_profile.gd", root / "player_profile.gd")
         shutil.copyfile(repo / "tests/puzzle_regression.gd", root / "puzzle_regression.gd")
         shutil.copyfile(repo / "tests/puzzle_catalog_check.gd", root / "puzzle_catalog_check.gd")
         shutil.copyfile(repo / "tests/puzzle_analyzer_check.gd", root / "puzzle_analyzer_check.gd")
         shutil.copyfile(repo / "tests/puzzle_scoreboard_check.gd", root / "puzzle_scoreboard_check.gd")
+        shutil.copyfile(repo / "tests/player_profile_check.gd", root / "player_profile_check.gd")
         shutil.copyfile(repo / "tests/puzzle_pack_format_check.gd", root / "puzzle_pack_format_check.gd")
         shutil.copyfile(repo / "tests/puzzle_generator_check.gd", root / "puzzle_generator_check.gd")
         for flags, marker in (
@@ -94,6 +99,7 @@ def run_rule_regressions(godot: str, repo: Path) -> None:
             (("--script", "puzzle_generator_check.gd"), "PUZZLE_GENERATOR_FAILURES=0"),
             (("--script", "puzzle_catalog_check.gd"), "PUZZLE_CATALOG_FAILURES=0"),
             (("--script", "puzzle_scoreboard_check.gd"), "PUZZLE_SCOREBOARD_FAILURES=0"),
+            (("--script", "player_profile_check.gd"), "PLAYER_PROFILE_FAILURES=0"),
         ):
             command = [godot, "--headless", "--path", str(root), *flags]
             print("Running:", " ".join(command), flush=True)

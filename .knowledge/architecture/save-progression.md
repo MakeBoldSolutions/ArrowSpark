@@ -6,12 +6,16 @@ appliesTo:
   - project.godot
   - scripts/game_state.gd
   - scripts/level_state.gd
+  - scripts/player_profile.gd
+  - scenes/menus/main_menu/profile_menu.gd
+  - scenes/menus/main_menu/profile_menu.tscn
   - addons/maaacks_game_template/base/scripts/global_state.gd
   - addons/maaacks_game_template/base/scripts/global_state_data.gd
   - addons/maaacks_game_template/base/scripts/app_settings.gd
   - addons/maaacks_game_template/base/scripts/config.gd
   - addons/maaacks_game_template/base/scenes/autoloads/app_config.gd
   - tests/save_input_regression.gd
+  - tests/player_profile_check.gd
   - tests/run_regressions.py
   - scenes/menus/main_menu/main_menu.tscn
   - scenes/menus/main_menu/main_menu_with_animations.gd
@@ -95,6 +99,61 @@ saved-bytes invariants around navigation flows. Limits: movement actions
 remapped onto Tab or D-pad buttons are deliberately not consumed by the board so
 focus can always leave it, which means such a remap also moves GUI focus.
 
+## Player Profile
+
+The player's results live in their own file, `user://player_profile.json`,
+owned by `PlayerProfile` (scripts/player_profile.gd). It is separate from
+`user://config.cfg` (settings) and `user://global_state.tres` (the template's
+legacy save): a damaged profile can never block settings or old saves, and the
+profile code never reads or writes either of those files. The profile holds a
+format version, the display name, the level to resume at, summed statistics
+(attempts finished, mistakes, Open Move assists) and one best result per level.
+
+A best result is keyed by the stable catalog puzzle id and stores the puzzle's
+`PuzzleContentVersion`. A best whose board has since changed (different
+version, or an id no longer in the catalog) is kept in the file but ignored, so
+a score never describes a board the player did not play; the next finish of that
+level replaces it. Entries that fail validation are skipped without discarding
+the rest of the profile.
+
+`PuzzleScoreboard` stays the in-memory comparator and the single authority for
+"established / improved / tied / not improved" and for the overall score.
+`PlayerProfile.ensure_loaded()` seeds it from the saved bests, and
+`arrow_puzzle.gd` calls `PlayerProfile.record_completion()` right after
+`PuzzleScoreboard.record_attempt()` for every finished attempt. An abandoned
+attempt records nothing, and an unfinished board is never saved: only the level
+to resume at (the level after the one most recently finished in its group, or
+that level at a group's end) and finished results persist. Continue appears on
+the main menu once there is a level to resume at and opens it through
+`PuzzleSession`; the Profile sub-menu (shown in the same container as Level
+Select) edits the name, summarizes the profile, and deletes it after
+confirmation. Level Select shows "Best N of M" under each finished level.
+
+An unreadable profile (not JSON, not a profile, or a newer format version) is
+never silently discarded: its exact bytes are copied to
+`player_profile.json.recovery` (numbered on collisions) and the game starts a
+new profile with a notice in the Profile menu. If the copy cannot be made the
+original is left untouched, writes are blocked for the session and the notice
+says progress will not be saved. This is lighter than the settings and
+legacy-save recovery above (no startup dialog) because losing a profile costs no
+settings or saved state, and the backup keeps the data recoverable by hand. The
+file is written directly, not through a temporary file and rename, so the Web
+build's browser storage is synced by a single file close.
+
+Limits: the profile lives only in the browser or install that wrote it. It does
+not follow the player to another device, clearing browser data removes it, and
+browsers may clear site storage after a long absence (Safari's behavior on a real
+iPhone is unverified). Writes are not crash-safe. One profile per device; shared
+devices are not handled. Source of truth: tests/player_profile_check.gd
+(persistence across a simulated restart, best-score rules, resume position,
+unreadable-file recovery with and without a backup, a newer format, changed
+boards, malformed entries, deletion, and the settings and legacy-save files left
+byte-for-byte alone), tests/save_input_regression.gd
+(`_test_profile_is_separate_and_continue_resumes()`) and
+tests/puzzle_layout_check.gd (Continue, Level Select bests and the Profile menu
+in the real scenes). A class must not name a static function `reload()`: it is
+`Script.reload()`, which re-initializes the class's static variables.
+
 ## Session-Only Puzzle Entry vs. Preserved Legacy Storage
 
 `scenes/menus/main_menu/main_menu_with_animations.gd`'s Play/New Game path
@@ -113,11 +172,13 @@ used them is not part of the project (it can be restored from
 .knowledge/architecture/arrow-puzzle.md for its rules, and for
 `PuzzleCatalog`/`PuzzleSession` themselves. Existing saved level progress,
 settings and recovery behavior described above are therefore unaffected by
-starting, playing, replaying, or selecting the puzzle. Continue stays
-hidden on the main menu (its scene/script remains in source, unreachable
-from this menu); the `NewGameButton` tooltip reads "Starts the first ArrowSpark level.
-Existing level progress (Continue) is preserved even though it's hidden
-here." Puzzle entry also never touches the input-remap
+starting, playing, replaying, or selecting the puzzle. Continue is shown
+only when the player profile has a level to resume at and opens it through
+`PuzzleSession` without calling `GlobalState.reset()` or `GameState.start_game()`
+(the template's `GlobalState`/`GameState` progress stays unused); the
+`NewGameButton` tooltip reads "Starts the first ArrowSpark level. Your saved
+results are kept. Continue resumes where you left off." Puzzle entry also never
+touches the input-remap
 system: a keyboard/gamepad remap seeded before `new_game()`/
 `load_game_scene()` is unaffected by either call. Source of truth:
 tests/save_input_regression.gd's `_test_no_reset_on_puzzle_entry()`.
@@ -159,7 +220,8 @@ In the Web build, Godot maps `user://` to the browser's own storage for the
 site, so settings, input remaps and the legacy `global_state.tres` persist
 locally in that browser. This is a new storage location, not a migration:
 desktop data is untouched, and nothing stored there is transmitted anywhere.
-Gameplay scores remain session-only, so reloading the page starts fresh.
+The player profile (see Player Profile above) lives in the same browser storage,
+so reloading the page keeps the player's name, finished levels and best scores.
 
 ## Validation and Limits
 

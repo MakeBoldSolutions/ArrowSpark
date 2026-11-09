@@ -1,13 +1,15 @@
 class_name PuzzleScoreboard
 extends RefCounted
-## Session-lifetime, in-memory-only holder of the best Completed Attempt
-## Result per puzzle and the derived overall session score. Same static-var,
-## process-lifetime precedent as PuzzleSession/GameVisualStyle: a GDScript
-## static var is bound to the running process, not to any node or scene, so
-## it survives SceneLoader.reload_current_scene()/load_scene() identically to
-## an autoload while needing no project.godot registration or _ready()
-## lifecycle. Never reads or writes GlobalState, GameState, LevelState, or
-## user://global_state.tres. Reset only by a fresh engine process.
+## In-memory holder of the best Completed Attempt Result per puzzle and the
+## derived overall score. It never touches storage: PlayerProfile saves the bests
+## and seeds them back in at startup (seed_best), and empties it on delete
+## (clear). Same static-var, process-lifetime precedent as
+## PuzzleSession/GameVisualStyle: a GDScript static var is bound to the running
+## process, not to any node or scene, so it survives
+## SceneLoader.reload_current_scene()/load_scene() identically to an autoload
+## while needing no project.godot registration or _ready() lifecycle. Never
+## reads or writes GlobalState, GameState, LevelState, or
+## user://global_state.tres.
 
 ## puzzle_id (String, PuzzleCatalog id) -> Completed Attempt Result Dictionary
 ## (the exact shape PuzzleState.get_results() returns).
@@ -55,3 +57,18 @@ static func get_overall_score() -> int:
 	for result in _best_results.values():
 		total += result["score"]
 	return total
+
+## Loads a previously saved best result (PlayerProfile does this at startup) so
+## later comparisons and the overall score start from it. Never replaces a better
+## result already held, and applies the same shape check as record_attempt.
+static func seed_best(puzzle_id: String, result: Dictionary) -> void:
+	assert(result.has("total_arrows") and result.has("mistakes") and result.has("open_move_assists")
+		and result.has("score") and result.has("accuracy"),
+		"PuzzleScoreboard.seed_best requires a PuzzleState.get_results()-shaped dictionary")
+	var existing: Variant = _best_results.get(puzzle_id)
+	if existing == null or result["score"] > existing["score"]:
+		_best_results[puzzle_id] = result.duplicate()
+
+## Forgets every stored best result (used when the player deletes their profile).
+static func clear() -> void:
+	_best_results.clear()

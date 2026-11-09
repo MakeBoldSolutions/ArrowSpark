@@ -5,6 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://dfycb1h41yhrw" path="res://scenes/menus/options_menu/master_options_menu_with_tabs.tscn" id="3_sr523"]
 [ext_resource type="PackedScene" uid="uid://da7uj8u87g24i" path="res://scenes/credits/credits.tscn" id="4_ixa71"]
 [ext_resource type="PackedScene" path="res://scenes/menus/main_menu/puzzle_select_menu.tscn" id="5_puzsel"]
+[ext_resource type="PackedScene" path="res://scenes/menus/main_menu/profile_menu.tscn" id="5_profile"]
 [ext_resource type="Texture2D" uid="uid://drvktkvagj2ih" path="res://assets/brand/mark_tile.svg" id="6_mark"]
 [ext_resource type="Script" path="res://scenes/menus/main_menu/menu_backdrop.gd" id="7_backdrop"]
 [ext_resource type="AudioStream" uid="uid://77gcin1ra0gl" path="res://assets/audio/ui/focus.wav" id="ui_focus"]
@@ -454,6 +455,7 @@ graph_offset = Vector2(-180.277, 49)
 [node name="MainMenu" instance=ExtResource("1_6btwc")]
 script = ExtResource("2_rr1rn")
 level_select_packed_scene = ExtResource("5_puzsel")
+profile_packed_scene = ExtResource("5_profile")
 game_scene_path = "res://scenes/puzzle/arrow_puzzle.tscn"
 options_packed_scene = ExtResource("3_sr523")
 credits_packed_scene = ExtResource("4_ixa71")
@@ -597,7 +599,7 @@ offset_bottom = 170.0
 
 [node name="NewGameButton" parent="MenuContainer/MenuButtonsMargin/MenuButtonsContainer/MenuButtonsBoxContainer" index="0"]
 theme_type_variation = &"PrimaryButton"
-tooltip_text = "Starts the first ArrowSpark level. Existing level progress (Continue) is preserved even though it's hidden here."
+tooltip_text = "Starts the first ArrowSpark level. Your saved results are kept. Continue resumes where you left off."
 
 [node name="ContinueGameButton" type="Button" parent="MenuContainer/MenuButtonsMargin/MenuButtonsContainer/MenuButtonsBoxContainer" index="1"]
 unique_name_in_owner = true
@@ -610,6 +612,11 @@ unique_name_in_owner = true
 visible = true
 layout_mode = 2
 text = "Level Select"
+
+[node name="ProfileButton" type="Button" parent="MenuContainer/MenuButtonsMargin/MenuButtonsContainer/MenuButtonsBoxContainer" index="3"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Profile"
 
 [node name="LevelSelectContainer" type="MarginContainer" parent="." index="11"]
 unique_name_in_owner = true
@@ -625,3 +632,4 @@ theme_override_constants/margin_bottom = 88
 
 [connection signal="pressed" from="MenuContainer/MenuButtonsMargin/MenuButtonsContainer/MenuButtonsBoxContainer/ContinueGameButton" to="." method="_on_continue_game_button_pressed"]
 [connection signal="pressed" from="MenuContainer/MenuButtonsMargin/MenuButtonsContainer/MenuButtonsBoxContainer/LevelSelectButton" to="." method="_on_level_select_button_pressed"]
+[connection signal="pressed" from="MenuContainer/MenuButtonsMargin/MenuButtonsContainer/MenuButtonsBoxContainer/ProfileButton" to="." method="_on_profile_button_pressed"]
