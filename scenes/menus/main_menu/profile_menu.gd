@@ -96,11 +96,20 @@ func refresh() -> void:
 	if not _name_edit.has_focus():
 		_name_edit.text = PlayerProfile.display_name()
 	var stats := PlayerProfile.stats()
-	_summary.text = "Levels finished: %d of %d\nOverall score: %d\nAttempts finished: %d\nMistakes: %d\nOpen Move assists: %d" % [
-		PlayerProfile.finished_count(), PuzzleCatalog.count(), PuzzleScoreboard.get_overall_score(),
+	var earned := PlayerProfile.earned_score()
+	var possible := PlayerProfile.possible_score()
+	var possible_finished := PlayerProfile.possible_score_on_finished()
+	_summary.text = "Complete: %d%%\nLevels finished: %d of %d\nScore: %d of %d possible (%d%%)\nScore on finished levels: %d of %d (%d%%)\nAttempts finished: %d\nMistakes: %d\nOpen Move assists: %d" % [
+		roundi(PlayerProfile.completion_fraction() * 100.0),
+		PlayerProfile.finished_count(), PuzzleCatalog.count(),
+		earned, possible, _percent(earned, possible),
+		earned, possible_finished, _percent(earned, possible_finished),
 		stats["attempts"], stats["mistakes"], stats["open_move_assists"]]
 	_notice.text = PlayerProfile.load_notice()
 	_notice.visible = not _notice.text.is_empty()
+
+static func _percent(part: int, whole: int) -> int:
+	return roundi(100.0 * part / whole) if whole > 0 else 0
 
 func _commit_name_on_focus_lost() -> void:
 	_commit_name(_name_edit.text)

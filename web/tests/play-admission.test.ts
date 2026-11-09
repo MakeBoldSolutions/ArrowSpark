@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { decidePlay, isTouchFirst, readCapabilities, type Capabilities } from '../src/scripts/play-admission';
+import { decidePlay, holdForKeyboard, isTouchFirst, readCapabilities, type Capabilities } from '../src/scripts/play-admission';
 
 const desktop = (over: Partial<Capabilities> = {}): Capabilities => ({
   width: 1440, height: 900, finePointer: true, touch: false, ...over,
@@ -47,6 +47,27 @@ describe('decidePlay', () => {
     expect(decidePlay(hybrid(800, 450))).toBe('play'); // too small for the desktop route, fine for touch landscape
     expect(decidePlay(hybrid(450, 800))).toBe('play');
     expect(decidePlay(hybrid(600, 300))).toBe('larger');
+  });
+});
+
+describe('holdForKeyboard', () => {
+  it('keeps a portrait phone playable when the keyboard shrinks only its height', () => {
+    const before = phone({ width: 412, height: 800 });
+    const withKeyboard = holdForKeyboard(before, phone({ width: 412, height: 420 }));
+    expect(decidePlay(withKeyboard)).toBe('play');
+  });
+
+  it('lets a rotation or a closed keyboard through unchanged', () => {
+    const before = phone({ width: 412, height: 800 });
+    expect(holdForKeyboard(before, phone({ width: 800, height: 300 })).height).toBe(300);
+    expect(holdForKeyboard(phone({ width: 412, height: 420 }), phone({ width: 412, height: 800 })).height).toBe(800);
+  });
+
+  it('still judges a first look, a desktop window and an unsupported screen by their real size', () => {
+    expect(holdForKeyboard(null, phone({ width: 412, height: 420 })).height).toBe(420);
+    expect(decidePlay(holdForKeyboard(desktop(), desktop({ height: 400 })))).toBe('larger');
+    const small = phone({ width: 300, height: 500 });
+    expect(decidePlay(holdForKeyboard(small, phone({ width: 300, height: 400 })))).toBe('larger');
   });
 });
 

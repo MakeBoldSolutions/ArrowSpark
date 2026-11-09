@@ -30,6 +30,18 @@ export function decidePlay({ width, height, finePointer, touch }: Capabilities):
   return 'larger';
 }
 
+// An on-screen keyboard shrinks the visible viewport's height but never its width. Without this,
+// opening the keyboard to type a name can push a portrait phone under the 640 px floor, which would
+// hide the game and close the keyboard again. While a touch-first screen keeps the same width and
+// only gets shorter, keep judging it by the height it had before; a rotation changes the width, and
+// a taller viewport (keyboard closed) is taken as is.
+export function holdForKeyboard(previous: Capabilities | null, next: Capabilities): Capabilities {
+  if (!previous || !isTouchFirst(next) || !isTouchFirst(previous)) return next;
+  if (decidePlay(previous) !== 'play') return next;
+  const sameWidth = Math.abs(next.width - previous.width) <= 1;
+  return sameWidth && next.height < previous.height ? { ...next, height: previous.height } : next;
+}
+
 // True when the visitor is on a touch screen without a fine pointer as the primary input, so
 // the page can show the beta note and touch wording.
 export function isTouchFirst({ finePointer, touch }: Pick<Capabilities, 'finePointer' | 'touch'>): boolean {

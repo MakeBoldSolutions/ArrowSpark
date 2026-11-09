@@ -672,9 +672,11 @@ func _check_profile_continue_and_progress() -> void:
 	check(profile != null and profile.visible and menu.sub_menu == profile, "the Profile button opens the profile menu")
 	var focus_owner := get_root().gui_get_focus_owner()
 	check(focus_owner == profile._name_edit, "opening the profile menu focuses the name field")
-	check(profile._summary.text.begins_with("Levels finished: 1 of %d" % PuzzleCatalog.count()),
+	check(profile._summary.text.contains("Levels finished: 1 of %d" % PuzzleCatalog.count()),
 		"the profile menu counts finished levels")
-	check(profile._summary.text.contains("Overall score: %d" % finished_score), "the profile menu shows the overall score")
+	check(profile._summary.text.begins_with("Complete: "), "the profile menu shows percent complete")
+	check(profile._summary.text.contains("Score: %d of %d possible" % [finished_score, PlayerProfile.possible_score()]),
+		"the profile menu shows the score against the possible score")
 	profile._name_edit.text_submitted.emit("  Ada  ")
 	check(PlayerProfile.display_name() == "Ada" and profile._name_edit.text == "Ada", "submitting a name saves it trimmed")
 

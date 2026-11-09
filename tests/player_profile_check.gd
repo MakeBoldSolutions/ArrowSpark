@@ -71,6 +71,12 @@ func _test_persists_across_restart() -> void:
 		"the best result survives a restart with every field")
 	check(PlayerProfile.is_finished(ids[0]) and PlayerProfile.finished_count() == 1, "the finished level is still finished after a restart")
 	check(PlayerProfile.stats() == {"attempts": 1, "mistakes": 3, "open_move_assists": 1}, "statistics survive a restart")
+	check(PlayerProfile.earned_score() == 7 and PlayerProfile.possible_score_on_finished() == 10,
+		"earned and possible score on finished levels come from the saved best")
+	check(is_equal_approx(PlayerProfile.completion_fraction(), 1.0 / PuzzleCatalog.count()),
+		"completion is finished levels over catalog levels")
+	check(PlayerProfile.possible_score() >= PlayerProfile.possible_score_on_finished() - 10 + 1 and PlayerProfile.possible_score() > 0,
+		"the possible score covers every catalog level")
 	check(PlayerProfile.resume_id() == ids[1], "Continue points at the level after the one just finished")
 	check(PuzzleScoreboard.get_best(ids[0])["score"] == 7, "the scoreboard is seeded with the saved best after a restart")
 	check(PuzzleScoreboard.get_overall_score() == 7, "the overall score after a restart is the sum of saved bests")

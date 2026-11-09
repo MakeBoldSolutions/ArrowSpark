@@ -41,7 +41,7 @@ const gameSrc = build ? `/game/${build}/index.html` : undefined;
 <script>
   import { startGameBridge } from '../../scripts/game-bridge';
   import { guardFrameChrome } from '../../scripts/page-zoom-guard';
-  import { decidePlay, readCapabilities } from '../../scripts/play-admission';
+  import { decidePlay, holdForKeyboard, readCapabilities, type Capabilities } from '../../scripts/play-admission';
 
   const host = document.querySelector<HTMLElement>('[data-game-host]');
   const iframe = document.querySelector<HTMLIFrameElement>('iframe[data-game-frame]');
@@ -64,8 +64,10 @@ const gameSrc = build ? `/game/${build}/index.html` : undefined;
       fullscreen.disabled = !document.fullscreenEnabled;
     }
     const root = document.documentElement;
+    let lastCapabilities: Capabilities | null = null;
     const admit = () => {
-      const capabilities = readCapabilities();
+      const capabilities = holdForKeyboard(lastCapabilities, readCapabilities());
+      lastCapabilities = capabilities;
       const verdict = decidePlay(capabilities);
       root.dataset.play = verdict;
       if (capabilities.touch) root.dataset.touch = '';

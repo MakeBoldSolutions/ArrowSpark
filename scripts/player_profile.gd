@@ -145,6 +145,42 @@ static func finished_count() -> int:
 			count += 1
 	return count
 
+## Share of catalog levels finished, 0.0 to 1.0.
+static func completion_fraction() -> float:
+	var total := PuzzleCatalog.count()
+	return float(finished_count()) / float(total) if total > 0 else 0.0
+
+## The best possible overall score: a perfect run (no mistakes, no assists) scores
+## one point per arrow, so this is the arrow count summed over every catalog level.
+static func possible_score() -> int:
+	var total := 0
+	for id in PuzzleCatalog.ids():
+		var definition := PuzzleCatalog.get_definition(id)
+		if definition != null:
+			total += definition.arrows.size()
+	return total
+
+## The best possible score on just the levels finished so far, which is what the
+## player's score on those levels is fairly compared with.
+static func possible_score_on_finished() -> int:
+	ensure_loaded()
+	var total := 0
+	for id in _levels:
+		var entry: Variant = best_result(id)
+		if entry != null:
+			total += int(entry["total_arrows"])
+	return total
+
+## Score actually earned on finished levels (best result on each).
+static func earned_score() -> int:
+	ensure_loaded()
+	var total := 0
+	for id in _levels:
+		var entry: Variant = best_result(id)
+		if entry != null:
+			total += int(entry["score"])
+	return total
+
 ## attempts, mistakes and open_move_assists, summed over every finished attempt.
 static func stats() -> Dictionary:
 	ensure_loaded()
