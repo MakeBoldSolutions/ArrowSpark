@@ -113,7 +113,7 @@ This runs twelve independent headless checks, in execution order:
    enumerates all 34 catalog entries (eight baseline puzzles, six
    structural experiments, one large-canvas fixture, six Gordian Knot
    experiments, eight progression levels, the Reference Knot and four generated
-   sample levels) in four purpose groups asserting, for each: a unique, non-empty stable id
+   sample levels) in five difficulty tiers asserting, for each: a unique, non-empty stable id
    independent of array position; structural validity via
    `PuzzleDefinition.is_valid()`; solver-confirmed solvability via
    `PuzzleSolver.analyze()`; the returned witness replays against a fresh

@@ -52,7 +52,8 @@ prefer explicit types where they aid clarity; keep changes small and justify new
   `PuzzleCatalog` keeps its API and loads the packs. A seeded `PuzzleGenerator` (developer
   tooling only, measured solely through `PuzzleSolver`/`PuzzleAnalyzer`) and
   `python tests/run_level_pack_build.py --godot <exe> --recipe levels/recipes/<pack>.json
-  [--check]` build reproducible packs; a four-level sample is the Generated Levels group.
+  [--check]` build reproducible packs. The four generated sample levels now live in the
+  difficulty-tier packs with their generator provenance (seed and profile) kept.
 
 - Mobile web beta on the showcase Play page: `web/src/scripts/play-admission.ts` decides from viewport
   and input capabilities (not the user agent) whether the game shows (desktop: fine pointer and
@@ -65,9 +66,11 @@ prefer explicit types where they aid clarity; keep changes small and justify new
   design and Godot practices in `.knowledge/reference/touch-gestures.md`. Verified on a real Pixel 7 Pro in
   Chrome (pinch and drag work); other devices and browsers are untested.
 
-- Puzzle catalog now has purpose groups (Foundations, Puzzle Lab, ArrowSpark Levels) driving
-  Level Select sections, group-relative numbering and group-scoped Next Puzzle, plus a
-  hand-composed Reference Knot, with Play starting the first of eight progression levels that lead up to it — metadata only, no rule changes.
+- Levels are grouped into five difficulty tiers (Getting Started, Intermediate, Advanced, Expert,
+  Master), assigned from `PuzzleAnalyzer` measurements, one pack per tier, easiest first within each.
+  Ids and boards are unchanged, so saved profiles are unaffected; Play starts the first level of
+  Getting Started. Tiers are metadata only, no rule changes; they replaced the earlier purpose groups
+  (Foundations, Puzzle Lab, ArrowSpark Levels).
 
 - `PuzzleState` has a deterministic Open Move lookup/assist counter and a
   revised score formula, plus a

@@ -4,7 +4,7 @@ type: authoritative-reference
 title: Reference Puzzle Design Report
 appliesTo:
   - scripts/puzzle/puzzle_catalog.gd
-  - levels/packs/arrowspark_levels.json
+  - levels/packs/master.json
   - tests/puzzle_catalog_check.gd
   - tests/puzzle_analyzer_check.gd
   - tests/puzzle_structural_report.gd
@@ -12,7 +12,7 @@ appliesTo:
 
 # Reference Puzzle Design Report
 
-The catalog entry `reference_knot` ("Reference Knot") is the one hand-composed level in the ArrowSpark Levels group. It was composed to show the intended ArrowSpark experience: a readable knot, several moments of discovery separated by renewed uncertainty, regions that depend on each other, a long arrow that visibly leaves and releases others, and an ending that does not drag. Objective numbers below come from `PuzzleAnalyzer` and `PuzzleSolver` and are diagnostics only; no score, formula or threshold decides quality. Human observations are quoted from actual sessions; nothing here is inferred from the design.
+The catalog entry `reference_knot` ("Reference Knot") is the one hand-composed level in the Master tier. It was composed to show the intended ArrowSpark experience: a readable knot, several moments of discovery separated by renewed uncertainty, regions that depend on each other, a long arrow that visibly leaves and releases others, and an ending that does not drag. Objective numbers below come from `PuzzleAnalyzer` and `PuzzleSolver` and are diagnostics only; no score, formula or threshold decides quality. Human observations are quoted from actual sessions; nothing here is inferred from the design.
 
 Evidence status in one place: one tester, the designer, who was familiar with earlier versions, played the final version to completion. No independent player has validated the experience. The numeric on-screen cell size at which arrows were traced was not captured.
 
@@ -102,11 +102,9 @@ Final session on version 3, conversational interview, answers verbatim and mappe
 
 The playtest corrected a too-absolute assumption about what makes a level good. A short obvious sequence after a real insight lets the player enjoy mastery; some rescanning is what starts the next discovery; a small final collapse can be satisfying. What hurts is excess: an obvious sequence long enough to become mindless clicking, rescanning so often that understanding cannot form, or a long trivial cleanup after the puzzle is effectively solved. A criterion for a level should therefore bound those excesses and not forbid the behaviors.
 
-## Group classification rationale
+## Tier classification rationale
 
-- Foundations: the eight baseline puzzles, each introducing or confirming one rule idea.
-- Puzzle Lab: the six structural experiments, the large-canvas validation board and the six knot experiments; each tests a structural idea or the viewport and was not designed as a level. The large-canvas board is classed here because it is an experimental validation board.
-- ArrowSpark Levels: the Reference Knot only, designed against the current player-experience standard. Group names describe why content exists and imply no quality ranking.
+Levels were originally grouped by why they existed (rule baselines, structural experiments, designed levels). They are now grouped by difficulty tier, assigned from `PuzzleAnalyzer` measurements. The Reference Knot is the only Master level: more than 100 arrows (115) at near-full density (0.92), dependency depth 33. It was designed against the current player-experience standard, and a tier names where a level sits in the climb, not why it was made.
 
 ## Candidate design principles (supported by this level only, not universal)
 

@@ -243,7 +243,7 @@ HeroTitle role and "Spark" in the ember HeroAccent role, and the tagline in
 HeroTagline) and a cream column. The column holds the actions, with New Game in
 PrimaryButton, plus the Options, Credits and Level Select sub-menus and Back.
 The hero ignores input, holds nothing focusable, and stays visible behind
-sub-menus. Level Select shows each purpose group as a two-column grid of
+sub-menus. Level Select shows each difficulty tier as a two-column grid of
 LevelCard buttons whose 6 px left edge carries the group accent (rust, ink or
 ember, mapped in `puzzle_select_menu.gd`) under LevelGroupHeader headings.
 

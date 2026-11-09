@@ -334,14 +334,14 @@ error. `PuzzleDefinition` itself gained no
 catalog/progression fields; it remains anonymous structural data.
 
 `canvas_validation` is a plainly titled, player-visible entry (the seventh
-Puzzle Lab entry, reached by Next from `composed_shaped`, listed in Level Select
+Expert-tier entry, listed in Level Select
 and counted in the session score like any other). It is an authored 40x30 board packed with fifty-two arrows (about 87% of
 the cells occupied): almost every arrow is long and bent (most 22-43 cells,
 only three shorter than eight), all four directions appear, long tails cross
 the rays of other arrows so most removals unlock several others, all four
 corner regions are occupied, and the initial open move (the first legal head
 in (y, x) order) is near the top-left. The layout is fixed data in
-`levels/packs/puzzle_lab.json`, stored like every level as orthogonal path
+`levels/packs/expert.json`, stored like every level as orthogonal path
 vertices expanded deterministically by `PuzzlePackFormat.expand_vertices`; it
 was found once by a seeded offline search that kept every step solvable and is
 not generated at runtime. It exists to
@@ -360,11 +360,12 @@ solver, assistance, scoring and session-only selection behavior.
 
 ### Progression levels
 
-Eight levels sit between the Foundations and the Reference Knot, in this order:
+Eight levels form the original progression toward the Reference Knot, and keep this relative order
+across the Intermediate, Advanced and Expert tiers:
 `first_knot` (9x7, 9 arrows), `two_neighborhoods` (15x9, 15), `the_bridge`
 (17x9, 14), `false_simplicity` (14x11, 17), `the_rescan` (20x12, 23),
 `major_release` (22x14, 30), `dense_weave` (26x16, 68) and `almost_a_knot`
-(36x24, 93). Each is fixed data in `levels/packs/arrowspark_levels.json`,
+(36x24, 93). Each is fixed data in the pack of its tier under `levels/packs/`,
 found by a seeded offline search against a structural profile (an earlier
 search, not the in-repo generator) and then confirmed by the solver; none is
 generated at runtime and none contains an isolated single-cell arrow. Each
@@ -375,38 +376,41 @@ by tests/puzzle_analyzer_check.gd. Measured structure of each level and the
 designer's observations are in
 `.knowledge/reference/progression-design-learning.md`.
 
-### Level groups
+### Difficulty tiers
 
-Every catalog entry carries a `group` metadata key: `arrowspark_levels`
-("ArrowSpark Levels": designed against the current player-experience
-standard: the eight progression levels in order, then the Reference Knot), `foundations` ("Foundations": the
-eight baseline puzzles), `puzzle_lab` ("Puzzle Lab": the structural
-experiments, the large-canvas validation board and the knot experiments) or
-`generated` ("Generated Levels": the four sample levels built by the level
-generator).
-Groups describe why content exists, not a quality ranking, and have no effect
-on rules, solver, analyzer, scoring, Open Move or the viewport. `PuzzleCatalog`
-exposes `group_ids()` (presentation order: ArrowSpark Levels, Foundations,
-Puzzle Lab, Generated Levels), `group_title()`, `group_of()`, `ids_in_group()`, `group_position()`
-(1-based within the group) and `next_in_group()` (no wrap, no cross-group,
-empty for unknown ids). Level Select renders one non-focusable header per group
-as a collapsible accordion: a focusable toggle header button per group (marked
-`-` when expanded, `+` when collapsed, with the entry count) above that group's
-entry buttons, numbered by group position. Under each header is one
-non-focusable line saying what the group is for — ArrowSpark Levels: "The
-intended ArrowSpark experience."; Foundations: "Small boards that teach the
-rule."; Puzzle Lab: "Development experiments, some deliberately
-over-tangled."; Generated Levels: "Boards built by the level generator; an
-untuned first sample." — which stays visible when the group is collapsed and never
-ranks one group above another. Every group starts expanded;
-collapsing hides a group's entries so keyboard and gamepad focus skip them. The
-in-game label and results title use the same group-relative number. The play
+Every catalog entry carries a `group` metadata key naming its difficulty tier:
+`getting_started` ("Getting Started": the eight baseline puzzles, the Warm-Up
+generated level and the four smallest rule experiments), `intermediate`
+("Intermediate": fifteen levels from nine to twenty-five arrows, including the
+generated levels and the large sparse boards), `advanced` ("Advanced": three
+dense mid-size boards), `expert` ("Expert": the large-canvas validation board
+and `almost_a_knot`) and `master` ("Master": the Reference Knot). Tiers are
+assigned from `PuzzleAnalyzer` measurements (arrows, density, dependency
+depth, arrows playable at the start), not from where a level came from, and
+have no effect on rules, solver, analyzer, scoring, Open Move or the viewport.
+There is one pack per tier (`getting_started.json` through `master.json`),
+listed in `levels/catalog.json` in that order, and levels keep catalog order
+inside a tier, which is easiest first. Level ids and boards never change when a
+level moves between tiers: saved profiles key best results by id and board
+version. `PuzzleCatalog` exposes `group_ids()` (easiest tier first),
+`group_title()`, `group_of()`, `ids_in_group()`, `group_position()` (1-based
+within the tier) and `next_in_group()` (no wrap, no cross-tier, empty for
+unknown ids). Level Select renders one collapsible accordion section per tier:
+a focusable toggle header button (marked `-` when expanded, `+` when collapsed,
+with the entry count) above that tier's entry buttons, numbered by position in
+the tier. Under each header is one non-focusable line describing the tier
+(Getting Started: "Small boards that teach the rule."; Intermediate: "Bigger
+boards and longer chains."; Advanced: "Dense boards where order matters.";
+Expert: "Large, tightly packed boards."; Master: "The hardest boards in the
+game."), visible even when the tier is collapsed. Every tier starts expanded;
+collapsing hides a tier's entries so keyboard and gamepad focus skip them. The
+in-game label and results title use the same tier-relative number. The play
 HUD has a Back button (first in the Tab order) that leaves the puzzle mid-play
-for Level Select without recording a score or touching progress. Play / New Game starts `first_knot`, the first progression level, without resetting progress; the Reference Knot is the last level of the group.
-Source of truth: tests/puzzle_catalog_check.gd (group sizes, membership,
+for Level Select without recording a score or touching progress. Play / New Game starts the first catalog level, the first of Getting Started, without resetting progress; the Reference Knot is the only Master level.
+Source of truth: tests/puzzle_catalog_check.gd (tier sizes, order, membership,
 position and next semantics, group-scoped session progression),
 tests/puzzle_layout_check.gd (grouped Level Select, accordion collapse and
-expand, the group description lines and their no-ranking wording, Back button
+expand, the tier description lines, Back button
 presence and wiring, group-end results buttons, Level
 Select request), tests/puzzle_canvas_check.gd (HUD tab order including Back;
 the live Back scene change itself is covered only by desktop smoke testing), tests/save_input_regression.gd (Play target, one-shot
