@@ -21,7 +21,7 @@ func check(condition: bool, description: String) -> void:
 ## fails loudly rather than skipping the malformed one.
 func _check_full_catalog_solvable() -> void:
 	var count := PuzzleCatalog.count()
-	check(count == 34, "the catalog contains 21 existing puzzles, eight progression levels, the Reference Knot and four generated samples")
+	check(count == 34, "the catalog contains all 34 levels")
 
 	var seen_ids: Dictionary = {}
 	for i in range(count):
@@ -94,58 +94,57 @@ func _check_knot_entries() -> void:
 	for offset in range(KNOT_ENTRIES.size()):
 		var expected: Dictionary = KNOT_ENTRIES[offset]
 		var id: String = expected["id"]
-		check(PuzzleCatalog.id_at(15 + offset) == id, "new experiment '%s' follows the original catalog" % id)
+		check(PuzzleCatalog.index_of(id) != -1, "experiment '%s' is in the catalog" % id)
 		var definition: PuzzleDefinition = PuzzleCatalog.get_definition(id)
 		check(Vector2i(definition.width, definition.height) == expected["size"],
 			"new experiment '%s' retains its authored canvas" % id)
 		check(definition.arrows.size() == expected["arrows"],
 			"new experiment '%s' retains its authored arrow count" % id)
-	var lab_ids := PuzzleCatalog.ids_in_group(PuzzleCatalog.GROUP_PUZZLE_LAB)
-	check(lab_ids[lab_ids.size() - 1] == "knot_boundary",
-		"the boundary experiment is the last Puzzle Lab entry")
-	var levels_ids := PuzzleCatalog.ids_in_group(PuzzleCatalog.GROUP_ARROWSPARK_LEVELS)
-	check(levels_ids[levels_ids.size() - 1] == "reference_knot" and PuzzleCatalog.index_of("reference_knot") == 29,
-		"the Reference Knot ends ArrowSpark Levels at its unchanged catalog position")
+	check(PuzzleCatalog.group_of("knot_boundary") == PuzzleCatalog.GROUP_ADVANCED,
+		"the boundary experiment is in Advanced")
+	var master_ids := PuzzleCatalog.ids_in_group(PuzzleCatalog.GROUP_MASTER)
+	check(master_ids == (["reference_knot"] as Array[String]),
+		"the Reference Knot is the only Master level")
 
-## Every entry belongs to exactly one valid group, groups keep their planned
-## sizes, and the group queries never wrap, cross groups or fail on unknown ids.
+## Every entry belongs to exactly one tier, the tiers keep their sizes and
+## order, and the tier queries never wrap, cross tiers or fail on unknown ids.
 func _check_groups() -> void:
 	var group_ids := PuzzleCatalog.group_ids()
-	check(group_ids == (["arrowspark_levels", "foundations", "puzzle_lab", "generated"] as Array[String]),
-		"groups are presented in the planned order, the generated samples last")
+	check(group_ids == (["getting_started", "intermediate", "advanced", "expert", "master"] as Array[String]),
+		"tiers are presented easiest first")
 	var total := 0
 	for group_id in group_ids:
-		check(not PuzzleCatalog.group_title(group_id).is_empty(), "group '%s' has a display title" % group_id)
+		check(not PuzzleCatalog.group_title(group_id).is_empty(), "tier '%s' has a display title" % group_id)
 		total += PuzzleCatalog.ids_in_group(group_id).size()
-	check(total == PuzzleCatalog.count(), "group membership covers every catalog entry exactly once")
-	check(PuzzleCatalog.ids_in_group("foundations").size() == 8, "Foundations has 8 entries")
-	check(PuzzleCatalog.ids_in_group("puzzle_lab").size() == 13, "Puzzle Lab has 13 entries")
-	check(PuzzleCatalog.ids_in_group("arrowspark_levels").size() == 9, "ArrowSpark Levels has the eight progression levels and the Reference Knot")
-	check(PuzzleCatalog.ids_in_group("generated").size() == 4, "Generated Levels has the four sample levels")
-	check(PuzzleCatalog.group_title("generated") == "Generated Levels", "the generated group is titled Generated Levels")
+	check(total == PuzzleCatalog.count(), "tier membership covers every catalog entry exactly once")
+	check(PuzzleCatalog.ids_in_group("getting_started").size() == 13, "Getting Started has 13 entries")
+	check(PuzzleCatalog.ids_in_group("intermediate").size() == 15, "Intermediate has 15 entries")
+	check(PuzzleCatalog.ids_in_group("advanced").size() == 3, "Advanced has 3 entries")
+	check(PuzzleCatalog.ids_in_group("expert").size() == 2, "Expert has 2 entries")
+	check(PuzzleCatalog.ids_in_group("master").size() == 1, "Master has 1 entry")
+	check(PuzzleCatalog.group_title("getting_started") == "Getting Started", "the first tier is titled Getting Started")
+	# The tiers are contiguous and in order in the catalog.
+	var last_tier := -1
 	for i in range(PuzzleCatalog.count()):
 		var id := PuzzleCatalog.id_at(i)
-		check(group_ids.has(PuzzleCatalog.group_of(id)), "entry '%s' has a valid group" % id)
-	check(PuzzleCatalog.group_of("canvas_validation") == "puzzle_lab", "canvas_validation is in Puzzle Lab")
-	check(PuzzleCatalog.group_of("reference_knot") == "arrowspark_levels", "reference_knot is in ArrowSpark Levels")
-
-	check(PuzzleCatalog.group_position("intro") == 1, "intro is first in Foundations")
-	check(PuzzleCatalog.group_position("subtle_blockers") == 8, "subtle_blockers is eighth in Foundations")
-	check(PuzzleCatalog.group_position("nested_chain") == 1, "nested_chain is first in Puzzle Lab")
-	check(PuzzleCatalog.group_position("knot_boundary") == 13, "knot_boundary is thirteenth in Puzzle Lab")
-	check(PuzzleCatalog.group_position("first_knot") == 1, "first_knot is first in ArrowSpark Levels")
-	check(PuzzleCatalog.group_position("reference_knot") == 9, "reference_knot is last in ArrowSpark Levels")
-	check(PuzzleCatalog.next_in_group("almost_a_knot") == "reference_knot", "the last progression level leads into the Reference Knot")
-	check(PuzzleCatalog.next_in_group("first_knot") == "two_neighborhoods", "the progression runs in its intended order")
-	check(PuzzleCatalog.next_in_group("intro") == "first_bend", "next_in_group advances within a group")
-	check(PuzzleCatalog.next_in_group("subtle_blockers") == "", "next_in_group ends at the last Foundations entry")
-	check(PuzzleCatalog.next_in_group("knot_boundary") == "", "next_in_group ends at the last Puzzle Lab entry")
-	check(PuzzleCatalog.next_in_group("reference_knot") == "", "next_in_group ends at the last ArrowSpark Levels entry")
-	check(PuzzleCatalog.group_position("gen_sample_01") == 1, "the generated group numbers from 1")
-	check(PuzzleCatalog.group_position("gen_sample_04") == 4, "the last sample is fourth in its group")
-	check(PuzzleCatalog.next_in_group("gen_sample_03") == "gen_sample_04", "next_in_group advances within the generated group")
-	check(PuzzleCatalog.next_in_group("gen_sample_04") == "", "next_in_group ends at the last generated sample")
-	check(PuzzleCatalog.index_of("gen_sample_01") == 30, "the generated samples follow every existing entry, leaving their positions unchanged")
+		var tier := group_ids.find(PuzzleCatalog.group_of(id))
+		check(tier != -1, "entry '%s' has a valid tier" % id)
+		check(tier >= last_tier, "entry '%s' does not step back to an easier tier" % id)
+		last_tier = tier
+	check(PuzzleCatalog.group_of("intro") == "getting_started", "intro is in Getting Started")
+	check(PuzzleCatalog.group_of("gen_sample_01") == "getting_started", "the Warm-Up generated level is in Getting Started")
+	check(PuzzleCatalog.group_of("gen_sample_04") == "intermediate", "the Wide Field generated level is in Intermediate")
+	check(PuzzleCatalog.group_of("canvas_validation") == "expert", "canvas_validation is in Expert")
+	check(PuzzleCatalog.group_of("almost_a_knot") == "expert", "almost_a_knot is in Expert")
+	check(PuzzleCatalog.group_of("reference_knot") == "master", "reference_knot is in Master")
+	check(PuzzleCatalog.group_position("intro") == 1, "intro is first in Getting Started")
+	check(PuzzleCatalog.group_position("bent_network") == 13, "bent_network is last in Getting Started")
+	check(PuzzleCatalog.group_position("first_knot") == 1, "first_knot is first in Intermediate")
+	check(PuzzleCatalog.group_position("reference_knot") == 1, "reference_knot numbers from 1 in Master")
+	check(PuzzleCatalog.next_in_group("intro") == "first_bend", "next_in_group advances within a tier")
+	check(PuzzleCatalog.next_in_group("bent_network") == "", "next_in_group ends at the last Getting Started entry")
+	check(PuzzleCatalog.next_in_group("composed_shaped") == "", "next_in_group does not cross into the next tier")
+	check(PuzzleCatalog.next_in_group("reference_knot") == "", "next_in_group ends at the last Master entry")
 	check(PuzzleCatalog.group_of("no_such_id") == "", "group_of an unknown id is empty")
 	check(PuzzleCatalog.group_position("no_such_id") == 0, "group_position of an unknown id is 0")
 	check(PuzzleCatalog.next_in_group("no_such_id") == "", "next_in_group of an unknown id is empty")
@@ -173,7 +172,7 @@ func _check_original_entries_unchanged() -> void:
 	for i in range(ORIGINAL_ENTRIES.size()):
 		var expected: Dictionary = ORIGINAL_ENTRIES[i]
 		var id: String = expected["id"]
-		check(PuzzleCatalog.id_at(i) == id, "original entry %d keeps id '%s' at its position" % [i, id])
+		check(PuzzleCatalog.index_of(id) != -1, "original entry %d keeps id '%s'" % [i, id])
 		var definition: PuzzleDefinition = PuzzleCatalog.get_definition(id)
 		check(Vector2i(definition.width, definition.height) == expected["size"],
 			"original entry '%s' keeps its board dimensions" % id)
@@ -189,8 +188,7 @@ const CANVAS_VALIDATION_SHA := "ccce768282c82848b925f672268842c8523a23a6d16cf612
 
 func _check_canvas_validation_fixture() -> void:
 	var id := "canvas_validation"
-	check(PuzzleCatalog.index_of(id) == 14,
-		"canvas_validation remains the fifteenth catalog entry")
+	check(PuzzleCatalog.index_of(id) != -1, "canvas_validation remains in the catalog")
 	check(PuzzleCatalog.get_title(id) == "Large Canvas Validation", "canvas_validation carries its plain title")
 	var definition: PuzzleDefinition = PuzzleCatalog.get_definition(id)
 	check(definition.width == 40 and definition.height == 30, "canvas_validation is a 40x30 board")
@@ -450,14 +448,13 @@ func _check_group_scoped_progression() -> void:
 		check(PuzzleSession.get_current_id() == last, "the current id is unchanged at the end of %s" % group_id)
 	PuzzleSession.set_current_id("")
 
-func _check_next_from_fourteenth_reaches_canvas_validation() -> void:
-	PuzzleSession.set_current_id(PuzzleCatalog.id_at(13))
-	check(PuzzleSession.has_next(), "the fourteenth puzzle offers a next entry")
-	check(PuzzleSession.advance_to_next(), "advancing from the fourteenth puzzle succeeds")
-	check(PuzzleSession.get_current_id() == "canvas_validation", "Next from puzzle 14 reaches canvas_validation")
-	check(PuzzleSession.has_next(), "canvas_validation offers the first new experiment next")
-	check(PuzzleSession.advance_to_next(), "advancing from canvas_validation succeeds")
-	check(PuzzleSession.get_current_id() == "knot_long_geometry", "Next reaches the first new experiment")
+func _check_next_follows_tier_order() -> void:
+	PuzzleSession.set_current_id("knot_boundary")
+	check(PuzzleSession.has_next() and PuzzleSession.advance_to_next(), "Advanced offers a next entry after its first")
+	check(PuzzleSession.get_current_id() == "major_release", "Next from knot_boundary reaches major_release")
+	check(PuzzleSession.advance_to_next(), "advancing from major_release succeeds")
+	check(PuzzleSession.get_current_id() == "dense_weave", "Next reaches dense_weave, the last Advanced entry")
+	check(not PuzzleSession.has_next(), "the last Advanced entry has no next entry")
 	PuzzleSession.set_current_id("")
 
 func _check_puzzle_session_defaults_and_navigation() -> void:
@@ -483,7 +480,7 @@ func _check_puzzle_session_defaults_and_navigation() -> void:
 
 ## The progression levels keep their ids, titles, order, dimensions, arrow counts
 ## and exact geometry: a change to any of them must fail here. Each level also
-## belongs to ArrowSpark Levels, ahead of the Reference Knot, and none relies on
+## keeps its relative order, ahead of the Reference Knot, and none relies on
 ## isolated single-cell arrows for its geometry.
 const PROGRESSION_LEVELS: Array[Dictionary] = [
 	{"id": "first_knot", "title": "First Knot", "size": Vector2i(9, 7), "arrows": 9, "version": "g1-8f675c5f02cc"},
@@ -497,14 +494,14 @@ const PROGRESSION_LEVELS: Array[Dictionary] = [
 ]
 
 func _check_progression_levels() -> void:
-	var group := PuzzleCatalog.ids_in_group(PuzzleCatalog.GROUP_ARROWSPARK_LEVELS)
-	check(group.size() == PROGRESSION_LEVELS.size() + 1, "ArrowSpark Levels holds the progression and the Reference Knot")
 	var versions: Dictionary = {}
 	var previous_arrows := 0
 	for i in range(PROGRESSION_LEVELS.size()):
 		var expected: Dictionary = PROGRESSION_LEVELS[i]
 		var id: String = expected["id"]
-		check(group[i] == id, "progression position %d keeps id '%s'" % [i + 1, id])
+		check(PuzzleCatalog.index_of(id) != -1, "progression level '%s' is in the catalog" % id)
+		check(i == 0 or PuzzleCatalog.index_of(id) > PuzzleCatalog.index_of(PROGRESSION_LEVELS[i - 1]["id"]),
+			"progression level '%s' still follows the level before it" % id)
 		check(PuzzleCatalog.get_title(id) == expected["title"], "'%s' keeps its title" % id)
 		var definition: PuzzleDefinition = PuzzleCatalog.get_definition(id)
 		check(Vector2i(definition.width, definition.height) == expected["size"], "'%s' keeps its board dimensions" % id)
@@ -520,7 +517,7 @@ func _check_progression_levels() -> void:
 		check(singles == 0, "'%s' relies on no isolated single-cell arrows" % id)
 		check(definition.arrows.size() >= previous_arrows - 2, "'%s' does not step back in size from the level before it" % id)
 		previous_arrows = definition.arrows.size()
-	check(PuzzleContentVersion.of(PuzzleCatalog.get_definition("reference_knot")) != "", "the Reference Knot remains in the group")
+	check(PuzzleContentVersion.of(PuzzleCatalog.get_definition("reference_knot")) != "", "the Reference Knot remains in the catalog")
 	check(not versions.has(REFERENCE_KNOT_CONTENT_VERSION), "no progression level shares the Reference Knot's geometry")
 
 ## The Reference Knot is the showcase level: every observed session and every
@@ -568,45 +565,45 @@ func _check_reference_knot_content_version() -> void:
 	var other: PuzzleDefinition = PuzzleCatalog.get_definition("intro")
 	check(PuzzleContentVersion.of(other) != version, "a different puzzle has a different content version")
 
-## Every catalog entry, in catalog order: id, title, group and the content
-## version of its exact geometry. Any change to an existing board, its identity
+## Every catalog entry, in catalog order (tier by tier, easiest first): id,
+## title, tier and the content version of its exact geometry. Any change to an existing board, its identity
 ## or its position fails here and names the entry; a new entry fails until its
 ## pin is recorded.
 const CATALOG_PINS: Array[Dictionary] = [
-	{"id": "intro", "title": "Simple Introduction", "group": "foundations", "version": "g1-95a75f0e6ec0"},
-	{"id": "first_bend", "title": "First Bend", "group": "foundations", "version": "g1-9d0fcfd77be0"},
-	{"id": "multi_bend", "title": "Multiple Bends", "group": "foundations", "version": "g1-0359fa394f4b"},
-	{"id": "dependency_chain", "title": "Dependency Chain", "group": "foundations", "version": "g1-9dbed2fe5668"},
-	{"id": "forced_sequence", "title": "Forced Sequence", "group": "foundations", "version": "g1-8a11ad329013"},
-	{"id": "multiple_choices", "title": "Multiple Choices", "group": "foundations", "version": "g1-bfc14580ef5f"},
-	{"id": "dense_board", "title": "Dense Board", "group": "foundations", "version": "g1-53bf4b1d0f55"},
-	{"id": "subtle_blockers", "title": "Subtle Blockers", "group": "foundations", "version": "g1-f46614de1bae"},
-	{"id": "nested_chain", "title": "Nested Chain", "group": "puzzle_lab", "version": "g1-fd81646ff78b"},
-	{"id": "cascade_key_arrow", "title": "Cascade / Key Arrow", "group": "puzzle_lab", "version": "g1-9bc5f37494d1"},
-	{"id": "dense_unravel", "title": "Dense Unravel", "group": "puzzle_lab", "version": "g1-7dc6715c8718"},
-	{"id": "bent_network", "title": "Bent Network", "group": "puzzle_lab", "version": "g1-e8a0c0855813"},
-	{"id": "long_range_blocker", "title": "Long-Range Blocker", "group": "puzzle_lab", "version": "g1-5d07507b3b23"},
-	{"id": "composed_shaped", "title": "Composed / Shaped", "group": "puzzle_lab", "version": "g1-945e9f86a158"},
-	{"id": "canvas_validation", "title": "Large Canvas Validation", "group": "puzzle_lab", "version": "g1-62013a335679"},
-	{"id": "knot_long_geometry", "title": "Long Geometry", "group": "puzzle_lab", "version": "g1-c8684bfa2502"},
-	{"id": "knot_interwoven_paths", "title": "Interwoven Paths", "group": "puzzle_lab", "version": "g1-8dec89447bc5"},
-	{"id": "knot_dense_core", "title": "Dense Core", "group": "puzzle_lab", "version": "g1-87b621609db4"},
-	{"id": "knot_regions", "title": "Distinct Regions", "group": "puzzle_lab", "version": "g1-d2398acdb422"},
-	{"id": "knot_single_release", "title": "Single Release", "group": "puzzle_lab", "version": "g1-3a442934b998"},
-	{"id": "knot_boundary", "title": "Boundary Knot", "group": "puzzle_lab", "version": "g1-06cd3944b28e"},
-	{"id": "first_knot", "title": "First Knot", "group": "arrowspark_levels", "version": "g1-8f675c5f02cc"},
-	{"id": "two_neighborhoods", "title": "Two Neighborhoods", "group": "arrowspark_levels", "version": "g1-ecf87d2e92ec"},
-	{"id": "the_bridge", "title": "The Bridge", "group": "arrowspark_levels", "version": "g1-1fa47c6f7736"},
-	{"id": "false_simplicity", "title": "False Simplicity", "group": "arrowspark_levels", "version": "g1-d324da959318"},
-	{"id": "the_rescan", "title": "The Rescan", "group": "arrowspark_levels", "version": "g1-6f5cf54bbf35"},
-	{"id": "major_release", "title": "Major Release", "group": "arrowspark_levels", "version": "g1-f916a6ea8496"},
-	{"id": "dense_weave", "title": "Dense Weave", "group": "arrowspark_levels", "version": "g1-030c1402781a"},
-	{"id": "almost_a_knot", "title": "Almost a Knot", "group": "arrowspark_levels", "version": "g1-76fa1582e5a2"},
-	{"id": "reference_knot", "title": "Reference Knot", "group": "arrowspark_levels", "version": "g1-7ce0942d4a5e"},
-	{"id": "gen_sample_01", "title": "Warm-Up", "group": "generated", "version": "g1-23d44324684b"},
-	{"id": "gen_sample_02", "title": "Tangle", "group": "generated", "version": "g1-19d50822c894"},
-	{"id": "gen_sample_03", "title": "Growing Web", "group": "generated", "version": "g1-aa8be01658d5"},
-	{"id": "gen_sample_04", "title": "Wide Field", "group": "generated", "version": "g1-3980bb152beb"},
+	{"id": "intro", "title": "Simple Introduction", "group": "getting_started", "version": "g1-95a75f0e6ec0"},
+	{"id": "first_bend", "title": "First Bend", "group": "getting_started", "version": "g1-9d0fcfd77be0"},
+	{"id": "multi_bend", "title": "Multiple Bends", "group": "getting_started", "version": "g1-0359fa394f4b"},
+	{"id": "dependency_chain", "title": "Dependency Chain", "group": "getting_started", "version": "g1-9dbed2fe5668"},
+	{"id": "forced_sequence", "title": "Forced Sequence", "group": "getting_started", "version": "g1-8a11ad329013"},
+	{"id": "multiple_choices", "title": "Multiple Choices", "group": "getting_started", "version": "g1-bfc14580ef5f"},
+	{"id": "dense_board", "title": "Dense Board", "group": "getting_started", "version": "g1-53bf4b1d0f55"},
+	{"id": "subtle_blockers", "title": "Subtle Blockers", "group": "getting_started", "version": "g1-f46614de1bae"},
+	{"id": "gen_sample_01", "title": "Warm-Up", "group": "getting_started", "version": "g1-23d44324684b"},
+	{"id": "long_range_blocker", "title": "Long-Range Blocker", "group": "getting_started", "version": "g1-5d07507b3b23"},
+	{"id": "nested_chain", "title": "Nested Chain", "group": "getting_started", "version": "g1-fd81646ff78b"},
+	{"id": "cascade_key_arrow", "title": "Cascade / Key Arrow", "group": "getting_started", "version": "g1-9bc5f37494d1"},
+	{"id": "bent_network", "title": "Bent Network", "group": "getting_started", "version": "g1-e8a0c0855813"},
+	{"id": "first_knot", "title": "First Knot", "group": "intermediate", "version": "g1-8f675c5f02cc"},
+	{"id": "gen_sample_02", "title": "Tangle", "group": "intermediate", "version": "g1-19d50822c894"},
+	{"id": "knot_long_geometry", "title": "Long Geometry", "group": "intermediate", "version": "g1-c8684bfa2502"},
+	{"id": "knot_interwoven_paths", "title": "Interwoven Paths", "group": "intermediate", "version": "g1-8dec89447bc5"},
+	{"id": "knot_single_release", "title": "Single Release", "group": "intermediate", "version": "g1-3a442934b998"},
+	{"id": "knot_regions", "title": "Distinct Regions", "group": "intermediate", "version": "g1-d2398acdb422"},
+	{"id": "two_neighborhoods", "title": "Two Neighborhoods", "group": "intermediate", "version": "g1-ecf87d2e92ec"},
+	{"id": "the_bridge", "title": "The Bridge", "group": "intermediate", "version": "g1-1fa47c6f7736"},
+	{"id": "gen_sample_03", "title": "Growing Web", "group": "intermediate", "version": "g1-aa8be01658d5"},
+	{"id": "knot_dense_core", "title": "Dense Core", "group": "intermediate", "version": "g1-87b621609db4"},
+	{"id": "false_simplicity", "title": "False Simplicity", "group": "intermediate", "version": "g1-d324da959318"},
+	{"id": "gen_sample_04", "title": "Wide Field", "group": "intermediate", "version": "g1-3980bb152beb"},
+	{"id": "the_rescan", "title": "The Rescan", "group": "intermediate", "version": "g1-6f5cf54bbf35"},
+	{"id": "dense_unravel", "title": "Dense Unravel", "group": "intermediate", "version": "g1-7dc6715c8718"},
+	{"id": "composed_shaped", "title": "Composed / Shaped", "group": "intermediate", "version": "g1-945e9f86a158"},
+	{"id": "knot_boundary", "title": "Boundary Knot", "group": "advanced", "version": "g1-06cd3944b28e"},
+	{"id": "major_release", "title": "Major Release", "group": "advanced", "version": "g1-f916a6ea8496"},
+	{"id": "dense_weave", "title": "Dense Weave", "group": "advanced", "version": "g1-030c1402781a"},
+	{"id": "canvas_validation", "title": "Large Canvas Validation", "group": "expert", "version": "g1-62013a335679"},
+	{"id": "almost_a_knot", "title": "Almost a Knot", "group": "expert", "version": "g1-76fa1582e5a2"},
+	{"id": "reference_knot", "title": "Reference Knot", "group": "master", "version": "g1-7ce0942d4a5e"},
 ]
 
 func _check_catalog_pins() -> void:
@@ -640,7 +637,7 @@ func _initialize() -> void:
 	_check_no_difficulty_labels()
 	_check_experimental_puzzle_properties()
 	_check_catalog_wide_order_independence()
-	_check_next_from_fourteenth_reaches_canvas_validation()
+	_check_next_follows_tier_order()
 	_check_group_scoped_progression()
 	_check_puzzle_session_defaults_and_navigation()
 	print("PUZZLE_CATALOG_FAILURES=", failures)

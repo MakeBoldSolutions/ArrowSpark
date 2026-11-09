@@ -48,7 +48,7 @@ func _write(file_path: String, text: String) -> void:
 	file.close()
 
 func _level_ids() -> Array[String]:
-	return PuzzleCatalog.ids_in_group(PuzzleCatalog.GROUP_ARROWSPARK_LEVELS)
+	return PuzzleCatalog.ids_in_group(PuzzleCatalog.GROUP_GETTING_STARTED)
 
 func _test_fresh_profile() -> void:
 	var file_path := _fresh()
@@ -222,6 +222,31 @@ func _test_other_files_are_untouched() -> void:
 	DirAccess.remove_absolute(settings)
 	DirAccess.remove_absolute(legacy)
 
+## A profile written before levels were grouped into difficulty tiers (best results keyed
+## by id with each board's content version, a resume id from the old ArrowSpark Levels
+## list) still reads: nothing is lost, nothing is marked unfinished, Continue resolves.
+func _test_profile_from_before_tiers_still_reads() -> void:
+	var file_path := _fresh()
+	var old_levels := {
+		"intro": "g1-95a75f0e6ec0", "first_knot": "g1-8f675c5f02cc",
+		"dense_weave": "g1-030c1402781a", "gen_sample_01": "g1-23d44324684b",
+		"knot_boundary": "g1-06cd3944b28e", "reference_knot": "g1-7ce0942d4a5e",
+	}
+	var levels := {}
+	for id in old_levels:
+		levels[id] = {"content_version": old_levels[id], "score": 4, "total_arrows": 5, "mistakes": 1,
+			"open_move_assists": 0, "accuracy": 0.8}
+	_write(file_path, JSON.stringify({"format": 1, "name": "Earlier Player", "resume_id": "dense_weave",
+		"stats": {"attempts": 6, "mistakes": 6, "open_move_assists": 0}, "levels": levels}))
+	PlayerProfile.restart()
+	check(PlayerProfile.load_notice().is_empty(), "a profile from before the tiers reads without a notice")
+	check(PlayerProfile.display_name() == "Earlier Player", "the name from before the tiers is kept")
+	for id in old_levels:
+		check(PlayerProfile.is_finished(id), "'%s' is still finished after the regroup" % id)
+	check(PlayerProfile.finished_count() == old_levels.size(), "no finished level is lost by the regroup")
+	check(PlayerProfile.resume_id() == "dense_weave", "Continue still resolves to the saved level after the regroup")
+	check(PuzzleCatalog.group_of(PlayerProfile.resume_id()) == "advanced", "the saved level now sits in its difficulty tier")
+
 func _initialize() -> void:
 	_test_fresh_profile()
 	_test_persists_across_restart()
@@ -235,5 +260,6 @@ func _initialize() -> void:
 	_test_malformed_entries_are_skipped()
 	_test_reset_deletes_everything()
 	_test_other_files_are_untouched()
+	_test_profile_from_before_tiers_still_reads()
 	print("PLAYER_PROFILE_FAILURES=", failures)
 	quit(1 if failures else 0)

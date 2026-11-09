@@ -555,16 +555,16 @@ func _check_level_select_accordion() -> void:
 	var buttons: Array[Button] = level_select.entry_buttons()
 	check(buttons.all(func(b: Button) -> bool: return b.is_visible_in_tree() or not level_select.is_visible_in_tree()),
 		"every Level Select group starts expanded")
-	var foundations_ids := PuzzleCatalog.ids_in_group(PuzzleCatalog.GROUP_FOUNDATIONS)
-	var foundations_header: Button = headers[PuzzleCatalog.group_ids().find(PuzzleCatalog.GROUP_FOUNDATIONS)]
-	var first_foundation: Button = buttons[PuzzleCatalog.ids_in_group(PuzzleCatalog.GROUP_ARROWSPARK_LEVELS).size()]
+	var foundations_ids := PuzzleCatalog.ids_in_group(PuzzleCatalog.GROUP_INTERMEDIATE)
+	var foundations_header: Button = headers[PuzzleCatalog.group_ids().find(PuzzleCatalog.GROUP_INTERMEDIATE)]
+	var first_foundation: Button = buttons[PuzzleCatalog.ids_in_group(PuzzleCatalog.GROUP_GETTING_STARTED).size()]
 	check(foundations_header.text.begins_with("- "), "an expanded header shows its collapse marker")
 	foundations_header.button_pressed = false
 	await process_frame
 	check(not first_foundation.get_parent().visible and foundations_header.text.begins_with("+ "),
 		"collapsing a group hides its entries and shows the expand marker")
 	check(buttons[0].get_parent().visible, "collapsing one group leaves the others expanded")
-	check(foundations_ids.size() == 8, "collapsing hides entries without removing them")
+	check(foundations_ids.size() == 15, "collapsing hides entries without removing them")
 	foundations_header.button_pressed = true
 	await process_frame
 	check(first_foundation.get_parent().visible and foundations_header.text.begins_with("- "),
@@ -629,7 +629,7 @@ func _check_menu_brand_layout() -> void:
 ## the Profile menu shows and edits the profile, and deleting it undoes all of that.
 func _check_profile_continue_and_progress() -> void:
 	PlayerProfile.reset()
-	var ids := PuzzleCatalog.ids_in_group(PuzzleCatalog.GROUP_ARROWSPARK_LEVELS)
+	var ids := PuzzleCatalog.ids_in_group(PuzzleCatalog.GROUP_GETTING_STARTED)
 	var scene_path := "res://scenes/menus/main_menu/main_menu_with_animations.tscn"
 	var menu = load(scene_path).instantiate()
 	get_root().add_child(menu)
@@ -706,16 +706,15 @@ func _check_level_select_group_descriptions() -> void:
 	var labels: Array[Label] = level_select.description_labels()
 	check(labels.size() == PuzzleCatalog.group_ids().size(), "each Level Select group has one description line")
 	var expected := {
-		PuzzleCatalog.GROUP_ARROWSPARK_LEVELS: "The intended ArrowSpark experience.",
-		PuzzleCatalog.GROUP_FOUNDATIONS: "Small boards that teach the rule.",
-		PuzzleCatalog.GROUP_PUZZLE_LAB: "Development experiments, some deliberately over-tangled.",
-		PuzzleCatalog.GROUP_GENERATED: "Boards built by the level generator; an untuned first sample.",
+		PuzzleCatalog.GROUP_GETTING_STARTED: "Small boards that teach the rule.",
+		PuzzleCatalog.GROUP_INTERMEDIATE: "Bigger boards and longer chains.",
+		PuzzleCatalog.GROUP_ADVANCED: "Dense boards where order matters.",
+		PuzzleCatalog.GROUP_EXPERT: "Large, tightly packed boards.",
+		PuzzleCatalog.GROUP_MASTER: "The hardest boards in the game.",
 	}
-	var ranking := RegEx.create_from_string("(?i)\b(best|better|easy|easier|hard|harder|hardest|beginner|advanced|expert|basic|top|premium|bonus|real)\b")
 	for i in range(labels.size()):
 		var group_id: String = PuzzleCatalog.group_ids()[i]
 		check(labels[i].text == expected[group_id], "the %s group's description reads '%s'" % [group_id, expected[group_id]])
-		check(ranking.search(labels[i].text) == null, "the %s description uses no ranking words" % group_id)
 		check(labels[i].focus_mode == Control.FOCUS_NONE, "the %s description never takes focus" % group_id)
 	var headers: Array[Button] = level_select.header_buttons()
 	headers[0].button_pressed = false
@@ -940,9 +939,9 @@ func _check_replay_restart_and_next_puzzle() -> void:
 	check(advanced._state.mistakes == 0 and advanced._state.successful_removals == 0,
 		"Next Puzzle starts a fresh attempt with no carried-over mistakes or removals")
 
-	# The last Foundations entry (small and stable) ends its group, so its
+	# The last Getting Started entry (small and stable) ends its tier, so its
 	# results offer Level Select instead of Next Puzzle.
-	var group_end_id: String = PuzzleCatalog.ids_in_group(PuzzleCatalog.GROUP_FOUNDATIONS).back()
+	var group_end_id: String = PuzzleCatalog.ids_in_group(PuzzleCatalog.GROUP_GETTING_STARTED).back()
 	PuzzleSession.set_current_id(group_end_id)
 	change_scene_to_packed(load("res://scenes/puzzle/arrow_puzzle.tscn"))
 	await process_frame

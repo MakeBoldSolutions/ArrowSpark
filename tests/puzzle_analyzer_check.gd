@@ -478,10 +478,9 @@ func _check_reference_knot_analyzes() -> void:
 ## Every progression level analyzes to completion as valid and solvable, with a
 ## consistent deepest chain and at least one legal move at the start.
 func _check_progression_levels_analyze() -> void:
-	var group := PuzzleCatalog.ids_in_group(PuzzleCatalog.GROUP_ARROWSPARK_LEVELS)
-	for id in group:
-		if id == "reference_knot":
-			continue
+	var progression: Array[String] = ["first_knot", "two_neighborhoods", "the_bridge", "false_simplicity",
+		"the_rescan", "major_release", "dense_weave", "almost_a_knot"]
+	for id in progression:
 		var result: Dictionary = PuzzleAnalyzer.analyze(PuzzleCatalog.get_definition(id))
 		var g: Dictionary = result.dependency_graph
 		check(result.valid and result.solvable, "%s: analyzer reports it valid and solvable" % id)

@@ -1207,7 +1207,7 @@ func _check_fresh_views_per_attempt_and_no_persistence() -> void:
 	check(not _board(replay).is_pan_mode(), "mouse Pan mode resets for a new attempt")
 	await _dispose(replay)
 
-	PuzzleSession.set_current_id(PuzzleCatalog.id_at(12))
+	PuzzleSession.set_current_id("dense_unravel")
 	check(PuzzleSession.advance_to_next(), "Next from an earlier puzzle advances the session")
 	var next_puzzle := await _spawn(PuzzleSession.get_current_id())
 	var next_board := _board(next_puzzle)
