@@ -38,6 +38,11 @@ measuring as part of the work.
 
 ## Dependencies and Decisions
 
+Owner decision (2026-11-09): this item delivers the Master tier of the graduated catalog: more than 100
+arrows at near 100% density. That answers the open question below on how close to the Reference
+Knot the tier should reach (essentially as dense as it), so what remains open is how readable such
+boards stay on a phone. The tier structure and its other tiers come from ps-005.
+
 Depends on ps-005 for tuned recipes and a catalog and gates proven at scale. Open question: how close
 to the Reference Knot the tier should reach, and how readable boards remain on a phone at that
 density.
