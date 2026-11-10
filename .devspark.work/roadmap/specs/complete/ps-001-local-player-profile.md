@@ -1,10 +1,12 @@
 ---
 id: ps-001
 title: Local player profile with saved progress
-status: proposed
+status: complete
 order: 10
 depends_on: []
-delivery: []
+delivery:
+  - "PR #20 (4d75bdb): local player profile, Continue, Profile menu, Level Select results"
+  - "2eb58a2: mobile keyboard fix and completion and score stats; confirmed on the owner's Pixel 2026-11-10"
 ---
 
 # ps-001: Local player profile with saved progress

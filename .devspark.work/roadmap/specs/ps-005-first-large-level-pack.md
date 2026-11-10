@@ -1,10 +1,13 @@
 ---
 id: ps-005
 title: First large level pack
-status: proposed
+status: active
 order: 20
 depends_on: []
-delivery: []
+delivery:
+  - "Regroup into five difficulty tiers (80800b7, 4c18abc, e03a7a6)"
+  - "PR #21 (757e3f8): generator depth_bias and 45 Advanced levels"
+  - "PR #22 (89c8655): 45 Expert and 10 Intermediate levels; the catalog is 134 levels"
 ---
 
 # ps-005: First large level pack
@@ -16,12 +19,12 @@ them stays easy at that size.
 
 ## Current Reality
 
-There are 34 levels. Packs are JSON and validated by `PuzzlePackFormat`, and
-`tests/run_level_pack_build.py` builds reproducible packs from recipes. The generator is untuned and
-has produced only four levels of up to 20 arrows, labelled as a sample in the game. Level Select is
-an accordion of level cards built for tens of entries. Every level is checked by the regression
-gates, and the Reference Knot's order-independence check is already sampled because the full check
-exceeds the launcher's time limit.
+As of `main` at `89c8655` (2026-11-10): 134 levels in five difficulty tiers (Getting Started 13,
+Intermediate 25, Advanced 48, Expert 47, Master 1), stored as JSON packs built reproducibly from
+recipes. The 100 new levels (10 Intermediate, 45 Advanced, 45 Expert) are delivered and passed the
+gates. Still open: Level Select is an accordion built for tens of entries and has not been examined at
+this size on desktop and phone, and load times are not measured. The puzzle gate now takes about 3.5
+minutes, with sampling used for generated levels.
 
 ## Scope and Independence
 
@@ -143,4 +146,4 @@ playable-at-start), so assignment is repeatable rather than by feel.
 
 The pack is in the catalog and every level passes the solver and pack audit. Rebuilding from the
 recipe reproduces it exactly. The owner has played an agreed sample and accepts the difficulty rise.
-Level Select works at full size on desktop and the real phone, and load times are measured.
+Level Select works at full size on desktop and the real phone, and Level Select open time is measured. (The size and time of the first game load belong to ps-011.)
