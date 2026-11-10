@@ -7,10 +7,18 @@ extends SceneTree
 ## tests/puzzle_regression.gd.
 
 var failures: int = 0
+var passes: int = 0
+## One PASS line per assertion costs seconds per thousand lines through the
+## launcher's captured stdout, and the large generated boards make thousands, so
+## PASS lines are printed only when PUZZLE_CHECK_VERBOSE is set; failures always
+## print, and the totals are printed at the end.
+var verbose := not OS.get_environment("PUZZLE_CHECK_VERBOSE").is_empty()
 
 func check(condition: bool, description: String) -> void:
 	if condition:
-		print("PASS: ", description)
+		passes += 1
+		if verbose:
+			print("PASS: ", description)
 	else:
 		failures += 1
 		push_error("FAIL: " + description)
@@ -21,8 +29,9 @@ func check(condition: bool, description: String) -> void:
 ## fails loudly rather than skipping the malformed one.
 func _check_full_catalog_solvable() -> void:
 	var count := PuzzleCatalog.count()
-	check(count == CATALOG_PINS.size() + GENERATED_ADVANCED_COUNT,
-		"the catalog contains the %d pinned levels and %d generated Advanced levels" % [CATALOG_PINS.size(), GENERATED_ADVANCED_COUNT])
+	check(count == CATALOG_PINS.size() + GENERATED_INTERMEDIATE_COUNT + GENERATED_ADVANCED_COUNT + GENERATED_EXPERT_COUNT,
+		"the catalog contains the %d pinned levels and %d generated levels" % [CATALOG_PINS.size(),
+			GENERATED_INTERMEDIATE_COUNT + GENERATED_ADVANCED_COUNT + GENERATED_EXPERT_COUNT])
 
 	var seen_ids: Dictionary = {}
 	for i in range(count):
@@ -119,10 +128,12 @@ func _check_groups() -> void:
 		total += PuzzleCatalog.ids_in_group(group_id).size()
 	check(total == PuzzleCatalog.count(), "tier membership covers every catalog entry exactly once")
 	check(PuzzleCatalog.ids_in_group("getting_started").size() == 13, "Getting Started has 13 entries")
-	check(PuzzleCatalog.ids_in_group("intermediate").size() == 15, "Intermediate has 15 entries")
+	check(PuzzleCatalog.ids_in_group("intermediate").size() == 15 + GENERATED_INTERMEDIATE_COUNT,
+		"Intermediate has its 15 original entries and %d generated ones" % GENERATED_INTERMEDIATE_COUNT)
 	check(PuzzleCatalog.ids_in_group("advanced").size() == 3 + GENERATED_ADVANCED_COUNT,
 		"Advanced has its 3 original entries and %d generated ones" % GENERATED_ADVANCED_COUNT)
-	check(PuzzleCatalog.ids_in_group("expert").size() == 2, "Expert has 2 entries")
+	check(PuzzleCatalog.ids_in_group("expert").size() == 2 + GENERATED_EXPERT_COUNT,
+		"Expert has its 2 original entries and %d generated ones" % GENERATED_EXPERT_COUNT)
 	check(PuzzleCatalog.ids_in_group("master").size() == 1, "Master has 1 entry")
 	check(PuzzleCatalog.group_title("getting_started") == "Getting Started", "the first tier is titled Getting Started")
 	# The tiers are contiguous and in order in the catalog.
@@ -145,7 +156,8 @@ func _check_groups() -> void:
 	check(PuzzleCatalog.group_position("reference_knot") == 1, "reference_knot numbers from 1 in Master")
 	check(PuzzleCatalog.next_in_group("intro") == "first_bend", "next_in_group advances within a tier")
 	check(PuzzleCatalog.next_in_group("bent_network") == "", "next_in_group ends at the last Getting Started entry")
-	check(PuzzleCatalog.next_in_group("composed_shaped") == "", "next_in_group does not cross into the next tier")
+	check(PuzzleCatalog.next_in_group("composed_shaped") == "mid_01", "next_in_group continues into the generated Intermediate levels")
+	check(PuzzleCatalog.next_in_group("mid_%02d" % GENERATED_INTERMEDIATE_COUNT) == "", "next_in_group does not cross into the next tier")
 	check(PuzzleCatalog.next_in_group("reference_knot") == "", "next_in_group ends at the last Master entry")
 	check(PuzzleCatalog.group_of("no_such_id") == "", "group_of an unknown id is empty")
 	check(PuzzleCatalog.group_position("no_such_id") == 0, "group_position of an unknown id is 0")
@@ -425,11 +437,24 @@ func _check_order_independence_at_every_branch(definition: PuzzleDefinition, lab
 ## already covers.
 const SAMPLED_BRANCH_ENTRY := "reference_knot"
 const SAMPLED_BRANCH_STRIDE := 6
+## Generated levels are solvable by construction and re-proved by the pack
+## audit; the largest are too slow to branch-check in full inside the launcher's
+## time limit, so their branches are sampled by id prefix. Everything else keeps
+## the full check.
+const GENERATED_BRANCH_STRIDES := {"adv_": 3, "exp_": 12}
+
+static func _branch_stride_for(id: String) -> int:
+	if id == SAMPLED_BRANCH_ENTRY:
+		return SAMPLED_BRANCH_STRIDE
+	for prefix in GENERATED_BRANCH_STRIDES.keys():
+		if id.begins_with(prefix):
+			return GENERATED_BRANCH_STRIDES[prefix]
+	return 1
 
 func _check_catalog_wide_order_independence() -> void:
 	for i in range(PuzzleCatalog.count()):
 		var id := PuzzleCatalog.id_at(i)
-		var stride := SAMPLED_BRANCH_STRIDE if id == SAMPLED_BRANCH_ENTRY else 1
+		var stride := _branch_stride_for(id)
 		_check_order_independence_at_every_branch(PuzzleCatalog.get_definition(id), "catalog entry '%s'" % id, stride)
 
 ## Next Puzzle is scoped to the current puzzle's own group: each group's last
@@ -614,7 +639,9 @@ const CATALOG_PINS: Array[Dictionary] = [
 ## version, and the pinned levels keep their relative order. Generated levels
 ## added later are pinned by their pack's recipe (`--check` rebuilds the pack
 ## byte for byte) and by the pack audit, not here.
+const GENERATED_INTERMEDIATE_COUNT := 10
 const GENERATED_ADVANCED_COUNT := 45
+const GENERATED_EXPERT_COUNT := 45
 
 func _check_catalog_pins() -> void:
 	var previous := -1
@@ -631,13 +658,17 @@ func _check_catalog_pins() -> void:
 		var version := PuzzleContentVersion.of(PuzzleCatalog.get_definition(id))
 		check(version == pin["version"],
 			"entry `%s` keeps its geometry %s (got %s)" % [id, pin["version"], version])
-	var generated := 0
+	var generated := {"mid_": 0, "adv_": 0, "exp_": 0}
+	var tiers := {"mid_": "intermediate", "adv_": "advanced", "exp_": "expert"}
 	for index in range(PuzzleCatalog.count()):
 		var id := PuzzleCatalog.id_at(index)
-		if id.begins_with("adv_"):
-			generated += 1
-			check(PuzzleCatalog.group_of(id) == "advanced", "generated level `%s` is in the Advanced tier" % id)
-	check(generated == GENERATED_ADVANCED_COUNT, "the catalog has %d generated Advanced levels" % GENERATED_ADVANCED_COUNT)
+		for prefix in generated.keys():
+			if id.begins_with(prefix):
+				generated[prefix] += 1
+				check(PuzzleCatalog.group_of(id) == tiers[prefix], "generated level `%s` is in the %s tier" % [id, tiers[prefix]])
+	check(generated["mid_"] == GENERATED_INTERMEDIATE_COUNT, "the catalog has %d generated Intermediate levels" % GENERATED_INTERMEDIATE_COUNT)
+	check(generated["adv_"] == GENERATED_ADVANCED_COUNT, "the catalog has %d generated Advanced levels" % GENERATED_ADVANCED_COUNT)
+	check(generated["exp_"] == GENERATED_EXPERT_COUNT, "the catalog has %d generated Expert levels" % GENERATED_EXPERT_COUNT)
 
 func _initialize() -> void:
 	_check_pack_gate()
@@ -657,5 +688,6 @@ func _initialize() -> void:
 	_check_next_follows_tier_order()
 	_check_group_scoped_progression()
 	_check_puzzle_session_defaults_and_navigation()
+	print("PUZZLE_CATALOG_CHECKS_PASSED=", passes)
 	print("PUZZLE_CATALOG_FAILURES=", failures)
 	quit(1 if failures else 0)

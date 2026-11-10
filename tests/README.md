@@ -12,7 +12,7 @@ Run `python tests/run_regressions.py` (Python 3 and Godot on PATH), or use
 The runner copies the relevant production scripts into a temporary project and
 isolates player data. Expected engine errors exercise failure handling; success
 requires exit code zero and `REGRESSION_FAILURES=0`. Each Godot process has a
-45-second timeout. This suite also asserts that opening the arrow puzzle from
+45-second timeout. The catalog check prints PASS lines only when `PUZZLE_CHECK_VERBOSE` is set (thousands of lines through captured stdout cost minutes) and prints `PUZZLE_CATALOG_CHECKS_PASSED=<n>`; it samples order-independence branches of the generated Advanced and Expert levels, and the layout check plays only the first, middle and last of each generated set through the real scene. This suite also asserts that opening the arrow puzzle from
 Play/New Game, or selecting a puzzle from Level Select, does not call
 `GlobalState.reset()` or `GameState.start_game()` (the no-reset guarantee for
 existing saved progress), and that New Game always sets `PuzzleSession` to
@@ -236,7 +236,7 @@ the project's display stretch setting and autoloads. The launcher imports the
 real project before all four scene checks, sharing one
 temporary APPDATA/XDG_DATA_HOME root across import and scene processes. The
 pure-rule copy list remains independent of scenes and fonts. Each real-project
-process has a 180-second timeout (the canvas check alone takes about 35 seconds on an idle workstation and longer under load); missing markers, script errors and nonzero
+process has a 300-second timeout (the layout check takes about 140 seconds and the canvas check about 35 on an idle workstation, and longer under load); missing markers, script errors and nonzero
 exit codes fail the run. No test reads or writes personal player data.
 
 ## Developer Structural Report (non-gating)

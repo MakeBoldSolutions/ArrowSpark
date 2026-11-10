@@ -382,10 +382,12 @@ Every catalog entry carries a `group` metadata key naming its difficulty tier:
 `getting_started` ("Getting Started": the eight baseline puzzles, the Warm-Up
 generated level and the four smallest rule experiments), `intermediate`
 ("Intermediate": fifteen levels from nine to twenty-five arrows, including the
-generated levels and the large sparse boards), `advanced` ("Advanced": three
+generated levels and the large sparse boards, then 10 generated levels of 10 to 24 arrows in
+`intermediate_generated.json`), `advanced` ("Advanced": three
 dense mid-size boards, then 45 generated levels of 30 to 69 arrows in
 `advanced_generated.json`, built from `levels/recipes/advanced_generated.json`), `expert` ("Expert": the large-canvas validation board
-and `almost_a_knot`) and `master` ("Master": the Reference Knot). Tiers are
+and `almost_a_knot`, then 45 generated levels of 72 to 111 arrows at density 0.80 to 0.88 in
+`expert_generated.json`) and `master` ("Master": the Reference Knot). Tiers are
 assigned from `PuzzleAnalyzer` measurements (arrows, density, dependency
 depth, arrows playable at the start), not from where a level came from, and
 have no effect on rules, solver, analyzer, scoring, Open Move or the viewport.

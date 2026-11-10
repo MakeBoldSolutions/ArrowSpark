@@ -17,9 +17,17 @@ func _clear_order_for(definition: PuzzleDefinition) -> Array[Vector2i]:
 		witness.append(head)
 	return witness
 
+## PASS lines are printed only when PUZZLE_CHECK_VERBOSE is set: thousands of
+## lines cost minutes through the launcher's captured stdout. Failures always
+## print, and the total is printed at the end.
+var passes: int = 0
+var verbose := not OS.get_environment("PUZZLE_CHECK_VERBOSE").is_empty()
+
 func check(condition: bool, description: String) -> void:
 	if condition:
-		print("PASS: ", description)
+		passes += 1
+		if verbose:
+			print("PASS: ", description)
 	else:
 		failures += 1
 		push_error("FAIL: " + description)
@@ -374,6 +382,19 @@ func _check_fresh_instance_starts_clean_and_rapid_tail_clicks() -> void:
 	fresh.queue_free()
 	PuzzleSession.set_current_id(PuzzleCatalog.id_at(0))
 
+## Every hand-authored level plays through the real scene. The generated
+## levels (ids ending in a two-digit number after mid_, adv_ or exp_) are about
+## a hundred more boards, up to a hundred arrows each, and the pure solver gate
+## already replays each one's witness, so the scene is exercised on the first,
+## middle and last of each set (the board sizes grow along the set).
+static func _plays_through_real_scene(id: String) -> bool:
+	for prefix in ["mid_", "adv_", "exp_"]:
+		if id.begins_with(prefix):
+			var number := int(id.trim_prefix(prefix))
+			var last: int = {"mid_": 10, "adv_": 45, "exp_": 45}[prefix]
+			return number == 1 or number == (last + 1) / 2 or number == last
+	return true
+
 ## US1 independent test: every one of the fifteen catalog puzzles is playable
 ## start-to-finish through the real, unmodified scene â€” proving engine
 ## generality end-to-end, not only via the pure solver gate. For each: the
@@ -384,6 +405,8 @@ func _check_fresh_instance_starts_clean_and_rapid_tail_clicks() -> void:
 func _check_all_catalog_puzzles_play_through_real_scene() -> void:
 	for i in range(PuzzleCatalog.count()):
 		var id := PuzzleCatalog.id_at(i)
+		if not _plays_through_real_scene(id):
+			continue
 		PuzzleSession.set_current_id(id)
 		var packed: PackedScene = load("res://scenes/puzzle/arrow_puzzle.tscn")
 		var puzzle: Control = packed.instantiate()
@@ -564,7 +587,7 @@ func _check_level_select_accordion() -> void:
 	check(not first_foundation.get_parent().visible and foundations_header.text.begins_with("+ "),
 		"collapsing a group hides its entries and shows the expand marker")
 	check(buttons[0].get_parent().visible, "collapsing one group leaves the others expanded")
-	check(foundations_ids.size() == 15, "collapsing hides entries without removing them")
+	check(foundations_ids.size() == PuzzleCatalog.ids_in_group(PuzzleCatalog.GROUP_INTERMEDIATE).size(), "collapsing hides entries without removing them")
 	foundations_header.button_pressed = true
 	await process_frame
 	check(first_foundation.get_parent().visible and foundations_header.text.begins_with("- "),
@@ -1101,5 +1124,6 @@ func _initialize() -> void:
 	await _check_replay_resets_open_move_fields()
 
 	puzzle.queue_free()
+	print("PUZZLE_LAYOUT_CHECKS_PASSED=", passes)
 	print("PUZZLE_LAYOUT_FAILURES=", failures)
 	quit(1 if failures else 0)
