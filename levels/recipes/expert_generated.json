@@ -1,0 +1,409 @@
+{
+ "format": "arrowspark-recipe/1",
+ "pack": "expert_generated",
+ "group": "expert",
+ "profiles": {
+  "gauntlet": {
+   "width": 19,
+   "height": 15,
+   "arrows": [
+    72,
+    80
+   ],
+   "density": [
+    0.8,
+    0.92
+   ],
+   "depth": [
+    12,
+    40
+   ],
+   "placement": {
+    "layering": "center_out",
+    "initial_playable_cap": 14,
+    "arrow_length": [
+     2,
+     5
+    ],
+    "depth_bias": 0.8
+   },
+   "attempts": 150
+  },
+  "crucible": {
+   "width": 20,
+   "height": 16,
+   "arrows": [
+    80,
+    88
+   ],
+   "density": [
+    0.8,
+    0.92
+   ],
+   "depth": [
+    12,
+    40
+   ],
+   "placement": {
+    "layering": "center_out",
+    "initial_playable_cap": 15,
+    "arrow_length": [
+     2,
+     5
+    ],
+    "depth_bias": 0.8
+   },
+   "attempts": 150
+  },
+  "labyrinth": {
+   "width": 21,
+   "height": 17,
+   "arrows": [
+    88,
+    96
+   ],
+   "density": [
+    0.8,
+    0.92
+   ],
+   "depth": [
+    13,
+    40
+   ],
+   "placement": {
+    "layering": "center_out",
+    "initial_playable_cap": 16,
+    "arrow_length": [
+     2,
+     5
+    ],
+    "depth_bias": 0.8
+   },
+   "attempts": 150
+  },
+  "citadel": {
+   "width": 23,
+   "height": 17,
+   "arrows": [
+    96,
+    104
+   ],
+   "density": [
+    0.8,
+    0.92
+   ],
+   "depth": [
+    13,
+    40
+   ],
+   "placement": {
+    "layering": "center_out",
+    "initial_playable_cap": 17,
+    "arrow_length": [
+     2,
+     5
+    ],
+    "depth_bias": 0.8
+   },
+   "attempts": 150
+  },
+  "summit": {
+   "width": 24,
+   "height": 18,
+   "arrows": [
+    104,
+    112
+   ],
+   "density": [
+    0.8,
+    0.92
+   ],
+   "depth": [
+    14,
+    40
+   ],
+   "placement": {
+    "layering": "center_out",
+    "initial_playable_cap": 18,
+    "arrow_length": [
+     2,
+     5
+    ],
+    "depth_bias": 0.8
+   },
+   "attempts": 150
+  }
+ },
+ "levels": [
+  {
+   "id": "exp_01",
+   "title": "Gauntlet 1",
+   "profile": "gauntlet",
+   "seed": 7001
+  },
+  {
+   "id": "exp_02",
+   "title": "Gauntlet 2",
+   "profile": "gauntlet",
+   "seed": 7002
+  },
+  {
+   "id": "exp_03",
+   "title": "Gauntlet 3",
+   "profile": "gauntlet",
+   "seed": 7003
+  },
+  {
+   "id": "exp_04",
+   "title": "Gauntlet 4",
+   "profile": "gauntlet",
+   "seed": 7004
+  },
+  {
+   "id": "exp_05",
+   "title": "Gauntlet 5",
+   "profile": "gauntlet",
+   "seed": 7005
+  },
+  {
+   "id": "exp_06",
+   "title": "Gauntlet 6",
+   "profile": "gauntlet",
+   "seed": 7006
+  },
+  {
+   "id": "exp_07",
+   "title": "Gauntlet 7",
+   "profile": "gauntlet",
+   "seed": 7007
+  },
+  {
+   "id": "exp_08",
+   "title": "Gauntlet 8",
+   "profile": "gauntlet",
+   "seed": 7008
+  },
+  {
+   "id": "exp_09",
+   "title": "Gauntlet 9",
+   "profile": "gauntlet",
+   "seed": 7009
+  },
+  {
+   "id": "exp_10",
+   "title": "Crucible 1",
+   "profile": "crucible",
+   "seed": 7010
+  },
+  {
+   "id": "exp_11",
+   "title": "Crucible 2",
+   "profile": "crucible",
+   "seed": 7011
+  },
+  {
+   "id": "exp_12",
+   "title": "Crucible 3",
+   "profile": "crucible",
+   "seed": 7012
+  },
+  {
+   "id": "exp_13",
+   "title": "Crucible 4",
+   "profile": "crucible",
+   "seed": 7013
+  },
+  {
+   "id": "exp_14",
+   "title": "Crucible 5",
+   "profile": "crucible",
+   "seed": 7014
+  },
+  {
+   "id": "exp_15",
+   "title": "Crucible 6",
+   "profile": "crucible",
+   "seed": 7015
+  },
+  {
+   "id": "exp_16",
+   "title": "Crucible 7",
+   "profile": "crucible",
+   "seed": 7016
+  },
+  {
+   "id": "exp_17",
+   "title": "Crucible 8",
+   "profile": "crucible",
+   "seed": 7017
+  },
+  {
+   "id": "exp_18",
+   "title": "Crucible 9",
+   "profile": "crucible",
+   "seed": 7018
+  },
+  {
+   "id": "exp_19",
+   "title": "Labyrinth 1",
+   "profile": "labyrinth",
+   "seed": 7019
+  },
+  {
+   "id": "exp_20",
+   "title": "Labyrinth 2",
+   "profile": "labyrinth",
+   "seed": 7020
+  },
+  {
+   "id": "exp_21",
+   "title": "Labyrinth 3",
+   "profile": "labyrinth",
+   "seed": 7021
+  },
+  {
+   "id": "exp_22",
+   "title": "Labyrinth 4",
+   "profile": "labyrinth",
+   "seed": 7022
+  },
+  {
+   "id": "exp_23",
+   "title": "Labyrinth 5",
+   "profile": "labyrinth",
+   "seed": 7023
+  },
+  {
+   "id": "exp_24",
+   "title": "Labyrinth 6",
+   "profile": "labyrinth",
+   "seed": 7024
+  },
+  {
+   "id": "exp_25",
+   "title": "Labyrinth 7",
+   "profile": "labyrinth",
+   "seed": 7025
+  },
+  {
+   "id": "exp_26",
+   "title": "Labyrinth 8",
+   "profile": "labyrinth",
+   "seed": 7026
+  },
+  {
+   "id": "exp_27",
+   "title": "Labyrinth 9",
+   "profile": "labyrinth",
+   "seed": 7027
+  },
+  {
+   "id": "exp_28",
+   "title": "Citadel 1",
+   "profile": "citadel",
+   "seed": 7028
+  },
+  {
+   "id": "exp_29",
+   "title": "Citadel 2",
+   "profile": "citadel",
+   "seed": 7029
+  },
+  {
+   "id": "exp_30",
+   "title": "Citadel 3",
+   "profile": "citadel",
+   "seed": 7030
+  },
+  {
+   "id": "exp_31",
+   "title": "Citadel 4",
+   "profile": "citadel",
+   "seed": 7531
+  },
+  {
+   "id": "exp_32",
+   "title": "Citadel 5",
+   "profile": "citadel",
+   "seed": 7032
+  },
+  {
+   "id": "exp_33",
+   "title": "Citadel 6",
+   "profile": "citadel",
+   "seed": 7033
+  },
+  {
+   "id": "exp_34",
+   "title": "Citadel 7",
+   "profile": "citadel",
+   "seed": 7034
+  },
+  {
+   "id": "exp_35",
+   "title": "Citadel 8",
+   "profile": "citadel",
+   "seed": 7535
+  },
+  {
+   "id": "exp_36",
+   "title": "Citadel 9",
+   "profile": "citadel",
+   "seed": 7036
+  },
+  {
+   "id": "exp_37",
+   "title": "Summit 1",
+   "profile": "summit",
+   "seed": 7037
+  },
+  {
+   "id": "exp_38",
+   "title": "Summit 2",
+   "profile": "summit",
+   "seed": 7038
+  },
+  {
+   "id": "exp_39",
+   "title": "Summit 3",
+   "profile": "summit",
+   "seed": 7039
+  },
+  {
+   "id": "exp_40",
+   "title": "Summit 4",
+   "profile": "summit",
+   "seed": 7040
+  },
+  {
+   "id": "exp_41",
+   "title": "Summit 5",
+   "profile": "summit",
+   "seed": 7041
+  },
+  {
+   "id": "exp_42",
+   "title": "Summit 6",
+   "profile": "summit",
+   "seed": 8042
+  },
+  {
+   "id": "exp_43",
+   "title": "Summit 7",
+   "profile": "summit",
+   "seed": 7043
+  },
+  {
+   "id": "exp_44",
+   "title": "Summit 8",
+   "profile": "summit",
+   "seed": 7044
+  },
+  {
+   "id": "exp_45",
+   "title": "Summit 9",
+   "profile": "summit",
+   "seed": 7045
+  }
+ ]
+}

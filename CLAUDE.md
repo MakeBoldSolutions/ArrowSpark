@@ -39,6 +39,10 @@ prefer explicit types where they aid clarity; keep changes small and justify new
 
 ## Recent Changes
 
+- Generated Intermediate (10) and Expert (45) levels join the Advanced ones: `intermediate_generated.json`
+  and `expert_generated.json` (Expert: 72 to 111 arrows, density 0.80 to 0.88, depth 12 to 22), each rebuilt
+  with `run_level_pack_build.py --recipe levels/recipes/<pack>.json [--check]`; build packs one at a time
+  with the other listed packs present. The catalog is now 134 levels; the puzzle gate takes about 3.5 minutes.
 - Generator `placement.depth_bias` (scheme gen2; profiles without it still give gen1 boards) builds
   deeper dependency chains, and `levels/packs/advanced_generated.json` adds 45 generated Advanced
   levels (30 to 69 arrows, depth 7 to 16) after the three original ones; rebuild or verify with

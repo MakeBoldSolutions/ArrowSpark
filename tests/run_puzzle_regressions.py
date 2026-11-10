@@ -183,7 +183,7 @@ def run_layout_check(godot: str, repo: Path) -> None:
         for flags, marker in checks:
             command = [godot, "--headless", "--path", str(repo), *flags]
             print("Running:", " ".join(command), flush=True)
-            result = subprocess.run(command, env=env, check=False, timeout=180,
+            result = subprocess.run(command, env=env, check=False, timeout=300,
                                     capture_output=True, text=True)
             print(result.stdout, flush=True)
             print(result.stderr, flush=True)
