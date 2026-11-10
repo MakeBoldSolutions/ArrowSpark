@@ -1,6 +1,6 @@
 # Work: Expert and Intermediate generated packs (ps-005, increment 2 of 4)
 
-**Status**: In Progress (built and gated; waiting on the owner's play sample)
+**Status**: Complete
 **Branch**: 022-work-ps-005-expert-and
 
 ## Intended outcome
@@ -36,5 +36,5 @@ No Level Select changes (increment 3), no Master levels (ps-006), no rule change
 
 ## Next useful action
 
-Play a sample (for example mid_05, exp_01, exp_23, exp_45) and say whether the rise feels right; then
-commit, PR, merge, and start increment 3 (Level Select at about 134 levels).
+The owner asked to push and merge (the sample play was not separately reported). Open the PR and merge, then
+start increment 3 (Level Select at about 134 levels) and the load-time work.
