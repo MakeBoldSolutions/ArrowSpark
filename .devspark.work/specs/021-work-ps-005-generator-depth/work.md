@@ -1,6 +1,6 @@
 # Work: Generator depth lever and the Advanced pack (ps-005, increment 1 of 4)
 
-**Status**: In Progress (built and gated; waiting on the owner's play sample)
+**Status**: Complete
 **Branch**: 021-work-ps-005-generator-depth
 
 ## Intended outcome
@@ -14,7 +14,7 @@ original ones. Order of ps-005/ps-006 increments: 1 depth lever + Advanced, 2 Ex
 - 45 levels pass the solver and pack audit; `--check` rebuild is byte-identical (done).
 - Existing 34 ids, boards and versions unchanged (catalog pins pass).
 - Both regression gates pass; puzzle gate about 28 s with the 45 added (done).
-- Owner plays a sample of each size band and accepts the difficulty (open).
+- Owner played a sample and approved the difficulty (done).
 
 ## Material exclusions
 
@@ -38,5 +38,4 @@ No Expert, Intermediate or Master levels, no Level Select changes, no rule chang
 
 ## Next useful action
 
-Play a sample (for example adv_01, adv_14, adv_28, adv_45) and say whether the rise feels right; then
-commit, merge, and start increment 2 (Expert and Intermediate).
+Merge, then start increment 2 (Expert and Intermediate).
