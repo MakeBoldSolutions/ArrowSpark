@@ -124,8 +124,37 @@ func _check_feasible_sizes() -> void:
 			all_feasible = false
 	check(all_feasible, "a ranged board size only draws sizes able to hold 10 arrows of length 2")
 
+## depth_bias (gen2) builds longer dependency chains, is deterministic, is
+## validated, and leaves a profile that does not use it on the gen1 scheme.
+func _check_depth_bias() -> void:
+	var base := {"width": 14, "height": 12, "arrows": [30, 34], "attempts": 1,
+		"placement": {"layering": "center_out", "arrow_length": [2, 5]}}
+	var biased := base.duplicate(true)
+	biased["placement"]["depth_bias"] = 0.8
+	var plain_total := 0
+	var biased_total := 0
+	for level_seed in [1, 2, 3, 4, 5, 6]:
+		var plain := PuzzleGenerator.generate(base, level_seed)
+		var chained := PuzzleGenerator.generate(biased, level_seed)
+		check(chained["definition"] != null, "seed %d: a depth-biased board is built" % level_seed)
+		var analysis := PuzzleAnalyzer.analyze(chained["definition"])
+		check(analysis["valid"] and analysis["solvable"], "seed %d: a depth-biased board is valid and solvable" % level_seed)
+		plain_total += PuzzleAnalyzer.analyze(plain["definition"])["dependency_graph"]["depth"]
+		biased_total += analysis["dependency_graph"]["depth"]
+	check(biased_total > plain_total, "depth_bias raises dependency depth (total %d against %d without it)" % [biased_total, plain_total])
+	var again := PuzzleGenerator.generate(biased, 3)
+	var first := PuzzleGenerator.generate(biased, 3)
+	check(PuzzleContentVersion.of(again["definition"]) == PuzzleContentVersion.of(first["definition"]),
+		"the same depth-biased profile and seed give the same board")
+	check(PuzzleGenerator.scheme_for(base) == "gen1", "a profile without depth_bias stays on the gen1 scheme")
+	check(PuzzleGenerator.scheme_for(biased) == PuzzleGenerator.GENERATOR_SCHEME and PuzzleGenerator.GENERATOR_SCHEME == "gen2",
+		"a profile with depth_bias is recorded as gen2")
+	_expect_rejected({"width": 6, "height": 6, "placement": {"depth_bias": 1.5}}, "depth_bias", "a depth_bias above 1")
+	_expect_rejected({"width": 6, "height": 6, "placement": {"depth_bias": "high"}}, "depth_bias", "a non-numeric depth_bias")
+
 func _initialize() -> void:
 	_check_determinism()
+	_check_depth_bias()
 	_check_reachable_profile()
 	_check_playable_cap()
 	_check_unreachable_profile()

@@ -73,7 +73,7 @@ func _build_level(level: Dictionary, recipe: Dictionary, pack_name: String, grou
 		return null
 	var provenance := {
 		"kind": "generated",
-		"generator": PuzzleGenerator.GENERATOR_SCHEME,
+		"generator": PuzzleGenerator.scheme_for(profile),
 		"profile_name": profile_name,
 		"profile": profile,
 		"seed": level_seed,

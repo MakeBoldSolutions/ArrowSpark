@@ -20,7 +20,13 @@ extends RefCounted
 ## change to how boards are proposed is visible next to each pinned content
 ## version. Bump it whenever the same profile and seed would give a
 ## different board.
-const GENERATOR_SCHEME := "gen1"
+##
+## gen2 adds the optional placement.depth_bias (chain building). A profile
+## without it is proposed exactly as gen1 proposed it, so scheme_for() keeps
+## reporting "gen1" for those and existing pinned boards stay reproducible.
+const GENERATOR_SCHEME := "gen2"
+const SCHEME_V1 := "gen1"
+const CHAIN_HEAD_TRIES := 8
 const MAX_HEAD_TRIES := 64
 const MAX_ATTEMPTS := 5000
 const DEFAULT_ATTEMPTS := 200
@@ -40,7 +46,14 @@ const METRICS := {
 	"average_length": ["geometry", "average_length", false],
 }
 const PROFILE_KEYS := ["width", "height", "placement", "attempts"]
-const PLACEMENT_KEYS := ["layering", "initial_playable_cap", "arrow_length"]
+const PLACEMENT_KEYS := ["layering", "initial_playable_cap", "arrow_length", "depth_bias"]
+
+## The scheme that proposes boards for this profile (recorded in provenance).
+static func scheme_for(profile: Dictionary) -> String:
+	var placement = profile.get("placement", {})
+	if placement is Dictionary and placement.has("depth_bias"):
+		return GENERATOR_SCHEME
+	return SCHEME_V1
 
 ## Generates one board for a profile and seed. Returns:
 ## ok (bool), profile_errors (Array[String]; non-empty means the profile was
@@ -136,6 +149,13 @@ static func _resolve_profile(profile: Dictionary) -> Dictionary:
 			errors.append("'placement.initial_playable_cap' must be a whole number of at least 1")
 		else:
 			cap = value
+	var depth_bias := 0.0
+	if placement.has("depth_bias"):
+		var value = placement["depth_bias"]
+		if not _is_number(value) or value < 0.0 or value > 1.0:
+			errors.append("'placement.depth_bias' must be a number from 0 to 1")
+		else:
+			depth_bias = float(value)
 	var attempts := DEFAULT_ATTEMPTS
 	if profile.has("attempts"):
 		var value = _whole(profile["attempts"])
@@ -168,6 +188,7 @@ static func _resolve_profile(profile: Dictionary) -> Dictionary:
 		"layering": layering,
 		"arrow_length": arrow_length,
 		"cap": cap,
+		"depth_bias": depth_bias,
 		"attempts": attempts,
 	}
 
@@ -221,9 +242,15 @@ static func _build_candidate(size: Vector2i, target: int, spec: Dictionary, rng:
 	var arrows := {}
 	var tails := {}
 	var cursor := 0
+	var bias: float = spec["depth_bias"]
+	var chain := {"up": {}, "cover": {}}
 	while arrows.size() < target:
 		var placed := false
 		var tries := 0
+		if bias > 0.0 and not arrows.is_empty() and rng.randf() < bias:
+			placed = _try_chain_place(size, occupied, arrows, tails, chain, spec, rng)
+			if placed:
+				continue
 		while not placed and tries < MAX_HEAD_TRIES and cursor < order.size():
 			var head: Vector2i = order[cursor]
 			cursor += 1
@@ -231,11 +258,62 @@ static func _build_candidate(size: Vector2i, target: int, spec: Dictionary, rng:
 				continue
 			tries += 1
 			placed = _try_place(head, size, occupied, arrows, tails, spec, rng)
+			if placed and bias > 0.0:
+				_note_chain(head, size, arrows, tails, chain)
 		if not placed:
 			break
 	if arrows.is_empty():
 		return null
 	return PuzzleDefinition.new(size.x, size.y, arrows, tails)
+
+## Chain building (gen2). `chain.up[head]` is the longest run of arrows that
+## wait on that arrow, directly or through others. It is final when the arrow
+## is placed, because everything waiting on it was placed earlier.
+## `chain.cover[cell]` lists the arrows whose forward ray passes the cell.
+## A new arrow whose cells lie on an earlier arrow's ray blocks it.
+static func _note_chain(head: Vector2i, size: Vector2i, arrows: Dictionary, tails: Dictionary, chain: Dictionary) -> void:
+	var up: Dictionary = chain["up"]
+	var cover: Dictionary = chain["cover"]
+	var level := 0
+	var cells: Array = [head]
+	cells.append_array(tails[head])
+	for cell in cells:
+		for blocked in cover.get(cell, []):
+			level = maxi(level, int(up[blocked]) + 1)
+	up[head] = level
+	for cell in _ray(head, arrows[head], size):
+		if not cover.has(cell):
+			cover[cell] = []
+		cover[cell].append(head)
+
+## Places an arrow with its head on the forward ray of a chain tip (an arrow
+## with the longest wait chain), so the chain grows by one. False when no
+## head on that ray works; the caller then places normally.
+static func _try_chain_place(size: Vector2i, occupied: Dictionary, arrows: Dictionary, tails: Dictionary,
+		chain: Dictionary, spec: Dictionary, rng: RandomNumberGenerator) -> bool:
+	var up: Dictionary = chain["up"]
+	var best := -1
+	var tips: Array = []
+	for head in arrows.keys():
+		var level: int = up[head]
+		if level > best:
+			best = level
+			tips = [head]
+		elif level == best:
+			tips.append(head)
+	var tip: Vector2i = tips[rng.randi_range(0, tips.size() - 1)]
+	var cells: Array = _ray(tip, arrows[tip], size).filter(func(cell): return not occupied.has(cell))
+	for i in range(cells.size() - 1, 0, -1):
+		var j := rng.randi_range(0, i)
+		var swap = cells[i]
+		cells[i] = cells[j]
+		cells[j] = swap
+	for k in range(mini(cells.size(), CHAIN_HEAD_TRIES)):
+		var head: Vector2i = cells[k]
+		if _try_place(head, size, occupied, arrows, tails, spec, rng):
+			_note_chain(head, size, arrows, tails, chain)
+			return true
+	return false
 
 ## Every cell once: nearest the centre first (with seeded jitter) for
 ## center_out, or a seeded shuffle for uniform.

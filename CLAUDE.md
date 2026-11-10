@@ -39,6 +39,12 @@ prefer explicit types where they aid clarity; keep changes small and justify new
 
 ## Recent Changes
 
+- Generator `placement.depth_bias` (scheme gen2; profiles without it still give gen1 boards) builds
+  deeper dependency chains, and `levels/packs/advanced_generated.json` adds 45 generated Advanced
+  levels (30 to 69 arrows, depth 7 to 16) after the three original ones; rebuild or verify with
+  `python tests/run_level_pack_build.py --godot <exe> --recipe levels/recipes/advanced_generated.json [--check]`.
+  The catalog pins cover the original 34 levels by id; new levels are pinned by their recipe.
+
 - Local player profile (no sign-in): `PlayerProfile` (`scripts/player_profile.gd`) saves a name,
   finished levels, best result per level and simple play counts to `user://player_profile.json`
   (browser storage on web, never sent anywhere), separate from settings and the template save.

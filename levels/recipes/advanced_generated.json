@@ -1,0 +1,409 @@
+{
+ "format": "arrowspark-recipe/1",
+ "pack": "advanced_generated",
+ "group": "advanced",
+ "profiles": {
+  "lattice": {
+   "width": 14,
+   "height": 12,
+   "arrows": [
+    30,
+    35
+   ],
+   "density": [
+    0.5,
+    0.8
+   ],
+   "depth": [
+    7,
+    16
+   ],
+   "placement": {
+    "layering": "center_out",
+    "initial_playable_cap": 6,
+    "arrow_length": [
+     2,
+     5
+    ],
+    "depth_bias": 0.6
+   },
+   "attempts": 100
+  },
+  "braid": {
+   "width": 16,
+   "height": 14,
+   "arrows": [
+    40,
+    45
+   ],
+   "density": [
+    0.5,
+    0.8
+   ],
+   "depth": [
+    8,
+    18
+   ],
+   "placement": {
+    "layering": "center_out",
+    "initial_playable_cap": 8,
+    "arrow_length": [
+     2,
+     5
+    ],
+    "depth_bias": 0.6
+   },
+   "attempts": 100
+  },
+  "mesh": {
+   "width": 18,
+   "height": 14,
+   "arrows": [
+    48,
+    54
+   ],
+   "density": [
+    0.5,
+    0.8
+   ],
+   "depth": [
+    9,
+    20
+   ],
+   "placement": {
+    "layering": "center_out",
+    "initial_playable_cap": 9,
+    "arrow_length": [
+     2,
+     5
+    ],
+    "depth_bias": 0.6
+   },
+   "attempts": 100
+  },
+  "thicket": {
+   "width": 20,
+   "height": 15,
+   "arrows": [
+    55,
+    62
+   ],
+   "density": [
+    0.5,
+    0.8
+   ],
+   "depth": [
+    10,
+    22
+   ],
+   "placement": {
+    "layering": "center_out",
+    "initial_playable_cap": 10,
+    "arrow_length": [
+     2,
+     5
+    ],
+    "depth_bias": 0.6
+   },
+   "attempts": 100
+  },
+  "tangle_wide": {
+   "width": 22,
+   "height": 16,
+   "arrows": [
+    62,
+    70
+   ],
+   "density": [
+    0.5,
+    0.8
+   ],
+   "depth": [
+    10,
+    24
+   ],
+   "placement": {
+    "layering": "center_out",
+    "initial_playable_cap": 11,
+    "arrow_length": [
+     2,
+     5
+    ],
+    "depth_bias": 0.6
+   },
+   "attempts": 100
+  }
+ },
+ "levels": [
+  {
+   "id": "adv_01",
+   "title": "Lattice 1",
+   "profile": "lattice",
+   "seed": 5001
+  },
+  {
+   "id": "adv_02",
+   "title": "Lattice 2",
+   "profile": "lattice",
+   "seed": 5002
+  },
+  {
+   "id": "adv_03",
+   "title": "Lattice 3",
+   "profile": "lattice",
+   "seed": 5003
+  },
+  {
+   "id": "adv_04",
+   "title": "Lattice 4",
+   "profile": "lattice",
+   "seed": 5004
+  },
+  {
+   "id": "adv_05",
+   "title": "Lattice 5",
+   "profile": "lattice",
+   "seed": 5005
+  },
+  {
+   "id": "adv_06",
+   "title": "Lattice 6",
+   "profile": "lattice",
+   "seed": 5006
+  },
+  {
+   "id": "adv_07",
+   "title": "Lattice 7",
+   "profile": "lattice",
+   "seed": 5007
+  },
+  {
+   "id": "adv_08",
+   "title": "Lattice 8",
+   "profile": "lattice",
+   "seed": 5008
+  },
+  {
+   "id": "adv_09",
+   "title": "Lattice 9",
+   "profile": "lattice",
+   "seed": 5009
+  },
+  {
+   "id": "adv_10",
+   "title": "Braid 1",
+   "profile": "braid",
+   "seed": 5010
+  },
+  {
+   "id": "adv_11",
+   "title": "Braid 2",
+   "profile": "braid",
+   "seed": 5011
+  },
+  {
+   "id": "adv_12",
+   "title": "Braid 3",
+   "profile": "braid",
+   "seed": 5012
+  },
+  {
+   "id": "adv_13",
+   "title": "Braid 4",
+   "profile": "braid",
+   "seed": 5013
+  },
+  {
+   "id": "adv_14",
+   "title": "Braid 5",
+   "profile": "braid",
+   "seed": 5014
+  },
+  {
+   "id": "adv_15",
+   "title": "Braid 6",
+   "profile": "braid",
+   "seed": 5015
+  },
+  {
+   "id": "adv_16",
+   "title": "Braid 7",
+   "profile": "braid",
+   "seed": 5016
+  },
+  {
+   "id": "adv_17",
+   "title": "Braid 8",
+   "profile": "braid",
+   "seed": 5017
+  },
+  {
+   "id": "adv_18",
+   "title": "Braid 9",
+   "profile": "braid",
+   "seed": 5018
+  },
+  {
+   "id": "adv_19",
+   "title": "Mesh 1",
+   "profile": "mesh",
+   "seed": 5019
+  },
+  {
+   "id": "adv_20",
+   "title": "Mesh 2",
+   "profile": "mesh",
+   "seed": 5020
+  },
+  {
+   "id": "adv_21",
+   "title": "Mesh 3",
+   "profile": "mesh",
+   "seed": 5021
+  },
+  {
+   "id": "adv_22",
+   "title": "Mesh 4",
+   "profile": "mesh",
+   "seed": 5022
+  },
+  {
+   "id": "adv_23",
+   "title": "Mesh 5",
+   "profile": "mesh",
+   "seed": 5023
+  },
+  {
+   "id": "adv_24",
+   "title": "Mesh 6",
+   "profile": "mesh",
+   "seed": 5024
+  },
+  {
+   "id": "adv_25",
+   "title": "Mesh 7",
+   "profile": "mesh",
+   "seed": 5025
+  },
+  {
+   "id": "adv_26",
+   "title": "Mesh 8",
+   "profile": "mesh",
+   "seed": 5026
+  },
+  {
+   "id": "adv_27",
+   "title": "Mesh 9",
+   "profile": "mesh",
+   "seed": 5027
+  },
+  {
+   "id": "adv_28",
+   "title": "Thicket 1",
+   "profile": "thicket",
+   "seed": 5028
+  },
+  {
+   "id": "adv_29",
+   "title": "Thicket 2",
+   "profile": "thicket",
+   "seed": 5029
+  },
+  {
+   "id": "adv_30",
+   "title": "Thicket 3",
+   "profile": "thicket",
+   "seed": 5030
+  },
+  {
+   "id": "adv_31",
+   "title": "Thicket 4",
+   "profile": "thicket",
+   "seed": 5031
+  },
+  {
+   "id": "adv_32",
+   "title": "Thicket 5",
+   "profile": "thicket",
+   "seed": 5032
+  },
+  {
+   "id": "adv_33",
+   "title": "Thicket 6",
+   "profile": "thicket",
+   "seed": 5033
+  },
+  {
+   "id": "adv_34",
+   "title": "Thicket 7",
+   "profile": "thicket",
+   "seed": 5034
+  },
+  {
+   "id": "adv_35",
+   "title": "Thicket 8",
+   "profile": "thicket",
+   "seed": 5035
+  },
+  {
+   "id": "adv_36",
+   "title": "Thicket 9",
+   "profile": "thicket",
+   "seed": 5036
+  },
+  {
+   "id": "adv_37",
+   "title": "Sprawl 1",
+   "profile": "tangle_wide",
+   "seed": 5037
+  },
+  {
+   "id": "adv_38",
+   "title": "Sprawl 2",
+   "profile": "tangle_wide",
+   "seed": 5038
+  },
+  {
+   "id": "adv_39",
+   "title": "Sprawl 3",
+   "profile": "tangle_wide",
+   "seed": 5039
+  },
+  {
+   "id": "adv_40",
+   "title": "Sprawl 4",
+   "profile": "tangle_wide",
+   "seed": 5040
+  },
+  {
+   "id": "adv_41",
+   "title": "Sprawl 5",
+   "profile": "tangle_wide",
+   "seed": 5041
+  },
+  {
+   "id": "adv_42",
+   "title": "Sprawl 6",
+   "profile": "tangle_wide",
+   "seed": 5042
+  },
+  {
+   "id": "adv_43",
+   "title": "Sprawl 7",
+   "profile": "tangle_wide",
+   "seed": 5043
+  },
+  {
+   "id": "adv_44",
+   "title": "Sprawl 8",
+   "profile": "tangle_wide",
+   "seed": 5044
+  },
+  {
+   "id": "adv_45",
+   "title": "Sprawl 9",
+   "profile": "tangle_wide",
+   "seed": 5045
+  }
+ ]
+}

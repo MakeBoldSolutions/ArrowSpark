@@ -1,4 +1,4 @@
 {
   "format": "arrowspark-catalog/1",
-  "packs": ["getting_started", "intermediate", "advanced", "expert", "master"]
+  "packs": ["getting_started", "intermediate", "advanced", "advanced_generated", "expert", "master"]
 }

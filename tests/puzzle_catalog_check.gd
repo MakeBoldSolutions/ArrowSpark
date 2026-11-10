@@ -21,7 +21,8 @@ func check(condition: bool, description: String) -> void:
 ## fails loudly rather than skipping the malformed one.
 func _check_full_catalog_solvable() -> void:
 	var count := PuzzleCatalog.count()
-	check(count == 34, "the catalog contains all 34 levels")
+	check(count == CATALOG_PINS.size() + GENERATED_ADVANCED_COUNT,
+		"the catalog contains the %d pinned levels and %d generated Advanced levels" % [CATALOG_PINS.size(), GENERATED_ADVANCED_COUNT])
 
 	var seen_ids: Dictionary = {}
 	for i in range(count):
@@ -119,7 +120,8 @@ func _check_groups() -> void:
 	check(total == PuzzleCatalog.count(), "tier membership covers every catalog entry exactly once")
 	check(PuzzleCatalog.ids_in_group("getting_started").size() == 13, "Getting Started has 13 entries")
 	check(PuzzleCatalog.ids_in_group("intermediate").size() == 15, "Intermediate has 15 entries")
-	check(PuzzleCatalog.ids_in_group("advanced").size() == 3, "Advanced has 3 entries")
+	check(PuzzleCatalog.ids_in_group("advanced").size() == 3 + GENERATED_ADVANCED_COUNT,
+		"Advanced has its 3 original entries and %d generated ones" % GENERATED_ADVANCED_COUNT)
 	check(PuzzleCatalog.ids_in_group("expert").size() == 2, "Expert has 2 entries")
 	check(PuzzleCatalog.ids_in_group("master").size() == 1, "Master has 1 entry")
 	check(PuzzleCatalog.group_title("getting_started") == "Getting Started", "the first tier is titled Getting Started")
@@ -453,8 +455,9 @@ func _check_next_follows_tier_order() -> void:
 	check(PuzzleSession.has_next() and PuzzleSession.advance_to_next(), "Advanced offers a next entry after its first")
 	check(PuzzleSession.get_current_id() == "major_release", "Next from knot_boundary reaches major_release")
 	check(PuzzleSession.advance_to_next(), "advancing from major_release succeeds")
-	check(PuzzleSession.get_current_id() == "dense_weave", "Next reaches dense_weave, the last Advanced entry")
-	check(not PuzzleSession.has_next(), "the last Advanced entry has no next entry")
+	check(PuzzleSession.get_current_id() == "dense_weave", "Next reaches dense_weave, the last original Advanced entry")
+	check(PuzzleSession.advance_to_next() and PuzzleSession.get_current_id() == "adv_01",
+		"Next from dense_weave continues into the generated Advanced levels")
 	PuzzleSession.set_current_id("")
 
 func _check_puzzle_session_defaults_and_navigation() -> void:
@@ -606,21 +609,35 @@ const CATALOG_PINS: Array[Dictionary] = [
 	{"id": "reference_knot", "title": "Reference Knot", "group": "master", "version": "g1-7ce0942d4a5e"},
 ]
 
+## The pins cover the original 34 levels: each is found by id (so new levels
+## may be inserted anywhere in the catalog), keeps its title, tier and board
+## version, and the pinned levels keep their relative order. Generated levels
+## added later are pinned by their pack's recipe (`--check` rebuilds the pack
+## byte for byte) and by the pack audit, not here.
+const GENERATED_ADVANCED_COUNT := 45
+
 func _check_catalog_pins() -> void:
-	check(PuzzleCatalog.count() == CATALOG_PINS.size(),
-		"the catalog has %d entries, one per recorded pin (got %d)" % [CATALOG_PINS.size(), PuzzleCatalog.count()])
-	for index in range(PuzzleCatalog.count()):
-		var id := PuzzleCatalog.id_at(index)
-		if index >= CATALOG_PINS.size():
-			check(false, "entry `%s` has no recorded pin" % id)
+	var previous := -1
+	for pin in CATALOG_PINS:
+		var id: String = pin["id"]
+		var index := PuzzleCatalog.index_of(id)
+		check(index != -1, "pinned level `%s` is in the catalog" % id)
+		if index == -1:
 			continue
-		var pin: Dictionary = CATALOG_PINS[index]
-		check(id == pin["id"], "entry %d is `%s` (got `%s`)" % [index, pin["id"], id])
+		check(index > previous, "pinned level `%s` keeps its place relative to the other pinned levels" % id)
+		previous = index
 		check(PuzzleCatalog.title_at(index) == pin["title"], "entry `%s` keeps its title" % id)
 		check(PuzzleCatalog.group_of(id) == pin["group"], "entry `%s` keeps its group" % id)
 		var version := PuzzleContentVersion.of(PuzzleCatalog.get_definition(id))
 		check(version == pin["version"],
 			"entry `%s` keeps its geometry %s (got %s)" % [id, pin["version"], version])
+	var generated := 0
+	for index in range(PuzzleCatalog.count()):
+		var id := PuzzleCatalog.id_at(index)
+		if id.begins_with("adv_"):
+			generated += 1
+			check(PuzzleCatalog.group_of(id) == "advanced", "generated level `%s` is in the Advanced tier" % id)
+	check(generated == GENERATED_ADVANCED_COUNT, "the catalog has %d generated Advanced levels" % GENERATED_ADVANCED_COUNT)
 
 func _initialize() -> void:
 	_check_pack_gate()
